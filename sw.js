@@ -1,7 +1,8 @@
-var CACHE_NAME = 'mbmb-billing-v3';
+var CACHE_NAME = 'mbmb-billing-v4';
 var CORE_ASSETS = [
   './',
   './manifest.json',
+  './catalog.js',
   './icon-192.png',
   './icon-512.png',
   './logo-header.png',
@@ -24,7 +25,7 @@ self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(
-        keys.filter(function (k) { return k !== CACHE_NAME; }).map(function (k) { return caches.delete(k); })
+        keys.filter(function (k) { return k !== CACHE_NAME && k.indexOf('mbmb-billing-') === 0; }).map(function (k) { return caches.delete(k); })
       );
     })
   );
@@ -33,6 +34,8 @@ self.addEventListener('activate', function (e) {
 
 function isPageRequest(req) {
   if (req.mode === 'navigate') return true;
+  // shared price list: always try the latest copy first
+  if (/\/catalog\.js(\?|$)/.test(req.url)) return true;
   var accept = req.headers.get('accept') || '';
   return accept.indexOf('text/html') !== -1;
 }

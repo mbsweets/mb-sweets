@@ -221,6 +221,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .ldaterow label{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:6px}
 .ldaterow input[type=date]{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:14px;color:var(--ink)}
 .ldaterow .lnk{font-size:.78rem;padding:0;min-height:auto}
+.webwarn{background:var(--red-bg);color:var(--ink);border:1px solid var(--red);border-radius:10px;padding:9px 12px;margin:10px 0;font-size:.9rem}
+.webbox{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;line-height:1.5}
+.weblist{list-style:none;padding:0;margin:8px 0}
+.weblist li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.weblist li b{white-space:nowrap}
 .dtag{background:var(--paper);border:1px solid var(--gold);border-radius:6px;padding:0 6px;font-size:.7rem;color:var(--gold);margin-left:6px;white-space:nowrap;display:inline-block}
 .dtag.dgiven{color:var(--green);border-color:var(--green)}
 .mini.overdue{border-color:var(--red);border-width:1.5px}
@@ -279,13 +284,14 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="printArea"></div>
 
+<script src="catalog.js"></script>
 <script>
 (function(){
 'use strict';
 var KEY='mbmb-billing-v1';
 
 var CATS=[['mithai','मिठाई'],['dairy','डेयरी (दूध-दही-पनीर)'],['namkeen','नमकीन'],['cold','कोल्ड ड्रिंक्स'],['cake','केक'],['packaged','पैकेज्ड फूड / बिस्किट / मिक्सचर']];
-var UNIT_OPTS=['किलो','पीस','लीटर','पैकेट','पैक','ग्राम','डिब्बा'];
+var UNIT_OPTS=['किलो','पीस','लीटर','पैकेट','पैक','प्लेट','ग्राम','डिब्बा'];
 var STAMP={pending:'पेंडिंग',partial:'आंशिक',delivered:'डिलीवर',cancelled:'कैंसल'};
 
 var DEFAULT_SHOP={name:'Maa Bhagwati Misthan Bhandar',addr:'Nanaura, Darbhanga, Bihar - 846005',phone:'8002010218',owner:'Pankaj Gupta',terms:'सामान ले जाने से पहले पूरा पेमेंट करना होगा।'};
@@ -312,9 +318,12 @@ var DEFAULT_ITEMS=[
  ['i20','दही (15 किलो पैक)','dairy','पैक',1500],
  ['i21','नमकीन','namkeen','किलो',200]
 ].map(function(r){return {id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
+var CATALOG=(window.MB_CATALOG&&Array.isArray(window.MB_CATALOG.items))?window.MB_CATALOG:null;
+if(CATALOG)DEFAULT_ITEMS=CATALOG.items.map(function(r){return {id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
+var WEB_SLOTS=[[8,11,'सुबह 8–11'],[11,14,'दोपहर 11–2'],[14,17,'दोपहर 2–5'],[17,20,'शाम 5–8']];
 
-var state={shop:Object.assign({},DEFAULT_SHOP),items:[],customers:[],orders:[],nextOrderNo:1};
-var ui={view:'home',customerId:null,search:'',storageOk:true,editId:null,orderDraft:null,itemsSearch:'',confirm:null,ordersFilter:'all',cameFrom:'home',ordersSearch:'',pendingRestore:null};
+var state={shop:Object.assign({},DEFAULT_SHOP),items:[],customers:[],orders:[],nextOrderNo:1,catalogApplied:0};
+var ui={view:'home',customerId:null,search:'',storageOk:true,editId:null,orderDraft:null,itemsSearch:'',confirm:null,ordersFilter:'all',cameFrom:'home',ordersSearch:'',pendingRestore:null,webImport:null};
 
 /* ---------- storage ---------- */
 function load(){
@@ -326,11 +335,13 @@ function load(){
       state.items=Array.isArray(d.items)?d.items:DEFAULT_ITEMS.map(function(i){return Object.assign({},i);});
       state.customers=Array.isArray(d.customers)?d.customers:[];
       state.orders=Array.isArray(d.orders)?d.orders:[];
+      state.catalogApplied=num(d.catalogApplied)||0;
       normalizeState();
       var mx=0;state.orders.forEach(function(o){if(o.no>mx)mx=o.no;});
       state.nextOrderNo=Math.max(d.nextOrderNo||1,mx+1);
     }else{
       state.items=DEFAULT_ITEMS.map(function(i){return Object.assign({},i);});
+      state.catalogApplied=CATALOG?CATALOG.version:0;
       save();
     }
   }catch(e){
@@ -338,6 +349,7 @@ function load(){
     /* purana data kharab padha gaya to use alag key par bacha lo, taaki overwrite na ho */
     try{var rawBad=localStorage.getItem(KEY);if(rawBad)localStorage.setItem(KEY+'-corrupt-'+Date.now(),rawBad);}catch(e2){}
     state.items=DEFAULT_ITEMS.map(function(i){return Object.assign({},i);});
+    state.catalogApplied=CATALOG?CATALOG.version:0;
   }
 }
 function save(){
@@ -351,6 +363,24 @@ function normalizeState(){
     o.payments.forEach(function(p){if(!p.id)p.id=uid();});
     o.items.forEach(function(it){if(!it.lid)it.lid=uid();});
   });
+}
+
+/* दुकान की साझा लिस्ट (catalog.js) से नए दाम/आइटम — सिर्फ वही जो पिछली बार के बाद बदले */
+function applyCatalog(){
+  if(!CATALOG)return 0;
+  var applied=num(state.catalogApplied)||1;
+  if(CATALOG.version<=applied){state.catalogApplied=applied;return 0;}
+  var n=0;
+  CATALOG.items.forEach(function(r){
+    if(num(r[5])<=applied)return;
+    var it=findItem(r[0]);
+    if(it){it.name=r[1];it.cat=r[2];it.unit=r[3];it.price=r[4];}
+    else state.items.push({id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]});
+    n++;
+  });
+  state.catalogApplied=CATALOG.version;
+  save();
+  return n;
 }
 
 /* ---------- helpers ---------- */
@@ -784,6 +814,7 @@ function orderCardFull(o){
   if(!cancelled){
     acts='<div class="oacts">'+
       (due>0?'<button class="btn small" data-act="order-payment" data-id="'+o.id+'">पेमेंट लो</button>':'')+
+      webConfirmButton(o)+
       billButton(o)+
       '<button class="lnk" data-act="remind-order" data-id="'+o.id+'">\uD83D\uDD14 रिमाइंडर</button>'+
       '<button class="lnk" data-act="print-order" data-id="'+o.id+'">\uD83D\uDDA8\uFE0F प्रिंट</button>'+
@@ -1006,7 +1037,9 @@ function renderOrderSheet(){
     '<div class="sh-actions"><button class="btn small" data-act="of-cancel-custom">Cancel</button><button class="btn primary small" data-act="of-add-custom">ऑर्डर में जोड़ो</button></div></div>'
     :'<button class="lnk" data-act="of-open-custom">+ नया आइटम (सिर्फ इस ऑर्डर के लिए)</button>';
 
+  var webBanner=(d.webCode&&!ui.editId)?'<div class="webwarn" style="margin-top:0">🌐 ऑनलाइन ऑर्डर <b>'+esc(d.webCode)+'</b> — सब चेक करो'+(d.lines.some(function(l){return !(num(l.rate)>0);})?', ₹0 वाले आइटम का Rate भरो':'')+', फिर Save करो।</div>':'';
   var html='<div class="sh-head"><h2>'+(ui.editId?'ऑर्डर #'+findOrder(ui.editId).no+' बदलो':'नया ऑर्डर')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    webBanner+
     '<label class="fl">ग्राहक</label>'+custBlock+
     '<label class="fl">डिलीवरी की date और time<input id="of-date" type="datetime-local" value="'+esc(d.date)+'"></label>'+
     '<label class="fl">सामान</label>'+
@@ -1071,11 +1104,167 @@ function saveOrderFromDraft(){
     var advIn=Math.max(0,num($('#of-advance').value));
     var adv=Math.min(totNew,advIn);
     var o2={id:uid(),no:state.nextOrderNo++,customerId:d.customerId,date:dateVal,items:items,payments:adv>0?[{id:uid(),amount:adv,date:todayStr(),note:'Advance'}]:[],cancelled:false,notes:notes,createdAt:Date.now()};
+    if(d.webCode){o2.webCode=d.webCode;o2.webMode=d.webMode||'d';}
     state.orders.push(o2);
     save();closeSheet();toast('ऑर्डर #'+o2.no+' save हो गया'+(advIn>totNew?' (advance टोटल से ज़्यादा था, '+rupee(totNew)+' ही जमा किया)':''));
   }
   ui.view='customer';ui.customerId=d.customerId;
   renderRoute();window.scrollTo(0,0);
+}
+
+/* ---------- वेबसाइट (मेन्यू) से आया ऑर्डर ---------- */
+function b64urlDecode(s){
+  s=String(s).replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  var bin=atob(s);
+  if(window.TextDecoder){
+    var bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  return decodeURIComponent(escape(bin));
+}
+function clip(s,n){s=String(s==null?'':s);return s.length>n?s.slice(0,n):s;}
+function parseWebOrder(raw){
+  try{
+    var p=JSON.parse(b64urlDecode(raw));
+    if(!p||typeof p!=='object'||!Array.isArray(p.i))return null;
+    return {
+      c:clip(p.c,20),n:clip(p.n,60),p:clip(p.p,15),m:p.m==='p'?'p':'d',
+      g:clip(p.g,80),a:clip(p.a,200),k:clip(p.k,120),
+      l:(Array.isArray(p.l)&&p.l.length===2&&isFinite(p.l[0])&&isFinite(p.l[1]))?[+p.l[0],+p.l[1]]:null,
+      dk:isFinite(p.dk)?+p.dk:null,
+      w:(p.w==='asap'||/^\d{4}-\d{2}-\d{2}$/.test(String(p.w)))?String(p.w):'asap',
+      s:(isFinite(p.s)&&p.s>=0&&p.s<WEB_SLOTS.length)?+p.s:-1,
+      i:p.i.filter(function(r){return Array.isArray(r)&&r.length>=2&&num(r[1])>0;}).slice(0,60).map(function(r){return [clip(r[0],12),num(r[1])];}),
+      x:Array.isArray(p.x)?p.x.filter(function(r){return Array.isArray(r)&&r.length>=2;}).slice(0,20).map(function(r){return [r[0]==='cake'?'cake':'pack',clip(r[1],300)];}):[],
+      cm:clip(p.cm,120),t:clip(p.t,300),ts:num(p.ts)
+    };
+  }catch(e){return null;}
+}
+function webItemInfo(id){
+  var it=findItem(id);
+  if(it)return {name:it.name,unit:it.unit,price:num(it.price)};
+  if(CATALOG){for(var i=0;i<CATALOG.items.length;i++){var r=CATALOG.items[i];if(r[0]===id)return {name:r[1],unit:r[3],price:num(r[4])};}}
+  return null;
+}
+function webWhenText(p){
+  if(p.w==='asap')return p.m==='p'?'जल्दी (30 मिनट में तैयार)':'जल्दी (30–60 मिनट)';
+  return fmtDshort(keyToDate(p.w))+(p.s>=0?', '+WEB_SLOTS[p.s][2]:'');
+}
+function webDateValue(p){
+  if(p.w==='asap'){
+    var d=new Date(Date.now()+60*60000);
+    var m=d.getMinutes();d.setMinutes(Math.ceil(m/15)*15,0,0);
+    return dayKey(d)+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+  }
+  var h=p.s>=0?WEB_SLOTS[p.s][0]:10;
+  return p.w+'T'+pad(h)+':00';
+}
+function webMapsLink(p){return p.l?('https://maps.google.com/?q='+p.l[0].toFixed(5)+','+p.l[1].toFixed(5)):'';}
+function webNotes(p){
+  var N=['🌐 ऑनलाइन ऑर्डर '+p.c+' · '+(p.m==='p'?'🏪 दुकान से लेंगे':'🚚 घर पर डिलीवरी')+' · ⏰ '+webWhenText(p)];
+  if(p.m==='d'){
+    if(p.g)N.push('गाँव/मोहल्ला: '+p.g);
+    if(p.a)N.push('पता: '+p.a);
+    if(p.k)N.push('पहचान: '+p.k);
+    if(p.l)N.push('📍 '+webMapsLink(p)+(p.dk!=null?' (~'+p.dk+' km)':''));
+    else N.push('📍 लोकेशन नहीं दी — दूरी जांचनी है');
+  }
+  if(p.cm)N.push('केक पर लिखना: "'+p.cm+'"');
+  if(p.t)N.push('ग्राहक का नोट: '+p.t);
+  return N.join('\n');
+}
+function webLines(p){
+  var L=[];
+  p.i.forEach(function(r){
+    var info=webItemInfo(r[0]);if(!info)return;
+    L.push({lid:uid(),name:info.name,unit:info.unit,rate:info.price,qty:r[1],delivered:false,date:''});
+  });
+  p.x.forEach(function(r){
+    L.push({lid:uid(),name:(r[0]==='cake'?'कस्टम केक: ':'पैकेट सामान (MRP): ')+r[1],unit:r[0]==='cake'?'पीस':'पैक',rate:0,qty:1,delivered:false,date:''});
+  });
+  return L;
+}
+function openWebImport(p){
+  ui.webImport=p;
+  var dup=state.orders.filter(function(o){return o.webCode&&o.webCode===p.c;})[0];
+  var noData=!state.orders.length&&!state.customers.length;
+  var lines=webLines(p);
+  var tot=lines.reduce(function(s,l){return s+num(l.qty)*num(l.rate);},0);
+  var zero=lines.some(function(l){return !(num(l.rate)>0);});
+  var html='<div class="sh-head"><h2>🌐 नया ऑनलाइन ऑर्डर</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    (noData?'<div class="webwarn">⚠️ इस ऐप में आपका कोई पुराना ग्राहक/ऑर्डर नहीं दिख रहा। अगर यह लिंक WhatsApp के अंदर खुला है, तो ऊपर ⋮ दबाकर <b>"Chrome में खोलें"</b> चुनो — वरना ऑर्डर गलत जगह सेव होगा।</div>':'')+
+    (dup?'<div class="webwarn">यह ऑर्डर पहले ही <b>#'+dup.no+'</b> में जुड़ चुका है।</div>':'')+
+    '<div class="webbox"><div><b>'+esc(p.n||'-')+'</b> · '+esc(p.p||'')+'</div>'+
+    '<div>'+(p.m==='p'?'🏪 दुकान से लेंगे':'🚚 घर पर डिलीवरी')+' · ⏰ '+esc(webWhenText(p))+'</div>'+
+    (p.m==='d'?'<div class="hint" style="margin:4px 0 0">'+esc([p.g,p.a,p.k].filter(Boolean).join(', ')||'पता नहीं लिखा')+(p.l?' · 📍 '+(p.dk!=null?p.dk+' km':'लोकेशन है'):' · 📍 लोकेशन नहीं')+'</div>':'')+
+    '</div>'+
+    '<ul class="weblist">'+lines.map(function(l){
+      return '<li><span>'+esc(displayName(l))+' ×'+fmtQty(l.qty)+' '+esc(l.unit)+'</span><b>'+(num(l.rate)>0?rupee(num(l.qty)*num(l.rate)):'दाम भरना है')+'</b></li>';
+    }).join('')+'</ul>'+
+    '<div class="ftotal"><span>टोटल'+(zero?' (तय दाम वाला)':'')+'</span><b>'+rupee(tot)+'</b></div>'+
+    (zero?'<p class="hint">"दाम भरना है" वाले आइटम का दाम अगली स्क्रीन पर Rate में भर देना।</p>':'')+
+    '<div class="sh-actions">'+
+      (dup?'<button class="btn" data-act="open-customer" data-id="'+dup.customerId+'">#'+dup.no+' देखो</button><button class="btn primary" data-act="web-import-go">फिर भी जोड़ो</button>'
+          :'<button class="btn" data-act="close">बाद में</button><button class="btn primary" data-act="web-import-go">📥 बिलिंग में जोड़ो</button>')+
+    '</div>';
+  openSheet(html);
+}
+function startWebOrderDraft(p){
+  var c=findCustomerByPhone(p.p,null);
+  var addr=[p.g,p.a,p.k].filter(Boolean).join(', ');
+  ui.editId=null;
+  ui.orderDraft={
+    customerId:c?c.id:null,locked:false,
+    date:webDateValue(p),notes:webNotes(p),advance:'',activeCat:CATS[0][0],
+    lines:webLines(p),custSearch:'',customItemOpen:false,
+    newCustOpen:!c,newCustName:p.n||'',newCustPhone:p.p||'',newCustAddr:p.m==='d'?addr:'',
+    webCode:p.c,webMode:p.m
+  };
+  if(c&&!c.address&&addr&&p.m==='d'){c.address=addr;save();}
+  openSheet('');
+  renderOrderSheet();
+}
+function checkWebImport(){
+  var h=location.hash||'';
+  var m=h.match(/^#o=([A-Za-z0-9_-]+)/);
+  if(!m)return;
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  var p=parseWebOrder(m[1]);
+  if(!p){toast('ऑनलाइन ऑर्डर का लिंक खुल नहीं पाया — पूरा लिंक दोबारा दबाओ');return;}
+  openWebImport(p);
+}
+function orderPageUrl(){
+  try{return new URL('order/',location.href).href;}catch(e){return 'https://mbsweets.github.io/mb-sweets/order/';}
+}
+function webConfirmMessage(o){
+  var c=findCustomer(o.customerId);
+  var tot=orderTotal(o),due=orderDue(o);
+  var L=[];
+  L.push('नमस्ते '+(c?c.name:'')+' जी 🙏');
+  L.push('आपका ऑर्डर कन्फर्म है ✅ (ऑर्डर #'+o.no+')');
+  L.push('');
+  o.items.forEach(function(it){L.push('• '+displayName(it)+' — '+fmtQty(it.qty)+' '+it.unit+(num(it.rate)>0?' = '+rupee(num(it.qty)*num(it.rate)):''));});
+  L.push('');
+  L.push('कुल: '+rupee(tot));
+  L.push((o.webMode==='p'?'🏪 दुकान से लेने का समय: ':'🚚 डिलीवरी: ')+fmtDT(o.date));
+  if(due>0){
+    L.push('');
+    if(o.webMode==='p'){
+      L.push('पेमेंट: सामान लेते समय दुकान पर, या अभी UPI से '+rupee(due));
+    }else{
+      L.push('कृपया '+rupee(due)+' का पेमेंट UPI से कर दें, उसके बाद डिलीवरी निकलेगी।');
+    }
+    L.push('UPI ID: '+((CATALOG&&CATALOG.shop.upi)||''));
+    L.push('QR / पेमेंट पेज: '+orderPageUrl()+'#pay='+due);
+    L.push('पेमेंट के बाद स्क्रीनशॉट इसी चैट में भेजें।');
+  }else{
+    L.push('पेमेंट मिल गया ✅ धन्यवाद!');
+  }
+  L.push('');
+  L.push('— '+state.shop.name);
+  return L.join('\n');
 }
 
 /* ---------- Payment form ---------- */
@@ -1292,6 +1481,13 @@ function summaryMessage(c){
   return L.join('\n');
 }
 
+function webConfirmButton(o){
+  if(!o.webCode||o.cancelled)return '';
+  var c=findCustomer(o.customerId);
+  var href=c?waLink(c.phone,webConfirmMessage(o)):'';
+  if(!href)return '';
+  return '<a class="btn small primary" href="'+esc(href)+'" target="_blank" rel="noopener">✅ कन्फर्म + पेमेंट भेजो</a>';
+}
 function billButton(o){
   return '<button class="btn small" data-act="bill-sheet" data-kind="order" data-ref="'+o.id+'">📲 बिल भेजो</button>';
 }
@@ -1706,7 +1902,7 @@ document.addEventListener('click',function(e){
       if(fa==='item')openItemForm();
       else openOrderForm(ui.view==='customer'?ui.customerId:null);
       break;
-    case 'open-customer':ui.cameFrom=(ui.view==='orders')?'orders':(ui.view==='dues'?'dues':'home');ui.view='customer';ui.customerId=id;renderRoute();window.scrollTo(0,0);break;
+    case 'open-customer':if($('#ov'))closeSheet();ui.cameFrom=(ui.view==='orders')?'orders':(ui.view==='dues'?'dues':'home');ui.view='customer';ui.customerId=id;renderRoute();window.scrollTo(0,0);break;
     case 'orders-filter':ui.ordersFilter=t.getAttribute('data-f');renderRoute();break;
     case 'view-dues':ui.view='dues';renderRoute();window.scrollTo(0,0);break;
     case 'add-customer':openCustomerForm();break;
@@ -1722,6 +1918,10 @@ document.addEventListener('click',function(e){
       save();closeSheet();ui.view='home';ui.customerId=null;renderRoute();toast('ग्राहक डिलीट हो गया');
       break;
     case 'close':closeSheet();break;
+    case 'web-import-go':
+      var wp=ui.webImport;
+      if(wp){closeSheet();startWebOrderDraft(wp);}
+      break;
 
     case 'new-order-for':openOrderForm(id);break;
     case 'edit-order':
@@ -1817,7 +2017,8 @@ document.addEventListener('click',function(e){
         try{localStorage.setItem(KEY+'-before-restore',JSON.stringify(state));}catch(e3){}
         state.shop=Object.assign({},DEFAULT_SHOP,rd2.shop||{});
         state.items=rd2.items;state.customers=rd2.customers;state.orders=rd2.orders;
-        normalizeState();
+        state.catalogApplied=num(rd2.catalogApplied)||0;
+        normalizeState();applyCatalog();
         var mx2=0;state.orders.forEach(function(o){if(o.no>mx2)mx2=o.no;});
         state.nextOrderNo=Math.max(rd2.nextOrderNo||1,mx2+1);
         save();closeSheet();renderShell();renderRoute();toast('Restore हो गया');
@@ -1879,7 +2080,7 @@ document.addEventListener('click',function(e){
       if(ncDup){$('#nc-err').innerHTML='यह नंबर पहले से "'+esc(ncDup.name)+'" के नाम से है। <button class="lnk" data-act="of-pick-cust" data-id="'+ncDup.id+'">उन्हीं को चुनो</button>';break;}
       var ncProb=phoneProblem(ncPhone,null);
       if(ncProb){$('#nc-err').textContent=ncProb;break;}
-      var newCust={id:uid(),name:ncName,phone:ncPhone,address:'',createdAt:Date.now()};
+      var newCust={id:uid(),name:ncName,phone:ncPhone,address:ui.orderDraft.newCustAddr||'',createdAt:Date.now()};
       state.customers.push(newCust);save();
       ui.orderDraft.customerId=newCust.id;
       ui.orderDraft.newCustOpen=false;
@@ -2052,10 +2253,14 @@ if('serviceWorker' in navigator){
 }
 
 load();
+var catUpdated=applyCatalog();
 renderShell();
 renderRoute();
 checkDueReminders();
 requestPersist();
+if(catUpdated)toast('दुकान की आइटम लिस्ट/दाम अपडेट हो गए ✓');
+checkWebImport();
+window.addEventListener('hashchange',checkWebImport);
 })();
 </script>
 </body>

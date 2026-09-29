@@ -1,0 +1,1258 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MB Sweets — ऑर्डर करें | Maa Bhagwati Misthan Bhandar, Nanaura</title>
+<meta name="description" content="Maa Bhagwati Misthan Bhandar (MB Sweets), नानौरा, दरभंगा — मिठाई, दूध-दही-पनीर, केक। 6 km तक घर पर डिलीवरी, ₹499+ पर फ्री। WhatsApp पर सीधे ऑर्डर करें।">
+<meta name="theme-color" content="#5C1620">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MB Sweets — घर बैठे ऑर्डर करें">
+<meta property="og:description" content="मिठाई · दूध-दही-पनीर · केक — नानौरा, दरभंगा। 6 km तक डिलीवरी, ₹499+ पर फ्री।">
+<meta property="og:image" content="https://mbsweets.github.io/mb-sweets/order/img/og.jpg">
+<meta property="og:url" content="https://mbsweets.github.io/mb-sweets/order/">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<style>
+@font-face{font-family:'Mukta';font-weight:400;font-display:swap;src:url(../fonts/Mukta-400.woff) format('woff')}
+@font-face{font-family:'Mukta';font-weight:600;font-display:swap;src:url(../fonts/Mukta-600.woff) format('woff')}
+@font-face{font-family:'Mukta';font-weight:700;font-display:swap;src:url(../fonts/Mukta-700.woff) format('woff')}
+@font-face{font-family:'Baloo 2';font-weight:700;font-display:swap;src:url(../fonts/Baloo2-700.woff) format('woff')}
+:root{
+  --paper:#FAF3E7; --card:#FFFFFF; --ink:#2B1712; --muted:#7E6A5B; --line:#E8DCC9;
+  --brand:#5C1620; --brand2:#7A2330; --on-brand:#FBEEDD; --gold:#9C6B00; --goldsoft:#F7E7C4;
+  --green:#2F6F4E; --greenbg:#E3F1E8; --amber:#8A5A00; --amberbg:#FBEFD5; --red:#A6332E; --redbg:#F6E1DD;
+  --wa:#1C9B52; --tile1:#FFF6E4; --tile2:#F3DDB2;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1C1210; --card:#261915; --ink:#F3E9DD; --muted:#B8A392; --line:#3D2B23;
+    --gold:#E7B84A; --goldsoft:#3A2A14; --green:#6BD7A1; --greenbg:#15291F; --amber:#F2BD55; --amberbg:#33260F;
+    --red:#FF9189; --redbg:#3B1C1C; --tile1:#3A2A1E; --tile2:#2A1D15;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1C1210; --card:#261915; --ink:#F3E9DD; --muted:#B8A392; --line:#3D2B23;
+  --gold:#E7B84A; --goldsoft:#3A2A14; --green:#6BD7A1; --greenbg:#15291F; --amber:#F2BD55; --amberbg:#33260F;
+  --red:#FF9189; --redbg:#3B1C1C; --tile1:#3A2A1E; --tile2:#2A1D15;
+}
+*{box-sizing:border-box}
+html{background:var(--paper);-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Mukta',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.45}
+body.noscroll{overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+.hero{background:var(--brand);color:var(--on-brand);padding:calc(14px + env(safe-area-inset-top,0px)) 0 16px}
+.hero .wrap{display:flex;gap:12px;align-items:center}
+.hero img{width:64px;height:64px;border-radius:14px;background:#fff;flex:0 0 auto;object-fit:contain}
+.hero h1{font-family:'Baloo 2','Mukta',sans-serif;font-size:1.35rem;line-height:1.1;margin:0}
+.hero .tag{font-size:.84rem;opacity:.9;margin-top:2px}
+.hero .addr{font-size:.78rem;opacity:.8;margin-top:2px}
+.langbtn{margin-left:auto;align-self:flex-start;background:transparent;border:1px solid rgba(251,238,221,.5);color:var(--on-brand);border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:600;min-height:32px}
+.status{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:8px 12px;border-radius:12px;font-weight:600;font-size:.92rem;background:var(--card);border:1px solid var(--line)}
+.status .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.status.open .dot{background:#2FA84F;box-shadow:0 0 0 4px rgba(47,168,79,.18)}
+.status.later .dot{background:#E0A21B}
+.status.pause .dot{background:#C8372D}
+.notice{background:var(--amberbg);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:8px 12px;margin-top:8px;font-size:.9rem}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.facts div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;font-size:.8rem;line-height:1.25}
+.facts b{display:block;font-size:.9rem;color:var(--ink)}
+.facts span{color:var(--muted)}
+.avail{margin:8px 0 0;font-size:.86rem;color:var(--amber);font-weight:600;text-align:center}
+.tabs{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);margin-top:12px}
+.tabs .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:8px;padding-bottom:8px;scrollbar-width:none}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-weight:600;font-size:.92rem;min-height:38px;white-space:nowrap}
+.tab.on{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+section.sec{padding-top:18px}
+.sec h2{font-family:'Baloo 2','Mukta',sans-serif;font-size:1.25rem;margin:0;color:var(--brand)}
+:root[data-theme="dark"] .sec h2{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sec h2{color:var(--gold)}}
+.sec .sub{color:var(--muted);font-size:.86rem;margin:2px 0 10px}
+.card{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:10px}
+.card.dim{opacity:.6}
+.pic{width:96px;height:96px;border-radius:12px;overflow:hidden;flex:0 0 auto;background:radial-gradient(circle at 50% 40%,var(--tile1),var(--tile2));position:relative}
+.pic img,.pic svg{width:100%;height:100%;display:block;object-fit:cover}
+.pic .tagimg{position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.55);color:#fff;font-size:.62rem;border-radius:6px;padding:0 5px}
+.body{flex:1;min-width:0;display:flex;flex-direction:column}
+.body h3{margin:0;font-size:1.05rem;line-height:1.2}
+.body h3 small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:1px}
+.brandtag{display:inline-block;background:var(--goldsoft);color:var(--gold);font-weight:700;font-size:.72rem;border-radius:6px;padding:0 6px;margin-top:3px;align-self:flex-start}
+.price{font-weight:700;margin-top:4px}
+.price span{color:var(--muted);font-weight:400;font-size:.85rem}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.opt{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:3px 9px;font-size:.84rem;font-weight:600;min-height:32px;position:relative}
+.opt.on{border-color:var(--brand);background:var(--brand);color:var(--on-brand)}
+.opt.off{text-decoration:line-through;opacity:.55}
+.opt .q{display:inline-block;margin-left:4px;background:var(--gold);color:#fff;border-radius:8px;padding:0 5px;font-size:.72rem}
+.qtyrow{margin-top:auto;padding-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.addbtn{border:1.5px solid var(--brand);background:transparent;color:var(--brand);font-weight:700;border-radius:10px;padding:0 16px;min-height:40px}
+:root[data-theme="dark"] .addbtn{border-color:var(--gold);color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .addbtn{border-color:var(--gold);color:var(--gold)}}
+.stepper{display:flex;align-items:center;border:1.5px solid var(--brand);border-radius:10px;overflow:hidden;background:var(--brand);color:var(--on-brand)}
+.stepper button{background:transparent;border:0;color:inherit;width:40px;height:40px;font-size:1.25rem;font-weight:700}
+.stepper b{min-width:78px;text-align:center;font-size:.9rem;padding:0 2px}
+.offtag{color:var(--red);font-weight:700;font-size:.88rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ccard{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.ccard .cpic{aspect-ratio:1/1;position:relative;background:var(--tile2)}
+.ccard .cpic img{width:100%;height:100%;object-fit:cover;display:block}
+.ccard .cpic .tagimg{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.55);color:#fff;font-size:.66rem;border-radius:6px;padding:0 6px}
+.ccard .cbody{padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px;flex:1}
+.ccard h3{margin:0;font-size:.95rem;line-height:1.2}
+.ccard .cq{font-size:.78rem;color:var(--green);font-weight:700}
+.ccard button{margin-top:auto}
+.smallnote{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.packbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.packtop{display:flex;gap:12px;align-items:center}
+.packtop .pic{width:72px;height:72px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}
+.chip{border:1px dashed var(--line);background:var(--paper);border-radius:999px;padding:3px 10px;font-size:.84rem;min-height:32px}
+textarea,input[type=text],input[type=tel],input[type=date]{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:10px 12px;font-size:16px}
+textarea{resize:vertical;min-height:70px}
+input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;text-decoration:none;text-align:center}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.btn.wa{background:var(--wa);border-color:var(--wa);color:#fff}
+.btn.block{width:100%}
+.btn.small{min-height:40px;padding:0 12px;font-size:.92rem}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bulkcard{margin-top:18px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:var(--on-brand);border-radius:16px;padding:14px}
+.bulkcard h3{margin:0 0 2px;font-family:'Baloo 2','Mukta',sans-serif;font-size:1.1rem}
+.bulkcard p{margin:0 0 10px;font-size:.88rem;opacity:.9}
+.bulkcard .btn{background:var(--on-brand);color:var(--brand);border-color:var(--on-brand)}
+.infobox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.infobox p{margin:4px 0}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.links .btn{min-height:44px;font-size:.9rem}
+footer{color:var(--muted);font-size:.78rem;text-align:center;padding:18px 0 110px}
+.cartbar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--paper) 30%);pointer-events:none}
+.cartbar button{pointer-events:auto;max-width:528px;margin:0 auto;display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;background:var(--brand);color:var(--on-brand);border:0;border-radius:14px;min-height:56px;padding:0 16px;box-shadow:0 6px 18px rgba(0,0,0,.18);font-weight:700}
+.cartbar small{display:block;font-weight:400;font-size:.78rem;opacity:.9}
+.cartbar .go{background:var(--on-brand);color:var(--brand);border-radius:10px;padding:6px 12px}
+/* full-screen views */
+.view{position:fixed;inset:0;z-index:40;background:var(--paper);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.vhead{position:sticky;top:0;z-index:2;background:var(--brand);color:var(--on-brand);padding-top:env(safe-area-inset-top,0px)}
+.vhead .wrap{display:flex;align-items:center;gap:8px;min-height:54px}
+.vhead h2{margin:0;font-size:1.1rem;font-family:'Baloo 2','Mukta',sans-serif}
+.backbtn{background:transparent;border:0;color:inherit;font-weight:700;min-height:44px;padding:0 8px 0 0;font-size:1rem}
+.vbody{padding:14px 0 40px}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.blk h3{margin:0 0 8px;font-size:1rem}
+.line{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.line:last-child{border-bottom:0}
+.line .ln{flex:1;min-width:0}
+.line .ln b{display:block;font-weight:600;line-height:1.25}
+.line .ln small{color:var(--muted)}
+.line .la{font-weight:700;white-space:nowrap}
+.line .stepper{transform:scale(.9);transform-origin:right center}
+.line .stepper b{min-width:64px}
+.rm{background:transparent;border:0;color:var(--red);font-weight:700;min-height:36px;padding:0 6px}
+.tot{display:flex;justify-content:space-between;font-weight:700;font-size:1.05rem;padding-top:8px}
+.minbar{margin-top:8px;border-radius:10px;padding:8px 10px;font-size:.88rem;font-weight:600}
+.minbar.ok{background:var(--greenbg);color:var(--green)}
+.minbar.no{background:var(--amberbg);color:var(--amber)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:8px;text-align:left;min-height:58px}
+.seg button b{display:block;font-size:.95rem}
+.seg button small{color:var(--muted);font-size:.78rem}
+.seg button.on{border-color:var(--brand);background:var(--goldsoft)}
+.seg button:disabled{opacity:.5}
+label.fl{display:block;margin-top:10px;font-weight:600;font-size:.9rem}
+label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
+.hint{color:var(--muted);font-size:.82rem;margin:4px 0 0}
+.locst{margin-top:8px;border-radius:10px;padding:8px 10px;font-size:.88rem;font-weight:600}
+.locst.ok{background:var(--greenbg);color:var(--green)}
+.locst.near{background:var(--amberbg);color:var(--amber)}
+.locst.far,.locst.err{background:var(--redbg);color:var(--red)}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.slots button{border:1.5px solid var(--line);background:var(--paper);border-radius:10px;min-height:44px;font-weight:600}
+.slots button.on{border-color:var(--brand);background:var(--brand);color:var(--on-brand)}
+.slots button:disabled{opacity:.4;text-decoration:line-through}
+.agree{display:flex;gap:10px;align-items:flex-start;margin-top:4px}
+.lnkbtn{background:none;border:0;padding:0;color:var(--brand);font-weight:700;text-decoration:underline;min-height:0}
+:root[data-theme="dark"] .lnkbtn{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lnkbtn{color:var(--gold)}}
+.agree input{width:22px;height:22px;margin-top:2px;flex:0 0 auto;accent-color:var(--brand)}
+.err{color:var(--red);font-weight:600;min-height:1em;margin:8px 0}
+.paynote{background:var(--goldsoft);border-radius:12px;padding:10px 12px;font-size:.9rem;margin:10px 0}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{position:relative;padding:0 0 12px 38px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+.bigok{text-align:center;padding:8px 0 4px}
+.bigok .ic{font-size:2.6rem;line-height:1}
+.bigok h3{margin:6px 0 2px;font-size:1.3rem}
+.code{display:inline-block;font-family:'Baloo 2','Mukta',sans-serif;background:var(--goldsoft);color:var(--gold);border-radius:8px;padding:0 10px;font-size:1.1rem;letter-spacing:.5px}
+.upibox{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:8px}
+.upibox code{flex:1;font-size:1rem;font-weight:700;word-break:break-all;font-family:inherit}
+.qrimg{display:block;width:100%;max-width:300px;margin:10px auto 0;border-radius:12px;border:1px solid var(--line);background:#fff}
+.amt{font-family:'Baloo 2','Mukta',sans-serif;font-size:2rem;color:var(--brand);text-align:center;line-height:1.1}
+:root[data-theme="dark"] .amt{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .amt{color:var(--gold)}}
+.rules{margin:0;padding-left:20px}
+.rules li{margin-bottom:8px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-size:.9rem;font-weight:600;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+.cakehead{display:flex;gap:12px;align-items:center}
+.cakehead img{width:84px;height:84px;border-radius:12px;object-fit:cover}
+@media (min-width:600px){.pic{width:112px;height:112px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="view"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:16px">यह पेज चलाने के लिए ब्राउज़र में JavaScript चालू करें, या सीधे WhatsApp करें: 8002010218</p></noscript>
+<script src="../catalog.js"></script>
+<script>
+(function(){
+'use strict';
+var C=window.MB_CATALOG;
+if(!C){document.getElementById('app').innerHTML='<p style="padding:20px">मेन्यू लोड नहीं हो पाया। इंटरनेट चालू करके पेज दोबारा खोलें, या WhatsApp करें: 8002010218</p>';return;}
+var S=C.shop;
+var STORE='mbo-v1';
+var SLOTS=[[8,11,'सुबह 8–11','8–11 AM'],[11,14,'दोपहर 11–2','11 AM–2 PM'],[14,17,'दोपहर 2–5','2–5 PM'],[17,20,'शाम 5–8','5–8 PM']];
+
+/* ---------- text (Hindi / English) ---------- */
+var T={
+hi:{
+ lang_btn:'English',
+ tag:'मिठाई · दूध-दही-पनीर · केक',
+ st_open:'ऑर्डर चालू · 30–60 मिनट में डिलीवरी',
+ st_early:'अभी आगे के समय का ऑर्डर दें · "जल्दी" वाले ऑर्डर सुबह 7 बजे से',
+ st_late:'आज के ऑर्डर बंद (शाम 7 के बाद) · कल के लिए ऑर्डर दें',
+ st_pause:'आज ऑनलाइन ऑर्डर बंद है · कृपया कॉल करें',
+ f1:'6 km तक',f1b:'डिलीवरी',f2:'₹499+ पर',f2b:'डिलीवरी फ्री',f3:'30–60 मिनट',f3b:'सुबह 7 – शाम 7',
+ avail:'डिलीवरी की उपलब्धता देखकर ही डिलीवरी कन्फर्म की जाएगी।',
+ tab_sweets:'मिठाई',tab_dairy:'दूध-दही-पनीर',tab_cake:'केक',tab_pack:'पैकेट सामान',tab_bulk:'शादी-पार्टी',tab_info:'जानकारी',
+ sweets_sub:'कम से कम 250 ग्राम, या पीस में',
+ dairy_sub:'रोज़ ताज़ा — जब चाहें ऑर्डर करें',
+ cake_sub:'100% अंडा-रहित (Eggless)',
+ custom_head:'कस्टम केक — दाम WhatsApp पर पूछें',
+ custom_sub:'डिज़ाइन चुनें, वज़न-फ्लेवर बताएं — दुकान दाम बताकर कन्फर्म करेगी।',
+ sample:'नमूना फोटो',
+ sample_note:'केक की फोटो सिर्फ नमूने के लिए हैं — असली केक थोड़ा अलग दिख सकता है।',
+ ask_price:'दाम पूछें',ask_added:'✓ जुड़ा — बदलें',
+ pack_title:'कोल्ड ड्रिंक · नमकीन-मिक्सचर · बिस्किट · पैकेट सामान',
+ pack_sub:'सब MRP पर। जो चाहिए लिख दें — दुकान दाम जोड़कर बताएगी।',
+ pack_ph:'जैसे: कोल्ड ड्रिंक 2 लीटर – 1, भुजिया 400 ग्राम – 2, बिस्किट – 5 पैकेट',
+ pack_add:'ऑर्डर में जोड़ें',pack_update:'बदलाव सेव करें',pack_added:'✓ ऑर्डर में जुड़ गया',pack_remove:'हटाएं',pack_empty:'पहले लिखें कि क्या चाहिए।',
+ pack_chips:['कोल्ड ड्रिंक','नमकीन','मिक्सचर','बिस्किट','चिप्स','पानी की बोतल','जूस'],
+ add:'+ जोड़ें',off:'आज उपलब्ध नहीं',in_kg:'किलो में',in_pc:'पीस में',
+ bulk_title:'शादी, तिलक, पूजा या पार्टी का बड़ा ऑर्डर?',bulk_sub:'मात्रा और तारीख बताएं — दाम और बाकी बात WhatsApp / फोन पर।',bulk_btn:'बड़ा ऑर्डर पूछें',
+ info_title:'दुकान की जानकारी',
+ i_hours:'🕖 दुकान: सुबह 7 – रात 9 · ऑनलाइन ऑर्डर: सुबह 7 – शाम 7',
+ i_del:'🚚 डिलीवरी: दुकान से 6 km तक · ₹499 या ज़्यादा पर फ्री · आम तौर पर 30–60 मिनट',
+ i_pick:'🏪 दुकान से खुद ले जाएं: कोई न्यूनतम रकम नहीं',
+ i_pay:'💳 पेमेंट: ऑर्डर कन्फर्म होने के बाद UPI से',
+ call:'📞 कॉल करें',whatsapp:'💬 WhatsApp',directions:'🗺️ रास्ता देखें',insta:'📷 Instagram',review:'⭐ Google पर रिव्यू दें',pay_link:'💳 UPI पेमेंट / QR',
+ rules_link:'📜 ऑर्डर के नियम पढ़ें',
+ foot_photo:'मिठाई की फोटो हमारी दुकान की हैं। केक और जिन पर चित्र बना है, वे नमूने के लिए हैं।',
+ items_n:'{n} आइटम',ask_n:'+ {n} दाम पूछने वाले',cart_next:'आगे बढ़ें →',
+ back:'← वापस',
+ co_title:'आपका ऑर्डर',co_empty:'अभी कुछ नहीं जोड़ा।',co_browse:'मेन्यू देखें',
+ co_total:'कुल (तय दाम)',co_ask:'दाम दुकान बताएगी',
+ min_left:'घर पर डिलीवरी के लिए ₹{x} का और सामान जोड़ें (कम से कम ₹499)',
+ min_ok:'✓ ₹499 पूरा — डिलीवरी फ्री',
+ min_unpriced:'पैकेट सामान / कस्टम केक का दाम जुड़कर कुल ₹499 होना चाहिए — दुकान बताएगी।',
+ how:'कैसे लेंगे?',m_del:'🚚 घर पर डिलीवरी',m_del_sub:'6 km तक · ₹499+ पर फ्री',m_pick:'🏪 दुकान से लूंगा',m_pick_sub:'कोई न्यूनतम रकम नहीं',
+ you:'आपकी जानकारी',f_name:'नाम',f_phone:'मोबाइल नंबर (WhatsApp वाला)',
+ addr_h:'डिलीवरी का पता',loc_btn:'📍 मेरी लोकेशन दें',loc_wait:'लोकेशन ढूंढ रहे हैं…',loc_again:'📍 लोकेशन दोबारा लें',
+ loc_why:'लोकेशन देने से दूरी पता चलती है और डिलीवरी वाला सीधे आपके घर पहुँचता है।',
+ loc_ok:'✓ आपका इलाका डिलीवरी में आता है (~{d} km)',
+ loc_near:'आप डिलीवरी सीमा के पास हैं (~{d} km) — दुकान कॉल करके कन्फर्म करेगी',
+ loc_far:'आप 6 km से बाहर लग रहे हैं (~{d} km) — डिलीवरी शायद न हो पाए। "दुकान से लूंगा" भी चुन सकते हैं।',
+ loc_denied:'लोकेशन की अनुमति नहीं मिली — कोई बात नहीं, नीचे पता ठीक से लिख दें।',
+ loc_fail:'लोकेशन नहीं मिल पाई — फ़ोन की लोकेशन (GPS) चालू करके दोबारा दबाएं, या सिर्फ पता लिख दें।',
+ loc_weak:'लोकेशन साफ़ नहीं मिली (±{a} km) — खुली जगह में दोबारा कोशिश करें, या पता लिख दें।',
+ loc_nosupport:'इस फ़ोन/ब्राउज़र में लोकेशन नहीं मिलती — पता लिख दें।',
+ f_village:'गाँव / मोहल्ला',f_address:'पूरा पता (घर, वार्ड, गली)',f_landmark:'पास की पहचान (मंदिर, स्कूल, दुकान) — ज़रूरी नहीं',
+ area_hint:'दुकान से 6 km तक — जैसे खिरमा, एयरपोर्ट, केवटी रनवे, पिंडारुच की तरफ।',
+ when_h:'कब चाहिए?',w_asap:'⚡ जल्दी',w_asap_d:'30–60 मिनट में',w_asap_p:'30 मिनट में तैयार',w_later:'📅 दूसरा समय',w_later_sub:'तारीख और समय चुनें',
+ w_asap_no:'"जल्दी" वाला ऑर्डर सुबह 7 से शाम 7 बजे तक ही — अभी "दूसरा समय" चुनें।',
+ f_date:'तारीख',f_slot:'समय',slot_none:'इस तारीख के लिए अब कोई समय नहीं बचा — अगली तारीख चुनें।',
+ cake_time:'केक का समय दुकान कन्फर्म करेगी।',
+ cake_msg:'केक पर क्या लिखना है? (अगर लिखवाना है)',cake_msg_ph:'जैसे: Happy Birthday Riya',
+ f_note:'कुछ और कहना है? (ज़रूरी नहीं)',f_note_ph:'जैसे: मिठाई डिब्बे में पैक करें',
+ agree:'मैंने ऑर्डर के नियम पढ़ लिए हैं',read_rules:'नियम पढ़ें',
+ pay_del:'💳 पेमेंट: दुकान ऑर्डर कन्फर्म करेगी, उसके बाद पूरा पेमेंट UPI से। पेमेंट होने के बाद ही डिलीवरी निकलेगी।',
+ pay_pick:'💳 पेमेंट: सामान लेते समय दुकान पर (नकद या UPI)।',
+ send:'💬 WhatsApp पर ऑर्डर भेजें',send_note:'WhatsApp खुलेगा — वहाँ "भेजें" ▶ दबाना न भूलें।',
+ e_empty:'पहले मेन्यू से कुछ चुनें।',e_pause:'आज ऑनलाइन ऑर्डर बंद है — कृपया कॉल करें।',e_name:'अपना नाम लिखें।',e_phone:'सही 10 अंकों का मोबाइल नंबर लिखें।',
+ e_village:'गाँव / मोहल्ला लिखें।',e_address:'पूरा पता लिखें।',e_min:'घर पर डिलीवरी के लिए कम से कम ₹499 का सामान चाहिए — ₹{x} का और जोड़ें, या "दुकान से लूंगा" चुनें।',
+ e_slot:'तारीख और समय चुनें।',e_agree:'नियम पढ़कर ✓ लगाएं।',e_asap:'अभी "जल्दी" वाला ऑर्डर नहीं हो सकता — "दूसरा समय" चुनें।',e_date:'सही तारीख चुनें (आज से 30 दिन के अंदर)।',
+ done_h:'ऑर्डर तैयार है!',done_code:'ऑर्डर कोड',
+ done_s1:'WhatsApp में "भेजें" ▶ दबाकर मैसेज भेजें। WhatsApp नहीं खुला तो नीचे का बटन दबाएं।',
+ done_s2:'दुकान उपलब्धता देखकर WhatsApp पर ऑर्डर कन्फर्म करेगी।',
+ done_s3d:'कन्फर्म होने पर नीचे दिए UPI से पेमेंट करें और स्क्रीनशॉट उसी चैट में भेजें।',
+ done_s3p:'कन्फर्म होने पर समय पर दुकान से सामान ले जाएं। पेमेंट लेते समय।',
+ done_resend:'💬 WhatsApp फिर से खोलें',done_new:'नया ऑर्डर शुरू करें',done_none:'अभी कोई ऑर्डर नहीं भेजा गया।',
+ pay_h:'UPI पेमेंट',pay_amt:'भेजने वाली रकम',pay_after:'⚠️ दुकान से कन्फर्मेशन आने के बाद ही पेमेंट करें।',
+ upi_id:'UPI ID',copy:'कॉपी करें',copied:'कॉपी हो गया ✓',copy_fail:'कॉपी नहीं हुआ — UPI ID खुद लिख लें',
+ open_upi:'UPI ऐप में पेमेंट करें',save_qr:'⬇️ QR फोटो सेव करें',
+ pay_how:'पेमेंट कैसे करें',
+ pay_h1:'"कॉपी करें" दबाएं → Google Pay / PhonePe / Paytm खोलें → "UPI ID पर भेजें" में चिपकाएं।',
+ pay_h2:'या QR फोटो सेव करें → UPI ऐप में "स्कैन" → "गैलरी से" वही फोटो चुनें।',
+ pay_h3:'दूसरे फ़ोन से सीधे यह QR स्कैन भी कर सकते हैं।',
+ pay_ss:'पेमेंट के बाद स्क्रीनशॉट WhatsApp पर भेजें',pay_wa:'💬 स्क्रीनशॉट भेजें',pay_wa_text:'नमस्ते, मैंने पेमेंट कर दिया है{a}। स्क्रीनशॉट भेज रहा/रही हूँ।',
+ bulk_h:'बड़ा ऑर्डर पूछें',b_event:'मौका',b_events:['शादी','तिलक / सगाई','जन्मदिन','पूजा / भोज','श्राद्ध','अन्य'],b_date:'तारीख',b_place:'जगह (गाँव / शहर)',b_what:'क्या-क्या और कितना',b_what_ph:'जैसे: रसगुल्ला 500 पीस, पेड़ा 10 किलो, दही 15 किलो',b_send:'💬 WhatsApp पर पूछें',e_bwhat:'क्या-क्या चाहिए, लिखें।',
+ ck_weight:'वज़न',ck_weights:['½ किलो','1 किलो','1½ किलो','2 किलो','3 किलो या ज़्यादा'],ck_flavour:'फ्लेवर',ck_flavours:['वनीला','चॉकलेट','बटरस्कॉच','पाइनएप्पल','रेड वेलवेट','रसमलाई'],
+ ck_msg:'केक पर क्या लिखना है',ck_note:'डिज़ाइन के बारे में (जैसे: डॉल, कार, नंबर 8, रंग)',ck_photo:'📷 फोटो केक: ऑर्डर भेजने के बाद अपनी फोटो उसी WhatsApp चैट में भेजें।',
+ ck_add:'ऑर्डर में जोड़ें',ck_save:'बदलाव सेव करें',ck_remove:'ऑर्डर से हटाएं',ck_price:'दाम WhatsApp पर बताया जाएगा',e_weight:'वज़न चुनें।',
+ rules_h:'ऑर्डर के नियम',
+ rules:[
+  'डिलीवरी दुकान से 6 km तक, ₹499 या ज़्यादा के ऑर्डर पर — डिलीवरी फ्री।',
+  'डिलीवरी की उपलब्धता देखकर ही डिलीवरी कन्फर्म की जाएगी।',
+  'दुकान WhatsApp पर ऑर्डर कन्फर्म करेगी। उसके बाद पूरा पेमेंट पहले UPI से करना होगा, तभी डिलीवरी निकलेगी।',
+  'पेमेंट के बाद ग्राहक ऑर्डर कैंसिल करे तो पैसा वापस नहीं होगा।',
+  'दुकान ने ऑर्डर कन्फर्म किया और समय पर डिलीवरी नहीं कर पाई, तो ग्राहक ऑर्डर कैंसिल कर सकता है — पूरा पैसा वापस मिलेगा।',
+  'ऑर्डर सुबह 7 से शाम 7 बजे तक। शाम 7 बजे के बाद अगले दिन के लिए ऑर्डर दें।',
+  'दाम वही जो दुकान में। पैकेट सामान MRP पर।',
+  'मिठाई कम से कम 250 ग्राम, या पीस में।',
+  'केक 100% अंडा-रहित हैं। केक की फोटो सिर्फ नमूने के लिए — असली केक थोड़ा अलग दिख सकता है। कस्टम केक का दाम WhatsApp पर बताया जाएगा।',
+  'दुकान से खुद ले जाने (पिकअप) पर कोई न्यूनतम रकम नहीं; पेमेंट सामान लेते समय।'
+ ],
+ u:{'किलो':'किलो','पीस':'पीस','लीटर':'लीटर','पैक':'पैक','पैकेट':'पैकेट','प्लेट':'प्लेट','ग्राम':'ग्राम'},
+ msg_new:'🛍️ *नया ऑर्डर — MB Sweets*',msg_code:'कोड',msg_loc:'📍 लोकेशन',msg_noloc:'📍 लोकेशन नहीं दी',msg_items:'*सामान:*',msg_total:'💰 कुल (तय दाम)',msg_ask:'दाम बताएं',
+ msg_cake:'🎂 कस्टम केक',msg_pack:'📦 पैकेट सामान (MRP)',msg_cakemsg:'🎂 केक पर लिखना',msg_note:'📝 नोट',msg_village:'गाँव/मोहल्ला',msg_addr:'पता',msg_land:'पहचान',
+ msg_pay_d:'ऑर्डर कन्फर्म होने के बाद UPI से पेमेंट करूँगा/करूँगी।',msg_pay_p:'पेमेंट दुकान पर सामान लेते समय।',msg_import:'📥 दुकान के बिलिंग ऐप के लिए:',
+ msg_bulk:'🎉 *बड़ा ऑर्डर — पूछताछ*'
+},
+en:{
+ lang_btn:'हिंदी',
+ tag:'Sweets · Milk-Dahi-Paneer · Cakes',
+ st_open:'Taking orders · delivery in 30–60 min',
+ st_early:'Order for later now · quick orders from 7 AM',
+ st_late:'Today\'s orders closed (after 7 PM) · order for tomorrow',
+ st_pause:'Online orders closed today · please call',
+ f1:'Up to 6 km',f1b:'delivery',f2:'₹499+',f2b:'free delivery',f3:'30–60 min',f3b:'7 AM – 7 PM',
+ avail:'Delivery is confirmed only after checking availability.',
+ tab_sweets:'Sweets',tab_dairy:'Milk-Dahi-Paneer',tab_cake:'Cakes',tab_pack:'Packaged',tab_bulk:'Weddings & parties',tab_info:'Info',
+ sweets_sub:'Minimum 250 g, or by the piece',
+ dairy_sub:'Fresh daily — order any time',
+ cake_sub:'100% Eggless',
+ custom_head:'Custom cakes — ask price on WhatsApp',
+ custom_sub:'Pick a design, tell weight & flavour — the shop will confirm with the price.',
+ sample:'Sample photo',
+ sample_note:'Cake photos are samples only — the actual cake may look a little different.',
+ ask_price:'Ask price',ask_added:'✓ Added — edit',
+ pack_title:'Cold drinks · Namkeen-mixture · Biscuits · Packaged items',
+ pack_sub:'All at MRP. Write what you need — the shop will add the price.',
+ pack_ph:'e.g. Cold drink 2 L – 1, Bhujia 400 g – 2, Biscuits – 5 packets',
+ pack_add:'Add to order',pack_update:'Save changes',pack_added:'✓ Added to order',pack_remove:'Remove',pack_empty:'First write what you need.',
+ pack_chips:['Cold drink','Namkeen','Mixture','Biscuits','Chips','Water bottle','Juice'],
+ add:'+ Add',off:'Not available today',in_kg:'By kg',in_pc:'By piece',
+ bulk_title:'Big order for a wedding, tilak, puja or party?',bulk_sub:'Tell quantity and date — price and details on WhatsApp / phone.',bulk_btn:'Ask for a big order',
+ info_title:'Shop info',
+ i_hours:'🕖 Shop: 7 AM – 9 PM · Online orders: 7 AM – 7 PM',
+ i_del:'🚚 Delivery: up to 6 km · free on ₹499+ · usually 30–60 min',
+ i_pick:'🏪 Pick up from shop: no minimum',
+ i_pay:'💳 Payment: by UPI after the order is confirmed',
+ call:'📞 Call',whatsapp:'💬 WhatsApp',directions:'🗺️ Directions',insta:'📷 Instagram',review:'⭐ Review on Google',pay_link:'💳 UPI payment / QR',
+ rules_link:'📜 Read order rules',
+ foot_photo:'Sweet photos are from our shop. Cake photos and drawings are samples.',
+ items_n:'{n} items',ask_n:'+ {n} price on request',cart_next:'Next →',
+ back:'← Back',
+ co_title:'Your order',co_empty:'Nothing added yet.',co_browse:'See menu',
+ co_total:'Total (fixed price)',co_ask:'shop will tell price',
+ min_left:'Add ₹{x} more for home delivery (minimum ₹499)',
+ min_ok:'✓ ₹499 reached — free delivery',
+ min_unpriced:'With packaged items / custom cake the total should reach ₹499 — the shop will confirm.',
+ how:'How will you get it?',m_del:'🚚 Home delivery',m_del_sub:'up to 6 km · free on ₹499+',m_pick:'🏪 I\'ll pick up',m_pick_sub:'no minimum',
+ you:'Your details',f_name:'Name',f_phone:'Mobile number (WhatsApp)',
+ addr_h:'Delivery address',loc_btn:'📍 Share my location',loc_wait:'Finding location…',loc_again:'📍 Get location again',
+ loc_why:'Your location tells us the distance and helps the delivery reach your door.',
+ loc_ok:'✓ Your area is within delivery (~{d} km)',
+ loc_near:'You are near the delivery limit (~{d} km) — the shop will call to confirm',
+ loc_far:'You seem to be beyond 6 km (~{d} km) — delivery may not be possible. You can choose pick-up.',
+ loc_denied:'Location permission not given — no problem, just write your address below.',
+ loc_fail:'Could not get location — turn on phone location (GPS) and try again, or just write your address.',
+ loc_weak:'Location not accurate (±{a} km) — try again in an open place, or write your address.',
+ loc_nosupport:'Location is not available on this phone/browser — please write your address.',
+ f_village:'Village / locality',f_address:'Full address (house, ward, lane)',f_landmark:'Nearby landmark (temple, school, shop) — optional',
+ area_hint:'Up to 6 km from the shop — e.g. towards Khirma, Airport, Keoti Runway, Pindaruch.',
+ when_h:'When do you need it?',w_asap:'⚡ ASAP',w_asap_d:'in 30–60 min',w_asap_p:'ready in 30 min',w_later:'📅 Later',w_later_sub:'pick date & time',
+ w_asap_no:'ASAP orders only 7 AM – 7 PM — please choose "Later".',
+ f_date:'Date',f_slot:'Time',slot_none:'No time left for this date — choose the next date.',
+ cake_time:'The shop will confirm the cake timing.',
+ cake_msg:'Message on the cake? (optional)',cake_msg_ph:'e.g. Happy Birthday Riya',
+ f_note:'Anything else? (optional)',f_note_ph:'e.g. pack sweets in a box',
+ agree:'I have read the order rules',read_rules:'Read rules',
+ pay_del:'💳 Payment: the shop confirms your order, then full payment by UPI. Delivery leaves after payment.',
+ pay_pick:'💳 Payment: at the shop when you pick up (cash or UPI).',
+ send:'💬 Send order on WhatsApp',send_note:'WhatsApp will open — remember to tap Send ▶ there.',
+ e_empty:'Choose something from the menu first.',e_pause:'Online orders are closed today — please call.',e_name:'Write your name.',e_phone:'Write a correct 10-digit mobile number.',
+ e_village:'Write your village / locality.',e_address:'Write your full address.',e_min:'Home delivery needs at least ₹499 — add ₹{x} more, or choose pick-up.',
+ e_slot:'Choose date and time.',e_agree:'Please read the rules and tick ✓.',e_asap:'ASAP is not possible right now — choose "Later".',e_date:'Choose a valid date (within 30 days).',
+ done_h:'Your order is ready!',done_code:'Order code',
+ done_s1:'Tap Send ▶ in WhatsApp. If WhatsApp did not open, tap the button below.',
+ done_s2:'The shop checks availability and confirms on WhatsApp.',
+ done_s3d:'After confirmation, pay by the UPI below and send the screenshot in the same chat.',
+ done_s3p:'After confirmation, pick up on time. Pay at the shop.',
+ done_resend:'💬 Open WhatsApp again',done_new:'Start a new order',done_none:'No order sent yet.',
+ pay_h:'UPI payment',pay_amt:'Amount to pay',pay_after:'⚠️ Pay only after the shop confirms your order.',
+ upi_id:'UPI ID',copy:'Copy',copied:'Copied ✓',copy_fail:'Could not copy — please note the UPI ID',
+ open_upi:'Pay in UPI app',save_qr:'⬇️ Save QR photo',
+ pay_how:'How to pay',
+ pay_h1:'Tap "Copy" → open Google Pay / PhonePe / Paytm → paste in "Pay to UPI ID".',
+ pay_h2:'Or save the QR photo → in the UPI app tap "Scan" → "from gallery" and pick it.',
+ pay_h3:'You can also scan this QR from another phone.',
+ pay_ss:'After paying, send the screenshot on WhatsApp',pay_wa:'💬 Send screenshot',pay_wa_text:'Hello, I have made the payment{a}. Sending the screenshot.',
+ bulk_h:'Ask for a big order',b_event:'Occasion',b_events:['Wedding','Tilak / Engagement','Birthday','Puja / Feast','Shraddh','Other'],b_date:'Date',b_place:'Place (village / town)',b_what:'What and how much',b_what_ph:'e.g. Rasgulla 500 pcs, Peda 10 kg, Dahi 15 kg',b_send:'💬 Ask on WhatsApp',e_bwhat:'Write what you need.',
+ ck_weight:'Weight',ck_weights:['½ kg','1 kg','1½ kg','2 kg','3 kg or more'],ck_flavour:'Flavour',ck_flavours:['Vanilla','Chocolate','Butterscotch','Pineapple','Red velvet','Rasmalai'],
+ ck_msg:'Message on the cake',ck_note:'About the design (e.g. doll, car, number 8, colours)',ck_photo:'📷 Photo cake: after sending the order, send your photo in the same WhatsApp chat.',
+ ck_add:'Add to order',ck_save:'Save changes',ck_remove:'Remove from order',ck_price:'Price will be told on WhatsApp',e_weight:'Choose a weight.',
+ rules_h:'Order rules',
+ rules:[
+  'Delivery up to 6 km from the shop, on orders of ₹499 or more — delivery is free.',
+  'Delivery is confirmed only after checking availability.',
+  'The shop confirms the order on WhatsApp. Then full payment by UPI first — delivery leaves after payment.',
+  'If the customer cancels after paying, the money will not be refunded.',
+  'If the shop confirmed the order but could not deliver on time, the customer can cancel — full refund.',
+  'Orders 7 AM to 7 PM. After 7 PM, order for the next day.',
+  'Same prices as in the shop. Packaged items at MRP.',
+  'Sweets minimum 250 g, or by the piece.',
+  'Cakes are 100% eggless. Cake photos are samples — the actual cake may look a little different. Custom cake price is told on WhatsApp.',
+  'Pick-up from the shop has no minimum; pay when you pick up.'
+ ],
+ u:{'किलो':'kg','पीस':'pc','लीटर':'L','पैक':'pack','पैकेट':'packet','प्लेट':'plate','ग्राम':'g'},
+ msg_new:'🛍️ *New order — MB Sweets*',msg_code:'Code',msg_loc:'📍 Location',msg_noloc:'📍 Location not shared',msg_items:'*Items:*',msg_total:'💰 Total (fixed price)',msg_ask:'please tell price',
+ msg_cake:'🎂 Custom cake',msg_pack:'📦 Packaged items (MRP)',msg_cakemsg:'🎂 On the cake',msg_note:'📝 Note',msg_village:'Village/locality',msg_addr:'Address',msg_land:'Landmark',
+ msg_pay_d:'I will pay by UPI after the order is confirmed.',msg_pay_p:'Payment at the shop on pick-up.',msg_import:'📥 For the shop billing app:',
+ msg_bulk:'🎉 *Big order — enquiry*'
+}
+};
+
+/* ---------- state ---------- */
+var st={lang:'hi',cart:{},custom:[],me:{name:'',phone:'',mode:'d',village:'',addr:'',landmark:''},cakeMsg:'',note:'',agree:false,last:null};
+var sel={};           // card key -> selected option index
+var loc=null;         // {lat,lng,acc,km}
+var locState='';      // '', 'wait', 'denied', 'fail', 'weak', 'nosupport'
+var when={type:'',date:'',slot:-1};
+var ckDraft=null;     // custom cake being edited
+var bulk={event:-1,date:'',place:'',what:''};
+
+function load(){
+  try{
+    var raw=localStorage.getItem(STORE);
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d.lang==='en')st.lang='en';
+      if(d.cart&&typeof d.cart==='object')st.cart=d.cart;
+      if(Array.isArray(d.custom))st.custom=d.custom;
+      if(d.me&&typeof d.me==='object')Object.keys(st.me).forEach(function(k){if(typeof d.me[k]==='string')st.me[k]=d.me[k];});
+      if(typeof d.cakeMsg==='string')st.cakeMsg=d.cakeMsg;
+      if(typeof d.note==='string')st.note=d.note;
+      if(d.last&&typeof d.last==='object')st.last=d.last;
+    }
+  }catch(e){}
+  // drop items that no longer exist
+  Object.keys(st.cart).forEach(function(id){if(!ITEM[id]||!(num(st.cart[id])>0))delete st.cart[id];});
+}
+function save(){
+  try{localStorage.setItem(STORE,JSON.stringify({lang:st.lang,cart:st.cart,custom:st.custom,me:st.me,cakeMsg:st.cakeMsg,note:st.note,last:st.last}));}catch(e){}
+}
+
+/* ---------- helpers ---------- */
+var ITEM={};
+C.items.forEach(function(r){ITEM[r[0]]={id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
+var OFF={};(C.off||[]).forEach(function(id){OFF[id]=1;});
+function $(s,r){return (r||document).querySelector(s);}
+function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function num(v){var n=parseFloat(v);return isFinite(n)?n:0;}
+function r2(n){return Math.round(num(n)*100)/100;}
+function rupee(n){n=r2(n);return '₹'+n.toLocaleString('en-IN',{maximumFractionDigits:2});}
+function t(k,vars){var v=(T[st.lang]&&T[st.lang][k]!=null)?T[st.lang][k]:T.hi[k];if(v==null)return k;if(vars&&typeof v==='string')Object.keys(vars).forEach(function(x){v=v.split('{'+x+'}').join(vars[x]);});return v;}
+function nm(o){return st.lang==='en'?(o.en||o.hi):o.hi;}
+function nm2(o){return st.lang==='en'?(o.hi||''):(o.en||'');}
+function pad(n){return n<10?'0'+n:''+n;}
+function dkey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function keyToDate(k){var a=String(k).split('-');return new Date(+a[0],+a[1]-1,+a[2]);}
+function nowMin(){var d=new Date();return d.getHours()*60+d.getMinutes();}
+function unitTxt(u){return (T[st.lang].u[u])||u;}
+function stepOf(u){return u==='किलो'?0.25:(u==='लीटर'?0.5:1);}
+function qtyTxt(unit,q,lang){
+  var L=lang||st.lang;var U=T[L].u;
+  q=Math.round(q*1000)/1000;
+  if(unit==='किलो'&&q<1)return Math.round(q*1000)+' '+U['ग्राम'];
+  return q+' '+(U[unit]||unit);
+}
+function toast(m){var el=$('#toast');el.textContent=m;el.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){el.classList.remove('on');},2200);}
+function phone10(p){
+  p=String(p||'').replace(/\D/g,'');
+  if(p.length===12&&p.slice(0,2)==='91')p=p.slice(2);
+  if(p.length===11&&p.charAt(0)==='0')p=p.slice(1);
+  return (p.length===10&&/^[6-9]/.test(p))?p:'';
+}
+function waUrl(text){return 'https://api.whatsapp.com/send?phone='+S.wa+'&text='+encodeURIComponent(text);}
+function haversine(a,b,c,d){
+  var R=6371,toR=Math.PI/180;
+  var dLat=(c-a)*toR,dLng=(d-b)*toR;
+  var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a*toR)*Math.cos(c*toR)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function b64url(str){
+  var bin='';
+  if(window.TextEncoder){var bytes=new TextEncoder().encode(str);for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);}
+  else bin=unescape(encodeURIComponent(str));
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function billingBase(){try{return new URL('../',location.href).href;}catch(e){return 'https://mbsweets.github.io/mb-sweets/';}}
+function img(name){return 'img/'+name+'.webp';}
+
+/* ---------- time rules ---------- */
+function asapOpen(){var m=nowMin();return !C.pause&&m>=S.orderStartHour*60&&m<S.orderEndHour*60;}
+function slotOk(dateKey,i){
+  var today=dkey(new Date());
+  if(dateKey<today)return false;
+  if(dateKey>today)return true;
+  var m=nowMin();
+  return m<S.orderEndHour*60&&m<=SLOTS[i][1]*60-60;
+}
+function anySlot(dateKey){for(var i=0;i<SLOTS.length;i++)if(slotOk(dateKey,i))return true;return false;}
+function firstDate(){var d=new Date();var k=dkey(d);if(anySlot(k))return k;d.setDate(d.getDate()+1);return dkey(d);}
+function maxDate(){var d=new Date();d.setDate(d.getDate()+30);return dkey(d);}
+function statusInfo(){
+  if(C.pause)return {cls:'pause',txt:t('st_pause')};
+  if(asapOpen())return {cls:'open',txt:t('st_open')};
+  return {cls:'later',txt:nowMin()<S.orderStartHour*60?t('st_early'):t('st_late')};
+}
+
+/* ---------- drawings (for items without a shop photo) ---------- */
+function rng(seed){return function(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};}
+function spiral(cx,cy,r0,r1,turns,sq){
+  var N=Math.round(turns*28),d='';
+  for(var i=0;i<=N;i++){var a=i/N*turns*2*Math.PI,r=r0+(r1-r0)*i/N;d+=(i?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)*sq).toFixed(1);}
+  return d;
+}
+function plate(y){return '<ellipse cx="60" cy="'+(y+4)+'" rx="50" ry="13" fill="#000" opacity=".12"/><ellipse cx="60" cy="'+y+'" rx="50" ry="13" fill="#C9A25C"/><ellipse cx="60" cy="'+(y-1)+'" rx="41" ry="9.5" fill="#E7C987"/>';}
+var ART={
+ jalebi:function(){
+   var s='<svg viewBox="0 0 120 120">'+plate(88);
+   [[42,64],[76,62],[59,78]].forEach(function(p,i){
+     var d=spiral(p[0],p[1],2,19,2.6,.62);
+     s+='<path d="'+d+'" fill="none" stroke="#B85C08" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>';
+     s+='<path d="'+d+'" fill="none" stroke="#EE8A17" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>';
+     s+='<path d="'+d+'" fill="none" stroke="#FFC65A" stroke-width="2" stroke-linecap="round" opacity=".8"/>';
+   });
+   return s+'</svg>';
+ },
+ milkcake:function(){
+   var s='<svg viewBox="0 0 120 120">'+plate(90);
+   function block(x,y,w,h,dx){
+     return '<path d="M'+x+' '+y+'l'+dx+' -8h'+w+'l-'+dx+' 8z" fill="#F0D59E"/>'+
+       '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="#D6A25A"/>'+
+       '<path d="M'+(x+w)+' '+y+'l'+dx+' -8v'+h+'l-'+dx+' 8z" fill="#BC8440"/>'+
+       '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(h*0.45)+'" fill="#E9C27F"/>';
+   }
+   s+=block(22,68,28,18,8)+block(56,70,28,18,8)+block(38,50,28,18,8);
+   var R=rng(7);for(var i=0;i<26;i++){s+='<circle cx="'+(26+R()*62).toFixed(1)+'" cy="'+(52+R()*34).toFixed(1)+'" r=".9" fill="#8C5A22" opacity=".45"/>';}
+   return s+'</svg>';
+ },
+ boondi:function(){
+   var s='<svg viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="40" ry="8" fill="#000" opacity=".12"/>'+
+     '<path d="M16 62 Q60 118 104 62 Z" fill="#C9A25C"/><path d="M22 64 Q60 108 98 64 Z" fill="#B48A43" opacity=".35"/>';
+   var R=rng(11),cols=['#F29B18','#F7B733','#E8820E','#FFC94A'];
+   for(var i=0;i<130;i++){var a=R()*Math.PI,rr=Math.sqrt(R());var x=60+Math.cos(a)*42*rr,y=62-Math.sin(a)*30*rr;s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.1" fill="'+cols[i%4]+'"/>';}
+   s+='<ellipse cx="60" cy="62" rx="44" ry="7" fill="none" stroke="#A67C33" stroke-width="3"/>';
+   return s+'</svg>';
+ },
+ cakeVanilla:function(){return cakeArt('#FFF1D0','#FFF8E8','#FFFFFF','#F5DDAE');},
+ cakeChoco:function(){return cakeArt('#6B3A22','#7E4529','#4A2616','#F3E3C8');},
+ milk:function(){
+   return '<svg viewBox="0 0 120 120"><ellipse cx="60" cy="102" rx="40" ry="6" fill="#000" opacity=".1"/>'+
+     '<path d="M28 34 h34 l-4 66 h-26 z" fill="#FFFFFF" stroke="#C9D8E4" stroke-width="2"/>'+
+     '<path d="M30 48 h30 l-3 50 h-24 z" fill="#F7F9FB"/>'+
+     '<rect x="66" y="30" width="30" height="66" rx="8" fill="#EAF3FB" stroke="#9DB9D3" stroke-width="2"/>'+
+     '<rect x="66" y="30" width="30" height="10" rx="4" fill="#9DB9D3"/>'+
+     '<path d="M81 52 c6 8 8 12 8 16 a8 8 0 0 1 -16 0 c0 -4 2 -8 8 -16z" fill="#4F86C6"/>'+
+     '<rect x="70" y="80" width="22" height="4" rx="2" fill="#9DB9D3"/></svg>';
+ },
+ dahi:function(){
+   return '<svg viewBox="0 0 120 120"><ellipse cx="60" cy="102" rx="42" ry="7" fill="#000" opacity=".12"/>'+
+     '<path d="M22 50 h76 l-10 48 a6 6 0 0 1 -6 5 h-44 a6 6 0 0 1 -6 -5 z" fill="#B8643C"/>'+
+     '<path d="M26 58 h68" stroke="#9A4F2C" stroke-width="3"/>'+
+     '<ellipse cx="60" cy="50" rx="38" ry="10" fill="#A2552F"/>'+
+     '<ellipse cx="60" cy="49" rx="33" ry="7.5" fill="#FFFDF6"/>'+
+     '<path d="M44 48 q8 -5 16 0 q8 5 16 0" fill="none" stroke="#EDE6D6" stroke-width="2"/></svg>';
+ },
+ paneer:function(){
+   var s='<svg viewBox="0 0 120 120">'+plate(90);
+   function cube(x,y,s2){return '<path d="M'+x+' '+y+'l'+(s2*0.4)+' -'+(s2*0.3)+'h'+s2+'l-'+(s2*0.4)+' '+(s2*0.3)+'z" fill="#FFFDF4"/><rect x="'+x+'" y="'+y+'" width="'+s2+'" height="'+s2+'" fill="#F4EBD6"/><path d="M'+(x+s2)+' '+y+'l'+(s2*0.4)+' -'+(s2*0.3)+'v'+s2+'l-'+(s2*0.4)+' '+(s2*0.3)+'z" fill="#E4D6B6"/>';}
+   s+=cube(24,64,20)+cube(50,66,20)+cube(76,64,18)+cube(38,44,20)+cube(64,46,19);
+   return s+'</svg>';
+ },
+ pack:function(){
+   return '<svg viewBox="0 0 120 120"><ellipse cx="60" cy="104" rx="46" ry="6" fill="#000" opacity=".1"/>'+
+     '<rect x="20" y="26" width="18" height="10" rx="3" fill="#C8372D"/>'+
+     '<path d="M18 36 h22 v6 q4 6 4 14 v44 a4 4 0 0 1 -4 4 h-22 a4 4 0 0 1 -4 -4 v-44 q0 -8 4 -14z" fill="#3B1F14"/>'+
+     '<rect x="14" y="62" width="30" height="16" fill="#F2E6D8"/><rect x="18" y="68" width="22" height="3" rx="1.5" fill="#C8372D"/>'+
+     '<path d="M50 40 l4 -6 l4 6 l4 -6 l4 6 l4 -6 l4 6 l4 -6 l4 6 v56 l-4 6 l-4 -6 l-4 6 l-4 -6 l-4 6 l-4 -6 l-4 6 l-4 -6 z" fill="#F5C518"/>'+
+     '<circle cx="66" cy="68" r="11" fill="#E8820E"/><path d="M60 70 q6 -8 12 0" fill="none" stroke="#FFF1C2" stroke-width="2.5" stroke-linecap="round"/>'+
+     '<circle cx="96" cy="84" r="16" fill="#D9A55A"/><circle cx="96" cy="84" r="12" fill="none" stroke="#C48D45" stroke-width="1.5" stroke-dasharray="2 3"/>'+
+     '<circle cx="91" cy="80" r="1.4" fill="#A8743A"/><circle cx="100" cy="80" r="1.4" fill="#A8743A"/><circle cx="96" cy="88" r="1.4" fill="#A8743A"/><circle cx="90" cy="88" r="1.4" fill="#A8743A"/><circle cx="102" cy="88" r="1.4" fill="#A8743A"/></svg>';
+ }
+};
+function cakeArt(body,top,drip,cream){
+  var s='<svg viewBox="0 0 120 120"><ellipse cx="60" cy="96" rx="50" ry="12" fill="#D8B98A"/><ellipse cx="60" cy="94" rx="46" ry="10" fill="#E9D2A8"/>'+
+    '<path d="M20 52 v34 a40 10 0 0 0 80 0 v-34 z" fill="'+body+'"/>'+
+    '<ellipse cx="60" cy="52" rx="40" ry="11" fill="'+top+'"/>';
+  var d='M20 52';for(var i=0;i<=8;i++){var x=20+i*10;d+=' L'+x+' '+(56+((i%2)?10:4))+' Q'+(x+5)+' '+(60)+' '+(x+10)+' 56';}
+  s+='<path d="'+d+' L100 52 A40 11 0 0 0 20 52z" fill="'+drip+'" opacity=".95"/>';
+  [[34,48],[48,44],[62,43],[76,44],[88,48],[46,54],[62,55],[78,54]].forEach(function(p){s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4.6" fill="'+cream+'"/><circle cx="'+p[0]+'" cy="'+(p[1]-3)+'" r="2.3" fill="#D7263D"/>';});
+  return s+'</svg>';
+}
+function picHtml(o,tag){
+  if(o.img)return '<img src="'+img(o.img)+'" alt="'+esc(o.hi)+'" loading="lazy" width="96" height="96">'+(tag?'<span class="tagimg">'+esc(tag)+'</span>':'');
+  var f=ART[o.art];return f?f():'';
+}
+
+/* ---------- cart ---------- */
+function optsOf(card){return card.opts.map(function(o){return typeof o==='string'?{id:o}:o;});}
+function optLabel(card,o){
+  if(o.hi)return st.lang==='en'?o.en:o.hi;
+  var u=ITEM[o.id].unit;
+  if(u==='किलो')return t('in_kg');
+  if(u==='पीस')return t('in_pc');
+  return unitTxt(u);
+}
+function cartLines(){
+  var L=[];
+  C.menu.forEach(function(card){
+    optsOf(card).forEach(function(o){
+      var q=num(st.cart[o.id]);if(!(q>0))return;
+      var it=ITEM[o.id];
+      L.push({id:o.id,card:card,opt:o,item:it,qty:q,amt:r2(q*it.price)});
+    });
+  });
+  return L;
+}
+function pricedTotal(){return r2(cartLines().reduce(function(s,l){return s+l.amt;},0));}
+function cartCount(){return cartLines().length+st.custom.length;}
+function hasFixedCake(){return cartLines().some(function(l){return l.item.cat==='cake';});}
+function hasCake(){return hasFixedCake()||st.custom.some(function(c){return c.type==='cake';});}
+function changeQty(id,dir){
+  var it=ITEM[id];if(!it)return;
+  var s=stepOf(it.unit);
+  var q=r2(num(st.cart[id])+dir*s);
+  if(q<=0)delete st.cart[id];else st.cart[id]=q;
+  save();
+}
+function lineName(l,lang){
+  var L=lang||st.lang;
+  var base=L==='en'?(l.card.en||l.card.hi):l.card.hi;
+  var opts=optsOf(l.card);
+  if(l.opt.hi)return base+' ('+(L==='en'?l.opt.en:l.opt.hi)+')';
+  if(opts.length>1&&l.item.unit==='पीस')return base+(L==='en'?' (pieces)':' (पीस)');
+  return base;
+}
+
+/* ---------- MENU PAGE ---------- */
+function cardHtml(card){
+  var opts=optsOf(card);
+  if(sel[card.key]==null){
+    var withQty=-1;opts.forEach(function(o,i){if(withQty<0&&num(st.cart[o.id])>0)withQty=i;});
+    sel[card.key]=withQty>=0?withQty:0;
+  }
+  var si=sel[card.key];if(si>=opts.length)si=0;
+  var o=opts[si],it=ITEM[o.id];
+  var allOff=opts.every(function(x){return OFF[x.id];});
+  var brand=card.brandHi?'<span class="brandtag">'+esc(st.lang==='en'?card.brandEn:card.brandHi)+'</span>':'';
+  var chips='';
+  if(opts.length>1){
+    chips='<div class="opts">'+opts.map(function(x,i){
+      var q=num(st.cart[x.id]);
+      return '<button class="opt'+(i===si?' on':'')+(OFF[x.id]?' off':'')+'" data-act="opt" data-card="'+card.key+'" data-i="'+i+'">'+esc(optLabel(card,x))+(q>0?'<span class="q">'+esc(qtyTxt(ITEM[x.id].unit,q))+'</span>':'')+'</button>';
+    }).join('')+'</div>';
+  }
+  var priceLine='<div class="price">'+rupee(it.price)+' <span>/ '+esc(o.hi?(st.lang==='en'?o.en:o.hi):unitTxt(it.unit))+'</span></div>';
+  if(o.hi&&it.unit==='किलो')priceLine='<div class="price">'+rupee(it.price)+' <span>/ '+esc(unitTxt('किलो'))+'</span></div>';
+  if(o.hi&&it.unit==='लीटर')priceLine='<div class="price">'+rupee(it.price)+' <span>/ '+esc(unitTxt('लीटर'))+'</span></div>';
+  var q=num(st.cart[o.id]);
+  var ctl;
+  if(C.pause)ctl='';
+  else if(OFF[o.id])ctl='<span class="offtag">'+t('off')+'</span>';
+  else if(q>0)ctl='<div class="stepper"><button data-act="dec" data-id="'+o.id+'" aria-label="कम करें">−</button><b>'+esc(qtyTxt(it.unit,q))+'</b><button data-act="inc" data-id="'+o.id+'" aria-label="बढ़ाएं">+</button></div>';
+  else ctl='<button class="addbtn" data-act="inc" data-id="'+o.id+'">'+t('add')+'</button>';
+  return '<article class="card'+(allOff?' dim':'')+'" id="card-'+card.key+'">'+
+    '<div class="pic">'+picHtml(card)+'</div>'+
+    '<div class="body"><h3>'+esc(nm(card))+'<small>'+esc(nm2(card))+'</small></h3>'+brand+priceLine+chips+
+    '<div class="qtyrow">'+ctl+'</div></div></article>';
+}
+function refreshCard(key){
+  var card=C.menu.filter(function(c){return c.key===key;})[0];
+  var el=document.getElementById('card-'+key);
+  if(card&&el)el.outerHTML=cardHtml(card);
+  renderCartBar();
+}
+function customCardHtml(cc){
+  var added=st.custom.filter(function(c){return c.type==='cake'&&c.key===cc.key;}).length;
+  return '<div class="ccard"><div class="cpic"><img src="'+img(cc.img)+'" alt="'+esc(cc.hi)+'" loading="lazy"><span class="tagimg">'+t('sample')+'</span></div>'+
+    '<div class="cbody"><h3>'+esc(nm(cc))+'</h3>'+(added?'<span class="cq">✓ '+added+'</span>':'')+
+    (C.pause?'':'<button class="btn small" data-act="cake" data-key="'+cc.key+'">'+t('ask_price')+'</button>')+'</div></div>';
+}
+function packHtml(){
+  var p=st.custom.filter(function(c){return c.type==='pack';})[0];
+  return '<div class="packbox" id="packbox"><div class="packtop"><div class="pic">'+ART.pack()+'</div>'+
+    '<div><h3 style="margin:0;font-size:1rem;line-height:1.25">'+t('pack_title')+'</h3><p class="hint" style="margin-top:2px">'+t('pack_sub')+'</p></div></div>'+
+    '<div class="chips">'+t('pack_chips').map(function(c){return '<button class="chip" data-act="packchip" data-v="'+esc(c)+'">+ '+esc(c)+'</button>';}).join('')+'</div>'+
+    '<textarea id="packText" rows="3" placeholder="'+esc(t('pack_ph'))+'">'+esc(p?p.text:'')+'</textarea>'+
+    '<div class="err" id="packErr"></div>'+
+    (C.pause?'':'<div class="row">'+(p?'<span class="cq" style="color:var(--green);font-weight:700">'+t('pack_added')+'</span><span style="flex:1"></span><button class="btn small" data-act="packrm">'+t('pack_remove')+'</button><button class="btn small primary" data-act="packadd">'+t('pack_update')+'</button>'
+      :'<span style="flex:1"></span><button class="btn small primary" data-act="packadd">'+t('pack_add')+'</button>')+'</div>')+
+    '</div>';
+}
+function renderMenu(){
+  var si=statusInfo();
+  var notice=st.lang==='en'?C.noticeEn:C.noticeHi;
+  var tabs=[['sweets',t('tab_sweets')],['dairy',t('tab_dairy')],['cake',t('tab_cake')],['pack',t('tab_pack')],['bulk',t('tab_bulk')],['info',t('tab_info')]];
+  var html='<header class="hero"><div class="wrap">'+
+      '<img src="../logo-header.png" alt="MB Sweets">'+
+      '<div><h1>'+esc(S.brand)+'</h1><div class="tag">'+esc(S.name)+'</div><div class="addr">'+esc(st.lang==='en'?S.addrEn:S.addrHi)+'</div></div>'+
+      '<button class="langbtn" data-act="lang">'+t('lang_btn')+'</button>'+
+    '</div></header>'+
+    '<div class="wrap">'+
+      '<div class="status '+si.cls+'" id="statusBox"><span class="dot"></span><span>'+esc(si.txt)+'</span></div>'+
+      (notice?'<div class="notice">📢 '+esc(notice)+'</div>':'')+
+      '<div class="facts"><div><b>'+t('f1')+'</b><span>'+t('f1b')+'</span></div><div><b>'+t('f2')+'</b><span>'+t('f2b')+'</span></div><div><b>'+t('f3')+'</b><span>'+t('f3b')+'</span></div></div>'+
+      '<p class="avail">'+t('avail')+'</p>'+
+    '</div>'+
+    '<nav class="tabs"><div class="wrap">'+tabs.map(function(x,i){return '<button class="tab'+(i===0?' on':'')+'" data-act="tab" data-t="'+x[0]+'">'+esc(x[1])+'</button>';}).join('')+'</div></nav>'+
+    '<main class="wrap">'+
+      '<section class="sec" id="sec-sweets"><h2>'+t('tab_sweets')+'</h2><p class="sub">'+t('sweets_sub')+'</p>'+
+        C.menu.filter(function(c){return c.tab==='sweets';}).map(cardHtml).join('')+'</section>'+
+      '<section class="sec" id="sec-dairy"><h2>'+t('tab_dairy')+'</h2><p class="sub">'+t('dairy_sub')+'</p>'+
+        C.menu.filter(function(c){return c.tab==='dairy';}).map(cardHtml).join('')+'</section>'+
+      '<section class="sec" id="sec-cake"><h2>'+t('tab_cake')+'</h2><p class="sub">'+t('cake_sub')+'</p>'+
+        C.menu.filter(function(c){return c.tab==='cake';}).map(cardHtml).join('')+
+        '<h3 style="margin:16px 0 2px;font-size:1.05rem">'+t('custom_head')+'</h3><p class="sub">'+t('custom_sub')+'</p>'+
+        '<div class="grid2">'+C.customCakes.map(customCardHtml).join('')+'</div>'+
+        '<p class="smallnote">'+t('sample_note')+'</p></section>'+
+      '<section class="sec" id="sec-pack"><h2 style="margin-bottom:10px">'+t('tab_pack')+'</h2>'+packHtml()+'</section>'+
+      '<section class="sec" id="sec-bulk"><div class="bulkcard"><h3>'+t('bulk_title')+'</h3><p>'+t('bulk_sub')+'</p><button class="btn" data-act="go" data-v="bulk">'+t('bulk_btn')+'</button></div></section>'+
+      '<section class="sec" id="sec-info"><h2>'+t('info_title')+'</h2><div class="infobox">'+
+        '<p>'+t('i_hours')+'</p><p>'+t('i_del')+'</p><p>'+t('i_pick')+'</p><p>'+t('i_pay')+'</p><p>📍 '+esc(st.lang==='en'?S.addrEn:S.addrHi)+'</p>'+
+        '<div class="links">'+
+          '<a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a>'+
+          '<a class="btn" href="'+esc(waUrl(st.lang==='en'?'Hello MB Sweets':'नमस्ते MB Sweets'))+'" target="_blank" rel="noopener">'+t('whatsapp')+'</a>'+
+          '<a class="btn" href="'+esc(S.maps)+'" target="_blank" rel="noopener">'+t('directions')+'</a>'+
+          '<a class="btn" href="'+esc(S.instagram)+'" target="_blank" rel="noopener">'+t('insta')+'</a>'+
+          '<button class="btn" data-act="go" data-v="pay">'+t('pay_link')+'</button>'+
+          '<a class="btn" href="'+esc(S.review)+'" target="_blank" rel="noopener">'+t('review')+'</a>'+
+        '</div>'+
+        '<div style="margin-top:10px"><button class="btn block" data-act="go" data-v="rules">'+t('rules_link')+'</button></div>'+
+      '</div></section>'+
+    '</main>'+
+    '<footer class="wrap">© '+esc(S.name)+' · Nanaura, Darbhanga<br>'+t('foot_photo')+'</footer>'+
+    '<div class="cartbar" id="cartbar"></div>';
+  $('#app').innerHTML=html;
+  document.documentElement.lang=st.lang==='en'?'en':'hi';
+  renderCartBar();
+  setupSpy();
+}
+function renderCartBar(){
+  var bar=$('#cartbar');if(!bar)return;
+  var n=cartCount();
+  if(!n){bar.innerHTML='';return;}
+  var tot=pricedTotal(),asks=st.custom.length;
+  bar.innerHTML='<button data-act="go" data-v="cart"><span>🛒 '+t('items_n',{n:n})+(tot>0?' · '+rupee(tot):'')+(asks?'<small>'+t('ask_n',{n:asks})+'</small>':'')+'</span><span class="go">'+t('cart_next')+'</span></button>';
+}
+var spyObs=null;
+function setupSpy(){
+  if(spyObs){spyObs.disconnect();spyObs=null;}
+  if(!('IntersectionObserver' in window))return;
+  spyObs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var k=e.target.id.replace('sec-','');
+      $all('.tab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-t')===k);});
+      var on=$('.tab.on');if(on&&on.scrollIntoView)try{on.scrollIntoView({block:'nearest',inline:'center'});}catch(x){}
+    });
+  },{rootMargin:'-45% 0px -50% 0px'});
+  $all('section.sec').forEach(function(s){spyObs.observe(s);});
+}
+
+/* ---------- VIEWS (cart / done / pay / bulk / rules / cake) ---------- */
+function route(){
+  var h=location.hash||'';
+  var m;
+  var v='';
+  if(h==='#cart')v='cart';
+  else if(h==='#done')v='done';
+  else if(h==='#bulk')v='bulk';
+  else if(h==='#rules')v='rules';
+  else if((m=h.match(/^#pay(?:=([0-9.]+))?/)))v='pay';
+  else if((m=h.match(/^#cake=([a-z0-9-]+)(?:,(\d+))?/)))v='cake';
+  var box=$('#view');
+  if(!v){box.innerHTML='';document.body.classList.remove('noscroll');renderCartBar();refreshPackIfNeeded();return;}
+  document.body.classList.add('noscroll');
+  if(v==='cart')renderCart();
+  else if(v==='done')renderDone();
+  else if(v==='bulk')renderBulk();
+  else if(v==='rules')renderRules();
+  else if(v==='pay')renderPay(m&&m[1]?num(m[1]):0);
+  else if(v==='cake')renderCake(m[1],m[2]!=null?+m[2]:-1);
+  var sc=$('#view .view');if(sc)sc.scrollTop=0;
+}
+function refreshPackIfNeeded(){
+  // cart, custom cakes or packaged list may have changed inside a view
+  var grid=$('#sec-cake .grid2');if(grid)grid.innerHTML=C.customCakes.map(customCardHtml).join('');
+  var pb=$('#packbox');if(pb)pb.outerHTML=packHtml();
+  C.menu.forEach(function(c){var el=document.getElementById('card-'+c.key);if(el)el.outerHTML=cardHtml(c);});
+}
+var navDepth=0;   // views opened from inside this page (so "back" can use browser history)
+function go(v){
+  if(!v){
+    navDepth=0;
+    if(location.hash){try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}}
+    route();return;
+  }
+  navDepth++;
+  location.hash=v;
+}
+function back(){
+  if(navDepth>0){navDepth--;history.back();}
+  else go('');
+}
+function viewShell(title,body){
+  $('#view').innerHTML='<div class="view"><div class="vhead"><div class="wrap"><button class="backbtn" data-act="back">'+t('back')+'</button><h2>'+esc(title)+'</h2></div></div><div class="vbody"><div class="wrap">'+body+'</div></div></div>';
+}
+
+/* --- cart / checkout --- */
+function renderCart(){
+  var lines=cartLines();
+  if(!lines.length&&!st.custom.length){
+    viewShell(t('co_title'),'<div class="blk" style="text-align:center"><p>'+t('co_empty')+'</p><button class="btn primary" data-act="back">'+t('co_browse')+'</button></div>');
+    return;
+  }
+  if(!when.type)when.type=asapOpen()?'asap':'later';
+  if(when.type==='asap'&&!asapOpen())when.type='later';
+  if(when.type==='later'&&!when.date)when.date=firstDate();
+  var tot=pricedTotal();
+  var items=lines.map(function(l){
+    return '<div class="line"><div class="ln"><b>'+esc(lineName(l))+'</b><small>'+rupee(l.item.price)+' / '+esc(unitTxt(l.item.unit))+'</small></div>'+
+      '<div class="stepper"><button data-act="cdec" data-id="'+l.id+'">−</button><b>'+esc(qtyTxt(l.item.unit,l.qty))+'</b><button data-act="cinc" data-id="'+l.id+'">+</button></div>'+
+      '<div class="la">'+rupee(l.amt)+'</div></div>';
+  }).join('')+st.custom.map(function(c,i){
+    var label=c.type==='cake'?('🎂 '+c.text):('📦 '+(st.lang==='en'?'Packaged':'पैकेट सामान')+': '+c.text);
+    return '<div class="line"><div class="ln"><b>'+esc(label)+'</b><small>'+t('co_ask')+'</small></div>'+
+      (c.type==='cake'?'<button class="rm" data-act="cake-edit" data-i="'+i+'">✎</button>':'')+
+      '<button class="rm" data-act="crm" data-i="'+i+'" aria-label="हटाएं">✕</button></div>';
+  }).join('');
+  var minHtml='';
+  if(st.me.mode==='d'){
+    if(tot>=S.minOrder)minHtml='<div class="minbar ok">'+t('min_ok')+'</div>';
+    else if(st.custom.length)minHtml='<div class="minbar no">'+t('min_unpriced')+'</div>';
+    else minHtml='<div class="minbar no">'+t('min_left',{x:r2(S.minOrder-tot)})+'</div>';
+  }
+  var isD=st.me.mode==='d';
+  var locHtml='';
+  if(isD){
+    var ls='';
+    if(locState==='wait')ls='<div class="locst near">'+t('loc_wait')+'</div>';
+    else if(loc){
+      var d=loc.km.toFixed(1);
+      if(loc.km<=4.5)ls='<div class="locst ok">'+t('loc_ok',{d:d})+'</div>';
+      else if(loc.km<=7)ls='<div class="locst near">'+t('loc_near',{d:d})+'</div>';
+      else ls='<div class="locst far">'+t('loc_far',{d:d})+'</div>';
+    }
+    else if(locState)ls='<div class="locst err">'+t('loc_'+locState,{a:locState==='weak'&&loc===null&&locWeakAcc?(locWeakAcc/1000).toFixed(1):''})+'</div>';
+    locHtml='<div class="blk"><h3>'+t('addr_h')+'</h3>'+
+      '<button class="btn block" data-act="loc"'+(locState==='wait'?' disabled':'')+'>'+(loc?t('loc_again'):t('loc_btn'))+'</button>'+
+      '<p class="hint">'+t('loc_why')+'</p>'+ls+
+      '<label class="fl">'+t('f_village')+'<input type="text" id="f-village" autocomplete="address-level3" value="'+esc(st.me.village)+'"></label>'+
+      '<p class="hint">'+t('area_hint')+'</p>'+
+      '<label class="fl">'+t('f_address')+'<textarea id="f-addr" rows="2" autocomplete="street-address">'+esc(st.me.addr)+'</textarea></label>'+
+      '<label class="fl">'+t('f_landmark')+'<input type="text" id="f-landmark" value="'+esc(st.me.landmark)+'"></label>'+
+      '</div>';
+  }
+  var asapOk=asapOpen();
+  var today=dkey(new Date());
+  var slotHtml='';
+  if(when.type==='later'){
+    var any=anySlot(when.date);
+    slotHtml='<label class="fl">'+t('f_date')+'<input type="date" id="f-date" min="'+today+'" max="'+maxDate()+'" value="'+esc(when.date)+'"></label>'+
+      '<div class="fl" style="margin-top:10px;font-weight:600;font-size:.9rem">'+t('f_slot')+'</div>'+
+      '<div class="slots">'+SLOTS.map(function(s,i){var ok=slotOk(when.date,i);return '<button data-act="slot" data-i="'+i+'"'+(ok?'':' disabled')+' class="'+(when.slot===i&&ok?'on':'')+'">'+esc(st.lang==='en'?s[3]:s[2])+'</button>';}).join('')+'</div>'+
+      (any?'':'<p class="hint" style="color:var(--red)">'+t('slot_none')+'</p>');
+  }
+  var html=
+    '<div class="blk"><h3>'+t('co_title')+'</h3>'+items+
+      '<div class="tot"><span>'+t('co_total')+'</span><span>'+rupee(tot)+'</span></div>'+minHtml+'</div>'+
+    '<div class="blk"><h3>'+t('how')+'</h3><div class="seg">'+
+      '<button data-act="mode" data-v="d" class="'+(isD?'on':'')+'"><b>'+t('m_del')+'</b><small>'+t('m_del_sub')+'</small></button>'+
+      '<button data-act="mode" data-v="p" class="'+(!isD?'on':'')+'"><b>'+t('m_pick')+'</b><small>'+t('m_pick_sub')+'</small></button>'+
+    '</div></div>'+
+    '<div class="blk"><h3>'+t('you')+'</h3>'+
+      '<label class="fl" style="margin-top:0">'+t('f_name')+'<input type="text" id="f-name" autocomplete="name" value="'+esc(st.me.name)+'"></label>'+
+      '<label class="fl">'+t('f_phone')+'<input type="tel" id="f-phone" inputmode="numeric" autocomplete="tel" maxlength="18" value="'+esc(st.me.phone)+'"></label>'+
+    '</div>'+
+    locHtml+
+    '<div class="blk"><h3>'+t('when_h')+'</h3><div class="seg">'+
+      '<button data-act="when" data-v="asap" class="'+(when.type==='asap'?'on':'')+'"'+(asapOk?'':' disabled')+'><b>'+t('w_asap')+'</b><small>'+(isD?t('w_asap_d'):t('w_asap_p'))+'</small></button>'+
+      '<button data-act="when" data-v="later" class="'+(when.type==='later'?'on':'')+'"><b>'+t('w_later')+'</b><small>'+t('w_later_sub')+'</small></button>'+
+      '</div>'+(asapOk?'':'<p class="hint">'+t('w_asap_no')+'</p>')+slotHtml+
+      (hasCake()?'<p class="hint">🎂 '+t('cake_time')+'</p>':'')+
+    '</div>'+
+    '<div class="blk">'+
+      (hasFixedCake()?'<label class="fl" style="margin-top:0">'+t('cake_msg')+'<input type="text" id="f-cakemsg" maxlength="60" placeholder="'+esc(t('cake_msg_ph'))+'" value="'+esc(st.cakeMsg)+'"></label>':'')+
+      '<label class="fl"'+(hasFixedCake()?'':' style="margin-top:0"')+'>'+t('f_note')+'<textarea id="f-note" rows="2" maxlength="250" placeholder="'+esc(t('f_note_ph'))+'">'+esc(st.note)+'</textarea></label>'+
+    '</div>'+
+    '<div class="paynote">'+(isD?t('pay_del'):t('pay_pick'))+'<br><b>'+t('avail')+'</b></div>'+
+    '<div class="agree"><input type="checkbox" id="f-agree"'+(st.agree?' checked':'')+'><span><label for="f-agree">'+t('agree')+'</label> — <button class="lnkbtn" data-act="go" data-v="rules">'+t('read_rules')+'</button></span></div>'+
+    '<div class="err" id="f-err"></div>'+
+    '<button class="btn wa block" data-act="send" style="min-height:54px;font-size:1.05rem">'+t('send')+'</button>'+
+    '<p class="hint" style="text-align:center">'+t('send_note')+'</p>';
+  var prevScroll=$('#view .view')?$('#view .view').scrollTop:0;
+  viewShell(t('co_title'),html);
+  var v=$('#view .view');if(v&&prevScroll)v.scrollTop=prevScroll;
+}
+function syncForm(){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:null;};
+  var x;
+  if((x=g('f-name'))!=null)st.me.name=x;
+  if((x=g('f-phone'))!=null)st.me.phone=x;
+  if((x=g('f-village'))!=null)st.me.village=x;
+  if((x=g('f-addr'))!=null)st.me.addr=x;
+  if((x=g('f-landmark'))!=null)st.me.landmark=x;
+  if((x=g('f-cakemsg'))!=null)st.cakeMsg=x;
+  if((x=g('f-note'))!=null)st.note=x;
+  var a=document.getElementById('f-agree');if(a)st.agree=a.checked;
+  var dt=g('f-date');if(dt!=null&&dt!==when.date){when.date=dt;if(when.slot>=0&&!slotOk(dt,when.slot))when.slot=-1;}
+}
+var locWeakAcc=0;
+function getLocation(){
+  if(!navigator.geolocation){locState='nosupport';renderCart();return;}
+  locState='wait';renderCart();
+  navigator.geolocation.getCurrentPosition(function(p){
+    var c=p.coords;
+    if(c.accuracy&&c.accuracy>3000){loc=null;locState='weak';locWeakAcc=c.accuracy;renderCart();return;}
+    loc={lat:c.latitude,lng:c.longitude,acc:c.accuracy||0,km:haversine(S.lat,S.lng,c.latitude,c.longitude)};
+    locState='';
+    if(location.hash==='#cart')renderCart();
+  },function(err){
+    locState=(err&&err.code===1)?'denied':'fail';
+    if(location.hash==='#cart')renderCart();
+  },{enableHighAccuracy:true,timeout:20000,maximumAge:120000});
+}
+function orderCode(){
+  var d=new Date();
+  return 'W'+pad(d.getDate())+pad(d.getMonth()+1)+'-'+pad(d.getHours())+pad(d.getMinutes())+Math.floor(Math.random()*10);
+}
+function whenText(lang){
+  var L=lang||st.lang;
+  if(when.type==='asap')return st.me.mode==='p'?T[L].w_asap.replace('⚡ ','')+' ('+T[L].w_asap_p+')':T[L].w_asap.replace('⚡ ','')+' ('+T[L].w_asap_d+')';
+  var dt=keyToDate(when.date);
+  var ds=dt.toLocaleDateString(L==='en'?'en-IN':'hi-IN',{weekday:'short',day:'numeric',month:'short'});
+  return ds+', '+(L==='en'?SLOTS[when.slot][3]:SLOTS[when.slot][2]);
+}
+function validate(){
+  var tot=pricedTotal();
+  if(!cartCount())return t('e_empty');
+  if(C.pause)return t('e_pause');
+  if(String(st.me.name).trim().length<2)return t('e_name');
+  if(!phone10(st.me.phone))return t('e_phone');
+  if(st.me.mode==='d'){
+    if(!String(st.me.village).trim())return t('e_village');
+    if(!String(st.me.addr).trim())return t('e_address');
+    if(tot<S.minOrder&&!st.custom.length)return t('e_min',{x:r2(S.minOrder-tot)});
+  }
+  if(when.type==='asap'&&!asapOpen())return t('e_asap');
+  if(when.type!=='asap'){
+    if(!when.date||when.date<dkey(new Date())||when.date>maxDate())return t('e_date');
+    if(when.slot<0||!slotOk(when.date,when.slot))return t('e_slot');
+  }
+  if(!st.agree)return t('e_agree');
+  return '';
+}
+function buildOrder(){
+  var L=st.lang;var X=T[L];
+  var code=orderCode();
+  var lines=cartLines();
+  var tot=pricedTotal();
+  var M=[];
+  M.push(X.msg_new);
+  M.push(X.msg_code+': '+code);
+  M.push('');
+  M.push('👤 '+st.me.name.trim());
+  M.push('📞 '+phone10(st.me.phone));
+  M.push(st.me.mode==='d'?X.m_del:X.m_pick);
+  if(st.me.mode==='d'){
+    M.push('🏠 '+X.msg_village+': '+st.me.village.trim());
+    M.push('    '+X.msg_addr+': '+st.me.addr.trim().replace(/\s*\n\s*/g,', '));
+    if(st.me.landmark.trim())M.push('    '+X.msg_land+': '+st.me.landmark.trim());
+    if(loc)M.push(X.msg_loc+': https://maps.google.com/?q='+loc.lat.toFixed(5)+','+loc.lng.toFixed(5)+' (~'+loc.km.toFixed(1)+' km)');
+    else M.push(X.msg_noloc);
+  }
+  M.push('⏰ '+whenText(L));
+  M.push('');
+  M.push(X.msg_items);
+  var n=0;
+  lines.forEach(function(l){n++;M.push(n+'. '+lineName(l,L)+' — '+qtyTxt(l.item.unit,l.qty,L)+' × '+rupee(l.item.price)+' = '+rupee(l.amt));});
+  st.custom.forEach(function(c){n++;M.push(n+'. '+(c.type==='cake'?X.msg_cake:X.msg_pack)+': '+c.text+' — '+X.msg_ask);});
+  M.push('');
+  M.push(X.msg_total+': '+rupee(tot)+(st.custom.length?' + '+X.msg_ask:''));
+  if(hasFixedCake()&&st.cakeMsg.trim())M.push(X.msg_cakemsg+': "'+st.cakeMsg.trim()+'"');
+  if(st.note.trim())M.push(X.msg_note+': '+st.note.trim());
+  M.push('');
+  M.push(st.me.mode==='d'?X.msg_pay_d:X.msg_pay_p);
+  var payload={
+    c:code,n:st.me.name.trim(),p:phone10(st.me.phone),m:st.me.mode,
+    w:when.type==='asap'?'asap':when.date,s:when.type==='asap'?-1:when.slot,
+    i:lines.map(function(l){return [l.id,l.qty];}),
+    x:st.custom.map(function(c){return [c.type,c.text];}),
+    ts:Math.floor(Date.now()/1000)
+  };
+  if(st.me.mode==='d'){
+    payload.g=st.me.village.trim();payload.a=st.me.addr.trim().replace(/\s*\n\s*/g,', ');payload.k=st.me.landmark.trim();
+    if(loc){payload.l=[+loc.lat.toFixed(5),+loc.lng.toFixed(5)];payload.dk=+loc.km.toFixed(1);}
+  }
+  if(hasFixedCake()&&st.cakeMsg.trim())payload.cm=st.cakeMsg.trim();
+  if(st.note.trim())payload.t=st.note.trim();
+  M.push('');
+  M.push(X.msg_import);
+  M.push(billingBase()+'#o='+b64url(JSON.stringify(payload)));
+  return {code:code,text:M.join('\n'),mode:st.me.mode,total:tot,asks:st.custom.length};
+}
+function sendOrder(){
+  syncForm();
+  var e=validate();
+  var box=$('#f-err');
+  if(e){if(box){box.textContent=e;box.scrollIntoView({block:'center',behavior:'smooth'});}return;}
+  var o=buildOrder();
+  var url=waUrl(o.text);
+  st.last={code:o.code,url:url,mode:o.mode,total:o.total,asks:o.asks,ts:Date.now()};
+  st.cart={};st.custom=[];st.cakeMsg='';st.note='';st.agree=false;
+  when={type:'',date:'',slot:-1};
+  save();
+  var w=null;
+  try{w=window.open(url,'_blank');}catch(x){w=null;}
+  if(w){try{w.opener=null;}catch(x){}location.replace('#done');}
+  else{location.replace('#done');setTimeout(function(){location.href=url;},60);}
+}
+
+/* --- done --- */
+function renderDone(){
+  var L=st.last;
+  if(!L){viewShell(t('done_h'),'<div class="blk"><p>'+t('done_none')+'</p><button class="btn primary" data-act="home">'+t('co_browse')+'</button></div>');return;}
+  var isD=L.mode!=='p';
+  var html='<div class="blk bigok"><div class="ic">✅</div><h3>'+t('done_h')+'</h3><div>'+t('done_code')+': <span class="code">'+esc(L.code)+'</span></div></div>'+
+    '<div class="blk"><ol class="steps"><li>'+t('done_s1')+'</li><li>'+t('done_s2')+'</li><li>'+(isD?t('done_s3d'):t('done_s3p'))+'</li></ol>'+
+    '<a class="btn wa block" href="'+esc(L.url)+'" target="_blank" rel="noopener">'+t('done_resend')+'</a></div>'+
+    (isD?payBlock(0,true):'')+
+    '<div class="row" style="margin-top:4px"><button class="btn primary" style="flex:1" data-act="home">'+t('done_new')+'</button><a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a></div>';
+  viewShell(t('done_h'),html);
+}
+
+/* --- pay --- */
+function upiLink(amount){
+  var u='upi://pay?pa='+encodeURIComponent(S.upi)+'&pn='+encodeURIComponent('MB Sweets')+'&cu=INR';
+  if(amount>0)u+='&am='+r2(amount).toFixed(2);
+  return u;
+}
+function payBlock(amount,beforeConfirm){
+  return '<div class="blk"><h3>'+t('pay_h')+'</h3>'+
+    (amount>0?'<div class="hint" style="text-align:center">'+t('pay_amt')+'</div><div class="amt">'+rupee(amount)+'</div>':'')+
+    (beforeConfirm?'<div class="paynote" style="margin-top:6px">'+t('pay_after')+'</div>':'')+
+    '<div class="upibox"><span class="hint" style="margin:0">'+t('upi_id')+'</span><code id="upiText">'+esc(S.upi)+'</code><button class="btn small" data-act="copyupi">'+t('copy')+'</button></div>'+
+    (amount>0?'<a class="btn primary block" style="margin-top:8px" href="'+esc(upiLink(amount))+'">'+t('open_upi')+' — '+rupee(amount)+'</a>':'')+
+    '<img class="qrimg" src="img/upi-card.png" alt="UPI QR — '+esc(S.upi)+'">'+
+    '<a class="btn block" style="margin-top:8px" href="img/upi-card.png" download="MB-Sweets-UPI-QR.png">'+t('save_qr')+'</a>'+
+    '<h3 style="margin:14px 0 6px">'+t('pay_how')+'</h3><ol class="steps"><li>'+t('pay_h1')+'</li><li>'+t('pay_h2')+'</li><li>'+t('pay_h3')+'</li></ol>'+
+    '</div>';
+}
+function renderPay(amount){
+  var txt=t('pay_wa_text',{a:amount>0?' ('+rupee(amount)+')':''});
+  var html=payBlock(amount,false)+
+    '<div class="blk"><h3>'+t('pay_ss')+'</h3><a class="btn wa block" href="'+esc(waUrl(txt))+'" target="_blank" rel="noopener">'+t('pay_wa')+'</a></div>';
+  viewShell(t('pay_h'),html);
+}
+function copyUpi(){
+  var done=function(){toast(t('copied'));};
+  var fail=function(){
+    try{
+      var ta=document.createElement('textarea');ta.value=S.upi;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);
+      toast(ok?t('copied'):t('copy_fail'));
+    }catch(e){toast(t('copy_fail'));}
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(S.upi).then(done,fail);else fail();
+}
+
+/* --- rules --- */
+function renderRules(){
+  viewShell(t('rules_h'),'<div class="blk"><ol class="rules">'+t('rules').map(function(r){return '<li>'+esc(r)+'</li>';}).join('')+'</ol></div>'+
+    '<button class="btn primary block" data-act="back">'+t('back')+'</button>');
+}
+
+/* --- custom cake --- */
+function renderCake(key,editIdx){
+  var cc=C.customCakes.filter(function(c){return c.key===key;})[0];
+  if(!cc){go('');return;}
+  if(!ckDraft||ckDraft.key!==key||ckDraft.editIdx!==editIdx){
+    var ex=editIdx>=0?st.custom[editIdx]:null;
+    ckDraft=ex&&ex.type==='cake'&&ex.key===key?{key:key,editIdx:editIdx,w:ex.w,f:ex.f,msg:ex.msg||'',note:ex.note||''}:{key:key,editIdx:-1,w:-1,f:-1,msg:'',note:''};
+  }
+  var fixedFlavour={redvelvet:4,rasmalai:5,pineapple:3,butterscotch:2}[key];
+  var html='<div class="blk"><div class="cakehead"><img src="'+img(cc.img)+'" alt=""><div><h3 style="margin:0">'+esc(nm(cc))+'</h3><p class="hint">'+t('ck_price')+'</p><p class="hint">'+t('sample_note')+'</p></div></div></div>'+
+    '<div class="blk"><h3>'+t('ck_weight')+'</h3><div class="slots">'+t('ck_weights').map(function(w,i){return '<button data-act="ckw" data-i="'+i+'" class="'+(ckDraft.w===i?'on':'')+'">'+esc(w)+'</button>';}).join('')+'</div>'+
+    (fixedFlavour==null?'<h3 style="margin-top:12px">'+t('ck_flavour')+'</h3><div class="slots">'+t('ck_flavours').map(function(f,i){return '<button data-act="ckf" data-i="'+i+'" class="'+(ckDraft.f===i?'on':'')+'">'+esc(f)+'</button>';}).join('')+'</div>':'')+
+    '<label class="fl">'+t('ck_msg')+'<input type="text" id="ck-msg" maxlength="60" placeholder="'+esc(t('cake_msg_ph'))+'" value="'+esc(ckDraft.msg)+'"></label>'+
+    '<label class="fl">'+t('ck_note')+'<input type="text" id="ck-note" maxlength="120" value="'+esc(ckDraft.note)+'"></label>'+
+    (cc.photo?'<p class="paynote">'+t('ck_photo')+'</p>':'')+
+    '<div class="err" id="ck-err"></div>'+
+    '<button class="btn primary block" data-act="ckadd">'+(ckDraft.editIdx>=0?t('ck_save'):t('ck_add'))+'</button>'+
+    (ckDraft.editIdx>=0?'<button class="btn block" style="margin-top:8px" data-act="ckrm">'+t('ck_remove')+'</button>':'')+
+    '</div>';
+  viewShell(nm(cc),html);
+}
+function cakeText(cc,d){
+  // always Hindi for the shop, English in brackets when page is English
+  var parts=[cc.hi,T.hi.ck_weights[d.w]];
+  var fixedFlavour={redvelvet:4,rasmalai:5,pineapple:3,butterscotch:2}[cc.key];
+  if(fixedFlavour==null&&d.f>=0)parts.push(T.hi.ck_flavour+': '+T.hi.ck_flavours[d.f]);
+  if(d.msg)parts.push('लिखना: "'+d.msg+'"');
+  if(d.note)parts.push('डिज़ाइन: '+d.note);
+  if(cc.photo)parts.push('फोटो WhatsApp पर भेजेंगे');
+  return parts.join(' · ');
+}
+function saveCake(){
+  var d=ckDraft;if(!d)return;
+  d.msg=($('#ck-msg')||{}).value||'';d.msg=d.msg.trim();
+  d.note=($('#ck-note')||{}).value||'';d.note=d.note.trim();
+  if(d.w<0){$('#ck-err').textContent=t('e_weight');return;}
+  var cc=C.customCakes.filter(function(c){return c.key===d.key;})[0];
+  var entry={type:'cake',key:d.key,w:d.w,f:d.f,msg:d.msg,note:d.note,text:cakeText(cc,d)};
+  if(d.editIdx>=0&&st.custom[d.editIdx])st.custom[d.editIdx]=entry;else st.custom.push(entry);
+  save();ckDraft=null;
+  toast(t('pack_added'));
+  back();
+}
+
+/* --- bulk --- */
+function renderBulk(){
+  var html='<div class="blk"><p class="hint" style="margin-top:0">'+t('bulk_sub')+'</p>'+
+    '<h3 style="margin-top:8px">'+t('b_event')+'</h3><div class="slots">'+t('b_events').map(function(e,i){return '<button data-act="bev" data-i="'+i+'" class="'+(bulk.event===i?'on':'')+'">'+esc(e)+'</button>';}).join('')+'</div>'+
+    '<label class="fl">'+t('b_date')+'<input type="date" id="b-date" min="'+dkey(new Date())+'" value="'+esc(bulk.date)+'"></label>'+
+    '<label class="fl">'+t('b_place')+'<input type="text" id="b-place" value="'+esc(bulk.place)+'"></label>'+
+    '<label class="fl">'+t('b_what')+'<textarea id="b-what" rows="4" placeholder="'+esc(t('b_what_ph'))+'">'+esc(bulk.what)+'</textarea></label>'+
+    '<label class="fl">'+t('f_name')+'<input type="text" id="b-name" value="'+esc(st.me.name)+'"></label>'+
+    '<label class="fl">'+t('f_phone')+'<input type="tel" id="b-phone" inputmode="numeric" maxlength="18" value="'+esc(st.me.phone)+'"></label>'+
+    '<div class="err" id="b-err"></div>'+
+    '<button class="btn wa block" data-act="bsend">'+t('b_send')+'</button></div>';
+  viewShell(t('bulk_h'),html);
+}
+function syncBulk(){
+  var g=function(id){var el=document.getElementById(id);return el?el.value:null;};var x;
+  if((x=g('b-date'))!=null)bulk.date=x;
+  if((x=g('b-place'))!=null)bulk.place=x;
+  if((x=g('b-what'))!=null)bulk.what=x;
+  if((x=g('b-name'))!=null)st.me.name=x;
+  if((x=g('b-phone'))!=null)st.me.phone=x;
+}
+function sendBulk(){
+  syncBulk();
+  var err=$('#b-err');
+  if(!bulk.what.trim()){err.textContent=t('e_bwhat');return;}
+  if(st.me.name.trim().length<2){err.textContent=t('e_name');return;}
+  if(!phone10(st.me.phone)){err.textContent=t('e_phone');return;}
+  save();
+  var X=T[st.lang];
+  var M=[X.msg_bulk,''];
+  if(bulk.event>=0)M.push('🎊 '+T.hi.b_events[bulk.event]);
+  if(bulk.date)M.push('📅 '+keyToDate(bulk.date).toLocaleDateString('hi-IN',{day:'numeric',month:'short',year:'numeric'}));
+  if(bulk.place.trim())M.push('📍 '+bulk.place.trim());
+  M.push('');M.push(bulk.what.trim());M.push('');
+  M.push('👤 '+st.me.name.trim());M.push('📞 '+phone10(st.me.phone));
+  var url=waUrl(M.join('\n'));
+  var w=null;try{w=window.open(url,'_blank');}catch(x){}
+  if(!w)location.href=url;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');
+  if(!el)return;
+  var a=el.getAttribute('data-act');
+  var id=el.getAttribute('data-id');
+  switch(a){
+    case 'lang':st.lang=st.lang==='en'?'hi':'en';save();renderMenu();route();break;
+    case 'tab':
+      var sec=document.getElementById('sec-'+el.getAttribute('data-t'));
+      if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});
+      break;
+    case 'opt':sel[el.getAttribute('data-card')]=+el.getAttribute('data-i');refreshCard(el.getAttribute('data-card'));break;
+    case 'inc':case 'dec':
+      if(C.pause||OFF[id])break;
+      changeQty(id,a==='inc'?1:-1);
+      var card=C.menu.filter(function(c){return optsOf(c).some(function(o){return o.id===id;});})[0];
+      if(card)refreshCard(card.key);
+      break;
+    case 'cinc':case 'cdec':syncForm();changeQty(id,a==='cinc'?1:-1);renderCart();break;
+    case 'crm':syncForm();st.custom.splice(+el.getAttribute('data-i'),1);save();renderCart();break;
+    case 'cake-edit':syncForm();var ce=st.custom[+el.getAttribute('data-i')];if(ce)go('cake='+ce.key+','+el.getAttribute('data-i'));break;
+    case 'go':syncForm();go(el.getAttribute('data-v'));break;
+    case 'back':syncForm();syncBulk();ckDraft=null;back();break;
+    case 'home':go('');window.scrollTo(0,0);break;
+    case 'packchip':
+      var ta=$('#packText');if(ta){var v=ta.value.trim();ta.value=(v?v+', ':'')+el.getAttribute('data-v')+' ';ta.focus();}
+      break;
+    case 'packadd':
+      var txt=($('#packText').value||'').trim();
+      if(!txt){$('#packErr').textContent=t('pack_empty');break;}
+      var pi=-1;st.custom.forEach(function(c,i){if(c.type==='pack')pi=i;});
+      if(pi>=0)st.custom[pi].text=txt;else st.custom.push({type:'pack',text:txt});
+      save();$('#packbox').outerHTML=packHtml();renderCartBar();toast(t('pack_added'));
+      break;
+    case 'packrm':st.custom=st.custom.filter(function(c){return c.type!=='pack';});save();$('#packbox').outerHTML=packHtml();renderCartBar();break;
+    case 'cake':ckDraft=null;go('cake='+el.getAttribute('data-key'));break;
+    case 'ckw':ckDraft.msg=$('#ck-msg').value;ckDraft.note=$('#ck-note').value;ckDraft.w=+el.getAttribute('data-i');renderCake(ckDraft.key,ckDraft.editIdx);break;
+    case 'ckf':ckDraft.msg=$('#ck-msg').value;ckDraft.note=$('#ck-note').value;ckDraft.f=+el.getAttribute('data-i');renderCake(ckDraft.key,ckDraft.editIdx);break;
+    case 'ckadd':saveCake();break;
+    case 'ckrm':if(ckDraft&&ckDraft.editIdx>=0){st.custom.splice(ckDraft.editIdx,1);save();}ckDraft=null;back();break;
+    case 'mode':syncForm();st.me.mode=el.getAttribute('data-v');save();renderCart();break;
+    case 'when':
+      syncForm();when.type=el.getAttribute('data-v');
+      if(when.type==='later'&&!when.date)when.date=firstDate();
+      renderCart();break;
+    case 'slot':syncForm();when.slot=+el.getAttribute('data-i');renderCart();break;
+    case 'loc':syncForm();getLocation();break;
+    case 'send':sendOrder();break;
+    case 'copyupi':copyUpi();break;
+    case 'bev':syncBulk();bulk.event=+el.getAttribute('data-i');renderBulk();break;
+    case 'bsend':sendBulk();break;
+  }
+});
+document.addEventListener('change',function(e){
+  var tg=e.target;
+  if(tg.id==='f-date'){syncForm();renderCart();}
+  else if(tg.id==='f-agree'){st.agree=tg.checked;}
+});
+document.addEventListener('input',function(e){
+  var id=e.target.id;
+  if(/^f-/.test(id)){syncForm();save();}
+  if(id==='f-agree'){st.agree=e.target.checked;}
+});
+window.addEventListener('hashchange',function(){if(!location.hash)navDepth=0;route();});
+window.addEventListener('pageshow',function(ev){if(ev.persisted){renderMenu();route();}});
+setInterval(function(){
+  var sb=$('#statusBox');if(!sb)return;
+  var si=statusInfo();sb.className='status '+si.cls;sb.lastChild.textContent=si.txt;
+},60000);
+
+/* ---------- start ---------- */
+load();
+renderMenu();
+route();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+})();
+</script>
+</body>
+</html>
