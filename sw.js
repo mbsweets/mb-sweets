@@ -1,4 +1,4 @@
-var CACHE_NAME = 'mbmb-billing-v5';
+var CACHE_NAME = 'mbmb-billing-v7';
 var CORE_ASSETS = [
   './',
   './manifest.json',
@@ -44,6 +44,8 @@ function isPageRequest(req) {
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
+  // only this app's own files; never cache other sites (online order register, WhatsApp, maps…)
+  if (new URL(req.url).origin !== self.location.origin) return;
 
   // App page: network first so updates show immediately; fall back to the saved copy when offline.
   if (isPageRequest(req)) {
@@ -72,6 +74,21 @@ self.addEventListener('fetch', function (e) {
         return res;
       }).catch(function () { return cached; });
       return cached || network;
+    })
+  );
+});
+
+// Tapping a notification (e.g. new online order) opens the app on the online orders screen.
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  var target = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        var c = list[i];
+        if ('focus' in c) { try { c.navigate(target); } catch (err) {} return c.focus(); }
+      }
+      return self.clients.openWindow(target);
     })
   );
 });

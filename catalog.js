@@ -36,6 +36,9 @@ window.MB_CATALOG = {
     radiusKm: 6
   },
 
+  /* ऑनलाइन ऑर्डर रजिस्टर (Google Sheet) का Web app URL — खाली हो तो ऑर्डर WhatsApp से जाते हैं */
+  orderApi: '',
+
   pause: false,
   noticeHi: '',
   noticeEn: '',

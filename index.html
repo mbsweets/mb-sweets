@@ -221,6 +221,29 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .ldaterow label{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:6px}
 .ldaterow input[type=date]{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:14px;color:var(--ink)}
 .ldaterow .lnk{font-size:.78rem;padding:0;min-height:auto}
+.navbtn{position:relative}
+.navbtn .bd{position:absolute;top:4px;left:50%;margin-left:8px;min-width:18px;height:18px;border-radius:9px;background:#D93025;color:#fff;font-size:.68rem;line-height:18px;padding:0 5px;font-weight:700}
+.banner.online{background:var(--brandband);color:var(--on-brand)}
+.oncard .when{font-size:1.05rem;font-weight:700;color:var(--brandband)}
+:root[data-theme="dark"] .oncard .when{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .oncard .when{color:var(--gold)}}
+.oncard.st-new{border:2px solid var(--gold)}
+.onitems{list-style:none;padding:0;margin:8px 0}
+.onitems li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.onitems li b{white-space:nowrap}
+.onitems li.ask{color:var(--amber)}
+.oncust{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;line-height:1.5}
+.oncust a{font-weight:700}
+.onmeta{color:var(--muted);font-size:.84rem}
+.st-new{color:var(--red)} .st-accepted{color:var(--gold)} .st-out{color:var(--amber)} .st-rejected{color:var(--muted);text-decoration:line-through}
+.onsum{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
+.onsum>div{padding:10px 6px;text-align:center;border-left:1px solid var(--line)}
+.onsum>div:first-child{border-left:0}
+.onsum b{display:block;font-size:1.15rem}
+.onsum span{display:block;color:var(--muted);font-size:.72rem}
+.chips2{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chips2 button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 12px;font:inherit;font-size:.88rem;color:var(--ink)}
+.chips2 button.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
 .webwarn{background:var(--red-bg);color:var(--ink);border:1px solid var(--red);border-radius:10px;padding:9px 12px;margin:10px 0;font-size:.9rem}
 .webbox{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;line-height:1.5}
 .weblist{list-style:none;padding:0;margin:8px 0}
@@ -547,18 +570,22 @@ function renderBanner(){
   if(!ui.storageOk)html+='<div class="banner">Is browser me data save nahi ho pa raha. Backup zaroor le lo, warna data chala jayega.</div>';
   html+=backupWarningHtml();
   var used=storageUsedPct();
+  var onN=onlineNewCount();
+  if(onN&&ui.view!=='online')html='<button class="banner btn-banner online" data-act="nav" data-v="online">🌐 '+onN+' नया ऑनलाइन ऑर्डर आया है — देखो</button>'+html;
   if(used>=70)html+='<button class="banner btn-banner" data-act="nav" data-v="backup">⚠️ ऐप की जगह '+used+'% भर गई है। आज ही बैकअप लो और ऐप अपडेट करवाओ ताकि पुराने ऑर्डर अलग रखे जा सकें।</button>';
   $('#banner').innerHTML=html;
 }
 function renderNav(){
-  var tabs=[['home','होम','\uD83C\uDFE0'],['orders','ऑर्डर्स','\uD83E\uDDFE'],['items','आइटम्स','\uD83C\uDF6C'],['backup','बैकअप','\uD83D\uDCBE']];
+  var tabs=[['home','होम','\uD83C\uDFE0'],['online','ऑनलाइन','\uD83C\uDF10'],['orders','ऑर्डर्स','\uD83E\uDDFE'],['items','आइटम्स','\uD83C\uDF6C'],['backup','बैकअप','\uD83D\uDCBE']];
+  var newN=onlineNewCount();
   $('#navbar').innerHTML=tabs.map(function(t){
     var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||(ui.view==='customer'&&ui.cameFrom==='dues')));
-    return '<button class="navbtn'+(on?' on':'')+'" data-act="nav" data-v="'+t[0]+'"><span class="ic">'+t[2]+'</span>'+t[1]+'</button>';
+    var bd=(t[0]==='online'&&newN)?'<span class="bd">'+newN+'</span>':'';
+    return '<button class="navbtn'+(on?' on':'')+'" data-act="nav" data-v="'+t[0]+'">'+bd+'<span class="ic">'+t[2]+'</span>'+t[1]+'</button>';
   }).join('');
   var fab=$('#fab');
   if(ui.view==='items'){fab.style.display='';fab.textContent='+ नया आइटम';fab.setAttribute('data-fabact','item');}
-  else if(ui.view==='backup'){fab.style.display='none';}
+  else if(ui.view==='backup'||ui.view==='online'){fab.style.display='none';}
   else{fab.style.display='';fab.textContent='+ नया ऑर्डर';fab.setAttribute('data-fabact','order');}
 }
 
@@ -875,6 +902,9 @@ function renderBackup(){
     '<div class="actbar"><label class="btn small">📂 फ़ाइल से<input id="b-file" type="file" accept=".txt,.json,text/plain,application/json" style="display:none"></label>'+
     '<button class="btn small" data-act="restore-backup">Restore karo</button></div>'+
 
+    '<div class="sechead" style="margin-top:22px"><h2>🌐 ऑनलाइन ऑर्डर</h2></div>'+
+    (onlineCfg()?'<p class="hint" style="font-weight:700;color:var(--green)">✓ इस फोन पर जुड़ा हुआ है</p>':'<p class="hint">अभी जुड़ा नहीं है।</p>')+
+    '<div class="actbar"><a class="btn small" href="online/setup.html">⚙️ '+(onlineCfg()?'सेटअप / नोटिफिकेशन टेस्ट':'सेटअप शुरू करो')+'</a></div>'+
     '<div class="sechead" style="margin-top:22px"><h2>दुकान की जानकारी</h2></div>'+
     '<label class="fl">दुकान का नाम<input id="s-name" type="text" value="'+esc(s.name)+'"></label>'+
     '<label class="fl">पता<input id="s-addr" type="text" value="'+esc(s.addr)+'"></label>'+
@@ -901,6 +931,7 @@ function renderRoute(){
   else if(ui.view==='customer')renderCustomer();
   else if(ui.view==='items')renderItems();
   else if(ui.view==='backup')renderBackup();
+  else if(ui.view==='online')renderOnline();
   renderNav();
   renderBanner();
 }
@@ -1105,6 +1136,12 @@ function saveOrderFromDraft(){
     var adv=Math.min(totNew,advIn);
     var o2={id:uid(),no:state.nextOrderNo++,customerId:d.customerId,date:dateVal,items:items,payments:adv>0?[{id:uid(),amount:adv,date:todayStr(),note:'Advance'}]:[],cancelled:false,notes:notes,createdAt:Date.now()};
     if(d.webCode){o2.webCode=d.webCode;o2.webMode=d.webMode||'d';}
+    if(d.webCode&&ui.onlineAccept===d.webCode){
+      var acc=findCustomer(d.customerId);
+      ui.onlineAccept=null;
+      if(acc)openWa(acc.phone,webConfirmMessage(o2));
+      queueStatus(d.webCode,'accepted',{total:round2(orderTotal(o2))});
+    }
     state.orders.push(o2);
     save();closeSheet();toast('ऑर्डर #'+o2.no+' save हो गया'+(advIn>totNew?' (advance टोटल से ज़्यादा था, '+rupee(totNew)+' ही जमा किया)':''));
   }
@@ -1228,6 +1265,13 @@ function startWebOrderDraft(p){
 }
 function checkWebImport(){
   var h=location.hash||'';
+  if(h==='#online'){
+    try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+    if($('#ov'))closeSheet();
+    ui.view='online';renderRoute();window.scrollTo(0,0);
+    onlineSync();
+    return;
+  }
   var m=h.match(/^#o=([A-Za-z0-9_-]+)/);
   if(!m)return;
   try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
@@ -1265,6 +1309,274 @@ function webConfirmMessage(o){
   L.push('');
   L.push('— '+state.shop.name);
   return L.join('\n');
+}
+
+/* ---------- 🌐 ऑनलाइन ऑर्डर (Google Sheet रजिस्टर से) ---------- */
+var ONLINE_CFG='mbmb-online',ONLINE_CACHE='mbmb-online-cache',ONLINE_QUEUE='mbmb-online-queue',ONLINE_SEEN='mbmb-online-seen';
+var online={cfg:null,orders:[],lastSync:0,syncing:false,error:'',showDone:false};
+var ON_LABEL={'new':'नया','accepted':'स्वीकार','out':'रास्ते में','delivered':'डिलीवर','rejected':'मना'};
+function lsGet(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function onlineCfg(){var c=lsGet(ONLINE_CFG,null);return (c&&c.u&&c.k)?c:null;}
+function loadOnlineCache(){var c=lsGet(ONLINE_CACHE,null);if(c&&Array.isArray(c.orders)){online.orders=c.orders;online.lastSync=c.t||0;}}
+function saveOnlineCache(){lsSet(ONLINE_CACHE,{orders:online.orders,t:online.lastSync});}
+function onlineNewCount(){return online.orders.filter(function(o){return o.status==='new';}).length;}
+function findOnline(code){for(var i=0;i<online.orders.length;i++)if(online.orders[i].code===code)return online.orders[i];return null;}
+function onlineGet(params){
+  var c=online.cfg;
+  var q=Object.keys(params).map(function(k){return k+'='+encodeURIComponent(params[k]);}).join('&');
+  return fetch(c.u+'?'+q,{redirect:'follow'}).then(function(r){return r.json();});
+}
+function onlinePost(body){return fetch(online.cfg.u,{method:'POST',body:JSON.stringify(body),redirect:'follow'}).then(function(r){return r.json();});}
+var flushing=null,flushAgain=false;
+/* send queued status changes one at a time, oldest first; never two senders at once */
+function flushQueue(){
+  if(!online.cfg)return Promise.resolve();
+  if(flushing){flushAgain=true;return flushing;}
+  flushing=(function next(){
+    var q=lsGet(ONLINE_QUEUE,[]);
+    if(!q.length)return Promise.resolve();
+    var u=q[0];
+    return onlinePost({action:'update',key:online.cfg.k,code:u.code,status:u.status,note:u.note,total:u.total}).then(function(r){
+      if(r&&(r.ok||r.error==='notfound'||r.error==='status')){
+        lsSet(ONLINE_QUEUE,lsGet(ONLINE_QUEUE,[]).filter(function(x){return x.qid!==u.qid;}));
+        return next();
+      }
+    },function(){});
+  })().then(function(){
+    flushing=null;
+    if(flushAgain){flushAgain=false;return flushQueue();}
+  },function(){flushing=null;});
+  return flushing;
+}
+function queueStatus(code,status,extra){
+  extra=extra||{};
+  var o=findOnline(code);
+  if(o){o.status=status;if(extra.note!==undefined)o.statusNote=extra.note;if(extra.total!==undefined)o.confirmedTotal=extra.total;o.updated=new Date().toISOString();}
+  var q=lsGet(ONLINE_QUEUE,[]);
+  q.push({qid:uid(),code:code,status:status,note:extra.note,total:extra.total});
+  lsSet(ONLINE_QUEUE,q);
+  saveOnlineCache();
+  refreshOnlineViews();
+  if(online.cfg)flushQueue();
+}
+function onlineSync(manual){
+  online.cfg=onlineCfg();
+  if(!online.cfg){if(manual)toast('ऑनलाइन ऑर्डर अभी जुड़ा नहीं है');return Promise.resolve();}
+  if(online.syncing)return Promise.resolve();
+  online.syncing=true;
+  if(manual)refreshOnlineViews();
+  return flushQueue().then(function(){return onlineGet({action:'list',key:online.cfg.k,days:10});}).then(function(r){
+    online.syncing=false;
+    if(!r||!r.ok){online.error=(r&&r.error==='key')?'चाबी गलत है — सेटअप दोबारा करें':'रजिस्टर से जवाब नहीं आया';refreshOnlineViews();return;}
+    var q=lsGet(ONLINE_QUEUE,[]),pend={};
+    q.forEach(function(u){pend[u.code]=u;});
+    online.orders=(r.orders||[]).map(function(o){
+      var p=pend[o.code];
+      if(p){o.status=p.status;if(p.note!==undefined)o.statusNote=p.note;if(p.total!==undefined)o.confirmedTotal=p.total;}
+      return o;
+    });
+    online.lastSync=Date.now();online.error='';
+    saveOnlineCache();
+    alertNewOrders();
+    refreshOnlineViews();
+    if(manual)toast('ऑनलाइन ऑर्डर अपडेट ✓');
+  }).catch(function(){
+    online.syncing=false;
+    online.error='इंटरनेट नहीं मिला — पिछली लिस्ट दिख रही है';
+    refreshOnlineViews();
+  });
+}
+function refreshOnlineViews(){
+  renderNav();
+  if(!$('#ov')){
+    if(ui.view==='online')renderOnline();
+    renderBanner();
+  }
+}
+function beep(){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    var ac=new AC();
+    [0,0.25].forEach(function(t0){
+      var o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.value=880;g.gain.value=0.25;
+      o.connect(g);g.connect(ac.destination);
+      o.start(ac.currentTime+t0);o.stop(ac.currentTime+t0+0.18);
+    });
+    setTimeout(function(){try{ac.close();}catch(e){}},1000);
+  }catch(e){}
+}
+function alertNewOrders(){
+  var seen=lsGet(ONLINE_SEEN,{});
+  var fresh=online.orders.filter(function(o){return o.status==='new'&&!seen[o.code];});
+  if(!fresh.length)return;
+  fresh.forEach(function(o){seen[o.code]=1;});
+  lsSet(ONLINE_SEEN,seen);
+  beep();
+  toast('🌐 '+fresh.length+' नया ऑनलाइन ऑर्डर आया!');
+  try{
+    if('Notification' in window&&Notification.permission==='granted'&&document.visibilityState!=='visible'&&navigator.serviceWorker){
+      var o=fresh[0];
+      navigator.serviceWorker.ready.then(function(reg){
+        reg.showNotification('🌐 नया ऑनलाइन ऑर्डर '+rupee(o.total),{body:onlineWhen(o)+(fresh.length>1?' (+'+(fresh.length-1)+' और)':''),tag:'online-new',data:{url:'./#online'}});
+      });
+    }
+  }catch(e){}
+}
+function onlineItemInfo(id){return webItemInfo(id);}
+function onlineLines(o){
+  var L=[];
+  (o.items||[]).forEach(function(r){
+    var info=onlineItemInfo(r[0]);
+    if(!info){L.push({name:'('+r[0]+')',unit:'',qty:num(r[1]),rate:0,amt:0});return;}
+    L.push({name:info.name,unit:info.unit,qty:num(r[1]),rate:info.price,amt:round2(num(r[1])*info.price)});
+  });
+  return L;
+}
+function onlineWhen(o){
+  var p={w:String(o.when||'asap'),s:(o.slot===''||o.slot==null)?-1:Number(o.slot),m:o.mode};
+  if(p.w==='asap')return (o.mode==='p'?'जल्दी (30 मिनट में तैयार)':'जल्दी (30–60 मिनट)');
+  var k=p.w,tk=todayStr();
+  var tm=new Date();tm.setDate(tm.getDate()+1);
+  var pre=k===tk?'आज, ':(k===dayKey(tm)?'कल, ':'');
+  return pre+fmtDshort(keyToDate(k))+(p.s>=0?', '+WEB_SLOTS[p.s][2]:'');
+}
+function onlineToPayload(o){
+  var l=(o.lat!==''&&o.lng!==''&&o.lat!=null&&o.lng!=null&&isFinite(o.lat)&&isFinite(o.lng))?[Number(o.lat),Number(o.lng)]:null;
+  return {c:o.code,n:o.name,p:String(o.phone),m:o.mode==='p'?'p':'d',g:o.village||'',a:o.address||'',k:o.landmark||'',l:l,
+    dk:(o.distKm===''||o.distKm==null)?null:Number(o.distKm),w:String(o.when||'asap'),s:(o.slot===''||o.slot==null)?-1:Number(o.slot),
+    i:o.items||[],x:o.custom||[],cm:o.cakeMsg||'',t:o.note||'',ts:0};
+}
+function billingOrderFor(code){return state.orders.filter(function(x){return x.webCode===code&&!x.cancelled;})[0]||null;}
+function createBillingOrderFromOnline(p){
+  var c=findCustomerByPhone(p.p,null);
+  var addr=[p.g,p.a,p.k].filter(Boolean).join(', ');
+  if(!c){c={id:uid(),name:p.n,phone:p.p,address:p.m==='d'?addr:'',createdAt:Date.now()};state.customers.push(c);}
+  else if(!c.address&&addr&&p.m==='d'){c.address=addr;}
+  var items=webLines(p).map(function(l){return {lid:l.lid,name:l.name,unit:l.unit,rate:l.rate,qty:l.qty,delivered:false,deliveredAt:'',date:''};});
+  var o2={id:uid(),no:state.nextOrderNo++,customerId:c.id,date:webDateValue(p),items:items,payments:[],cancelled:false,notes:webNotes(p),createdAt:Date.now(),webCode:p.c,webMode:p.m};
+  state.orders.push(o2);save();
+  return o2;
+}
+function openWa(phone,text){
+  var href=waLink(phone,text);if(!href){toast('ग्राहक का नंबर सही नहीं है');return;}
+  var w=null;try{w=window.open(href,'_blank');}catch(e){w=null;}
+  if(!w)location.href=href;
+}
+function acceptOnline(code){
+  var o=findOnline(code);if(!o)return;
+  var ex=billingOrderFor(code);
+  if(ex){openWa(o.phone,webConfirmMessage(ex));queueStatus(code,'accepted',{total:orderTotal(ex)});return;}
+  var p=onlineToPayload(o);
+  if((o.custom||[]).length){
+    ui.onlineAccept=code;
+    startWebOrderDraft(p);
+    return;
+  }
+  var bo=createBillingOrderFromOnline(p);
+  openWa(o.phone,webConfirmMessage(bo));
+  queueStatus(code,'accepted',{total:orderTotal(bo)});
+  toast('ऑर्डर #'+bo.no+' बन गया ✓ ग्राहक को कन्फर्म मैसेज भेजो');
+}
+var REJECT_REASONS=['आज यह सामान खत्म हो गया है','आपका पता डिलीवरी दूरी (6 km) से बाहर है','चुने गए समय पर डिलीवरी नहीं हो पाएगी','आज दुकान बंद है'];
+function openRejectSheet(code){
+  var o=findOnline(code);if(!o)return;
+  ui.rejectReason=0;
+  openSheet('<div class="sh-head"><h2>ऑर्डर मना करें?</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">'+esc(o.name)+' · '+esc(o.code)+' — ग्राहक को WhatsApp पर विनम्र मैसेज जाएगा। वजह चुनो:</p>'+
+    '<div class="chips2" id="rj-chips">'+REJECT_REASONS.map(function(r,i){return '<button data-act="on-rj-pick" data-i="'+i+'" class="'+(i===0?'on':'')+'">'+esc(r)+'</button>';}).join('')+'</div>'+
+    '<label class="fl">या अपनी वजह लिखो<input id="rj-text" type="text" maxlength="150"></label>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">वापस</button><button class="btn warn" data-act="on-reject-send" data-code="'+esc(code)+'">❌ मना करो और मैसेज भेजो</button></div>');
+}
+function rejectMessage(o,reason){
+  return ['नमस्ते '+o.name+' जी 🙏','माफ़ कीजिए, आपका ऑर्डर '+o.code+' अभी पूरा नहीं कर पाएंगे।','वजह: '+reason,'',
+    'किसी और समय या सामान के लिए दोबारा ऑर्डर कर सकते हैं: '+orderPageUrl(),'— '+state.shop.name].join('\n');
+}
+function outMessage(o,bo){
+  return ['नमस्ते '+o.name+' जी,','आपका ऑर्डर '+(bo?'#'+bo.no+' ':'')+'('+o.code+') रास्ते में है 🚚 जल्द पहुँचेगा।'+(bo&&orderDue(bo)>0?'\nबाकी पेमेंट: '+rupee(orderDue(bo)):''),'— '+state.shop.name].join('\n');
+}
+function reviewMessage(o){
+  var link=(CATALOG&&CATALOG.shop&&CATALOG.shop.review)||'';
+  return ['धन्यवाद '+o.name+' जी! 🙏 उम्मीद है सामान पसंद आया होगा।',link?'अच्छा लगा हो तो Google पर 1 मिनट में रिव्यू दे दीजिए, इससे हमें बहुत मदद मिलती है:\n'+link:'','— '+state.shop.name].filter(Boolean).join('\n');
+}
+function deliverOnline(code){
+  var bo=billingOrderFor(code);
+  if(bo){var dt=todayStr();bo.items.forEach(function(it){if(!it.delivered){it.delivered=true;it.deliveredAt=dt;}});save();}
+  queueStatus(code,'delivered');
+  toast('डिलीवर ✓'+(bo&&orderDue(bo)>0?' — बाकी '+rupee(orderDue(bo))+' बिल में दर्ज है':''));
+}
+function onlineCard(o){
+  var lines=onlineLines(o),tot=lines.reduce(function(s,l){return s+l.amt;},0);
+  var custom=o.custom||[];
+  var bo=billingOrderFor(o.code);
+  var isD=o.mode!=='p';
+  var mapUrl=(o.lat!==''&&o.lat!=null&&isFinite(o.lat)&&o.lng!==''&&isFinite(o.lng))?('https://maps.google.com/?q='+Number(o.lat).toFixed(5)+','+Number(o.lng).toFixed(5)):'';
+  var addr=[o.village,o.address].filter(Boolean).join(', ');
+  var created=o.created?fmtDT(o.created):'';
+  var acts='';
+  if(o.status==='new'){
+    acts='<button class="btn primary small" data-act="on-accept" data-code="'+esc(o.code)+'">✅ स्वीकार करो</button>'+
+      '<button class="btn small" data-act="on-reject" data-code="'+esc(o.code)+'">❌ मना</button>'+
+      '<a class="btn small" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>';
+  }else if(o.status==='accepted'||o.status==='out'){
+    acts=(isD&&o.status==='accepted'?'<button class="btn primary small" data-act="on-out" data-code="'+esc(o.code)+'">🚚 निकल गया</button>':'')+
+      '<button class="btn small'+(o.status==='out'||!isD?' primary':'')+'" data-act="on-deliver" data-code="'+esc(o.code)+'">✔️ '+(isD?'डिलीवर हो गया':'ग्राहक ले गया')+'</button>'+
+      (bo?'<button class="lnk" data-act="on-open-bill" data-code="'+esc(o.code)+'">बिल #'+bo.no+' देखो</button>':'')+
+      (bo?'<button class="lnk" data-act="on-pay-msg" data-code="'+esc(o.code)+'">📲 पेमेंट मैसेज दोबारा</button>':'')+
+      '<a class="lnk" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>';
+  }else if(o.status==='delivered'){
+    acts='<button class="btn small" data-act="on-review" data-code="'+esc(o.code)+'">⭐ रिव्यू माँगो</button>'+
+      (bo?'<button class="lnk" data-act="on-open-bill" data-code="'+esc(o.code)+'">बिल #'+bo.no+' देखो</button>':'');
+  }else if(o.status==='rejected'){
+    acts=o.statusNote?'<span class="onmeta">वजह: '+esc(o.statusNote)+'</span>':'';
+  }
+  return '<article class="order oncard st-'+esc(o.status)+'">'+
+    '<div class="otop"><div class="when">⏰ '+esc(onlineWhen(o))+'</div><span class="obadge">'+esc(o.code)+'</span><span class="stamp st-'+esc(o.status)+'">'+(ON_LABEL[o.status]||esc(o.status))+'</span></div>'+
+    '<div class="onmeta">'+(isD?'🚚 घर पर डिलीवरी':'🏪 दुकान से लेंगे')+(o.distKm!==''&&o.distKm!=null?' · ~'+esc(o.distKm)+' km':'')+(created?' · आया: '+esc(created):'')+'</div>'+
+    '<ul class="onitems">'+lines.map(function(l){return '<li><span>'+esc(displayName(l))+' — '+esc((l.unit==='किलो'&&l.qty<1)?Math.round(l.qty*1000)+' ग्राम':fmtQty(l.qty)+' '+l.unit)+'</span><b>'+rupee(l.amt)+'</b></li>';}).join('')+
+      custom.map(function(c){return '<li class="ask"><span>'+(c[0]==='cake'?'🎂 कस्टम केक: ':'📦 पैकेट सामान (MRP): ')+esc(c[1])+'</span><b>दाम तय करो</b></li>';}).join('')+'</ul>'+
+    '<div class="ftotal"><span>कुल'+(custom.length?' (तय दाम वाला)':'')+'</span><b>'+rupee(o.confirmedTotal||tot)+'</b></div>'+
+    (o.cakeMsg?'<div class="hint">🎂 केक पर लिखना: "'+esc(o.cakeMsg)+'"</div>':'')+
+    (o.note?'<div class="hint">📝 '+esc(o.note)+'</div>':'')+
+    '<div class="oncust"><b>'+esc(o.name)+'</b> · <a href="tel:+91'+esc(String(o.phone).slice(-10))+'">'+esc(o.phone)+'</a>'+
+      (isD?'<br>🏠 '+esc(addr||'-')+(o.landmark?'<br>पहचान: '+esc(o.landmark):'')+'<br>'+(mapUrl?'<a href="'+esc(mapUrl)+'" target="_blank" rel="noopener">📍 नक्शे में देखो</a>':'<span class="onmeta">📍 लोकेशन नहीं दी — ग्राहक WhatsApp पर भेज सकता है</span>'):'')+
+    '</div>'+
+    (acts?'<div class="oacts">'+acts+'</div>':'')+
+    '</article>';
+}
+function renderOnline(){
+  online.cfg=onlineCfg();
+  var html='<div class="sechead" style="margin-top:4px"><h2>🌐 ऑनलाइन ऑर्डर</h2>'+(online.cfg?'<button class="lnk" data-act="on-sync">'+(online.syncing?'देख रहे हैं…':'🔄 ताज़ा करो')+'</button>':'')+'</div>';
+  if(!online.cfg){
+    html+='<div class="installbox"><p><b>ऑनलाइन ऑर्डर अभी जुड़ा नहीं है।</b> एक बार का सेटअप करने के बाद ग्राहकों के ऑर्डर सीधे यहाँ आएंगे और फोन पर नोटिफिकेशन भी बजेगा।</p>'+
+      '<a class="btn primary small" href="online/setup.html">⚙️ सेटअप शुरू करो</a></div>';
+    $('#main').innerHTML=html;return;
+  }
+  if(online.error)html+='<div class="banner">'+esc(online.error)+'</div>';
+  var tk=todayStr();
+  var todays=online.orders.filter(function(o){return o.created&&dayKey(o.created)===tk&&o.status!=='rejected';});
+  var todayAmt=todays.reduce(function(s,o){return s+num(o.confirmedTotal||o.total);},0);
+  var fresh=online.orders.filter(function(o){return o.status==='new';}).sort(function(a,b){return String(a.created).localeCompare(String(b.created));});
+  var running=online.orders.filter(function(o){return o.status==='accepted'||o.status==='out';});
+  var done=online.orders.filter(function(o){return o.status==='delivered'||o.status==='rejected';}).sort(function(a,b){return String(b.updated||b.created).localeCompare(String(a.updated||a.created));});
+  html+='<div class="onsum"><div><b style="color:var(--red)">'+fresh.length+'</b><span>नए</span></div><div><b>'+running.length+'</b><span>चल रहे</span></div><div><b>'+rupee(todayAmt)+'</b><span>आज ('+todays.length+' ऑर्डर)</span></div></div>';
+  if(online.lastSync)html+='<p class="hint" style="margin-top:-4px">आखिरी बार देखा: '+esc(fmtDT(online.lastSync))+' · खुला रहने पर हर 30 सेकंड में खुद देखता है</p>';
+  html+='<h3 class="grouphead">🆕 नए ऑर्डर</h3>'+(fresh.length?fresh.map(onlineCard).join(''):'<p class="hint">अभी कोई नया ऑर्डर नहीं।</p>');
+  html+='<h3 class="grouphead">⏳ चल रहे</h3>'+(running.length?running.map(onlineCard).join(''):'<p class="hint">कोई नहीं।</p>');
+  if(done.length){
+    html+='<h3 class="grouphead">पूरे हुए (पिछले 10 दिन)</h3>'+
+      (online.showDone?done.map(onlineCard).join('')+'<button class="lnk" data-act="on-toggle-done">छिपाओ</button>':'<button class="btn small" data-act="on-toggle-done">'+done.length+' ऑर्डर दिखाओ</button>');
+  }
+  $('#main').innerHTML=html;
+}
+function startOnline(){
+  loadOnlineCache();
+  online.cfg=onlineCfg();
+  if(!online.cfg)return;
+  onlineSync();
+  setInterval(function(){if(document.visibilityState==='visible')onlineSync();},30000);
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')onlineSync();});
 }
 
 /* ---------- Payment form ---------- */
@@ -1941,6 +2253,40 @@ document.addEventListener('click',function(e){
       save();closeSheet();ui.view='home';ui.customerId=null;renderRoute();toast('ग्राहक डिलीट हो गया');
       break;
     case 'close':closeSheet();break;
+    case 'on-sync':onlineSync(true);break;
+    case 'on-accept':acceptOnline(t.getAttribute('data-code'));break;
+    case 'on-reject':openRejectSheet(t.getAttribute('data-code'));break;
+    case 'on-rj-pick':
+      ui.rejectReason=+t.getAttribute('data-i');
+      $all('#rj-chips button').forEach(function(b,i){b.classList.toggle('on',i===ui.rejectReason);});
+      break;
+    case 'on-reject-send':
+      var rjc=t.getAttribute('data-code'),rjo=findOnline(rjc);
+      if(rjo){
+        var rjTxt=($('#rj-text').value||'').trim()||REJECT_REASONS[ui.rejectReason||0];
+        closeSheet();
+        openWa(rjo.phone,rejectMessage(rjo,rjTxt));
+        queueStatus(rjc,'rejected',{note:rjTxt});
+      }
+      break;
+    case 'on-out':
+      var outo=findOnline(t.getAttribute('data-code'));
+      if(outo){openWa(outo.phone,outMessage(outo,billingOrderFor(outo.code)));queueStatus(outo.code,'out');}
+      break;
+    case 'on-deliver':deliverOnline(t.getAttribute('data-code'));break;
+    case 'on-review':
+      var rvo=findOnline(t.getAttribute('data-code'));
+      if(rvo)openWa(rvo.phone,reviewMessage(rvo));
+      break;
+    case 'on-pay-msg':
+      var pmo=findOnline(t.getAttribute('data-code')),pmb=pmo?billingOrderFor(pmo.code):null;
+      if(pmo&&pmb)openWa(pmo.phone,webConfirmMessage(pmb));
+      break;
+    case 'on-open-bill':
+      var obo=billingOrderFor(t.getAttribute('data-code'));
+      if(obo){ui.cameFrom='home';ui.view='customer';ui.customerId=obo.customerId;renderRoute();window.scrollTo(0,0);}
+      break;
+    case 'on-toggle-done':online.showDone=!online.showDone;renderOnline();break;
     case 'web-import-go':
       var wp=ui.webImport;
       if(wp){closeSheet();startWebOrderDraft(wp);}
@@ -2282,6 +2628,7 @@ renderRoute();
 checkDueReminders();
 requestPersist();
 if(catUpdated)toast('दुकान की आइटम लिस्ट/दाम अपडेट हो गए ✓');
+startOnline();
 checkWebImport();
 window.addEventListener('hashchange',checkWebImport);
 })();

@@ -227,6 +227,22 @@ var SLOTS=[[8,11,'सुबह 8–11','8–11 AM'],[11,14,'दोपहर 11�
 var T={
 hi:{
  lang_btn:'English',
+ send_app:'🛍️ ऑर्डर भेजें',send_app_note:'ऑर्डर सीधे दुकान तक पहुँचेगा।',sending:'भेज रहे हैं…',
+ send_fail:'ऑर्डर भेजने में दिक्कत आई (शायद इंटरनेट)। दोबारा कोशिश करें, या WhatsApp से भेज दें।',send_fail_rate:'बहुत जल्दी-जल्दी ऑर्डर भेजे गए — थोड़ी देर बाद कोशिश करें, या WhatsApp से भेजें।',
+ retry:'🔄 दोबारा कोशिश करें',send_wa:'💬 WhatsApp से भेजें',
+ done_app_h:'ऑर्डर दुकान तक पहुँच गया!',
+ done_app_s1:'दुकान उपलब्धता देखकर ऑर्डर कन्फर्म करेगी — यहीं दिखेगा, और WhatsApp पर मैसेज भी आएगा।',
+ done_app_s2d:'कन्फर्म होने पर नीचे दिए QR/UPI से पेमेंट करें और स्क्रीनशॉट WhatsApp पर भेजें।',
+ done_app_s2p:'कन्फर्म होने पर समय पर दुकान से सामान ले जाएं। पेमेंट लेते समय।',
+ os_h:'ऑर्डर का स्टेटस',os_check:'🔄 स्टेटस देखें',os_loading:'स्टेटस देख रहे हैं…',os_err:'अभी स्टेटस नहीं मिला — थोड़ी देर बाद देखें।',
+ os_new:'🕐 दुकान को मिल गया — कन्फर्म होने का इंतज़ार',os_accepted:'✅ कन्फर्म हो गया!',os_out:'🚚 रास्ते में है — जल्द पहुँचेगा!',os_delivered:'✔️ डिलीवर हो गया — धन्यवाद! 🙏',os_rejected:'❌ माफ़ कीजिए, यह ऑर्डर नहीं हो पाएगा।',
+ os_total:'कुल',os_pay_now:'नीचे से पेमेंट करें।',
+ locsend_h:'📍 घर की लोकेशन भेजें',locsend_txt:'लोकेशन नहीं मिली थी। डिलीवरी वाले को घर ढूंढने में आसानी के लिए WhatsApp पर लोकेशन भेज दें: नीचे बटन दबाएं → WhatsApp में 📎 → "Location" → "अभी की लोकेशन भेजें"।',locsend_btn:'💬 WhatsApp पर लोकेशन भेजें',locsend_msg:'नमस्ते, मेरे ऑर्डर {c} के लिए घर की लोकेशन भेज रहा/रही हूँ 👇',
+ talk_btn:'💬 WhatsApp पर बात करें',talk_msg:'नमस्ते, मेरा ऑर्डर कोड {c} है।',my_order:'📦 मेरा ऑर्डर देखें',
+ loc_stuck:'लोकेशन का जवाब नहीं आया। ऊपर पते वाली पट्टी में 🔒 या ⓘ दबाकर Location → Allow करें, फोन की लोकेशन (GPS) चालू रखें और दोबारा दबाएं। न हो पाए तो कोई बात नहीं — ऑर्डर के बाद WhatsApp पर लोकेशन भेज दें।',
+ loc_inapp:'यह पेज किसी ऐप के अंदर खुला है — लोकेशन न आए तो ऊपर ⋮ दबाकर "Chrome में खोलें"।',
+ wk:['रविवार','सोमवार','मंगलवार','बुधवार','गुरुवार','शुक्रवार','शनिवार'],mo:['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'],d_today:'आज',d_tmr:'कल',
+ m_head:'🛍️ *नया ऑर्डर — MB Sweets*',m_items:'*सामान:*',m_total:'कुल',m_plus:'+ केक/पैकेट सामान का दाम',
  inst_txt:'MB Sweets ऐप फोन में रखें — अगली बार सीधे आइकन से ऑर्डर करें',inst_btn:'📲 ऐप इंस्टॉल करें',inst_done:'ऐप इंस्टॉल हो गया ✓ होम स्क्रीन पर "MB Sweets" आइकन देखें',
  inst_h:'ऐप इंस्टॉल करें',
  inst_ios:['नीचे (या ऊपर) शेयर बटन ⬆️ दबाएं।','"Add to Home Screen" / "होम स्क्रीन में जोड़ें" चुनें।','"Add" दबाएं — होम स्क्रीन पर MB Sweets का आइकन आ जाएगा।'],
@@ -277,7 +293,7 @@ hi:{
  loc_ok:'✓ आपका इलाका डिलीवरी में आता है (~{d} km)',
  loc_near:'आप डिलीवरी सीमा के पास हैं (~{d} km) — दुकान कॉल करके कन्फर्म करेगी',
  loc_far:'आप 6 km से बाहर लग रहे हैं (~{d} km) — डिलीवरी शायद न हो पाए। "दुकान से लूंगा" भी चुन सकते हैं।',
- loc_denied:'लोकेशन की अनुमति नहीं मिली — कोई बात नहीं, नीचे पता ठीक से लिख दें।',
+ loc_denied:'लोकेशन की अनुमति बंद है। ऊपर 🔒 दबाकर Location → Allow करें — या कोई बात नहीं, पता लिख दें और ऑर्डर के बाद WhatsApp पर लोकेशन भेज दें।',
  loc_fail:'लोकेशन नहीं मिल पाई — फ़ोन की लोकेशन (GPS) चालू करके दोबारा दबाएं, या सिर्फ पता लिख दें।',
  loc_weak:'लोकेशन साफ़ नहीं मिली (±{a} km) — खुली जगह में दोबारा कोशिश करें, या पता लिख दें।',
  loc_nosupport:'इस फ़ोन/ब्राउज़र में लोकेशन नहीं मिलती — पता लिख दें।',
@@ -336,6 +352,22 @@ hi:{
 },
 en:{
  lang_btn:'हिंदी',
+ send_app:'🛍️ Send order',send_app_note:'Your order goes straight to the shop.',sending:'Sending…',
+ send_fail:'Could not send the order (maybe internet). Try again, or send it on WhatsApp.',send_fail_rate:'Too many orders in a short time — try a little later, or send on WhatsApp.',
+ retry:'🔄 Try again',send_wa:'💬 Send on WhatsApp',
+ done_app_h:'Your order reached the shop!',
+ done_app_s1:'The shop checks availability and confirms — you will see it here and get a WhatsApp message.',
+ done_app_s2d:'After confirmation, pay with the QR/UPI below and send the screenshot on WhatsApp.',
+ done_app_s2p:'After confirmation, pick up on time. Pay at the shop.',
+ os_h:'Order status',os_check:'🔄 Check status',os_loading:'Checking status…',os_err:'Status not available right now — check again shortly.',
+ os_new:'🕐 Received by the shop — waiting for confirmation',os_accepted:'✅ Confirmed!',os_out:'🚚 On the way — arriving soon!',os_delivered:'✔️ Delivered — thank you! 🙏',os_rejected:'❌ Sorry, this order cannot be fulfilled.',
+ os_total:'Total',os_pay_now:'Please pay below.',
+ locsend_h:'📍 Send your home location',locsend_txt:'We did not get your location. To help the delivery reach you, send it on WhatsApp: tap below → in WhatsApp tap 📎 → "Location" → "Send your current location".',locsend_btn:'💬 Send location on WhatsApp',locsend_msg:'Hello, sending my home location for order {c} 👇',
+ talk_btn:'💬 Chat on WhatsApp',talk_msg:'Hello, my order code is {c}.',my_order:'📦 View my order',
+ loc_stuck:'No reply for location. Tap 🔒 or ⓘ in the address bar → Location → Allow, keep phone location (GPS) on and try again. If it still fails, no problem — send your location on WhatsApp after ordering.',
+ loc_inapp:'This page opened inside another app — if location fails, tap ⋮ and choose "Open in Chrome".',
+ wk:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mo:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],d_today:'Today',d_tmr:'Tomorrow',
+ m_head:'🛍️ *New order — MB Sweets*',m_items:'*Items:*',m_total:'Total',m_plus:'+ price of cake/packaged items',
  inst_txt:'Keep the MB Sweets app on your phone — order straight from the icon next time',inst_btn:'📲 Install app',inst_done:'App installed ✓ Look for the "MB Sweets" icon on your home screen',
  inst_h:'Install the app',
  inst_ios:['Tap the Share button ⬆️ (bottom or top).','Choose "Add to Home Screen".','Tap "Add" — the MB Sweets icon appears on your home screen.'],
@@ -386,7 +418,7 @@ en:{
  loc_ok:'✓ Your area is within delivery (~{d} km)',
  loc_near:'You are near the delivery limit (~{d} km) — the shop will call to confirm',
  loc_far:'You seem to be beyond 6 km (~{d} km) — delivery may not be possible. You can choose pick-up.',
- loc_denied:'Location permission not given — no problem, just write your address below.',
+ loc_denied:'Location permission is off. Tap 🔒 → Location → Allow — or no problem, write your address and send your location on WhatsApp after ordering.',
  loc_fail:'Could not get location — turn on phone location (GPS) and try again, or just write your address.',
  loc_weak:'Location not accurate (±{a} km) — try again in an open place, or write your address.',
  loc_nosupport:'Location is not available on this phone/browser — please write your address.',
@@ -774,6 +806,7 @@ function renderMenu(){
       '<div class="status '+si.cls+'" id="statusBox"><span class="dot"></span><span>'+esc(si.txt)+'</span></div>'+
       (notice?'<div class="notice">📢 '+esc(notice)+'</div>':'')+
       installBarHtml()+
+      ((st.last&&Date.now()-st.last.ts<3*86400000)?'<button class="btn block" style="margin-top:8px" data-act="go" data-v="done">'+t('my_order')+' · '+esc(st.last.code)+'</button>':'')+
       '<div class="facts"><div><b>'+t('f1')+'</b><span>'+t('f1b')+'</span></div><div><b>'+t('f2')+'</b><span>'+t('f2b')+'</span></div><div><b>'+t('f3')+'</b><span>'+t('f3b')+'</span></div></div>'+
       '<p class="avail">'+t('avail')+'</p>'+
     '</div>'+
@@ -929,7 +962,7 @@ function renderCart(){
     else if(locState)ls='<div class="locst err">'+t('loc_'+locState,{a:locState==='weak'&&loc===null&&locWeakAcc?(locWeakAcc/1000).toFixed(1):''})+'</div>';
     locHtml='<div class="blk"><h3>'+t('addr_h')+'</h3>'+
       '<button class="btn block" data-act="loc"'+(locState==='wait'?' disabled':'')+'>'+(loc?t('loc_again'):t('loc_btn'))+'</button>'+
-      '<p class="hint">'+t('loc_why')+'</p>'+ls+
+      '<p class="hint">'+t('loc_why')+'</p>'+(inAppBrowser()?'<p class="hint" style="color:var(--amber)">'+t('loc_inapp')+'</p>':'')+ls+
       '<label class="fl">'+t('f_village')+'<input type="text" id="f-village" autocomplete="address-level3" value="'+esc(st.me.village)+'"></label>'+
       '<p class="hint">'+t('area_hint')+'</p>'+
       '<label class="fl">'+t('f_address')+'<textarea id="f-addr" rows="2" autocomplete="street-address">'+esc(st.me.addr)+'</textarea></label>'+
@@ -971,8 +1004,11 @@ function renderCart(){
     '<div class="paynote">'+(isD?t('pay_del'):t('pay_pick'))+'<br><b>'+t('avail')+'</b></div>'+
     '<div class="agree"><input type="checkbox" id="f-agree"'+(st.agree?' checked':'')+'><span><label for="f-agree">'+t('agree')+'</label> — <button class="lnkbtn" data-act="go" data-v="rules">'+t('read_rules')+'</button></span></div>'+
     '<div class="err" id="f-err"></div>'+
-    '<button class="btn wa block" data-act="send" style="min-height:54px;font-size:1.05rem">'+t('send')+'</button>'+
-    '<p class="hint" style="text-align:center">'+t('send_note')+'</p>';
+    (C.orderApi?'<button class="btn primary block" id="sendBtn" data-act="send" style="min-height:54px;font-size:1.05rem">'+t('send_app')+'</button>'+
+      '<p class="hint" style="text-align:center">'+t('send_app_note')+'</p>'
+     :'<button class="btn wa block" id="sendBtn" data-act="send" style="min-height:54px;font-size:1.05rem">'+t('send')+'</button>'+
+      '<p class="hint" style="text-align:center">'+t('send_note')+'</p>')+
+    '<div id="sendFail"></div>';
   var prevScroll=$('#view .view')?$('#view .view').scrollTop:0;
   viewShell(t('co_title'),html);
   var v=$('#view .view');if(v&&prevScroll)v.scrollTop=prevScroll;
@@ -990,31 +1026,64 @@ function syncForm(){
   var a=document.getElementById('f-agree');if(a)st.agree=a.checked;
   var dt=g('f-date');if(dt!=null&&dt!==when.date){when.date=dt;if(when.slot>=0&&!slotOk(dt,when.slot))when.slot=-1;}
 }
-var locWeakAcc=0;
+var locWeakAcc=0,locTimer=null,locSeq=0;
+function inAppBrowser(){
+  var ua=navigator.userAgent||'';
+  return /; wv\)|FBAN|FBAV|Instagram|WhatsApp|PhonePe|Paytm|GSA\//i.test(ua);
+}
+function setLoc(c){
+  loc={lat:c.latitude,lng:c.longitude,acc:c.accuracy||0,km:haversine(S.lat,S.lng,c.latitude,c.longitude)};
+}
 function getLocation(){
   if(!navigator.geolocation){locState='nosupport';renderCart();return;}
+  var seq=++locSeq,answered=false;
   locState='wait';renderCart();
+  clearTimeout(locTimer);
+  var redraw=function(){if(location.hash==='#cart')renderCart();};
+  // some browsers never answer (hidden permission prompt) — do not leave the customer waiting
+  locTimer=setTimeout(function(){if(seq!==locSeq||answered)return;locState='stuck';redraw();},15000);
+  try{
+    if(navigator.permissions&&navigator.permissions.query){
+      navigator.permissions.query({name:'geolocation'}).then(function(s){
+        if(seq===locSeq&&!answered&&s&&s.state==='denied'){answered=true;clearTimeout(locTimer);locState='denied';redraw();}
+      },function(){});
+    }
+  }catch(e){}
   navigator.geolocation.getCurrentPosition(function(p){
+    if(seq!==locSeq)return;
+    answered=true;clearTimeout(locTimer);
     var c=p.coords;
-    if(c.accuracy&&c.accuracy>3000){loc=null;locState='weak';locWeakAcc=c.accuracy;renderCart();return;}
-    loc={lat:c.latitude,lng:c.longitude,acc:c.accuracy||0,km:haversine(S.lat,S.lng,c.latitude,c.longitude)};
-    locState='';
-    if(location.hash==='#cart')renderCart();
+    if(c.accuracy&&c.accuracy>3000){loc=null;locState='weak';locWeakAcc=c.accuracy;redraw();return;}
+    setLoc(c);locState='';redraw();
+    // quietly try for a sharper fix
+    if(c.accuracy>150){
+      try{navigator.geolocation.getCurrentPosition(function(q){
+        if(seq!==locSeq)return;
+        if(q.coords.accuracy&&q.coords.accuracy<(loc?loc.acc:1e9)){setLoc(q.coords);redraw();}
+      },function(){},{enableHighAccuracy:true,timeout:15000,maximumAge:0});}catch(e){}
+    }
   },function(err){
+    if(seq!==locSeq||answered)return;
+    answered=true;clearTimeout(locTimer);
     locState=(err&&err.code===1)?'denied':'fail';
-    if(location.hash==='#cart')renderCart();
-  },{enableHighAccuracy:true,timeout:20000,maximumAge:120000});
+    redraw();
+  },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
 }
 function orderCode(){
   var d=new Date();
   return 'W'+pad(d.getDate())+pad(d.getMonth()+1)+'-'+pad(d.getHours())+pad(d.getMinutes())+Math.floor(Math.random()*10);
 }
+function dateText(key,L){
+  var X=T[L||st.lang];
+  var dt=keyToDate(key);
+  var today=dkey(new Date());var tm=new Date();tm.setDate(tm.getDate()+1);
+  var pre=key===today?X.d_today+', ':(key===dkey(tm)?X.d_tmr+', ':'');
+  return pre+dt.getDate()+' '+X.mo[dt.getMonth()]+' ('+X.wk[dt.getDay()]+')';
+}
 function whenText(lang){
   var L=lang||st.lang;
   if(when.type==='asap')return st.me.mode==='p'?T[L].w_asap.replace('⚡ ','')+' ('+T[L].w_asap_p+')':T[L].w_asap.replace('⚡ ','')+' ('+T[L].w_asap_d+')';
-  var dt=keyToDate(when.date);
-  var ds=dt.toLocaleDateString(L==='en'?'en-IN':'hi-IN',{weekday:'short',day:'numeric',month:'short'});
-  return ds+', '+(L==='en'?SLOTS[when.slot][3]:SLOTS[when.slot][2]);
+  return dateText(when.date,L)+', '+(L==='en'?SLOTS[when.slot][3]:SLOTS[when.slot][2]);
 }
 function validate(){
   var tot=pricedTotal();
@@ -1035,83 +1104,170 @@ function validate(){
   if(!st.agree)return t('e_agree');
   return '';
 }
-function buildOrder(){
-  var L=st.lang;var X=T[L];
-  var code=orderCode();
-  var lines=cartLines();
-  var tot=pricedTotal();
+/* the order as clean WhatsApp text: when + what first, customer details after */
+function orderText(code,L){
+  var X=T[L];
+  var lines=cartLines(),tot=pricedTotal();
   var M=[];
-  M.push(X.msg_new);
+  M.push(X.m_head);
   M.push(X.msg_code+': '+code);
-  M.push('');
-  M.push('👤 '+st.me.name.trim());
-  M.push('📞 '+phone10(st.me.phone));
+  M.push('⏰ *'+whenText(L)+'*');
   M.push(st.me.mode==='d'?X.m_del:X.m_pick);
-  if(st.me.mode==='d'){
-    M.push('🏠 '+X.msg_village+': '+st.me.village.trim());
-    M.push('    '+X.msg_addr+': '+st.me.addr.trim().replace(/\s*\n\s*/g,', '));
-    if(st.me.landmark.trim())M.push('    '+X.msg_land+': '+st.me.landmark.trim());
-    if(loc)M.push(X.msg_loc+': https://maps.google.com/?q='+loc.lat.toFixed(5)+','+loc.lng.toFixed(5)+' (~'+loc.km.toFixed(1)+' km)');
-    else M.push(X.msg_noloc);
-  }
-  M.push('⏰ '+whenText(L));
   M.push('');
-  M.push(X.msg_items);
-  var n=0;
-  lines.forEach(function(l){n++;M.push(n+'. '+lineName(l,L)+' — '+qtyTxt(l.item.unit,l.qty,L)+' × '+rupee(l.item.price)+' = '+rupee(l.amt));});
-  st.custom.forEach(function(c){n++;M.push(n+'. '+(c.type==='cake'?X.msg_cake:X.msg_pack)+': '+c.text+' — '+X.msg_ask);});
-  M.push('');
-  M.push(X.msg_total+': '+rupee(tot)+(st.custom.length?' + '+X.msg_ask:''));
+  M.push(X.m_items);
+  lines.forEach(function(l){M.push('• '+lineName(l,L)+' — '+qtyTxt(l.item.unit,l.qty,L)+' — '+rupee(l.amt));});
+  st.custom.forEach(function(c){M.push('• '+(c.type==='cake'?X.msg_cake:X.msg_pack)+': '+c.text+' — '+X.msg_ask);});
+  M.push('*'+X.m_total+': '+rupee(tot)+'*'+(st.custom.length?' '+X.m_plus:''));
   if(hasFixedCake()&&st.cakeMsg.trim())M.push(X.msg_cakemsg+': "'+st.cakeMsg.trim()+'"');
   if(st.note.trim())M.push(X.msg_note+': '+st.note.trim());
   M.push('');
-  M.push(st.me.mode==='d'?X.msg_pay_d:X.msg_pay_p);
+  M.push('👤 '+st.me.name.trim()+' · '+phone10(st.me.phone));
+  if(st.me.mode==='d'){
+    M.push('🏠 '+st.me.village.trim()+', '+st.me.addr.trim().replace(/\s*\n\s*/g,', '));
+    if(st.me.landmark.trim())M.push('    '+X.msg_land+': '+st.me.landmark.trim());
+    if(loc)M.push('📍 https://maps.google.com/?q='+loc.lat.toFixed(5)+','+loc.lng.toFixed(5)+' (~'+loc.km.toFixed(1)+' km)');
+  }
+  return M.join('\n');
+}
+function buildOrder(){
+  var code=orderCode();
+  var lines=cartLines();
+  var tot=pricedTotal();
   var payload={
     c:code,n:st.me.name.trim(),p:phone10(st.me.phone),m:st.me.mode,
     w:when.type==='asap'?'asap':when.date,s:when.type==='asap'?-1:when.slot,
     i:lines.map(function(l){return [l.id,l.qty];}),
     x:st.custom.map(function(c){return [c.type,c.text];}),
-    ts:Math.floor(Date.now()/1000)
+    t:tot,lang:st.lang,
+    sm:lines.map(function(l){return lineName(l,'hi')+' '+qtyTxt(l.item.unit,l.qty,'hi');}).concat(st.custom.map(function(c){return (c.type==='cake'?'कस्टम केक: ':'पैकेट सामान: ')+c.text;})).join('; ')
   };
   if(st.me.mode==='d'){
     payload.g=st.me.village.trim();payload.a=st.me.addr.trim().replace(/\s*\n\s*/g,', ');payload.k=st.me.landmark.trim();
     if(loc){payload.l=[+loc.lat.toFixed(5),+loc.lng.toFixed(5)];payload.dk=+loc.km.toFixed(1);}
   }
   if(hasFixedCake()&&st.cakeMsg.trim())payload.cm=st.cakeMsg.trim();
-  if(st.note.trim())payload.t=st.note.trim();
-  M.push('');
-  M.push(X.msg_import);
-  M.push(billingBase()+'#o='+b64url(JSON.stringify(payload)));
-  return {code:code,text:M.join('\n'),mode:st.me.mode,total:tot,asks:st.custom.length};
+  if(st.note.trim())payload.nt=st.note.trim();
+  var sigObj=JSON.parse(JSON.stringify(payload));delete sigObj.c;
+  return {code:code,text:orderText(code,st.lang),payload:payload,sig:JSON.stringify(sigObj),mode:st.me.mode,total:tot,asks:st.custom.length,p4:phone10(st.me.phone).slice(-4),hasLoc:!!loc};
 }
-function sendOrder(){
-  syncForm();
-  var e=validate();
-  var box=$('#f-err');
-  if(e){if(box){box.textContent=e;box.scrollIntoView({block:'center',behavior:'smooth'});}return;}
-  var o=buildOrder();
+var pendingOrder=null,sending=false;
+function withCode(o,code){
+  // keep the first code when retrying the same order, so the shop never gets it twice
+  o.code=code;o.payload.c=code;
+  var X=T[st.lang];
+  o.text=o.text.replace(/(\n[^\n]*: )W\d{4}-\d{5}/,'$1'+code);
+  return o;
+}
+function postOrder(payload){
+  var ctrl=('AbortController' in window)?new AbortController():null;
+  var timer=ctrl?setTimeout(function(){ctrl.abort();},25000):null;
+  return fetch(C.orderApi,{method:'POST',body:JSON.stringify({action:'create',order:payload}),redirect:'follow',signal:ctrl?ctrl.signal:undefined})
+    .then(function(r){if(timer)clearTimeout(timer);return r.json();},function(e){if(timer)clearTimeout(timer);throw e;});
+}
+function finishOrder(o,via){
   var url=waUrl(o.text);
-  st.last={code:o.code,url:url,mode:o.mode,total:o.total,asks:o.asks,ts:Date.now()};
+  st.last={code:o.code,via:via,url:url,mode:o.mode,total:o.total,asks:o.asks,p4:o.p4,hasLoc:o.hasLoc,ts:Date.now()};
   st.cart={};st.custom=[];st.cakeMsg='';st.note='';st.agree=false;
   when={type:'',date:'',slot:-1};
+  pendingOrder=null;
   save();
+  return url;
+}
+function sendViaWhatsApp(o){
+  var url=finishOrder(o,'wa');
   var w=null;
   try{w=window.open(url,'_blank');}catch(x){w=null;}
   if(w){try{w.opener=null;}catch(x){}location.replace('#done');}
   else{location.replace('#done');setTimeout(function(){location.href=url;},60);}
 }
+function setSending(on){
+  var b=$('#sendBtn');if(b){b.disabled=on;b.textContent=on?t('sending'):(C.orderApi?t('send_app'):t('send'));}
+}
+function showSendFail(err){
+  var box=$('#sendFail');if(!box)return;
+  box.innerHTML='<div class="err" style="margin-top:10px">'+(err==='rate'?t('send_fail_rate'):t('send_fail'))+'</div>'+
+    '<div class="row"><button class="btn primary" style="flex:1" data-act="send">'+t('retry')+'</button><button class="btn wa" style="flex:1" data-act="send-wa">'+t('send_wa')+'</button></div>';
+  box.scrollIntoView({block:'center',behavior:'smooth'});
+}
+function sendOrder(){
+  if(sending)return;
+  syncForm();
+  var e=validate();
+  var box=$('#f-err');
+  if(e){if(box){box.textContent=e;box.scrollIntoView({block:'center',behavior:'smooth'});}return;}
+  if(box)box.textContent='';
+  var o=buildOrder();
+  if(pendingOrder&&pendingOrder.sig===o.sig)o=withCode(o,pendingOrder.code);
+  pendingOrder=o;
+  if(!C.orderApi){sendViaWhatsApp(o);return;}
+  sending=true;setSending(true);
+  var fb=$('#sendFail');if(fb)fb.innerHTML='';
+  postOrder(o.payload).then(function(r){
+    sending=false;
+    if(r&&r.ok){finishOrder(o,'app');location.replace('#done');}
+    else{setSending(false);showSendFail(r&&r.error);}
+  },function(){sending=false;setSending(false);showSendFail('net');});
+}
+function sendPendingViaWhatsApp(){
+  if(!pendingOrder){sendOrder();return;}
+  sendViaWhatsApp(pendingOrder);
+}
 
 /* --- done --- */
+var statusTimer=null;
 function renderDone(){
   var L=st.last;
+  clearInterval(statusTimer);
   if(!L){viewShell(t('done_h'),'<div class="blk"><p>'+t('done_none')+'</p><button class="btn primary" data-act="home">'+t('co_browse')+'</button></div>');return;}
   var isD=L.mode!=='p';
-  var html='<div class="blk bigok"><div class="ic">✅</div><h3>'+t('done_h')+'</h3><div>'+t('done_code')+': <span class="code">'+esc(L.code)+'</span></div></div>'+
+  var html;
+  if(L.via==='app'){
+    html='<div class="blk bigok"><div class="ic">✅</div><h3>'+t('done_app_h')+'</h3><div>'+t('done_code')+': <span class="code">'+esc(L.code)+'</span></div></div>'+
+      '<div class="blk"><h3>'+t('os_h')+'</h3><div id="ordStatus" class="minbar no">'+t('os_loading')+'</div>'+
+        '<button class="btn block" style="margin-top:8px" data-act="check-status">'+t('os_check')+'</button></div>'+
+      '<div class="blk"><ol class="steps"><li>'+t('done_app_s1')+'</li><li>'+(isD?t('done_app_s2d'):t('done_app_s2p'))+'</li></ol></div>'+
+      (isD&&!L.hasLoc?'<div class="blk"><h3>'+t('locsend_h')+'</h3><p class="hint" style="margin-top:0">'+t('locsend_txt')+'</p><a class="btn wa block" href="'+esc(waUrl(t('locsend_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('locsend_btn')+'</a></div>':'')+
+      (isD?'<div id="payWrap">'+payBlock(0,true)+'</div>':'')+
+      '<div class="row" style="margin-top:4px"><button class="btn primary" style="flex:1" data-act="home">'+t('done_new')+'</button><a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a></div>'+
+      '<a class="btn block" style="margin-top:8px" href="'+esc(waUrl(t('talk_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('talk_btn')+'</a>';
+    viewShell(t('done_app_h'),html);
+    checkStatus();
+    statusTimer=setInterval(function(){if(location.hash==='#done')checkStatus();else clearInterval(statusTimer);},30000);
+    return;
+  }
+  html='<div class="blk bigok"><div class="ic">✅</div><h3>'+t('done_h')+'</h3><div>'+t('done_code')+': <span class="code">'+esc(L.code)+'</span></div></div>'+
     '<div class="blk"><ol class="steps"><li>'+t('done_s1')+'</li><li>'+t('done_s2')+'</li><li>'+(isD?t('done_s3d'):t('done_s3p'))+'</li></ol>'+
     '<a class="btn wa block" href="'+esc(L.url)+'" target="_blank" rel="noopener">'+t('done_resend')+'</a></div>'+
+    (isD&&!L.hasLoc?'<div class="blk"><h3>'+t('locsend_h')+'</h3><p class="hint" style="margin-top:0">'+t('locsend_txt')+'</p></div>':'')+
     (isD?payBlock(0,true):'')+
     '<div class="row" style="margin-top:4px"><button class="btn primary" style="flex:1" data-act="home">'+t('done_new')+'</button><a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a></div>';
   viewShell(t('done_h'),html);
+}
+var lastStatus='';
+function checkStatus(){
+  var L=st.last;if(!L||L.via!=='app'||!C.orderApi)return;
+  var box=$('#ordStatus');
+  fetch(C.orderApi+'?action=status&code='+encodeURIComponent(L.code)+'&p4='+encodeURIComponent(L.p4),{redirect:'follow'})
+    .then(function(r){return r.json();})
+    .then(function(r){
+      box=$('#ordStatus');if(!box)return;
+      if(!r||!r.ok){box.className='minbar no';box.textContent=t('os_err');return;}
+      var s=r.status||'new';
+      var amt=num(r.confirmedTotal)||num(r.total);
+      var txt=t('os_'+s)||t('os_new');
+      if(s==='accepted'||s==='out'){txt+=' '+t('os_total')+': '+rupee(amt)+(s==='accepted'&&L.mode!=='p'?' — '+t('os_pay_now'):'');}
+      if(s==='rejected'&&r.statusNote)txt+=' ('+r.statusNote+')';
+      box.className='minbar '+(s==='rejected'?'no':'ok');
+      box.textContent=txt;
+      if(s!==lastStatus){
+        lastStatus=s;
+        var pw=$('#payWrap');
+        if(pw){
+          if(s==='accepted'||s==='out')pw.innerHTML=payBlock(amt,false);
+          else if(s==='rejected'||s==='delivered')pw.innerHTML='';
+        }
+      }
+    },function(){box=$('#ordStatus');if(box){box.className='minbar no';box.textContent=t('os_err');}});
 }
 
 /* --- pay --- */
@@ -1294,6 +1450,8 @@ document.addEventListener('click',function(e){
     case 'slot':syncForm();when.slot=+el.getAttribute('data-i');renderCart();break;
     case 'loc':syncForm();getLocation();break;
     case 'send':sendOrder();break;
+    case 'send-wa':syncForm();sendPendingViaWhatsApp();break;
+    case 'check-status':checkStatus();break;
     case 'copyupi':copyUpi();break;
     case 'install':doInstall();break;
     case 'bev':syncBulk();bulk.event=+el.getAttribute('data-i');renderBulk();break;

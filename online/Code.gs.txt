@@ -1,0 +1,252 @@
+/**
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर
+ * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
+ *
+ * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
+ * आपके फोन पर ntfy से नोटिफिकेशन जाता है, और बिलिंग ऐप यहीं से ऑर्डर पढ़ता है।
+ * दुकान की गुप्त चाबी (key) और ntfy का नाम पहली बार सेटअप में अपने-आप बनते हैं।
+ */
+
+var SHEET_NAME = 'Orders';
+var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
+var HEAD = ['code', 'created', 'status', 'name', 'phone', 'mode', 'village', 'address', 'landmark',
+  'lat', 'lng', 'distKm', 'when', 'slot', 'summary', 'total', 'items', 'custom', 'cakeMsg', 'note',
+  'lang', 'updated', 'statusNote', 'confirmedTotal'];
+var SLOTS = ['सुबह 8–11', 'दोपहर 11–2', 'दोपहर 2–5', 'शाम 5–8'];
+var STATUSES = ['new', 'accepted', 'out', 'delivered', 'rejected'];
+
+/* सेटअप: कोड चिपकाने के बाद ऊपर ▶ Run दबाएं — यही फ़ंक्शन चलेगा (शीट जोड़ता है और Google से अनुमति लेता है) */
+function setupSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  PropertiesService.getScriptProperties().setProperty('SHEET_ID', ss.getId());
+  sheet_();
+  UrlFetchApp.fetch('https://ntfy.sh/', { method: 'get', muteHttpExceptions: true });
+  Logger.log('✅ सेटअप ठीक है — अब Deploy करें');
+}
+
+/* ---------- helpers ---------- */
+function props_() { return PropertiesService.getScriptProperties(); }
+function out_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+function ss_() {
+  var ss = null;
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) { ss = null; }
+  if (!ss) {
+    var id = props_().getProperty('SHEET_ID');
+    if (id) ss = SpreadsheetApp.openById(id);
+  }
+  return ss;
+}
+function sheet_() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(SHEET_NAME);
+    sh.appendRow(HEAD);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+function str_(v, max) { v = (v === null || v === undefined) ? '' : String(v); v = v.replace(/[\u0000-\u0008\u000B-\u001F]/g, ''); return v.length > max ? v.slice(0, max) : v; }
+function num_(v) { var n = parseFloat(v); return isFinite(n) ? n : 0; }
+function rnd_(n) {
+  var abc = 'abcdefghijkmnpqrstuvwxyz23456789', s = '';
+  for (var i = 0; i < n; i++) s += abc.charAt(Math.floor(Math.random() * abc.length));
+  return s;
+}
+function keyOk_(k) { var key = props_().getProperty('KEY'); return !!key && String(k || '') === key; }
+function rowToObj_(r) {
+  var o = {};
+  for (var i = 0; i < HEAD.length; i++) o[HEAD[i]] = r[i];
+  try { o.items = JSON.parse(o.items || '[]'); } catch (e) { o.items = []; }
+  try { o.custom = JSON.parse(o.custom || '[]'); } catch (e) { o.custom = []; }
+  o.created = o.created instanceof Date ? o.created.toISOString() : String(o.created || '');
+  o.updated = o.updated instanceof Date ? o.updated.toISOString() : String(o.updated || '');
+  o.phone = String(o.phone || '').replace(/^'/, '');
+  o.when = String(o.when || '').replace(/^'/, '');
+  o.code = String(o.code || '');
+  return o;
+}
+function findRow_(sh, code) {
+  var last = sh.getLastRow();
+  if (last < 2) return -1;
+  var codes = sh.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = codes.length - 1; i >= 0; i--) if (String(codes[i][0]) === code) return i + 2;
+  return -1;
+}
+function rate_(bucket, limit, seconds) {
+  var c = CacheService.getScriptCache();
+  var n = parseInt(c.get(bucket) || '0', 10);
+  if (n >= limit) return false;
+  c.put(bucket, String(n + 1), seconds);
+  return true;
+}
+function rupee_(n) { return '₹' + Math.round(num_(n)); }
+function whenText_(w, s, mode) {
+  if (w === 'asap') return mode === 'p' ? 'जल्दी (30 मिनट में तैयार)' : 'जल्दी (30–60 मिनट)';
+  var d = String(w).split('-');
+  var months = ['जनवरी', 'फरवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
+  var t = d.length === 3 ? (parseInt(d[2], 10) + ' ' + months[parseInt(d[1], 10) - 1]) : w;
+  return t + (s >= 0 && s < SLOTS.length ? ', ' + SLOTS[s] : '');
+}
+
+/* ---------- notification to the owner's phone (ntfy app) ---------- */
+function notify_(title, message, priority) {
+  var topic = props_().getProperty('TOPIC');
+  if (!topic) return false;
+  try {
+    var res = UrlFetchApp.fetch('https://ntfy.sh/', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+      payload: JSON.stringify({ topic: topic, title: title, message: message, priority: priority || 4,
+        tags: ['shopping_bags'], click: BILLING_URL + '#online' })
+    });
+    return res.getResponseCode() < 300;
+  } catch (e) { return false; }
+}
+
+/* ---------- web app entry points ---------- */
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  try {
+    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY') });
+    if (p.action === 'init') return out_(init_());
+    if (p.action === 'status') return out_(status_(p.code, p.p4));
+    if (p.action === 'list') return out_(list_(p.key, p.days));
+    if (p.action === 'testnotify') {
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      return out_({ ok: notify_('✅ MB Sweets — टेस्ट', 'नोटिफिकेशन ठीक से आ रहा है। नया ऑनलाइन ऑर्डर आने पर ऐसे ही बजेगा।', 4) });
+    }
+    return out_({ ok: false, error: 'action' });
+  } catch (err) {
+    return out_({ ok: false, error: 'server', detail: String(err) });
+  }
+}
+
+function doPost(e) {
+  var body = {};
+  try { body = JSON.parse((e && e.postData && e.postData.contents) || '{}'); } catch (err) { return out_({ ok: false, error: 'json' }); }
+  try {
+    if (body.action === 'create') return out_(create_(body.order || {}));
+    if (body.action === 'update') return out_(update_(body));
+    if (body.action === 'list') return out_(list_(body.key, body.days));
+    return out_({ ok: false, error: 'action' });
+  } catch (err) {
+    return out_({ ok: false, error: 'server', detail: String(err) });
+  }
+}
+
+/* ---------- first-time setup: makes the secret key and the ntfy name ---------- */
+function init_() {
+  var pr = props_();
+  if (pr.getProperty('KEY')) return { ok: false, error: 'already' };
+  var ss = ss_();
+  if (!ss) return { ok: false, error: 'nosheet' };
+  pr.setProperty('SHEET_ID', ss.getId());
+  var key = rnd_(24), topic = 'mbsweets-' + rnd_(12);
+  pr.setProperty('KEY', key);
+  pr.setProperty('TOPIC', topic);
+  sheet_();
+  return { ok: true, key: key, topic: topic };
+}
+
+/* run this once from the editor (▶ Run) only if you ever need a fresh key */
+function resetSetup() {
+  var pr = props_();
+  pr.deleteProperty('KEY');
+  pr.deleteProperty('TOPIC');
+}
+
+/* ---------- customer places an order ---------- */
+function create_(o) {
+  if (o.hp) return { ok: true, code: 'X' };                       // bots fill the hidden field
+  var phone = str_(o.p, 15).replace(/\D/g, '');
+  if (!/^[6-9]\d{9}$/.test(phone)) return { ok: false, error: 'phone' };
+  var name = str_(o.n, 60).trim();
+  if (name.length < 2) return { ok: false, error: 'name' };
+  var mode = o.m === 'p' ? 'p' : 'd';
+  var items = Array.isArray(o.i) ? o.i.slice(0, 60).filter(function (r) {
+    return Array.isArray(r) && r.length >= 2 && /^[a-z0-9]{1,12}$/i.test(String(r[0])) && num_(r[1]) > 0 && num_(r[1]) <= 500;
+  }).map(function (r) { return [String(r[0]), num_(r[1])]; }) : [];
+  var custom = Array.isArray(o.x) ? o.x.slice(0, 20).filter(function (r) {
+    return Array.isArray(r) && r.length >= 2 && str_(r[1], 300).trim();
+  }).map(function (r) { return [r[0] === 'cake' ? 'cake' : 'pack', str_(r[1], 300)]; }) : [];
+  if (!items.length && !custom.length) return { ok: false, error: 'empty' };
+  var when = (o.w === 'asap' || /^\d{4}-\d{2}-\d{2}$/.test(String(o.w))) ? String(o.w) : 'asap';
+  var slot = (isFinite(o.s) && o.s >= 0 && o.s < SLOTS.length) ? Number(o.s) : -1;
+  var code = /^W\d{4}-\d{5}$/.test(String(o.c)) ? String(o.c) : ('W' + Utilities.formatDate(new Date(), 'Asia/Kolkata', 'ddMM-HHmm') + Math.floor(Math.random() * 10));
+
+  if (!rate_('rl_p_' + phone, 6, 600)) return { ok: false, error: 'rate' };
+  if (!rate_('rl_all', 120, 3600)) return { ok: false, error: 'rate' };
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sh = sheet_();
+    if (findRow_(sh, code) > 0) return { ok: true, code: code, dup: true };
+    var lat = '', lng = '';
+    if (Array.isArray(o.l) && o.l.length === 2 && isFinite(o.l[0]) && isFinite(o.l[1])) { lat = Number(o.l[0]); lng = Number(o.l[1]); }
+    var now = new Date();
+    sh.appendRow([code, now, 'new', name, "'" + phone, mode, str_(o.g, 80), str_(o.a, 200), str_(o.k, 120),
+      lat, lng, isFinite(o.dk) ? Number(o.dk) : '', "'" + when, slot, str_(o.sm, 500), num_(o.t),
+      JSON.stringify(items), JSON.stringify(custom), str_(o.cm, 120), str_(o.nt, 300),
+      o.lang === 'en' ? 'en' : 'hi', now, '', '']);
+  } finally {
+    lock.releaseLock();
+  }
+  var n = items.length + custom.length;
+  notify_('🛍️ नया ऑर्डर ' + rupee_(o.t) + (custom.length ? ' +' : ''),
+    whenText_(when, slot, mode) + ' · ' + (mode === 'p' ? '🏪 दुकान से लेंगे' : '🚚 डिलीवरी') + ' · ' + n + ' आइटम\nदबाकर बिलिंग ऐप में देखें', 5);
+  return { ok: true, code: code };
+}
+
+/* ---------- customer checks their order status ---------- */
+function status_(code, p4) {
+  code = str_(code, 20);
+  var sh = sheet_();
+  var row = findRow_(sh, code);
+  if (row < 0) return { ok: false, error: 'notfound' };
+  var o = rowToObj_(sh.getRange(row, 1, 1, HEAD.length).getValues()[0]);
+  if (String(o.phone).slice(-4) !== String(p4 || '')) return { ok: false, error: 'notfound' };
+  return { ok: true, code: o.code, status: o.status, statusNote: o.statusNote, total: o.total,
+    confirmedTotal: o.confirmedTotal, mode: o.mode, when: o.when, slot: o.slot, updated: o.updated };
+}
+
+/* ---------- billing app reads the orders ---------- */
+function list_(key, days) {
+  if (!keyOk_(key)) return { ok: false, error: 'key' };
+  var sh = sheet_();
+  var last = sh.getLastRow();
+  if (last < 2) return { ok: true, orders: [], now: new Date().toISOString() };
+  var from = Math.max(2, last - 499);
+  var rows = sh.getRange(from, 1, last - from + 1, HEAD.length).getValues();
+  var since = Date.now() - Math.min(60, Math.max(1, num_(days) || 10)) * 86400000;
+  var list = [];
+  rows.forEach(function (r) {
+    var o = rowToObj_(r);
+    var t = new Date(o.created).getTime();
+    if (o.status === 'new' || o.status === 'accepted' || o.status === 'out' || t >= since) list.push(o);
+  });
+  return { ok: true, orders: list, now: new Date().toISOString() };
+}
+
+/* ---------- billing app changes a status ---------- */
+function update_(b) {
+  if (!keyOk_(b.key)) return { ok: false, error: 'key' };
+  var status = String(b.status || '');
+  if (STATUSES.indexOf(status) < 0) return { ok: false, error: 'status' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sh = sheet_();
+    var row = findRow_(sh, str_(b.code, 20));
+    if (row < 0) return { ok: false, error: 'notfound' };
+    sh.getRange(row, HEAD.indexOf('status') + 1).setValue(status);
+    sh.getRange(row, HEAD.indexOf('updated') + 1).setValue(new Date());
+    if (b.note !== undefined) sh.getRange(row, HEAD.indexOf('statusNote') + 1).setValue(str_(b.note, 200));
+    if (b.total !== undefined && b.total !== null && b.total !== '') sh.getRange(row, HEAD.indexOf('confirmedTotal') + 1).setValue(num_(b.total));
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true };
+}
