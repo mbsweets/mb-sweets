@@ -230,7 +230,7 @@ hi:{
  inst_txt:'MB Sweets ऐप फोन में रखें — अगली बार सीधे आइकन से ऑर्डर करें',inst_btn:'📲 ऐप इंस्टॉल करें',inst_done:'ऐप इंस्टॉल हो गया ✓ होम स्क्रीन पर "MB Sweets" आइकन देखें',
  inst_h:'ऐप इंस्टॉल करें',
  inst_ios:['नीचे (या ऊपर) शेयर बटन ⬆️ दबाएं।','"Add to Home Screen" / "होम स्क्रीन में जोड़ें" चुनें।','"Add" दबाएं — होम स्क्रीन पर MB Sweets का आइकन आ जाएगा।'],
- inst_and:['अगर यह पेज WhatsApp या Instagram के अंदर खुला है, तो ऊपर ⋮ दबाकर "Chrome में खोलें" चुनें।','Chrome में ऊपर ⋮ दबाएं।','"ऐप इंस्टॉल करें" या "होम स्क्रीन में जोड़ें" चुनें, फिर "इंस्टॉल" दबाएं।'],
+ inst_and:['अगर Chrome के ⋮ मेन्यू में "ऐप खोलें" / "Open app" लिखा है, तो ऐप पहले से फोन में है — होम स्क्रीन पर MB Sweets आइकन से खोलें।','अगर यह पेज WhatsApp या Instagram के अंदर खुला है, तो ऊपर ⋮ दबाकर "Chrome में खोलें" चुनें।','Chrome में ऊपर ⋮ दबाएं।','"ऐप इंस्टॉल करें" या "होम स्क्रीन में जोड़ें" चुनें, फिर "इंस्टॉल" दबाएं।'],
  inst_note:'इंस्टॉल करने के बाद ऐप में हमेशा नए दाम और मेन्यू दिखेंगे — कुछ अपडेट नहीं करना पड़ता।',
  tag:'मिठाई · दूध-दही-पनीर · केक',
  st_open:'ऑर्डर चालू · 30–60 मिनट में डिलीवरी',
@@ -339,7 +339,7 @@ en:{
  inst_txt:'Keep the MB Sweets app on your phone — order straight from the icon next time',inst_btn:'📲 Install app',inst_done:'App installed ✓ Look for the "MB Sweets" icon on your home screen',
  inst_h:'Install the app',
  inst_ios:['Tap the Share button ⬆️ (bottom or top).','Choose "Add to Home Screen".','Tap "Add" — the MB Sweets icon appears on your home screen.'],
- inst_and:['If this page opened inside WhatsApp or Instagram, tap ⋮ and choose "Open in Chrome".','In Chrome, tap ⋮ at the top.','Choose "Install app" or "Add to Home screen", then tap Install.'],
+ inst_and:['If Chrome\'s ⋮ menu shows "Open app", the app is already on your phone — open it from the MB Sweets icon.','If this page opened inside WhatsApp or Instagram, tap ⋮ and choose "Open in Chrome".','In Chrome, tap ⋮ at the top.','Choose "Install app" or "Add to Home screen", then tap Install.'],
  inst_note:'After installing, the app always shows the latest prices and menu — nothing to update.',
  tag:'Sweets · Milk-Dahi-Paneer · Cakes',
  st_open:'Taking orders · delivery in 30–60 min',
@@ -671,11 +671,11 @@ function lineName(l,lang){
 }
 
 /* ---------- install as app ---------- */
-var installEvt=null;
+var installEvt=null,appInstalled=false;
 function isStandalone(){try{return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}catch(e){return false;}}
 function isIOS(){var ua=navigator.userAgent||'';return /iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
 function installBarHtml(){
-  if(isStandalone())return '';
+  if(isStandalone()||appInstalled)return '';
   return '<div class="instbar" id="instbar"><img src="../icon-192.png" alt=""><span>'+t('inst_txt')+'</span><button class="btn primary" data-act="install">'+t('inst_btn')+'</button></div>';
 }
 function doInstall(){
@@ -696,7 +696,15 @@ function renderInstall(){
     '<button class="btn primary block" data-act="back">'+t('back')+'</button>');
 }
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();installEvt=e;});
-window.addEventListener('appinstalled',function(){installEvt=null;var b=$('#instbar');if(b)b.remove();toast(t('inst_done'));});
+function checkInstalled(){
+  try{
+    if(!navigator.getInstalledRelatedApps)return;
+    navigator.getInstalledRelatedApps().then(function(apps){
+      if(apps&&apps.length){appInstalled=true;var b=$('#instbar');if(b)b.remove();}
+    },function(){});
+  }catch(e){}
+}
+window.addEventListener('appinstalled',function(){installEvt=null;appInstalled=true;var b=$('#instbar');if(b)b.remove();toast(t('inst_done'));});
 
 /* ---------- MENU PAGE ---------- */
 function cardHtml(card){
@@ -1313,6 +1321,7 @@ setInterval(function(){
 load();
 renderMenu();
 route();
+checkInstalled();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
 })();
 </script>
