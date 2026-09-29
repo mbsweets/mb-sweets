@@ -800,6 +800,7 @@ function renderBackup(){
   var s=state.shop;
   var notifOn=('Notification' in window)&&Notification.permission==='granted';
   var canShare=!!navigator.share;
+  var isStandalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
   var html=
     '<div class="sechead" style="margin-top:4px"><h2>बैकअप (रोज़ करो)</h2></div>'+
     '<p class="hint" id="last-backup-txt" style="font-weight:700">'+backupStatusText()+'</p>'+
@@ -822,8 +823,8 @@ function renderBackup(){
     '<div class="actbar"><button class="btn primary small" data-act="save-shopinfo">सेव करो</button></div>'+
 
     '<div class="sechead" style="margin-top:22px"><h2>ऐप और रिमाइंडर</h2></div>'+
-    '<div class="installbox"><p>📲 इस ऐप को फोन में असली ऐप जैसा इंस्टॉल करो — अपना आइकन, बिना ब्राउज़र बार के, बिना इंटरनेट के भी खुलेगा।</p><button class="btn primary small" data-act="install-app">➕ ऐप इंस्टॉल करो</button></div>'+
-    '<div class="installbox"><p>🔔 <b>ऑर्डर रिमाइंडर:</b> हर ऑर्डर पर "रिमाइंडर" बटन दबाकर एक calendar फ़ाइल डाउनलोड करो — उसे खोलकर अपने Google Calendar में जोड़ लो। इससे डिलीवरी से 2 दिन और 1 दिन पहले आपके फ़ोन में पक्का notification आएगा (जैसे दूध पहले से मंगवाना है तो याद रहेगा)। <b>ध्यान दें:</b> यह डाउनलोड सिर्फ तब काम करेगा जब ऐप install किया हो या सीधे इसके browser link में खोला हो — Claude की chat window के अंदर preview में नहीं चलेगा।</p>'+
+    (isStandalone?'<div class="installbox"><p>✓ ऐप इस फ़ोन में इंस्टॉल है। होम स्क्रीन के MB Sweets आइकन से खोलो।</p></div>':'<div class="installbox"><p>📲 इस ऐप को फोन में असली ऐप जैसा इंस्टॉल करो — अपना आइकन, बिना ब्राउज़र बार के, बिना इंटरनेट के भी खुलेगा।</p><button class="btn primary small" data-act="install-app">➕ ऐप इंस्टॉल करो</button></div>')+
+    '<div class="installbox"><p>🔔 <b>ऑर्डर रिमाइंडर:</b> हर ऑर्डर पर "रिमाइंडर" बटन दबाकर एक calendar फ़ाइल डाउनलोड करो — उसे खोलकर अपने Google Calendar में जोड़ लो। इससे डिलीवरी से 2 दिन और 1 दिन पहले आपके फ़ोन में पक्का notification आएगा (जैसे दूध पहले से मंगवाना है तो याद रहेगा)।</p>'+
     '<p class="hint" style="margin-top:8px">इसके अलावा, जब भी यह ऐप खोलो और कल/परसों का कोई सामान बाकी हो, ऐप खुद भी एक notification दिखा सकता है — उसके लिए नीचे से अनुमति दे दो:</p>'+
     '<button class="btn small" data-act="enable-notif">'+(notifOn?'✓ notification चालू है':'notification ऑन करो')+'</button></div>';
   $('#main').innerHTML=html;
