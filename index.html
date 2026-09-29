@@ -1208,7 +1208,7 @@ function openInstallHelpSheet(){
 /* ---------- WhatsApp messages ---------- */
 function waLink(phone,text){
   var p=phoneNorm(phone);if(!p)return '';
-  return 'https://wa.me/'+p+'?text='+encodeURIComponent(text);
+  return 'https://api.whatsapp.com/send?phone='+p+'&text='+encodeURIComponent(text);
 }
 function appendTerms(L){
   var terms=(state.shop.terms||'').trim();
@@ -1224,7 +1224,7 @@ function billLineItems(L, o){
   var baseDayKey=dayKey(o.date);
   o.items.forEach(function(it,idx){
     var amt=num(it.qty)*num(it.rate);
-    L.push((idx+1)+'. '+displayName(it)+(it.delivered?(' - Diya gaya'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':'')):''));
+    L.push((idx+1)+'. '+displayName(it)+' '+(it.delivered?('✅'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':'')):'⏳'));
     L.push('    '+fmtQty(it.qty)+' '+it.unit+' x '+rupee(it.rate)+' = '+rupee(amt));
     if(it.date&&it.date!==baseDayKey){
       L.push('    Delivery: '+fmtDshort(it.date));
@@ -1245,6 +1245,8 @@ function billMessage(o){
   L.push('Customer: '+(c?c.name:'-'));
   L.push('-------------------');
   billLineItems(L, o);
+  L.push('');
+  L.push('✅ = दिया गया    ⏳ = बाकी');
   L.push('-------------------');
   L.push('Total Bill: '+rupee(orderTotal(o)));
   L.push('Jama (Advance/Paid): '+rupee(orderPaid(o)));
@@ -1265,6 +1267,7 @@ function summaryMessage(c){
   L.push('Ph: '+state.shop.phone);
   L.push('===================');
   L.push('Poora Hisaab: '+c.name);
+  L.push('✅ = दिया गया    ⏳ = बाकी');
   L.push('');
   var totBill=0,totPaid=0;
   os.forEach(function(o){
@@ -1398,19 +1401,43 @@ function biTableHead(ctx,y){
   ctx.fillStyle=BI.maroon;ctx.fillRect(P,y+46,W-2*P,3);
   return y+49;
 }
+function biIconDone(ctx,x,y,s){
+  biRound(ctx,x,y,s,s,Math.round(s*0.22),'#2FA84F',null);
+  ctx.save();ctx.strokeStyle='#FFFFFF';ctx.lineWidth=Math.max(3,s*0.14);ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(x+s*0.24,y+s*0.53);ctx.lineTo(x+s*0.43,y+s*0.71);ctx.lineTo(x+s*0.77,y+s*0.31);ctx.stroke();
+  ctx.restore();
+}
+function biIconPending(ctx,x,y,s){
+  ctx.save();
+  var frame='#7A5A1E',sand='#E0A21B';
+  ctx.fillStyle=frame;
+  biRound(ctx,x+s*0.10,y+s*0.02,s*0.80,s*0.13,s*0.05,frame,null);
+  biRound(ctx,x+s*0.10,y+s*0.85,s*0.80,s*0.13,s*0.05,frame,null);
+  ctx.beginPath();
+  ctx.moveTo(x+s*0.20,y+s*0.15);ctx.lineTo(x+s*0.80,y+s*0.15);ctx.lineTo(x+s*0.56,y+s*0.50);
+  ctx.lineTo(x+s*0.80,y+s*0.85);ctx.lineTo(x+s*0.20,y+s*0.85);ctx.lineTo(x+s*0.44,y+s*0.50);ctx.closePath();
+  ctx.fillStyle='#FFF4DC';ctx.fill();
+  ctx.strokeStyle=frame;ctx.lineWidth=Math.max(2,s*0.07);ctx.lineJoin='round';ctx.stroke();
+  ctx.fillStyle=sand;
+  ctx.beginPath();ctx.moveTo(x+s*0.32,y+s*0.25);ctx.lineTo(x+s*0.68,y+s*0.25);ctx.lineTo(x+s*0.50,y+s*0.45);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(x+s*0.50,y+s*0.60);ctx.lineTo(x+s*0.71,y+s*0.80);ctx.lineTo(x+s*0.29,y+s*0.80);ctx.closePath();ctx.fill();
+  ctx.fillRect(x+s*0.485,y+s*0.45,s*0.03,s*0.17);
+  ctx.restore();
+}
 function biItemRow(ctx,y,o,it,idx){
-  var W=BI.W,P=BI.P,nameW=BI.QX-176-P;
+  var W=BI.W,P=BI.P,IS=34,NX=P+IS+14,nameW=BI.QX-176-NX;
   biFont(ctx,600,32);var nl=biWrap(ctx,(idx+1)+'. '+displayName(it),nameW);
   var subs=[];
   if(it.date&&it.date!==dayKey(o.date))subs.push({t:'डिलीवरी: '+fmtDshort(it.date),c:BI.gold});
-  if(it.delivered)subs.push({t:'✓ दिया गया'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':''),c:BI.green});
+  if(it.delivered&&it.deliveredAt)subs.push({t:'दिया गया: '+fmtDshort(it.deliveredAt),c:BI.green});
   var fy=y+50,yy=fy;
+  if(it.delivered)biIconDone(ctx,P,fy-28,IS);else biIconPending(ctx,P,fy-29,IS);
   biFont(ctx,600,32);
-  nl.forEach(function(l,i){if(i>0)yy+=42;biText(ctx,l,P,yy,'left',BI.ink);});
+  nl.forEach(function(l,i){if(i>0)yy+=42;biText(ctx,l,NX,yy,'left',BI.ink);});
   biFont(ctx,400,30);biText(ctx,fmtQty(it.qty)+' '+it.unit,BI.QX,fy,'right',BI.ink);
   biText(ctx,rupee(it.rate),BI.RX,fy,'right',BI.muted);
   biFont(ctx,700,31);biText(ctx,rupee(num(it.qty)*num(it.rate)),W-P,fy,'right',BI.ink);
-  subs.forEach(function(s){yy+=36;biFont(ctx,600,25);biText(ctx,s.t,P+36,yy,'left',s.c);});
+  subs.forEach(function(s){yy+=36;biFont(ctx,600,25);biText(ctx,s.t,NX+22,yy,'left',s.c);});
   var bottom=yy+24;
   ctx.fillStyle=BI.line;ctx.fillRect(P,bottom,W-2*P,2);
   return bottom+2;
@@ -1432,6 +1459,8 @@ function biOrderSub(ctx,y,o){
 function biTotals(ctx,y,tot,paid,payments){
   var W=BI.W,P=BI.P,bx=W-P-520;
   y+=28;
+  biIconDone(ctx,P,y+6,30);biFont(ctx,600,25);biText(ctx,'दिया गया',P+42,y+30,'left',BI.muted);
+  biIconPending(ctx,P,y+54,30);biText(ctx,'बाकी',P+42,y+78,'left',BI.muted);
   biFont(ctx,600,31);biText(ctx,'कुल बिल',bx,y+32,'left',BI.ink);biText(ctx,rupee(tot),W-P,y+32,'right',BI.ink);y+=50;
   biText(ctx,'जमा',bx,y+32,'left',BI.ink);biText(ctx,rupee(paid),W-P,y+32,'right',BI.green);y+=46;
   (payments||[]).forEach(function(p){
