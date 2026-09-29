@@ -461,6 +461,17 @@ function renderShell(){
   renderNav();
   renderBanner();
 }
+function storageUsedPct(){try{var n=(localStorage.getItem(KEY)||'').length;return Math.round(n/5000000*1000)/10;}catch(e){return 0;}}
+function requestPersist(){
+  try{
+    if(navigator.storage&&navigator.storage.persist){
+      navigator.storage.persisted().then(function(p){
+        if(p){ui.persisted=true;return;}
+        return navigator.storage.persist().then(function(g){ui.persisted=!!g;});
+      }).catch(function(){});
+    }
+  }catch(e){}
+}
 function daysSinceBackup(){
   var ts=localStorage.getItem('mbmb-lastbackup');
   if(!ts)return null;
@@ -488,6 +499,8 @@ function renderBanner(){
   var html='';
   if(!ui.storageOk)html+='<div class="banner">Is browser me data save nahi ho pa raha. Backup zaroor le lo, warna data chala jayega.</div>';
   html+=backupWarningHtml();
+  var used=storageUsedPct();
+  if(used>=70)html+='<button class="banner btn-banner" data-act="nav" data-v="backup">⚠️ ऐप की जगह '+used+'% भर गई है। आज ही बैकअप लो और ऐप अपडेट करवाओ ताकि पुराने ऑर्डर अलग रखे जा सकें।</button>';
   $('#banner').innerHTML=html;
 }
 function renderNav(){
@@ -804,6 +817,7 @@ function renderBackup(){
   var html=
     '<div class="sechead" style="margin-top:4px"><h2>बैकअप (रोज़ करो)</h2></div>'+
     '<p class="hint" id="last-backup-txt" style="font-weight:700">'+backupStatusText()+'</p>'+
+    '<p class="hint">डेटा: '+state.customers.length+' ग्राहक, '+state.orders.length+' ऑर्डर · जगह भरी: '+storageUsedPct()+'%'+(ui.persisted?' · Chrome सुरक्षा: पक्की ✓':'')+'</p>'+
     '<p class="hint">Data sirf isi phone me save hota hai. Roz dukaan band karte waqt backup apne hi WhatsApp number par bhej do — phone kho jaye ya kharab ho jaye to bhi data bacha rahega.</p>'+
     '<div class="actbar">'+(canShare?'<button class="btn primary small" data-act="share-backup">📤 WhatsApp पर भेजो</button>':'')+
     '<button class="btn '+(canShare?'':'primary ')+'small" data-act="copy-backup">Copy karo</button></div>'+
@@ -1738,6 +1752,7 @@ load();
 renderShell();
 renderRoute();
 checkDueReminders();
+requestPersist();
 })();
 </script>
 </body>
