@@ -1,0 +1,1743 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maa Bhagwati Misthan Bhandar</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5C1620">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MB Sweets">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF3E7; --card:#FFFFFF; --ink:#2B1712; --muted:#8A7566; --line:#E6D9C6;
+  --brandband:#5C1620; --on-brand:#FBEEDD;
+  --gold:#9C6B00; --green:#2F6F4E; --amber:#A9720A; --red:#A6332E; --red-bg:#F6E1DD;
+  color-scheme: light dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1C1210; --card:#251813; --ink:#F3E9DD; --muted:#B39C89; --line:#3B2A22;
+    --gold:#E0B23D; --green:#5CD39A; --amber:#F2B84B; --red:#FF8A8A; --red-bg:#3B1C1C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1C1210; --card:#251813; --ink:#F3E9DD; --muted:#B39C89; --line:#3B2A22;
+  --gold:#E0B23D; --green:#5CD39A; --amber:#F2B84B; --red:#FF8A8A; --red-bg:#3B1C1C;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--paper)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Mukta',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15.5px;line-height:1.45;-webkit-text-size-adjust:100%}
+body.noscroll{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brandband);outline-offset:2px}
+h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
+
+.letterhead{background:var(--brandband);color:var(--on-brand);padding:16px 16px 14px;padding-top:calc(16px + env(safe-area-inset-top,0px))}
+.letterhead h1{font-size:1.4rem;line-height:1.2}
+.letterhead p{margin:2px 0 0;font-size:.82rem;opacity:.88}
+.lh-row{display:flex;align-items:center;gap:12px}
+.lh-logo{width:54px;height:54px;object-fit:contain;flex:0 0 auto;filter:drop-shadow(0 2px 5px rgba(0,0,0,.3))}
+.lh-text{min-width:0}
+
+.app{max-width:560px;margin:0 auto;padding:14px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+
+.band{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px}
+.band>div{padding:12px 6px;text-align:center;border-left:1px solid var(--line)}
+.band>div:first-child{border-left:0}
+.band b{display:block;font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:1.15rem;line-height:1.2}
+.band span{display:block;font-size:.72rem;color:var(--muted);line-height:1.25;margin-top:2px}
+.band .tom b{color:var(--gold)}
+.band .due b{color:var(--red)}
+
+.banner{background:var(--red-bg);color:var(--red);border-radius:10px;padding:8px 12px;font-size:.9rem;margin-bottom:12px}
+.banner.btn-banner{display:block;width:100%;text-align:left;border:0;font-family:inherit;font-weight:600}
+
+.duecard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.duemain{display:flex;flex-direction:column;align-items:flex-start;width:100%;background:none;border:0;text-align:left;padding:0;min-height:auto}
+.duemain .nm{font-weight:700}
+.duemain .sub{color:var(--red);font-size:.8rem;margin-top:2px}
+.dueacts{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.dueacts .dueamt{font-weight:700;color:var(--red);font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:1.05rem}
+
+#printArea{display:none}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{display:block;position:absolute;left:0;top:0;width:100%;padding:16px;color:#000;background:#fff}
+  #printArea table{width:100%;border-collapse:collapse}
+  #printArea th,#printArea td{border:1px solid #999;padding:6px}
+}
+
+.sumcard{background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.sumhead{font-weight:700;color:var(--gold);margin-bottom:6px;font-size:.95rem}
+.sumrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;padding:6px 0;border-top:1px dashed var(--line)}
+.sumrow:first-of-type{border-top:0}
+.sumnm{font-weight:700;flex:1;min-width:110px}
+.sumqty{font-weight:700;color:var(--brandband);white-space:nowrap}
+.sumdetail{width:100%;color:var(--muted);font-size:.78rem}
+
+.sechead{display:flex;align-items:baseline;gap:8px;margin:18px 0 8px}
+.sechead h2{font-size:1.05rem}
+.sechead .cnt{color:var(--muted);font-size:.85rem}
+
+.mini{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mini.tomorrow{border-color:var(--gold);border-width:1.5px}
+.mini .l{min-width:0}
+.mini .nm,.mini .sub,.crow .nm,.crow .ph{display:block}
+.crow .l{min-width:0}
+#b-text{display:block;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+.mini .nm{font-weight:700;overflow-wrap:anywhere}
+.mini .sub{color:var(--muted);font-size:.82rem;margin-top:1px}
+.mini .r{text-align:right;flex:0 0 auto}
+.mini .r b{display:block;color:var(--red);font-size:.95rem}
+.mini .r span{display:block;color:var(--muted);font-size:.75rem}
+
+#search,#itemSearch,#ordersSearch{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);font-size:16px;margin-top:2px}
+#ordersSearch{margin:2px 0 10px}
+
+.addrow{display:flex;justify-content:flex-end;margin:10px 0 6px}
+.lnk{background:none;border:0;color:var(--brandband);font-weight:700;min-height:40px;padding:0 4px;border-radius:8px}
+:root[data-theme="dark"] .lnk, @media (prefers-color-scheme:dark){.lnk{color:#E9A9B0}}
+.lnk.danger{color:var(--red)}
+.lnk.muted{color:var(--muted);font-weight:500}
+
+.crow{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.crow .nm{font-weight:700}
+.crow .ph{color:var(--muted);font-size:.82rem;margin-top:1px}
+.crow .due{color:var(--red);font-weight:700;font-size:.92rem;white-space:nowrap}
+.crow .clear{color:var(--green);font-size:.82rem;white-space:nowrap}
+
+.empty{text-align:center;color:var(--muted);padding:32px 12px}
+.empty b{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:4px}
+
+/* customer profile */
+.backbtn{display:inline-flex;align-items:center;gap:4px;background:none;border:0;color:var(--muted);font-weight:600;padding:6px 0;min-height:40px}
+.cphead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px}
+.cphead h2{font-size:1.35rem}
+.cphead .ph a{color:var(--brandband);text-decoration:none;font-weight:600}
+.cphead .addr{color:var(--muted);font-size:.88rem;margin-top:2px}
+.cpacts{display:flex;gap:8px;margin-top:6px}
+
+.actbar{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
+.btn{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:transparent;font-weight:700;color:var(--ink)}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn.primary{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
+.btn.warn{background:var(--red);border-color:var(--red);color:#fff}
+.btn.small{min-height:40px;padding:0 12px;font-size:.92rem}
+.btn:disabled{opacity:.45}
+
+.grouphead{margin:18px 0 8px;font-size:1rem;color:var(--muted);font-weight:700}
+
+.order{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.order.cancelled{opacity:.58}
+.otop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.otop .obadge{font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-weight:700;font-size:.85rem;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:1px 8px;flex:0 0 auto}
+.odate{font-weight:700;margin-top:2px}
+.stamp{font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-weight:700;font-size:.9rem;padding:1px 10px;border:2px solid currentColor;border-radius:6px;transform:rotate(-3deg);white-space:nowrap;flex:0 0 auto}
+.st-pending{color:var(--amber)} .st-partial{color:var(--gold)} .st-delivered{color:var(--green)} .st-cancelled{color:var(--muted);text-decoration:line-through}
+
+.checklist{list-style:none;margin:10px 0 0;padding:10px 0 0;border-top:1px dashed var(--line)}
+.checklist li{display:flex;align-items:center;gap:10px;padding:5px 0}
+.chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:transparent}
+.chk.on{background:var(--green);border-color:var(--green);color:#fff}
+.citem{flex:1;overflow-wrap:anywhere}
+.camt{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.9rem}
+.checklist li.ro{opacity:.7}
+.checklist li button{background:none;border:0;text-align:left;display:flex;align-items:center;gap:10px;width:100%;padding:0;min-height:32px}
+
+.paylog{margin-top:8px;font-size:.85rem;color:var(--muted)}
+.paylog div{padding:1px 0}
+
+.money{display:flex;gap:16px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);align-items:baseline;flex-wrap:wrap}
+.money div{display:flex;flex-direction:column}
+.money span{font-size:.76rem;color:var(--muted)}
+.money b{font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:1.05rem}
+.money .due b{color:var(--red)}
+.money .paidall{margin-left:auto;color:var(--green);font-weight:700;font-size:.9rem}
+
+.oacts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+.navbar{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.navbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:9px 4px 8px;color:var(--muted);font-size:.74rem;font-weight:600}
+.navbtn .ic{font-size:1.25rem;line-height:1}
+.navbtn.on{color:var(--brandband)}
+
+.fab{position:fixed;right:16px;bottom:calc(64px + env(safe-area-inset-bottom,0px) + 14px);z-index:6;background:var(--brandband);color:var(--on-brand);border:0;border-radius:999px;padding:0 20px;min-height:50px;font-weight:700;font-size:.98rem;box-shadow:0 6px 16px rgba(60,10,15,.35)}
+
+.overlay{position:fixed;inset:0;z-index:10;background:rgba(20,10,8,.55);display:flex;align-items:flex-end;justify-content:center;padding-top:env(safe-area-inset-top,0px)}
+@keyframes rise{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:calc(100% - 20px);overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));animation:rise .2s ease-out;overscroll-behavior:contain}
+.sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
+.sh-head h2{font-size:1.2rem}
+.sh-actions{display:flex;gap:10px;margin-top:14px}
+.sh-actions .btn{flex:1}
+.fl{display:block;margin-top:12px;font-weight:600;font-size:.9rem;color:var(--muted)}
+.fl input,.fl select,.fl textarea{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:16px}
+.err{color:var(--red);font-size:.88rem;margin-top:10px;min-height:1px}
+.hint{color:var(--muted);font-size:.88rem;margin:6px 0}
+
+/* order-form specific */
+.custchip{display:flex;justify-content:space-between;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:6px}
+.custchip b{overflow-wrap:anywhere}
+.custchip span{color:var(--muted);font-size:.82rem;display:block}
+.suglist{margin-top:6px;max-height:180px;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
+.sugrow{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 12px;min-height:40px}
+.sugrow:last-child{border-bottom:0}
+.sugrow small{display:block;color:var(--muted)}
+.sugrow.newc{color:var(--brandband);font-weight:700}
+
+.cattabs{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px}
+.cattab{flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:6px 13px;min-height:36px;font-weight:600;font-size:.88rem}
+.cattab.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:7px 11px;font-size:.88rem;min-height:38px}
+.chip small{display:block;color:var(--muted);font-size:.74rem}
+.chip.empty{color:var(--muted);font-style:normal}
+
+.lines{margin-top:10px}
+.lrow{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.lrow .ltop{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.lrow .lname{font-weight:700;overflow-wrap:anywhere}
+.lrow .lx{background:none;border:0;color:var(--red);font-size:1.25rem;line-height:1;min-height:32px;padding:0 4px}
+.lgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
+.lgrid label{display:block;font-size:.72rem;color:var(--muted)}
+.lgrid input{width:100%;margin-top:2px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:16px}
+.lamt{font-size:.78rem;color:var(--muted);margin-top:4px;text-align:right}
+.ldaterow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;flex-wrap:wrap}
+.ldaterow label{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ldaterow input[type=date]{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:14px;color:var(--ink)}
+.ldaterow .lnk{font-size:.78rem;padding:0;min-height:auto}
+.dtag{background:var(--paper);border:1px solid var(--gold);border-radius:6px;padding:0 6px;font-size:.7rem;color:var(--gold);margin-left:6px;white-space:nowrap;display:inline-block}
+.dtag.dgiven{color:var(--green);border-color:var(--green)}
+.mini.overdue{border-color:var(--red);border-width:1.5px}
+.payrow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.payrow .lnk{min-height:30px;font-size:.8rem;padding:0 4px}
+.homeinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:-4px 0 10px}
+.homeinfo .coll{font-size:.9rem;color:var(--muted)}
+.homeinfo .coll b{color:var(--green)}
+label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+
+.customitem{border:1px dashed var(--line);border-radius:10px;padding:10px;margin-top:10px}
+.customitem .g2{display:grid;grid-template-columns:2fr 1fr;gap:8px}
+.customitem label{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);margin-top:8px}
+
+.ftotal{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding:10px 12px;border-radius:10px;background:var(--paper)}
+.ftotal b{font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:1.25rem;color:var(--brandband)}
+
+/* items tab */
+.itemrow{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.itemrow .nm{font-weight:700}
+.itemrow .un{color:var(--muted);font-size:.82rem}
+.itemrow .pr{font-weight:700;color:var(--gold);white-space:nowrap}
+.catsec{margin-top:16px}
+.catsec h3{font-size:.95rem;color:var(--muted);margin-bottom:7px}
+
+.installbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+.installbox p{margin:0 0 8px}
+.toast{position:fixed;left:50%;bottom:calc(126px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-weight:500;max-width:88%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion: reduce){.sheet{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+<header class="letterhead">
+  <div class="lh-row">
+    <img class="lh-logo" src="logo-header.png" alt="">
+    <div class="lh-text">
+      <h1 id="lh-name"></h1>
+      <p id="lh-addr"></p>
+      <p id="lh-phone"></p>
+    </div>
+  </div>
+</header>
+<div class="app" id="app">
+  <div id="banner"></div>
+  <div id="main"></div>
+</div>
+<nav class="navbar" id="navbar"></nav>
+<button class="fab" id="fab" data-act="fab"></button>
+<div id="sheetRoot"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="printArea"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='mbmb-billing-v1';
+
+var CATS=[['mithai','मिठाई'],['dairy','डेयरी (दूध-दही-पनीर)'],['namkeen','नमकीन'],['cold','कोल्ड ड्रिंक्स'],['cake','केक'],['packaged','पैकेज्ड फूड / बिस्किट / मिक्सचर']];
+var UNIT_OPTS=['किलो','पीस','लीटर','पैकेट','पैक','ग्राम','डिब्बा'];
+var STAMP={pending:'पेंडिंग',partial:'आंशिक',delivered:'डिलीवर',cancelled:'कैंसल'};
+
+var DEFAULT_SHOP={name:'Maa Bhagwati Misthan Bhandar',addr:'Nanaura, Darbhanga, Bihar - 846005',phone:'8002010218',owner:'Pankaj Gupta',terms:'सामान ले जाने से पहले पूरा पेमेंट करना होगा।'};
+var DEFAULT_ITEMS=[
+ ['i1','रसगुल्ला (किलो)','mithai','किलो',300],
+ ['i2','रसगुल्ला (पीस)','mithai','पीस',15],
+ ['i3','बालूशाही (किलो)','mithai','किलो',300],
+ ['i4','बालूशाही (पीस)','mithai','पीस',12],
+ ['i5','गुलाब जामुन (किलो)','mithai','किलो',350],
+ ['i6','गुलाब जामुन (पीस)','mithai','पीस',15],
+ ['i7','चमचम (किलो)','mithai','किलो',320],
+ ['i8','चमचम (पीस)','mithai','पीस',15],
+ ['i9','पेड़ा','mithai','किलो',500],
+ ['i10','मिल्क केक','mithai','किलो',300],
+ ['i11','लड्डू','mithai','किलो',180],
+ ['i12','जलेबी','mithai','किलो',140],
+ ['i13','बूंदी','mithai','किलो',140],
+ ['i14','दूध (फुल क्रीम)','dairy','लीटर',65],
+ ['i15','दूध (टी.एम. हाफ क्रीम)','dairy','लीटर',60],
+ ['i16','पनीर पैकेट (200 ग्राम)','dairy','पैकेट',95],
+ ['i17','खुला पनीर','dairy','किलो',320],
+ ['i18','दही (2 किलो पैक)','dairy','पैक',250],
+ ['i19','दही (5 किलो पैक)','dairy','पैक',550],
+ ['i20','दही (15 किलो पैक)','dairy','पैक',1500],
+ ['i21','नमकीन','namkeen','किलो',200]
+].map(function(r){return {id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
+
+var state={shop:Object.assign({},DEFAULT_SHOP),items:[],customers:[],orders:[],nextOrderNo:1};
+var ui={view:'home',customerId:null,search:'',storageOk:true,editId:null,orderDraft:null,itemsSearch:'',confirm:null,ordersFilter:'all',cameFrom:'home',ordersSearch:'',pendingRestore:null};
+
+/* ---------- storage ---------- */
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){
+      var d=JSON.parse(raw);
+      state.shop=Object.assign({},DEFAULT_SHOP,d.shop||{});
+      state.items=Array.isArray(d.items)?d.items:DEFAULT_ITEMS.map(function(i){return Object.assign({},i);});
+      state.customers=Array.isArray(d.customers)?d.customers:[];
+      state.orders=Array.isArray(d.orders)?d.orders:[];
+      normalizeState();
+      var mx=0;state.orders.forEach(function(o){if(o.no>mx)mx=o.no;});
+      state.nextOrderNo=Math.max(d.nextOrderNo||1,mx+1);
+    }else{
+      state.items=DEFAULT_ITEMS.map(function(i){return Object.assign({},i);});
+      save();
+    }
+  }catch(e){
+    ui.storageOk=false;
+    /* purana data kharab padha gaya to use alag key par bacha lo, taaki overwrite na ho */
+    try{var rawBad=localStorage.getItem(KEY);if(rawBad)localStorage.setItem(KEY+'-corrupt-'+Date.now(),rawBad);}catch(e2){}
+    state.items=DEFAULT_ITEMS.map(function(i){return Object.assign({},i);});
+  }
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));}
+  catch(e){ui.storageOk=false;try{renderBanner();}catch(e2){}}
+}
+function normalizeState(){
+  state.orders.forEach(function(o){
+    if(!Array.isArray(o.items))o.items=[];
+    if(!Array.isArray(o.payments))o.payments=[];
+    o.payments.forEach(function(p){if(!p.id)p.id=uid();});
+    o.items.forEach(function(it){if(!it.lid)it.lid=uid();});
+  });
+}
+
+/* ---------- helpers ---------- */
+function $(s,r){return (r||document).querySelector(s);}
+function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function num(v){var n=parseFloat(v);return isFinite(n)?n:0;}
+function rupee(n){n=num(n);return (n<0?'-':'')+'\u20B9'+Math.abs(n).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function pad(n){return n<10?'0'+n:''+n;}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function dayKey(v){var x=new Date(v);return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());}
+function fmtDT(v){var x=new Date(v);if(isNaN(x))return '-';return x.toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});}
+function fmtDonly(v){var x=new Date(v);if(isNaN(x))return '-';return x.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDshort(v){var x=new Date(v);if(isNaN(x))return '-';return x.toLocaleDateString('en-IN',{day:'numeric',month:'short'});}
+function fmtQty(n){return String(Math.round(num(n)*1000)/1000);}
+function round2(n){return Math.round(num(n)*100)/100;}
+function keyToDate(k){var a=String(k).split('-');return new Date(+a[0],+a[1]-1,+a[2]);}
+function dayDiff(fromKey,toKey){return Math.round((keyToDate(toKey)-keyToDate(fromKey))/86400000);}
+function findCustomerByPhone(phone,exceptId){
+  var p=phoneNorm(phone);if(!p)return null;
+  for(var i=0;i<state.customers.length;i++){var c=state.customers[i];if(c.id!==exceptId&&phoneNorm(c.phone)===p)return c;}
+  return null;
+}
+function phoneProblem(ph,exceptId){
+  if(!ph)return '';
+  if(ph.replace(/\D/g,'').length<10)return 'मोबाइल नंबर पूरा 10 अंकों का लिखो।';
+  var dup=findCustomerByPhone(ph,exceptId);
+  if(dup)return 'यह नंबर पहले से "'+dup.name+'" के नाम से सेव है।';
+  return '';
+}
+function catLabel(c){for(var i=0;i<CATS.length;i++)if(CATS[i][0]===c)return CATS[i][1];return c;}
+function phoneNorm(p){
+  p=String(p||'').replace(/\D/g,'');
+  if(!p)return '';
+  if(p.length===11&&p.charAt(0)==='0')p=p.slice(1);
+  if(p.length===10)p='91'+p;
+  return p;
+}
+var toastTimer;
+function toast(msg){
+  var t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2600);
+}
+function findCustomer(id){for(var i=0;i<state.customers.length;i++)if(state.customers[i].id===id)return state.customers[i];return null;}
+function findOrder(id){for(var i=0;i<state.orders.length;i++)if(state.orders[i].id===id)return state.orders[i];return null;}
+function findItem(id){for(var i=0;i<state.items.length;i++)if(state.items[i].id===id)return state.items[i];return null;}
+function customerOrders(cid){return state.orders.filter(function(o){return o.customerId===cid;});}
+function orderTotal(o){return o.items.reduce(function(s,i){return s+num(i.qty)*num(i.rate);},0);}
+function orderPaid(o){return o.payments.reduce(function(s,p){return s+num(p.amount);},0);}
+function orderDue(o){return round2(Math.max(0,orderTotal(o)-orderPaid(o)));}
+function orderStatus(o){
+  if(o.cancelled)return 'cancelled';
+  var total=o.items.length,done=o.items.filter(function(i){return i.delivered;}).length;
+  if(total===0||done===0)return 'pending';
+  if(done<total)return 'partial';
+  return 'delivered';
+}
+function itemDateKey(o,it){return it.date||dayKey(o.date);}
+function namesList(items,max){
+  var names=items.map(function(it){return it.name+' ×'+fmtQty(it.qty);});
+  if(names.length>max)return names.slice(0,max).join(', ')+' +'+(names.length-max)+' और';
+  return names.join(', ');
+}
+function customerTotals(cid){
+  var t=0,p=0,cnt=0;
+  customerOrders(cid).forEach(function(o){if(!o.cancelled){t+=orderTotal(o);p+=orderPaid(o);cnt++;}});
+  return {billed:t,paid:p,due:round2(Math.max(0,t-p)),extra:round2(Math.max(0,p-t)),count:cnt};
+}
+function allDue(){var t=0;state.customers.forEach(function(c){t+=customerTotals(c.id).due;});return t;}
+function customerOldestDueDate(cid){
+  var os=customerOrders(cid).filter(function(o){return !o.cancelled&&orderDue(o)>0;});
+  if(!os.length)return null;
+  var min=os[0].date;
+  os.forEach(function(o){if(new Date(o.date)<new Date(min))min=o.date;});
+  return min;
+}
+function renderDues(){
+  var rows=state.customers.map(function(c){
+    var t=customerTotals(c.id);
+    if(t.due<=0)return null;
+    var oldest=customerOldestDueDate(c.id);
+    var days=oldest?dayDiff(dayKey(oldest),todayStr()):0;
+    return {c:c,due:t.due,days:days};
+  }).filter(function(x){return x;}).sort(function(a,b){return b.days-a.days;});
+
+  var html='<button class="backbtn" data-act="nav" data-v="home">\u2190 होम</button>'+
+    '<div class="sechead"><h2>सबसे पुराना बाकी</h2><span class="cnt">'+rows.length+' ग्राहक</span></div>'+
+    (rows.length?'<p class="hint">कुल बाकी: <b style="color:var(--red)">'+rupee(allDue())+'</b> — सबसे पुराना सबसे ऊपर है।</p>':'');
+  if(!rows.length){
+    html+='<div class="empty"><b>सब कुछ क्लियर है!</b>किसी भी ग्राहक का बाकी नहीं है।</div>';
+  }else{
+    html+=rows.map(function(r){
+      var subTxt=r.days>0?(r.days+' दिन से बाकी'):(r.days===0?'आज की डिलीवरी का बाकी':('आने वाला ऑर्डर — डिलीवरी '+(-r.days)+' दिन बाद'));
+      return '<div class="duecard">'+
+        '<button class="duemain" data-act="open-customer" data-id="'+r.c.id+'">'+
+          '<span class="nm">'+esc(r.c.name)+'</span>'+
+          '<span class="sub">'+subTxt+'</span>'+
+        '</button>'+
+        '<div class="dueacts">'+
+          '<span class="dueamt">'+rupee(r.due)+'</span>'+
+          '<button class="btn small" data-act="customer-payment" data-id="'+r.c.id+'">पेमेंट लो</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  $('#main').innerHTML=html;
+}
+
+/* ---------- header / nav / shell ---------- */
+function renderShell(){
+  $('#lh-name').textContent=state.shop.name;
+  $('#lh-addr').textContent=state.shop.addr;
+  $('#lh-phone').textContent='Ph: '+state.shop.phone;
+  document.title=state.shop.name;
+  renderNav();
+  renderBanner();
+}
+function daysSinceBackup(){
+  var ts=localStorage.getItem('mbmb-lastbackup');
+  if(!ts)return null;
+  return Math.floor((Date.now()-Number(ts))/86400000);
+}
+function backupWarningHtml(){
+  if(!state.customers.length&&!state.orders.length)return '';
+  var d=daysSinceBackup();
+  if(d===null){
+    return '<button class="banner btn-banner" data-act="nav" data-v="backup">\u26A0\uFE0F Aapne kabhi backup nahi liya! Data surakshit rakhne ke liye "बैकअप" tab mein jaake "Copy karo" dabao.</button>';
+  }
+  if(d>=3){
+    return '<button class="banner btn-banner" data-act="nav" data-v="backup">\u26A0\uFE0F '+d+' din se backup nahi liya. Data surakshit rakhne ke liye backup zaroor le lo.</button>';
+  }
+  return '';
+}
+function backupStatusText(){
+  var d=daysSinceBackup();
+  if(d===null)return 'आखिरी बैकअप: कभी नहीं लिया';
+  if(d===0)return 'आखिरी बैकअप: आज लिया \u2713';
+  if(d===1)return 'आखिरी बैकअप: कल लिया';
+  return 'आखिरी बैकअप: '+d+' दिन पहले लिया';
+}
+function renderBanner(){
+  var html='';
+  if(!ui.storageOk)html+='<div class="banner">Is browser me data save nahi ho pa raha. Backup zaroor le lo, warna data chala jayega.</div>';
+  html+=backupWarningHtml();
+  $('#banner').innerHTML=html;
+}
+function renderNav(){
+  var tabs=[['home','होम','\uD83C\uDFE0'],['orders','ऑर्डर्स','\uD83E\uDDFE'],['items','आइटम्स','\uD83C\uDF6C'],['backup','बैकअप','\uD83D\uDCBE']];
+  $('#navbar').innerHTML=tabs.map(function(t){
+    var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||(ui.view==='customer'&&ui.cameFrom==='dues')));
+    return '<button class="navbtn'+(on?' on':'')+'" data-act="nav" data-v="'+t[0]+'"><span class="ic">'+t[2]+'</span>'+t[1]+'</button>';
+  }).join('');
+  var fab=$('#fab');
+  if(ui.view==='items'){fab.style.display='';fab.textContent='+ नया आइटम';fab.setAttribute('data-fabact','item');}
+  else if(ui.view==='backup'){fab.style.display='none';}
+  else{fab.style.display='';fab.textContent='+ नया ऑर्डर';fab.setAttribute('data-fabact','order');}
+}
+
+/* ---------- HOME ---------- */
+function dueGroups(live,dateKey){
+  var out=[];
+  live.forEach(function(o){
+    var due=o.items.filter(function(it){return !it.delivered&&itemDateKey(o,it)===dateKey;});
+    if(due.length)out.push({order:o,items:due});
+  });
+  out.sort(function(a,b){return new Date(a.order.date)-new Date(b.order.date);});
+  return out;
+}
+function dayItemSummary(live,dateKey){
+  var map={};
+  live.forEach(function(o){
+    o.items.forEach(function(it){
+      if(it.delivered)return;
+      if(itemDateKey(o,it)!==dateKey)return;
+      var k=it.name+'|'+it.unit;
+      if(!map[k])map[k]={name:it.name,unit:it.unit,qty:0,custs:{}};
+      map[k].qty+=num(it.qty);
+      var c=findCustomer(o.customerId);
+      var cname=c?c.name:'?';
+      map[k].custs[cname]=(map[k].custs[cname]||0)+num(it.qty);
+    });
+  });
+  var arr=Object.keys(map).map(function(k){return map[k];});
+  arr.sort(function(a,b){return b.qty-a.qty;});
+  return arr;
+}
+function daySummaryBlock(live,dateKey,label){
+  var items=dayItemSummary(live,dateKey);
+  if(!items.length)return '';
+  var rows=items.map(function(it){
+    var custNames=Object.keys(it.custs);
+    var detail=custNames.map(function(cn){return cn+' ×'+fmtQty(it.custs[cn]);}).join(', ');
+    return '<div class="sumrow"><span class="sumnm">'+esc(it.name)+'</span><span class="sumqty">'+fmtQty(it.qty)+' '+esc(it.unit)+'</span>'+
+      '<span class="sumdetail">'+esc(detail)+'</span></div>';
+  }).join('');
+  return '<div class="sumcard"><div class="sumhead">'+esc(label)+' \u2013 कुल सामान तैयार करो</div>'+rows+'</div>';
+}
+function renderHome(){
+  var today=todayStr();
+  var tmr=(function(){var d=new Date();d.setDate(d.getDate()+1);return dayKey(d);})();
+  var dayAfter=(function(){var d=new Date();d.setDate(d.getDate()+2);return dayKey(d);})();
+  var live=state.orders.filter(function(o){return !o.cancelled;});
+  var tmrGroups=dueGroups(live,tmr);
+  var todGroups=dueGroups(live,today);
+  var dayAfterGroups=dueGroups(live,dayAfter);
+  var overdueGroups=[];
+  live.forEach(function(o){
+    var od=o.items.filter(function(it){return !it.delivered&&itemDateKey(o,it)<today;});
+    if(od.length)overdueGroups.push({order:o,items:od});
+  });
+  overdueGroups.sort(function(a,b){return new Date(a.order.date)-new Date(b.order.date);});
+  var todayColl=0;
+  state.orders.forEach(function(o){o.payments.forEach(function(p){if(p.date===today)todayColl+=num(p.amount);});});
+  var band='<div class="band">'+
+    '<div><b>'+todGroups.length+'</b><span>आज डिलीवरी</span></div>'+
+    '<div class="tom"><b>'+tmrGroups.length+'</b><span>कल डिलीवरी</span></div>'+
+    '<div class="due"><b>'+rupee(allDue())+'</b><span>कुल बाकी</span></div></div>';
+
+  var dueCustCount=state.customers.filter(function(c){return customerTotals(c.id).due>0;}).length;
+  var duesLink=(state.orders.length||dueCustCount)?'<div class="homeinfo"><span class="coll">आज जमा हुआ: <b>'+rupee(todayColl)+'</b></span>'+(dueCustCount?'<button class="lnk" data-act="view-dues">📋 सबसे पुराना बाकी ('+dueCustCount+')</button>':'')+'</div>':'';
+
+  var sections='';
+  if(overdueGroups.length){
+    sections+='<div class="sechead"><h2 style="color:var(--red)">⚠️ छूटी डिलीवरी</h2><span class="cnt">'+overdueGroups.length+'</span></div>'+
+      '<p class="hint" style="margin-top:-4px">इनकी तारीख निकल गई पर टिक नहीं लगा। दे दिया हो तो ग्राहक खोलकर टिक लगा दो।</p>'+
+      overdueGroups.map(function(g){return miniCard(g.order,g.items,'overdue');}).join('');
+  }
+  sections+=daySummaryBlock(live,dayAfter,'परसों');
+  if(dayAfterGroups.length){
+    sections+='<div class="sechead"><h2>परसों डिलीवरी है</h2><span class="cnt">'+dayAfterGroups.length+'</span></div>'+dayAfterGroups.map(function(g){return miniCard(g.order,g.items,'');}).join('');
+  }
+  sections+=daySummaryBlock(live,tmr,'कल');
+  if(tmrGroups.length){
+    sections+='<div class="sechead"><h2>\uD83D\uDD14 कल डिलीवरी है</h2><span class="cnt">'+tmrGroups.length+'</span></div>'+tmrGroups.map(function(g){return miniCard(g.order,g.items,'tomorrow');}).join('');
+  }
+  sections+=daySummaryBlock(live,today,'आज');
+  if(todGroups.length){
+    sections+='<div class="sechead"><h2>आज डिलीवरी है</h2><span class="cnt">'+todGroups.length+'</span></div>'+todGroups.map(function(g){return miniCard(g.order,g.items,'today');}).join('');
+  }
+
+  var q=ui.search.trim().toLowerCase();
+  var custs=state.customers.filter(function(c){
+    if(!q)return true;
+    return c.name.toLowerCase().indexOf(q)>-1||String(c.phone||'').indexOf(q)>-1;
+  }).slice().sort(function(a,b){
+    function last(c){var os=customerOrders(c.id);var m=c.createdAt||0;os.forEach(function(o){if(o.createdAt>m)m=o.createdAt;});return m;}
+    return last(b)-last(a);
+  });
+
+  var list;
+  if(!state.customers.length){
+    list='<div class="empty"><b>Abhi koi customer nahi hai</b>Neeche "+ नया ऑर्डर" dabao, customer ka naam likho aur pehla order banao.</div>';
+  }else if(!custs.length){
+    list='<div class="empty"><b>Kuch nahi mila</b>Naam ya phone number se dobara search karo.</div>';
+  }else{
+    list=custs.map(function(c){
+      var t=customerTotals(c.id);
+      return '<button class="crow" data-act="open-customer" data-id="'+c.id+'" style="width:100%;text-align:left;border:1px solid var(--line)">'+
+        '<span class="l"><span class="nm">'+esc(c.name)+'</span><span class="ph">'+esc(c.phone||'फ़ोन नहीं')+'</span></span>'+
+        (t.due>0?'<span class="due">'+rupee(t.due)+'<br><span style="font-weight:400;font-size:.72rem">बाकी</span></span>':'<span class="clear">\u2713 क्लियर</span>')+
+        '</button>';
+    }).join('');
+  }
+
+  $('#main').innerHTML=band+duesLink+sections+
+    '<div class="sechead" style="margin-top:20px"><h2>ग्राहक खोजो</h2></div>'+
+    '<input id="search" type="search" placeholder="नाम या फोन नंबर" autocomplete="off" value="'+esc(ui.search)+'">'+
+    '<div class="addrow"><button class="lnk" data-act="add-customer">+ नया ग्राहक</button></div>'+
+    list;
+}
+function miniCard(o,dueItems,tag){
+  var c=findCustomer(o.customerId);
+  var due=orderDue(o);
+  var showItems=dueItems||o.items;
+  var subTxt=dueItems?namesList(showItems,3):(o.items.length+' item');
+  return '<button class="mini'+(tag==='tomorrow'?' tomorrow':(tag==='overdue'?' overdue':''))+'" data-act="open-customer" data-id="'+o.customerId+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
+    '<span class="l"><span class="nm">'+esc(c?c.name:'?')+'</span><span class="sub">#'+o.no+' \u00b7 '+fmtDT(o.date)+' \u00b7 '+esc(subTxt)+'</span></span>'+
+    (due>0?'<span class="r"><b>'+rupee(due)+'</b><span>बाकी</span></span>':'')+
+    '</button>';
+}
+
+/* ---------- ORDERS OVERVIEW ---------- */
+function renderOrders(){
+  var filter=ui.ordersFilter||'all';
+  var all=state.orders.slice();
+  var totalAll=all.length;
+  var pendingCount=all.filter(function(o){var s=orderStatus(o);return s==='pending'||s==='partial';}).length;
+  var doneCount=all.filter(function(o){return orderStatus(o)==='delivered';}).length;
+
+  var band='<div class="band">'+
+    '<div><b>'+totalAll+'</b><span>कुल ऑर्डर</span></div>'+
+    '<div class="tom"><b>'+pendingCount+'</b><span>पेंडिंग</span></div>'+
+    '<div><b style="color:var(--green)">'+doneCount+'</b><span>पूरा हुआ</span></div></div>';
+
+  var filters=[['all','सभी'],['pending','पेंडिंग'],['delivered','पूरा हुआ'],['cancelled','कैंसल']];
+  var tabsHtml='<div class="cattabs" style="margin-top:0">'+filters.map(function(f){
+    return '<button class="cattab'+(filter===f[0]?' on':'')+'" data-act="orders-filter" data-f="'+f[0]+'">'+f[1]+'</button>';
+  }).join('')+'</div>';
+
+  var oqRaw=(ui.ordersSearch||'').trim().toLowerCase();
+  var byNo=oqRaw.charAt(0)==='#';
+  var oq=oqRaw.replace(/^#/,'').trim();
+  var list=all.filter(function(o){
+    if(oq){
+      var oc=findCustomer(o.customerId);
+      var hit=byNo?String(o.no)===oq:(String(o.no)===oq||(oc&&(oc.name.toLowerCase().indexOf(oq)>-1||String(oc.phone||'').replace(/\s/g,'').indexOf(oq.replace(/\s/g,''))>-1)));
+      if(!hit)return false;
+    }
+    var s=orderStatus(o);
+    if(filter==='pending')return s==='pending'||s==='partial';
+    if(filter==='delivered')return s==='delivered';
+    if(filter==='cancelled')return s==='cancelled';
+    return true;
+  });
+  if(filter==='delivered'||filter==='cancelled'){
+    list.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  }else{
+    list.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  }
+
+  var rows;
+  if(!list.length){
+    rows='<div class="empty"><b>यहाँ कोई ऑर्डर नहीं</b>दूसरा फ़िल्टर चुन कर देखो।</div>';
+  }else{
+    rows=list.map(orderOverviewRow).join('');
+  }
+
+  $('#main').innerHTML='<div class="sechead"><h2>सारे ऑर्डर</h2></div>'+band+
+    '<input id="ordersSearch" type="search" placeholder="नाम, फोन या ऑर्डर नंबर से खोजो" autocomplete="off" value="'+esc(ui.ordersSearch||'')+'">'+tabsHtml+'<div style="margin-top:12px">'+rows+'</div>';
+}
+function orderOverviewRow(o){
+  var c=findCustomer(o.customerId);
+  var st=orderStatus(o);
+  var due=orderDue(o);
+  return '<button class="mini" data-act="open-customer" data-id="'+o.customerId+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
+    '<span class="l"><span class="nm">'+esc(c?c.name:'?')+'</span><span class="sub">#'+o.no+' \u00b7 '+fmtDT(o.date)+' \u00b7 '+o.items.length+' item</span></span>'+
+    '<span style="display:flex;align-items:center;gap:8px;flex:0 0 auto">'+
+    (due>0?'<span class="r"><b>'+rupee(due)+'</b><span>बाकी</span></span>':'')+
+    '<span class="stamp st-'+st+'">'+STAMP[st]+'</span>'+
+    '</span></button>';
+}
+
+/* ---------- CUSTOMER PROFILE ---------- */
+function renderCustomer(){
+  var c=findCustomer(ui.customerId);
+  if(!c){ui.view='home';return renderRoute();}
+  var t=customerTotals(c.id);
+  var os=customerOrders(c.id).slice();
+  var todayKey=todayStr();
+  function isUp(o){
+    if(dayKey(o.date)>=todayKey)return true;
+    if(o.cancelled)return false;
+    return o.items.some(function(it){return !it.delivered&&it.date&&it.date>=todayKey;});
+  }
+  var upcoming=os.filter(isUp).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  var past=os.filter(function(o){return !isUp(o);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+
+  var backLabel=ui.cameFrom==='orders'?'ऑर्डर्स':(ui.cameFrom==='dues'?'बाकी लिस्ट':'होम');
+  var backTarget=ui.cameFrom==='dues'?'dues':ui.cameFrom;
+  var html='<button class="backbtn" data-act="nav" data-v="'+backTarget+'">\u2190 '+backLabel+'</button>'+
+    '<div class="cphead"><div><h2>'+esc(c.name)+'</h2>'+
+    (c.phone?'<div class="ph"><a href="tel:+'+phoneNorm(c.phone)+'">'+esc(c.phone)+'</a></div>':'')+
+    (c.address?'<div class="addr">'+esc(c.address)+'</div>':'')+
+    '</div></div>'+
+    '<div class="cpacts"><button class="lnk" data-act="edit-customer" data-id="'+c.id+'">बदलो</button><button class="lnk danger" data-act="del-customer" data-id="'+c.id+'">डिलीट</button></div>'+
+    '<div class="band" style="grid-template-columns:repeat(4,1fr);margin-top:12px">'+
+    '<div><b>'+t.count+'</b><span>ऑर्डर</span></div>'+
+    '<div><b>'+rupee(t.billed)+'</b><span>कुल बिल</span></div>'+
+    '<div><b>'+rupee(t.paid)+'</b><span>जमा</span></div>'+
+    '<div class="due"><b>'+rupee(t.due)+'</b><span>बाकी</span></div></div>'+
+    (canAdjustExtra(c.id)?'<div class="banner" style="background:transparent;border:1px dashed var(--green);color:var(--green)">किसी ऑर्डर पर ज़्यादा पैसा जमा है और दूसरे पर बाकी है. <button class="btn small" style="margin-top:6px" data-act="adjust-extra" data-id="'+c.id+'">ज़्यादा जमा को बाकी में जोड़ दो</button></div>':'')+
+    (t.extra>0?'<p class="hint" style="color:var(--green);font-weight:600;margin-top:-6px">'+rupee(t.extra)+' ज़्यादा जमा है — वापस करो या अगले ऑर्डर में जोड़ दो।</p>':'')+
+    '<div class="actbar">'+
+    '<button class="btn primary small" data-act="new-order-for" data-id="'+c.id+'">+ नया ऑर्डर</button>'+
+    (t.due>0?'<button class="btn small" data-act="customer-payment" data-id="'+c.id+'">पेमेंट लो</button>':'')+
+    (os.filter(function(o){return !o.cancelled;}).length?summaryButton(c):'')+
+    '</div>';
+
+  if(!os.length){
+    html+='<div class="empty"><b>अभी कोई ऑर्डर नहीं</b>"+ नया ऑर्डर" दबाओ।</div>';
+  }else{
+    if(upcoming.length){html+='<div class="grouphead">आने वाले ऑर्डर</div>'+upcoming.map(orderCardFull).join('');}
+    if(past.length){html+='<div class="grouphead">पुराने ऑर्डर</div>'+past.map(orderCardFull).join('');}
+  }
+  $('#main').innerHTML=html;
+}
+function orderCardFull(o){
+  var st=orderStatus(o);
+  var tot=orderTotal(o),paid=orderPaid(o),due=orderDue(o);
+  var cancelled=o.cancelled;
+  var baseDayKey=dayKey(o.date);
+  var items=o.items.map(function(it){
+    var amt=num(it.qty)*num(it.rate);
+    var dtag=(it.date&&it.date!==baseDayKey)?(' <span class="dtag">'+fmtDshort(it.date)+'</span>'):'';
+    if(cancelled){
+      return '<li class="ro"><span class="chk">\u00b7</span><span class="citem">'+esc(it.name)+' \u00d7'+it.qty+dtag+'</span><span class="camt">'+rupee(amt)+'</span></li>';
+    }
+    return '<li><button data-act="toggle-item" data-order="'+o.id+'" data-line="'+it.lid+'"><span class="chk'+(it.delivered?' on':'')+'">\u2713</span><span class="citem">'+esc(it.name)+' ×'+fmtQty(it.qty)+' '+esc(it.unit)+dtag+(it.delivered&&it.deliveredAt?' <span class="dtag dgiven">दिया '+fmtDshort(it.deliveredAt)+'</span>':'')+'</span><span class="camt">'+rupee(amt)+'</span></button></li>';
+  }).join('');
+  var pays='';
+  if(o.payments.length){
+    pays='<div class="paylog"><div style="font-weight:600">जमा का हिसाब:</div>'+o.payments.map(function(p){
+      return '<div class="payrow"><span>'+fmtDonly(p.date)+': '+rupee(p.amount)+(p.note?' ('+esc(p.note)+')':'')+'</span>'+
+        (cancelled?'':'<button class="lnk danger" data-act="del-payment" data-order="'+o.id+'" data-pay="'+p.id+'">हटाओ</button>')+'</div>';
+    }).join('')+'</div>';
+  }
+  var acts='';
+  if(!cancelled){
+    acts='<div class="oacts">'+
+      (due>0?'<button class="btn small" data-act="order-payment" data-id="'+o.id+'">पेमेंट लो</button>':'')+
+      billButton(o)+
+      '<button class="lnk" data-act="remind-order" data-id="'+o.id+'">\uD83D\uDD14 रिमाइंडर</button>'+
+      '<button class="lnk" data-act="print-order" data-id="'+o.id+'">\uD83D\uDDA8\uFE0F प्रिंट</button>'+
+      '<button class="lnk" data-act="edit-order" data-id="'+o.id+'">एडिट</button>'+
+      '<button class="lnk danger" data-act="cancel-order" data-id="'+o.id+'">कैंसल</button>'+
+      '</div>';
+  }
+  return '<article class="order'+(cancelled?' cancelled':'')+'">'+
+    '<div class="otop"><div><div class="odate">'+fmtDT(o.date)+'</div></div>'+
+    '<span class="obadge">#'+o.no+'</span>'+
+    '<span class="stamp st-'+st+'">'+STAMP[st]+'</span></div>'+
+    (o.notes?'<div class="hint">'+esc(o.notes)+'</div>':'')+
+    '<ul class="checklist">'+items+'</ul>'+
+    pays+
+    '<div class="money"><div><span>टोटल</span><b>'+rupee(tot)+'</b></div><div><span>जमा</span><b>'+rupee(paid)+'</b></div>'+
+    (due>0?'<div class="due"><span>बाकी</span><b>'+rupee(due)+'</b></div>':(paid>tot+0.001?'<div class="paidall">'+rupee(paid-tot)+' ज़्यादा जमा</div>':'<div class="paidall">पूरा जमा</div>'))+'</div>'+
+    acts+'</article>';
+}
+
+/* ---------- ITEMS TAB ---------- */
+function renderItems(){
+  var q=ui.itemsSearch.trim().toLowerCase();
+  var html='<div class="sechead"><h2>आइटम लिस्ट</h2></div>'+
+    '<input id="itemSearch" type="search" placeholder="आइटम खोजो" autocomplete="off" value="'+esc(ui.itemsSearch)+'">';
+  CATS.forEach(function(cd){
+    var its=state.items.filter(function(i){return i.cat===cd[0]&&(!q||i.name.toLowerCase().indexOf(q)>-1);});
+    if(q&&!its.length)return;
+    html+='<div class="catsec"><h3>'+cd[1]+'</h3>';
+    if(!its.length){html+='<div class="hint">अभी कोई आइटम नहीं। ऊपर "+ नया आइटम" से जोड़ो।</div>';}
+    else{
+      html+=its.map(function(i){
+        return '<button class="itemrow" data-act="edit-item" data-id="'+i.id+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
+          '<span><span class="nm">'+esc(i.name)+'</span><br><span class="un">'+esc(i.unit)+'</span></span>'+
+          '<span class="pr">'+rupee(i.price)+'</span></button>';
+      }).join('');
+    }
+    html+='</div>';
+  });
+  $('#main').innerHTML=html;
+}
+
+/* ---------- BACKUP TAB ---------- */
+function renderBackup(){
+  var s=state.shop;
+  var notifOn=('Notification' in window)&&Notification.permission==='granted';
+  var canShare=!!navigator.share;
+  var html=
+    '<div class="sechead" style="margin-top:4px"><h2>बैकअप (रोज़ करो)</h2></div>'+
+    '<p class="hint" id="last-backup-txt" style="font-weight:700">'+backupStatusText()+'</p>'+
+    '<p class="hint">Data sirf isi phone me save hota hai. Roz dukaan band karte waqt backup apne hi WhatsApp number par bhej do — phone kho jaye ya kharab ho jaye to bhi data bacha rahega.</p>'+
+    '<div class="actbar">'+(canShare?'<button class="btn primary small" data-act="share-backup">📤 WhatsApp पर भेजो</button>':'')+
+    '<button class="btn '+(canShare?'':'primary ')+'small" data-act="copy-backup">Copy karo</button></div>'+
+    '<textarea id="b-text" rows="4" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>'+
+    '<p class="hint">Restore karne ke liye purana backup text upar box me paste karo, ya "फ़ाइल से" dabakar backup file chuno.</p>'+
+    '<div class="err" id="b-err"></div>'+
+    '<div class="actbar"><label class="btn small">📂 फ़ाइल से<input id="b-file" type="file" accept=".txt,.json,text/plain,application/json" style="display:none"></label>'+
+    '<button class="btn small" data-act="restore-backup">Restore karo</button></div>'+
+
+    '<div class="sechead" style="margin-top:22px"><h2>दुकान की जानकारी</h2></div>'+
+    '<label class="fl">दुकान का नाम<input id="s-name" type="text" value="'+esc(s.name)+'"></label>'+
+    '<label class="fl">पता<input id="s-addr" type="text" value="'+esc(s.addr)+'"></label>'+
+    '<label class="fl">फोन नंबर<input id="s-phone" type="tel" value="'+esc(s.phone)+'"></label>'+
+    '<label class="fl">मालिक का नाम<input id="s-owner" type="text" value="'+esc(s.owner)+'"></label>'+
+    '<label class="fl">नियम व शर्तें (बिल के नीचे दिखेंगी, हर लाइन एक नियम)<textarea id="s-terms" rows="3">'+esc(s.terms||'')+'</textarea></label>'+
+    '<div class="err" id="s-err"></div>'+
+    '<div class="actbar"><button class="btn primary small" data-act="save-shopinfo">सेव करो</button></div>'+
+
+    '<div class="sechead" style="margin-top:22px"><h2>ऐप और रिमाइंडर</h2></div>'+
+    '<div class="installbox"><p>📲 इस ऐप को फोन में असली ऐप जैसा इंस्टॉल करो — अपना आइकन, बिना ब्राउज़र बार के, बिना इंटरनेट के भी खुलेगा।</p><button class="btn primary small" data-act="install-app">➕ ऐप इंस्टॉल करो</button></div>'+
+    '<div class="installbox"><p>🔔 <b>ऑर्डर रिमाइंडर:</b> हर ऑर्डर पर "रिमाइंडर" बटन दबाकर एक calendar फ़ाइल डाउनलोड करो — उसे खोलकर अपने Google Calendar में जोड़ लो। इससे डिलीवरी से 2 दिन और 1 दिन पहले आपके फ़ोन में पक्का notification आएगा (जैसे दूध पहले से मंगवाना है तो याद रहेगा)। <b>ध्यान दें:</b> यह डाउनलोड सिर्फ तब काम करेगा जब ऐप install किया हो या सीधे इसके browser link में खोला हो — Claude की chat window के अंदर preview में नहीं चलेगा।</p>'+
+    '<p class="hint" style="margin-top:8px">इसके अलावा, जब भी यह ऐप खोलो और कल/परसों का कोई सामान बाकी हो, ऐप खुद भी एक notification दिखा सकता है — उसके लिए नीचे से अनुमति दे दो:</p>'+
+    '<button class="btn small" data-act="enable-notif">'+(notifOn?'✓ notification चालू है':'notification ऑन करो')+'</button></div>';
+  $('#main').innerHTML=html;
+  $('#b-text').value=JSON.stringify(state);
+}
+
+/* ---------- ROUTE ---------- */
+function renderRoute(){
+  if(ui.view==='home')renderHome();
+  else if(ui.view==='orders')renderOrders();
+  else if(ui.view==='dues')renderDues();
+  else if(ui.view==='customer')renderCustomer();
+  else if(ui.view==='items')renderItems();
+  else if(ui.view==='backup')renderBackup();
+  renderNav();
+  renderBanner();
+}
+
+/* ---------- SHEETS: generic ---------- */
+function openSheet(html){
+  $('#sheetRoot').innerHTML='<div class="overlay" id="ov"><div class="sheet" role="dialog" aria-modal="true">'+html+'</div></div>';
+  document.body.classList.add('noscroll');
+}
+function setSheet(html){
+  var s=$('#ov .sheet');
+  if(s)s.innerHTML=html;else openSheet(html);
+}
+function closeSheet(){
+  $('#sheetRoot').innerHTML='';
+  document.body.classList.remove('noscroll');
+  ui.orderDraft=null;ui.editId=null;
+}
+
+/* ---------- Customer form ---------- */
+function openCustomerForm(id){
+  var c=id?findCustomer(id):null;
+  openSheet(
+    '<div class="sh-head"><h2>'+(c?'ग्राहक बदलो':'नया ग्राहक')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<label class="fl">नाम<input id="c-name" type="text" value="'+esc(c?c.name:'')+'"></label>'+
+    '<label class="fl">फोन नंबर (WhatsApp वाला)<input id="c-phone" type="tel" value="'+esc(c?c.phone:'')+'"></label>'+
+    '<label class="fl">पता<input id="c-addr" type="text" value="'+esc(c?c.address:'')+'"></label>'+
+    '<div class="err" id="c-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-customer" data-id="'+(c?c.id:'')+'">Save करो</button></div>'
+  );
+  setTimeout(function(){var f=$('#c-name');if(f)f.focus();},50);
+}
+function saveCustomerFrom(id){
+  var name=$('#c-name').value.trim();
+  if(!name){$('#c-err').textContent='नाम लिखो।';return null;}
+  var phErr=phoneProblem($('#c-phone').value.trim(),id||null);
+  if(phErr){$('#c-err').textContent=phErr;return null;}
+  var c=id?findCustomer(id):null;
+  if(c){c.name=name;c.phone=$('#c-phone').value.trim();c.address=$('#c-addr').value.trim();}
+  else{
+    c={id:uid(),name:name,phone:$('#c-phone').value.trim(),address:$('#c-addr').value.trim(),createdAt:Date.now()};
+    state.customers.push(c);
+  }
+  save();
+  return c;
+}
+
+/* ---------- Order form (draft-based) ---------- */
+function openOrderForm(customerId,orderId){
+  var o=orderId?findOrder(orderId):null;
+  ui.editId=orderId||null;
+  if(o){
+    ui.orderDraft={
+      customerId:o.customerId,locked:true,
+      date:o.date,notes:o.notes||'',advance:'',activeCat:CATS[0][0],
+      lines:o.items.map(function(it){return {lid:it.lid,name:it.name,unit:it.unit,rate:it.rate,qty:it.qty,delivered:it.delivered,deliveredAt:it.deliveredAt||'',date:it.date||''};}),
+      customItemOpen:false
+    };
+  }else{
+    var c=customerId?findCustomer(customerId):null;
+    ui.orderDraft={
+      customerId:c?c.id:null,locked:!!c,
+      date:'',notes:'',advance:'',activeCat:CATS[0][0],
+      lines:[],custSearch:'',
+      customItemOpen:false
+    };
+  }
+  openSheet('');
+  renderOrderSheet();
+  setTimeout(function(){var f=$('#of-date');if(f&&!f.value)f.focus();},60);
+}
+function orderDraftTotal(){
+  return ui.orderDraft.lines.reduce(function(s,l){return s+num(l.qty)*num(l.rate);},0);
+}
+function renderOrderSheet(){
+  var d=ui.orderDraft;
+  var c=d.customerId?findCustomer(d.customerId):null;
+  var custBlock;
+  if(c){
+    custBlock='<div class="custchip"><span><b>'+esc(c.name)+'</b><span>'+esc(c.phone||'फ़ोन नंबर नहीं')+'</span></span>'+
+      (d.locked&&ui.editId?'':'<button class="lnk" data-act="of-change-cust">बदलो</button>')+'</div>';
+  }else if(d.newCustOpen){
+    custBlock='<div class="customitem">'+
+      '<label class="fl" style="margin-top:0">ग्राहक का नाम<input id="nc-name" type="text" value="'+esc(d.newCustName||'')+'"></label>'+
+      '<label class="fl">मोबाइल नंबर (WhatsApp वाला)<input id="nc-phone" type="tel" inputmode="tel" value="'+esc(d.newCustPhone||'')+'"></label>'+
+      '<div class="err" id="nc-err"></div>'+
+      '<div class="sh-actions"><button class="btn small" data-act="of-cancel-newcust">वापस</button><button class="btn primary small" data-act="of-confirm-newcust">ग्राहक जोड़ो</button></div>'+
+      '</div>';
+  }else{
+    var q=(d.custSearch||'').trim().toLowerCase();
+    var matches=q?state.customers.filter(function(x){return x.name.toLowerCase().indexOf(q)>-1||String(x.phone||'').indexOf(q)>-1;}).slice(0,6):[];
+    custBlock='<input id="of-custsearch" type="text" placeholder="ग्राहक का नाम या फोन" autocomplete="off" value="'+esc(d.custSearch||'')+'" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);font-size:16px">';
+    if(q){
+      custBlock+='<div class="suglist">';
+      matches.forEach(function(m){
+        custBlock+='<button class="sugrow" data-act="of-pick-cust" data-id="'+m.id+'"><b>'+esc(m.name)+'</b><small>'+esc(m.phone||'')+'</small></button>';
+      });
+      custBlock+='<button class="sugrow newc" data-act="of-new-cust">+ "'+esc(d.custSearch)+'" नया ग्राहक जोड़ो</button>';
+      custBlock+='</div>';
+    }
+  }
+
+  var itsInCat=state.items.filter(function(i){return i.cat===d.activeCat;});
+  var chips=itsInCat.length?itsInCat.map(function(i){
+    return '<button class="chip" data-act="of-add-chip" data-id="'+i.id+'">'+esc(i.name)+'<small>'+rupee(i.price)+' / '+esc(i.unit)+'</small></button>';
+  }).join(''):'<span class="chip empty">इस category me abhi item nahi hai</span>';
+
+  var cattabs=CATS.map(function(cd){
+    return '<button class="cattab'+(d.activeCat===cd[0]?' on':'')+'" data-act="of-cat" data-c="'+cd[0]+'">'+cd[1]+'</button>';
+  }).join('');
+
+  var orderDateOnly=d.date?d.date.split('T')[0]:'';
+  var linesHint=d.lines.length?'<p class="hint" style="margin-top:0">हर item की डिलीवरी तारीख अलग रख सकते हो। एक ही item अलग-अलग तारीख में बाँटना हो (जैसे 10 में से 3 कल, 3 परसों) तो "+ बाँटो" दबाओ और quantity/date बदल दो।</p>':'';
+  var lines=d.lines.length?linesHint+d.lines.map(function(l){
+    var lval=l.date||orderDateOnly;
+    return '<div class="lrow" data-lid="'+l.lid+'"><div class="ltop"><span class="lname">'+esc(l.name)+' <span style="color:var(--muted);font-weight:400">('+esc(l.unit)+')</span></span>'+
+      '<button class="lx" data-act="of-rm-line" data-lid="'+l.lid+'">\u00d7</button></div>'+
+      '<div class="lgrid"><label>Qty<input type="number" inputmode="decimal" step="any" min="0" data-act="of-qty" data-lid="'+l.lid+'" value="'+l.qty+'"></label>'+
+      '<label>Rate \u20b9<input type="number" inputmode="decimal" step="any" min="0" data-act="of-rate" data-lid="'+l.lid+'" value="'+l.rate+'"></label>'+
+      '<label>= राशि<div class="lamt" style="margin-top:8px">'+rupee(num(l.qty)*num(l.rate))+'</div></label></div>'+
+      '<div class="ldaterow"><label>डिलीवरी तारीख<input type="date" data-act="of-linedate" data-lid="'+l.lid+'" value="'+esc(lval)+'"></label>'+
+      '<button class="lnk" data-act="of-split-line" data-lid="'+l.lid+'">+ बाँटो</button></div>'+
+      '</div>';
+  }).join(''):'<p class="hint">अभी कोई item नहीं जोड़ा। नीचे category se item चुनो।</p>';
+
+  var customItemBlock=d.customItemOpen?
+    '<div class="customitem"><div class="g2"><input id="ci-name" type="text" placeholder="आइटम का नाम" value="'+esc(d.ciName||'')+'">'+
+    '<input id="ci-rate" type="number" inputmode="decimal" step="any" min="0" placeholder="Rate ₹" value="'+esc(d.ciRate||'')+'"></div>'+
+    '<input id="ci-unit" type="text" placeholder="यूनिट (किलो/पीस...)" value="'+esc(d.ciUnit||'')+'" list="ci-units-dl" style="width:100%;margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:16px">'+
+    '<label><input type="checkbox" id="ci-save" checked> आइटम लिस्ट में भी जोड़ो</label>'+
+    '<div class="err" id="ci-err"></div>'+
+    '<div class="sh-actions"><button class="btn small" data-act="of-cancel-custom">Cancel</button><button class="btn primary small" data-act="of-add-custom">ऑर्डर में जोड़ो</button></div></div>'
+    :'<button class="lnk" data-act="of-open-custom">+ नया आइटम (सिर्फ इस ऑर्डर के लिए)</button>';
+
+  var html='<div class="sh-head"><h2>'+(ui.editId?'ऑर्डर #'+findOrder(ui.editId).no+' बदलो':'नया ऑर्डर')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<label class="fl">ग्राहक</label>'+custBlock+
+    '<label class="fl">डिलीवरी की date और time<input id="of-date" type="datetime-local" value="'+esc(d.date)+'"></label>'+
+    '<label class="fl">सामान</label>'+
+    '<div class="cattabs">'+cattabs+'</div>'+
+    '<div class="chips">'+chips+'</div>'+
+    '<div class="lines">'+lines+'</div>'+
+    customItemBlock+
+    '<div class="ftotal"><span>टोटल</span><b id="of-total">'+rupee(orderDraftTotal())+'</b></div>'+
+    (ui.editId?'':'<label class="fl">अभी कितना advance मिला \u20b9<input id="of-advance" type="number" inputmode="decimal" step="any" min="0" value="'+esc(d.advance)+'"></label>')+
+    '<label class="fl">नोट (जैसे केक पर क्या लिखना है)<textarea id="of-notes" rows="2">'+esc(d.notes)+'</textarea></label>'+
+    '<div class="err" id="of-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-order">Save करो</button></div>'+
+    '<datalist id="ci-units-dl">'+UNIT_OPTS.map(function(u){return '<option value="'+u+'">';}).join('')+'</datalist>';
+  setSheet(html);
+}
+function syncDraftField(t){
+  var d=ui.orderDraft;if(!d||!t||!t.id)return false;
+  if(t.id==='of-date'){
+    d.date=t.value;
+    var dOnly=d.date?d.date.split('T')[0]:'';
+    $all('input[data-act=of-linedate]').forEach(function(inp){
+      var l=d.lines.find(function(x){return x.lid===inp.getAttribute('data-lid');});
+      if(l&&!l.date)inp.value=dOnly;
+    });
+    return true;
+  }
+  var map={'of-notes':'notes','of-advance':'advance','nc-name':'newCustName','nc-phone':'newCustPhone','ci-name':'ciName','ci-rate':'ciRate','ci-unit':'ciUnit'};
+  if(map[t.id]){d[map[t.id]]=t.value;return true;}
+  return false;
+}
+function softClose(){
+  if(ui.orderDraft&&(ui.orderDraft.lines.length||ui.orderDraft.customerId)){
+    toast('ऑर्डर बंद करना है तो ऊपर "बंद करो" दबाओ');return;
+  }
+  closeSheet();
+}
+function updateOrderTotalDisplay(){
+  var el=$('#of-total');if(el)el.textContent=rupee(orderDraftTotal());
+}
+function addOrLine(item){
+  var d=ui.orderDraft;
+  var exist=d.lines.find(function(l){return l.name===item.name;});
+  if(exist){exist.qty=num(exist.qty)+1;}
+  else{d.lines.push({lid:uid(),name:item.name,unit:item.unit,rate:item.price!=null?item.price:item.rate,qty:1,delivered:false,date:''});}
+  renderOrderSheet();
+}
+function saveOrderFromDraft(){
+  var d=ui.orderDraft;
+  var err=$('#of-err');
+  if(!d.customerId){err.textContent='ग्राहक चुनो या नया जोड़ो।';return;}
+  var dateVal=$('#of-date').value;
+  if(!dateVal){err.textContent='डिलीवरी की date/time चुनो।';return;}
+  var items=d.lines.filter(function(l){return num(l.qty)>0;}).map(function(l){return {lid:l.lid,name:l.name,unit:l.unit,rate:Math.max(0,num(l.rate)),qty:num(l.qty),delivered:!!l.delivered,deliveredAt:l.delivered?(l.deliveredAt||''):'',date:l.date||''};});
+  if(!items.length){err.textContent='कम से कम एक item जोड़ो।';return;}
+  var notes=$('#of-notes').value.trim();
+  if(ui.editId){
+    var o=findOrder(ui.editId);
+    o.customerId=d.customerId;o.date=dateVal;o.items=items;o.notes=notes;
+    save();closeSheet();toast('ऑर्डर #'+o.no+' अपडेट हो गया');
+  }else{
+    var totNew=round2(items.reduce(function(s,i){return s+i.qty*i.rate;},0));
+    var advIn=Math.max(0,num($('#of-advance').value));
+    var adv=Math.min(totNew,advIn);
+    var o2={id:uid(),no:state.nextOrderNo++,customerId:d.customerId,date:dateVal,items:items,payments:adv>0?[{id:uid(),amount:adv,date:todayStr(),note:'Advance'}]:[],cancelled:false,notes:notes,createdAt:Date.now()};
+    state.orders.push(o2);
+    save();closeSheet();toast('ऑर्डर #'+o2.no+' save हो गया'+(advIn>totNew?' (advance टोटल से ज़्यादा था, '+rupee(totNew)+' ही जमा किया)':''));
+  }
+  ui.view='customer';ui.customerId=d.customerId;
+  renderRoute();window.scrollTo(0,0);
+}
+
+/* ---------- Payment form ---------- */
+function openPaymentForm(customerId,preOrderId){
+  var eligible=customerOrders(customerId).filter(function(o){return !o.cancelled&&orderDue(o)>0;});
+  var chosen=preOrderId?findOrder(preOrderId):(eligible.length===1?eligible[0]:null);
+  var c=findCustomer(customerId);
+  var html='<div class="sh-head"><h2>पेमेंट लो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>';
+  if(!chosen){
+    if(eligible.length>1){
+      html+='<button class="btn primary" style="width:100%;margin-bottom:10px" data-act="pay-lump" data-id="'+customerId+'">💰 पूरे हिसाब में एक साथ जमा करो</button>'+
+        '<p class="hint">या किसी एक ऑर्डर के लिए पेमेंट चुनो:</p>';
+    }else{
+      html+='<p class="hint">'+esc(c.name)+' के किस ऑर्डर के लिए पेमेंट है?</p>';
+    }
+    eligible.forEach(function(o){
+      html+='<button class="mini" data-act="pay-pick-order" data-cust="'+customerId+'" data-id="'+o.id+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
+        '<span class="l"><span class="nm">#'+o.no+' \u2013 '+fmtDT(o.date)+'</span></span><span class="r"><b>'+rupee(orderDue(o))+'</b><span>बाकी</span></span></button>';
+    });
+  }else{
+    html+='<p class="hint">ऑर्डर #'+chosen.no+' ('+fmtDT(chosen.date)+') \u2013 अभी '+rupee(orderDue(chosen))+' बाकी है।</p>'+
+      (eligible.length>1?'<button class="lnk" data-act="pay-change-order" data-cust="'+customerId+'">दूसरा ऑर्डर चुनो</button>':'')+
+      '<label class="fl">कितना पैसा मिला \u20b9<input id="p-amt" type="number" inputmode="decimal" step="any" min="0" value="'+orderDue(chosen)+'"></label>'+
+      '<label class="fl">तारीख<input id="p-date" type="date" value="'+todayStr()+'"></label>'+
+      '<label class="fl">नोट (वैकल्पिक)<input id="p-note" type="text"></label>'+
+      '<div class="err" id="p-err"></div>'+
+      '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-payment" data-id="'+chosen.id+'">Save करो</button></div>';
+  }
+  openSheet(html);
+  setTimeout(function(){var f=$('#p-amt');if(f){f.focus();f.select();}},60);
+}
+function orderExtra(o){return round2(Math.max(0,orderPaid(o)-orderTotal(o)));}
+function canAdjustExtra(cid){
+  var os=customerOrders(cid).filter(function(o){return !o.cancelled;});
+  return os.some(function(o){return orderExtra(o)>0;})&&os.some(function(o){return orderDue(o)>0;});
+}
+function adjustExtra(cid){
+  var os=customerOrders(cid).filter(function(o){return !o.cancelled;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  var moved=0,today=todayStr();
+  os.forEach(function(src){
+    var ex=orderExtra(src);
+    os.forEach(function(dst){
+      if(ex<=0.001||dst===src)return;
+      var need=orderDue(dst);if(need<=0)return;
+      var take=round2(Math.min(ex,need));
+      src.payments.push({id:uid(),amount:-take,date:today,note:'#'+dst.no+' में adjust'});
+      dst.payments.push({id:uid(),amount:take,date:today,note:'#'+src.no+' से adjust'});
+      ex=round2(ex-take);moved=round2(moved+take);
+    });
+  });
+  return moved;
+}
+function openLumpPayment(cid){
+  var c=findCustomer(cid);
+  var el=customerOrders(cid).filter(function(o){return !o.cancelled&&orderDue(o)>0;});
+  var tot=round2(el.reduce(function(s,o){return s+orderDue(o);},0));
+  openSheet('<div class="sh-head"><h2>एक साथ जमा</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">'+esc(c.name)+' के '+el.length+' ऑर्डर पर कुल '+rupee(tot)+' बाकी है। जितना पैसा मिला वो सबसे पुराने ऑर्डर से शुरू करके अपने आप बँट जाएगा।</p>'+
+    '<label class="fl">कितना पैसा मिला ₹<input id="lp-amt" type="number" inputmode="decimal" step="any" min="0" value="'+tot+'"></label>'+
+    '<label class="fl">तारीख<input id="lp-date" type="date" value="'+todayStr()+'"></label>'+
+    '<label class="fl">नोट (वैकल्पिक)<input id="lp-note" type="text"></label>'+
+    '<div class="err" id="lp-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-lump" data-id="'+cid+'">Save करो</button></div>');
+  setTimeout(function(){var f=$('#lp-amt');if(f){f.focus();f.select();}},60);
+}
+function openOrderPayment(orderId){
+  var o=findOrder(orderId);
+  openPaymentForm(o.customerId,orderId);
+}
+
+/* ---------- Item form ---------- */
+function openItemForm(id){
+  var i=id?findItem(id):null;
+  var opts=CATS.map(function(cd){return '<option value="'+cd[0]+'"'+((i?i.cat:CATS[0][0])===cd[0]?' selected':'')+'>'+cd[1]+'</option>';}).join('');
+  openSheet(
+    '<div class="sh-head"><h2>'+(i?'आइटम बदलो':'नया आइटम')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<label class="fl">नाम<input id="i-name" type="text" value="'+esc(i?i.name:'')+'"></label>'+
+    '<label class="fl">Category<select id="i-cat">'+opts+'</select></label>'+
+    '<label class="fl">यूनिट<input id="i-unit" list="i-units-dl" type="text" value="'+esc(i?i.unit:'किलो')+'"></label>'+
+    '<label class="fl">Rate \u20b9<input id="i-price" type="number" inputmode="decimal" step="any" min="0" value="'+(i?i.price:'')+'"></label>'+
+    '<div class="err" id="i-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-item" data-id="'+(i?i.id:'')+'">Save करो</button></div>'+
+    (i?'<div style="margin-top:14px;text-align:center"><button class="lnk danger" data-act="del-item" data-id="'+i.id+'">यह आइटम हटाओ</button></div>':'')+
+    '<datalist id="i-units-dl">'+UNIT_OPTS.map(function(u){return '<option value="'+u+'">';}).join('')+'</datalist>'
+  );
+  setTimeout(function(){var f=$('#i-name');if(f)f.focus();},50);
+}
+
+/* ---------- Confirm sheets ---------- */
+function openDeleteCustomerConfirm(id){
+  var c=findCustomer(id);var t=customerTotals(id);
+  openSheet(
+    '<div class="sh-head"><h2>ग्राहक डिलीट करें?</h2></div>'+
+    '<p class="hint">'+esc(c.name)+' हमेशा के लिए हट जाएगा। इनके '+t.count+' ऑर्डर भी हट जाएंगे'+(t.due>0?', जिसमें '+rupee(t.due)+' अभी भी बाकी है':'')+'.</p>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">नहीं, रहने दो</button><button class="btn warn" data-act="confirm-del-customer" data-id="'+id+'">हां, डिलीट करो</button></div>'
+  );
+}
+function openCancelOrderConfirm(id){
+  var o=findOrder(id);
+  openSheet(
+    '<div class="sh-head"><h2>ऑर्डर कैंसल करें?</h2></div>'+
+    '<p class="hint">ऑर्डर #'+o.no+' कैंसल हो जाएगा। यह हिसाब में नहीं जुड़ेगा। इसे मिटाया नहीं जाएगा, सिर्फ कैंसल दिखेगा।</p>'+
+    (orderPaid(o)>0?'<p class="hint" style="color:var(--red);font-weight:600">ध्यान दें: इस ऑर्डर पर '+rupee(orderPaid(o))+' जमा है। कैंसल करने पर यह पैसा हिसाब से हट जाएगा — ग्राहक को वापस करो, या कैंसल की जगह ऑर्डर एडिट करके सामान बदल दो।</p>':'')+
+    '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-cancel-order" data-id="'+id+'">हां, कैंसल करो</button></div>'
+  );
+}
+function openDeleteItemConfirm(id){
+  var i=findItem(id);
+  openSheet(
+    '<div class="sh-head"><h2>आइटम हटाएं?</h2></div>'+
+    '<p class="hint">"'+esc(i.name)+'" लिस्ट से हट जाएगा। पुराने ऑर्डर और बिल पर कोई असर नहीं पड़ेगा।</p>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-del-item" data-id="'+id+'">हां, हटाओ</button></div>'
+  );
+}
+
+function openInstallHelpSheet(){
+  var ua=navigator.userAgent||'';
+  var isIOS=/iphone|ipad|ipod/i.test(ua);
+  var body=isIOS?
+    '<p class="hint">नीचे Safari के Share बटन (\u2B06\uFE0F) पर दबाओ, फिर "Add to Home Screen" चुनो। इसके बाद ऐप का आइकन आपकी होम स्क्रीन पर आ जाएगा।</p>'
+    :'<p class="hint">ऊपर दाईं तरफ़ Chrome के 3-डॉट मेन्यू पर दबाओ, फिर "Add to Home screen" या "Install app" चुनो।</p>';
+  openSheet(
+    '<div class="sh-head"><h2>ऐप इंस्टॉल करो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    body+
+    '<p class="hint">इंस्टॉल होने के बाद ऐप बिल्कुल असली ऐप जैसा खुलेगा \u2014 अपने आइकन के साथ, बिना ब्राउज़र के पता (address bar) दिखाए।</p>'+
+    '<div class="sh-actions"><button class="btn primary" data-act="close">ठीक है</button></div>'
+  );
+}
+
+/* ---------- WhatsApp messages ---------- */
+function waLink(phone,text){
+  var p=phoneNorm(phone);if(!p)return '';
+  return 'https://wa.me/'+p+'?text='+encodeURIComponent(text);
+}
+function appendTerms(L){
+  var terms=(state.shop.terms||'').trim();
+  if(!terms)return;
+  L.push('-------------------');
+  L.push('नियम व शर्तें:');
+  terms.split('\n').forEach(function(line){
+    line=line.trim();
+    if(line)L.push('- '+line);
+  });
+}
+function billLineItems(L, o){
+  var baseDayKey=dayKey(o.date);
+  o.items.forEach(function(it,idx){
+    var amt=num(it.qty)*num(it.rate);
+    L.push((idx+1)+'. '+it.name+(it.delivered?(' - Diya gaya'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':'')):' - Baaki hai'));
+    L.push('    '+fmtQty(it.qty)+' '+it.unit+' x '+rupee(it.rate)+' = '+rupee(amt));
+    if(it.date&&it.date!==baseDayKey){
+      L.push('    Delivery: '+fmtDshort(it.date));
+    }
+    if(idx<o.items.length-1){
+      L.push('');
+      L.push('- - - - - - - - - -');
+    }
+  });
+}
+function billMessage(o){
+  var c=findCustomer(o.customerId);
+  var L=[];
+  L.push('*'+state.shop.name+'*');
+  L.push(state.shop.addr);
+  L.push('Ph: '+state.shop.phone);
+  L.push('===================');
+  L.push('BILL');
+  L.push('Bill No: '+o.no);
+  L.push('Delivery: '+fmtDT(o.date));
+  L.push('Customer: '+(c?c.name:'-'));
+  L.push('-------------------');
+  billLineItems(L, o);
+  L.push('-------------------');
+  L.push('Total Bill: '+rupee(orderTotal(o)));
+  L.push('Jama (Advance/Paid): '+rupee(orderPaid(o)));
+  o.payments.forEach(function(p){L.push('    '+fmtDshort(p.date)+': '+rupee(p.amount)+(p.note?' ('+p.note+')':''));});
+  L.push('Baaki (Due): '+rupee(orderDue(o)));
+  if(orderPaid(o)>orderTotal(o)+0.001)L.push('Extra Jama: '+rupee(orderPaid(o)-orderTotal(o)));
+  appendTerms(L);
+  L.push('===================');
+  L.push('Dhanyawad');
+  L.push(state.shop.owner);
+  return L.join('\n');
+}
+function summaryMessage(c){
+  var os=customerOrders(c.id).filter(function(o){return !o.cancelled;}).slice().sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  var L=[];
+  L.push('*'+state.shop.name+'*');
+  L.push(state.shop.addr);
+  L.push('Ph: '+state.shop.phone);
+  L.push('===================');
+  L.push('Poora Hisaab: '+c.name);
+  L.push('');
+  var totBill=0,totPaid=0;
+  os.forEach(function(o){
+    var ot=orderTotal(o),op=orderPaid(o),od=orderDue(o);
+    totBill+=ot;totPaid+=op;
+    L.push('-------------------');
+    L.push('Delivery: '+fmtDT(o.date)+' (Order #'+o.no+', '+STAMP[orderStatus(o)]+')');
+    L.push('');
+    billLineItems(L, o);
+    L.push('');
+    L.push('Order Total: '+rupee(ot)+'  |  Jama: '+rupee(op)+'  |  Baaki: '+rupee(od));
+    L.push('');
+  });
+  L.push('===================');
+  L.push('Grand Total Bill: '+rupee(totBill));
+  L.push('Grand Total Jama: '+rupee(totPaid));
+  L.push('Grand Total Baaki: '+rupee(Math.max(0,totBill-totPaid)));
+  appendTerms(L);
+  L.push('===================');
+  L.push('Dhanyawad');
+  L.push(state.shop.owner);
+  return L.join('\n');
+}
+
+function billButton(o){
+  var c=findCustomer(o.customerId);
+  var href=c?waLink(c.phone,billMessage(o)):'';
+  if(href)return '<a class="btn small" href="'+esc(href)+'" target="_blank" rel="noopener">\uD83D\uDCF2 बिल भेजो</a>';
+  return '<button class="btn small" data-act="need-phone" data-kind="order" data-ref="'+o.id+'">\uD83D\uDCF2 बिल भेजो</button>';
+}
+function summaryButton(c){
+  var href=waLink(c.phone,summaryMessage(c));
+  if(href)return '<a class="btn small" href="'+esc(href)+'" target="_blank" rel="noopener">\uD83D\uDCF2 पूरा हिसाब भेजो</a>';
+  return '<button class="btn small" data-act="need-phone" data-kind="summary" data-ref="'+c.id+'">\uD83D\uDCF2 पूरा हिसाब भेजो</button>';
+}
+function openQuickPhoneSheet(kind,refId){
+  var c=kind==='order'?findCustomer(findOrder(refId).customerId):findCustomer(refId);
+  if(!c)return;
+  openSheet(
+    '<div class="sh-head"><h2>व्हाट्सएप नंबर जोड़ो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">'+esc(c.name)+' का व्हाट्सएप नंबर अभी सेव नहीं है। नंबर डालो, बिल उसी नंबर पर चला जाएगा।</p>'+
+    '<label class="fl">व्हाट्सएप नंबर<input id="qp-phone" type="tel" inputmode="tel" placeholder="10 अंकों का मोबाइल नंबर" value="'+esc(c.phone||'')+'"></label>'+
+    '<div class="err" id="qp-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">बाद में</button>'+
+    '<a class="btn primary" href="#" target="_blank" rel="noopener" data-act="save-quick-phone" data-kind="'+kind+'" data-ref="'+refId+'">Save और भेजो</a>'+
+    '</div>'
+  );
+  setTimeout(function(){var f=$('#qp-phone');if(f)f.focus();},60);
+}
+
+/* ---------- Calendar reminders (.ics) — works offline, no server needed ---------- */
+function icsDate(dt){
+  return dt.getUTCFullYear()+pad(dt.getUTCMonth()+1)+pad(dt.getUTCDate())+'T'+pad(dt.getUTCHours())+pad(dt.getUTCMinutes())+pad(dt.getUTCSeconds())+'Z';
+}
+function icsEscape(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
+function orderIcs(o){
+  var c=findCustomer(o.customerId);
+  var start=new Date(o.date);
+  if(isNaN(start))start=new Date();
+  var end=new Date(start.getTime()+30*60000);
+  var itemsTxt=o.items.map(function(it){return it.name+' x'+it.qty+' '+it.unit;}).join(', ');
+  var summary='Order #'+o.no+' - '+(c?c.name:'Customer');
+  var desc=itemsTxt+' | Baaki: '+rupee(orderDue(o));
+  var uidv='mbmb-order-'+o.id+'@mbmb-billing';
+  var L=[];
+  L.push('BEGIN:VCALENDAR');
+  L.push('VERSION:2.0');
+  L.push('PRODID:-//MBMB Billing//HI');
+  L.push('BEGIN:VEVENT');
+  L.push('UID:'+uidv);
+  L.push('DTSTAMP:'+icsDate(new Date()));
+  L.push('DTSTART:'+icsDate(start));
+  L.push('DTEND:'+icsDate(end));
+  L.push('SUMMARY:'+icsEscape(summary));
+  L.push('DESCRIPTION:'+icsEscape(desc));
+  L.push('BEGIN:VALARM');
+  L.push('ACTION:DISPLAY');
+  L.push('DESCRIPTION:Reminder');
+  L.push('TRIGGER:-P2D');
+  L.push('END:VALARM');
+  L.push('BEGIN:VALARM');
+  L.push('ACTION:DISPLAY');
+  L.push('DESCRIPTION:Reminder');
+  L.push('TRIGGER:-P1D');
+  L.push('END:VALARM');
+  L.push('END:VEVENT');
+  L.push('END:VCALENDAR');
+  return L.join('\r\n');
+}
+function downloadIcs(o){
+  var ics=orderIcs(o);
+  var blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='order-'+o.no+'-reminder.ics';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1500);
+}
+
+/* ---------- Print bill ---------- */
+function printOrderBill(o){
+  var c=findCustomer(o.customerId);
+  var rows=o.items.map(function(it,idx){
+    var amt=num(it.qty)*num(it.rate);
+    var sub=[];
+    if(it.date&&it.date!==dayKey(o.date))sub.push('Delivery: '+fmtDshort(it.date));
+    sub.push(it.delivered?('दिया गया'+(it.deliveredAt?' '+fmtDshort(it.deliveredAt):'')):'बाकी');
+    return '<tr><td>'+(idx+1)+'</td><td>'+esc(it.name)+'<br><small>'+esc(sub.join(' · '))+'</small></td><td>'+fmtQty(it.qty)+' '+esc(it.unit)+'</td><td>'+rupee(it.rate)+'</td><td>'+rupee(amt)+'</td></tr>';
+  }).join('');
+  var termsLines=(state.shop.terms||'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  var termsHtml=termsLines.length?('<div style="margin-top:16px;padding-top:10px;border-top:1px dashed #999;font-size:.9em"><b>नियम व शर्तें:</b><ul style="margin:6px 0 0;padding-left:18px">'+termsLines.map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul></div>'):'';
+  var html=
+    '<div style="text-align:center;margin-bottom:14px">'+
+      '<h2 style="margin:0">'+esc(state.shop.name)+'</h2>'+
+      '<div>'+esc(state.shop.addr)+'</div>'+
+      '<div>Ph: '+esc(state.shop.phone)+'</div>'+
+    '</div>'+
+    '<hr>'+
+    '<div style="display:flex;justify-content:space-between;margin:10px 0">'+
+      '<div>Bill No: '+o.no+'<br>Delivery: '+fmtDT(o.date)+'</div>'+
+      '<div>Customer: '+esc(c?c.name:'-')+(c&&c.phone?('<br>Ph: '+esc(c.phone)):'')+'</div>'+
+    '</div>'+
+    '<table>'+
+      '<thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+    '<div style="margin-top:14px;text-align:right">'+
+      '<div>Total Bill: <b>'+rupee(orderTotal(o))+'</b></div>'+
+      '<div>Jama: '+rupee(orderPaid(o))+'</div>'+
+      o.payments.map(function(p){return '<div style="font-size:.85em">'+fmtDshort(p.date)+': '+rupee(p.amount)+(p.note?' ('+esc(p.note)+')':'')+'</div>';}).join('')+
+      '<div>Baaki: <b>'+rupee(orderDue(o))+'</b></div>'+
+    '</div>'+
+    termsHtml+
+    '<div style="margin-top:20px;text-align:center">Dhanyawad<br>'+esc(state.shop.owner)+'</div>';
+  $('#printArea').innerHTML=html;
+  setTimeout(function(){window.print();},80);
+}
+
+/* ---------- In-app reminder notification (best-effort, jab app khule tab hi) ---------- */
+function checkDueReminders(){
+  try{
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    var todayK=todayStr();
+    var lastKey='mbmb-lastremind';
+    if(localStorage.getItem(lastKey)===todayK)return;
+    var live=state.orders.filter(function(o){return !o.cancelled;});
+    var tmrK=(function(){var d=new Date();d.setDate(d.getDate()+1);return dayKey(d);})();
+    var dayAfterK=(function(){var d=new Date();d.setDate(d.getDate()+2);return dayKey(d);})();
+    var tmrItems=dayItemSummary(live,tmrK);
+    var dayAfterItems=dayItemSummary(live,dayAfterK);
+    if(!tmrItems.length&&!dayAfterItems.length){localStorage.setItem(lastKey,todayK);return;}
+    var parts=[];
+    if(tmrItems.length)parts.push('Kal: '+tmrItems.slice(0,4).map(function(i){return i.name+' '+fmtQty(i.qty)+' '+i.unit;}).join(', '));
+    if(dayAfterItems.length)parts.push('Parso: '+dayAfterItems.slice(0,4).map(function(i){return i.name+' '+fmtQty(i.qty)+' '+i.unit;}).join(', '));
+    new Notification('MB Sweets \u2013 aane wala order',{body:parts.join(' | ')});
+    localStorage.setItem(lastKey,todayK);
+  }catch(e){}
+}
+
+/* ---------- EVENTS ---------- */
+document.addEventListener('click',function(e){
+  if(e.target.id==='ov'){softClose();return;}
+  var t=e.target.closest('[data-act]');if(!t)return;
+  var act=t.getAttribute('data-act'),id=t.getAttribute('data-id');
+  switch(act){
+    case 'nav':
+      ui.view=t.getAttribute('data-v');
+      if(ui.view!=='customer')ui.customerId=null;
+      renderRoute();window.scrollTo(0,0);break;
+    case 'fab':
+      var fa=$('#fab').getAttribute('data-fabact');
+      if(fa==='item')openItemForm();
+      else openOrderForm(ui.view==='customer'?ui.customerId:null);
+      break;
+    case 'open-customer':ui.cameFrom=(ui.view==='orders')?'orders':(ui.view==='dues'?'dues':'home');ui.view='customer';ui.customerId=id;renderRoute();window.scrollTo(0,0);break;
+    case 'orders-filter':ui.ordersFilter=t.getAttribute('data-f');renderRoute();break;
+    case 'view-dues':ui.view='dues';renderRoute();window.scrollTo(0,0);break;
+    case 'add-customer':openCustomerForm();break;
+    case 'edit-customer':openCustomerForm(id);break;
+    case 'save-customer':
+      var savedC=saveCustomerFrom(id||null);
+      if(savedC){closeSheet();renderRoute();toast('ग्राहक save हो गया');}
+      break;
+    case 'del-customer':openDeleteCustomerConfirm(id);break;
+    case 'confirm-del-customer':
+      state.orders=state.orders.filter(function(o){return o.customerId!==id;});
+      state.customers=state.customers.filter(function(c){return c.id!==id;});
+      save();closeSheet();ui.view='home';ui.customerId=null;renderRoute();toast('ग्राहक डिलीट हो गया');
+      break;
+    case 'close':closeSheet();break;
+
+    case 'new-order-for':openOrderForm(id);break;
+    case 'edit-order':
+      var eo=findOrder(id);openOrderForm(eo.customerId,id);break;
+    case 'remind-order':
+      var reo=findOrder(id);
+      if(reo){downloadIcs(reo);toast('Reminder file download ho gayi \u2014 usse khol kar apne calendar me add kar lo');}
+      break;
+    case 'print-order':
+      var po2=findOrder(id);
+      if(po2)printOrderBill(po2);
+      break;
+    case 'cancel-order':openCancelOrderConfirm(id);break;
+    case 'confirm-cancel-order':
+      var co=findOrder(id);co.cancelled=true;save();closeSheet();renderRoute();toast('ऑर्डर कैंसल हो गया');
+      break;
+    case 'toggle-item':
+      var too=findOrder(t.getAttribute('data-order'));
+      var lid=t.getAttribute('data-line');
+      var li=too.items.find(function(x){return x.lid===lid;});
+      if(li){
+        li.delivered=!li.delivered;li.deliveredAt=li.delivered?todayStr():'';
+        save();renderRoute();
+        toast(li.delivered?('"'+li.name+'" दिया गया ✓'):('"'+li.name+'" फिर से बाकी में'));
+      }
+      break;
+    case 'order-payment':openOrderPayment(id);break;
+    case 'customer-payment':openPaymentForm(id);break;
+    case 'pay-pick-order':openPaymentForm(t.getAttribute('data-cust'),id);break;
+    case 'pay-change-order':openPaymentForm(id);break;
+    case 'save-payment':
+      var po=findOrder(id);
+      var amt=num($('#p-amt').value);
+      if(!(amt>0)){$('#p-err').textContent='सही amount लिखो।';break;}
+      var poDue=orderDue(po);
+      if(amt>poDue+0.001){$('#p-err').textContent='इस ऑर्डर पर सिर्फ '+rupee(poDue)+' बाकी है — इससे ज़्यादा नहीं ले सकते।';break;}
+      po.payments.push({id:uid(),amount:amt,date:$('#p-date').value||todayStr(),note:$('#p-note').value.trim()});
+      save();closeSheet();renderRoute();toast('पेमेंट जुड़ गया');
+      break;
+    case 'del-payment':
+      var dpo=findOrder(t.getAttribute('data-order'));var dpid=t.getAttribute('data-pay');
+      var dp=dpo?dpo.payments.find(function(x){return x.id===dpid;}):null;
+      if(dp){
+        openSheet('<div class="sh-head"><h2>पेमेंट हटाएं?</h2></div>'+
+          '<p class="hint">ऑर्डर #'+dpo.no+' का '+fmtDonly(dp.date)+' वाला '+rupee(dp.amount)+' का पेमेंट हट जाएगा। सिर्फ गलती से डाला हो तभी हटाओ।</p>'+
+          '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-del-payment" data-order="'+dpo.id+'" data-pay="'+dp.id+'">हां, हटाओ</button></div>');
+      }
+      break;
+    case 'confirm-del-payment':
+      var cpo=findOrder(t.getAttribute('data-order'));var cpid=t.getAttribute('data-pay');
+      if(cpo){cpo.payments=cpo.payments.filter(function(x){return x.id!==cpid;});save();}
+      closeSheet();renderRoute();toast('पेमेंट हट गया');
+      break;
+    case 'pay-lump':openLumpPayment(id);break;
+    case 'adjust-extra':
+      var mv=adjustExtra(id);save();renderRoute();
+      toast(mv>0?(rupee(mv)+' बाकी वाले ऑर्डर में जोड़ दिया'):'कुछ adjust करने को नहीं है');
+      break;
+    case 'save-lump':
+      var lamt=num($('#lp-amt').value);
+      var lel=customerOrders(id).filter(function(o){return !o.cancelled&&orderDue(o)>0;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+      var ltot=round2(lel.reduce(function(s,o){return s+orderDue(o);},0));
+      if(!(lamt>0)){$('#lp-err').textContent='सही amount लिखो।';break;}
+      if(lamt>ltot+0.001){$('#lp-err').textContent='कुल बाकी सिर्फ '+rupee(ltot)+' है — इससे ज़्यादा नहीं ले सकते।';break;}
+      var lrem=round2(lamt),lcount=0,ldate=$('#lp-date').value||todayStr(),lnote=$('#lp-note').value.trim()||'एक साथ जमा';
+      lel.forEach(function(o){
+        if(lrem<=0.001)return;
+        var take=round2(Math.min(lrem,orderDue(o)));
+        if(take>0){o.payments.push({id:uid(),amount:take,date:ldate,note:lnote});lrem=round2(lrem-take);lcount++;}
+      });
+      save();closeSheet();renderRoute();toast(rupee(lamt)+' जमा हो गया ('+lcount+' ऑर्डर में बँटा)');
+      break;
+    case 'share-backup':
+      var shTxt=JSON.stringify(state);
+      var markShared=function(){
+        localStorage.setItem('mbmb-lastbackup',String(Date.now()));renderBanner();
+        var lb2=$('#last-backup-txt');if(lb2)lb2.textContent=backupStatusText();
+        toast('Backup भेज दिया ✓');
+      };
+      var shFail=function(err){if(err&&err.name==='AbortError')return;toast('Share नहीं हुआ — "Copy karo" से कर लो');};
+      try{
+        var shFile=new File([shTxt],'mbmb-backup-'+todayStr()+'.txt',{type:'text/plain'});
+        if(navigator.canShare&&navigator.canShare({files:[shFile]})){
+          navigator.share({files:[shFile],title:'MB Sweets backup '+todayStr()}).then(markShared,shFail);
+        }else if(navigator.share){
+          navigator.share({title:'MB Sweets backup '+todayStr(),text:shTxt}).then(markShared,shFail);
+        }else{toast('इस फ़ोन में Share नहीं है — "Copy karo" से कर लो');}
+      }catch(err){shFail(err);}
+      break;
+    case 'confirm-restore':
+      var rd2=ui.pendingRestore;ui.pendingRestore=null;
+      if(rd2){
+        try{localStorage.setItem(KEY+'-before-restore',JSON.stringify(state));}catch(e3){}
+        state.shop=Object.assign({},DEFAULT_SHOP,rd2.shop||{});
+        state.items=rd2.items;state.customers=rd2.customers;state.orders=rd2.orders;
+        normalizeState();
+        var mx2=0;state.orders.forEach(function(o){if(o.no>mx2)mx2=o.no;});
+        state.nextOrderNo=Math.max(rd2.nextOrderNo||1,mx2+1);
+        save();closeSheet();renderShell();renderRoute();toast('Restore हो गया');
+      }else{closeSheet();}
+      break;
+    case 'need-phone':
+      openQuickPhoneSheet(t.getAttribute('data-kind'),t.getAttribute('data-ref'));
+      break;
+    case 'save-quick-phone':
+      var qkind=t.getAttribute('data-kind'),qref=t.getAttribute('data-ref');
+      var qphoneRaw=$('#qp-phone').value.trim();
+      var qc=qkind==='order'?findCustomer(findOrder(qref).customerId):findCustomer(qref);
+      var qmsg=qc&&qkind==='order'?billMessage(findOrder(qref)):(qc?summaryMessage(qc):'');
+      var qlink=qc?waLink(qphoneRaw,qmsg):'';
+      if(!qlink){e.preventDefault();$('#qp-err').textContent='सही मोबाइल नंबर लिखो (10 अंकों का)।';break;}
+      qc.phone=qphoneRaw;save();
+      t.setAttribute('href',qlink);
+      setTimeout(function(){closeSheet();renderRoute();toast('नंबर जुड़ गया, WhatsApp खुल रहा है');},80);
+      break;
+
+    case 'of-change-cust':ui.orderDraft.customerId=null;ui.orderDraft.custSearch='';renderOrderSheet();break;
+    case 'of-pick-cust':ui.orderDraft.customerId=id;ui.orderDraft.newCustOpen=false;renderOrderSheet();break;
+    case 'of-new-cust':
+      ui.orderDraft.newCustOpen=true;
+      ui.orderDraft.newCustName=(ui.orderDraft.custSearch||'').trim();
+      ui.orderDraft.newCustPhone='';
+      renderOrderSheet();
+      setTimeout(function(){var f=$('#nc-phone');if(f)f.focus();},60);
+      break;
+    case 'of-cancel-newcust':
+      ui.orderDraft.newCustOpen=false;
+      renderOrderSheet();
+      break;
+    case 'of-confirm-newcust':
+      var ncName=$('#nc-name').value.trim();
+      var ncPhone=$('#nc-phone').value.trim();
+      if(!ncName){$('#nc-err').textContent='नाम लिखो।';break;}
+      var ncDup=findCustomerByPhone(ncPhone,null);
+      if(ncDup){$('#nc-err').innerHTML='यह नंबर पहले से "'+esc(ncDup.name)+'" के नाम से है। <button class="lnk" data-act="of-pick-cust" data-id="'+ncDup.id+'">उन्हीं को चुनो</button>';break;}
+      var ncProb=phoneProblem(ncPhone,null);
+      if(ncProb){$('#nc-err').textContent=ncProb;break;}
+      var newCust={id:uid(),name:ncName,phone:ncPhone,address:'',createdAt:Date.now()};
+      state.customers.push(newCust);save();
+      ui.orderDraft.customerId=newCust.id;
+      ui.orderDraft.newCustOpen=false;
+      renderOrderSheet();
+      toast('नया ग्राहक जुड़ गया');
+      break;
+    case 'of-cat':ui.orderDraft.activeCat=t.getAttribute('data-c');renderOrderSheet();break;
+    case 'of-add-chip':addOrLine(findItem(id));break;
+    case 'of-rm-line':
+      var rl=t.getAttribute('data-lid');
+      ui.orderDraft.lines=ui.orderDraft.lines.filter(function(l){return l.lid!==rl;});
+      renderOrderSheet();
+      break;
+    case 'of-split-line':
+      var slid=t.getAttribute('data-lid');
+      var sl=ui.orderDraft.lines.find(function(l){return l.lid===slid;});
+      if(sl){
+        var sidx=ui.orderDraft.lines.indexOf(sl);
+        var nl={lid:uid(),name:sl.name,unit:sl.unit,rate:sl.rate,qty:'',delivered:false,date:sl.date||''};
+        ui.orderDraft.lines.splice(sidx+1,0,nl);
+        renderOrderSheet();
+        setTimeout(function(){
+          var row=document.querySelector('.lrow[data-lid="'+nl.lid+'"] input[type=number]');
+          if(row)row.focus();
+        },60);
+      }
+      break;
+    case 'of-open-custom':ui.orderDraft.customItemOpen=true;renderOrderSheet();break;
+    case 'of-cancel-custom':ui.orderDraft.customItemOpen=false;renderOrderSheet();break;
+    case 'of-add-custom':
+      var ciName=$('#ci-name').value.trim(),ciUnit=$('#ci-unit').value.trim()||'किलो',ciRate=num($('#ci-rate').value);
+      if(!ciName){$('#ci-err').textContent='आइटम का नाम लिखो।';break;}
+      if(!(ciRate>=0)){$('#ci-err').textContent='सही rate लिखो।';break;}
+      var saveToMaster=$('#ci-save').checked;
+      if(saveToMaster&&!state.items.some(function(x){return x.name.toLowerCase()===ciName.toLowerCase();})){
+        state.items.push({id:uid(),name:ciName,cat:ui.orderDraft.activeCat,unit:ciUnit,price:ciRate});
+        save();
+      }
+      ui.orderDraft.customItemOpen=false;ui.orderDraft.ciName='';ui.orderDraft.ciRate='';ui.orderDraft.ciUnit='';
+      addOrLine({name:ciName,unit:ciUnit,price:ciRate});
+      break;
+    case 'save-order':saveOrderFromDraft();break;
+
+    case 'edit-item':openItemForm(id);break;
+    case 'save-item':
+      var iname=$('#i-name').value.trim(),iprice=Math.max(0,num($('#i-price').value));
+      if(!iname){$('#i-err').textContent='नाम लिखो।';break;}
+      if(state.items.some(function(x){return x.id!==id&&x.name.toLowerCase()===iname.toLowerCase();})){$('#i-err').textContent='इस नाम का आइटम पहले से लिस्ट में है।';break;}
+      var existI=id?findItem(id):null;
+      if(existI){existI.name=iname;existI.cat=$('#i-cat').value;existI.unit=$('#i-unit').value.trim()||'किलो';existI.price=iprice;}
+      else{state.items.push({id:uid(),name:iname,cat:$('#i-cat').value,unit:$('#i-unit').value.trim()||'किलो',price:iprice});}
+      save();closeSheet();renderRoute();toast('आइटम save हो गया');
+      break;
+    case 'del-item':openDeleteItemConfirm(id);break;
+    case 'confirm-del-item':
+      state.items=state.items.filter(function(i){return i.id!==id;});
+      save();closeSheet();renderRoute();toast('आइटम हट गया');
+      break;
+
+    case 'install-app':
+      if(window.deferredInstallPrompt){
+        window.deferredInstallPrompt.prompt();
+        window.deferredInstallPrompt.userChoice.then(function(){window.deferredInstallPrompt=null;});
+      }else{
+        openInstallHelpSheet();
+      }
+      break;
+    case 'enable-notif':
+      if('Notification' in window){
+        Notification.requestPermission().then(function(perm){
+          if(perm==='granted'){
+            localStorage.removeItem('mbmb-lastremind');
+            checkDueReminders();
+            toast('notification chaalu ho gaya');
+          }else{
+            toast('notification ki anumati nahi mili');
+          }
+          renderRoute();
+        });
+      }else{
+        toast('Is browser me notification support nahi hai');
+      }
+      break;
+    case 'save-shopinfo':
+      var sn=$('#s-name').value.trim();
+      if(!sn){$('#s-err').textContent='दुकान का नाम लिखो।';break;}
+      state.shop={name:sn,addr:$('#s-addr').value.trim(),phone:$('#s-phone').value.trim(),owner:$('#s-owner').value.trim(),terms:$('#s-terms').value.trim()};
+      save();renderShell();toast('जानकारी save हो गई');
+      break;
+    case 'copy-backup':
+      var ta=$('#b-text');ta.focus();ta.select();
+      var done=function(){
+        toast('Copy हो गया');
+        localStorage.setItem('mbmb-lastbackup',String(Date.now()));
+        renderBanner();
+        var lb=$('#last-backup-txt');if(lb)lb.textContent=backupStatusText();
+      };
+      var fb=function(){var ok=false;try{ok=document.execCommand('copy');}catch(err){}if(ok)done();else toast('Text select हो गया, अब खुद copy करो');};
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(ta.value).then(done,fb);else fb();
+      break;
+    case 'restore-backup':
+      try{
+        var rd=JSON.parse($('#b-text').value.trim());
+        if(!rd||!Array.isArray(rd.orders)||!Array.isArray(rd.customers)||!Array.isArray(rd.items))throw new Error('bad');
+        ui.pendingRestore=rd;
+        openSheet('<div class="sh-head"><h2>Restore करें?</h2></div>'+
+          '<p class="hint">इस backup में <b>'+rd.customers.length+' ग्राहक</b> और <b>'+rd.orders.length+' ऑर्डर</b> हैं।</p>'+
+          '<p class="hint">अभी ऐप में '+state.customers.length+' ग्राहक और '+state.orders.length+' ऑर्डर हैं — ये सब backup वाले data से बदल जाएंगे।</p>'+
+          '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-restore">हां, Restore करो</button></div>');
+      }catch(err){$('#b-err').textContent='यह backup text सही नहीं लग रहा।';}
+      break;
+  }
+});
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(ui.orderDraft&&syncDraftField(t))return;
+  if(t.id==='ordersSearch'){ui.ordersSearch=t.value;renderOrders();var f4=$('#ordersSearch');if(f4){f4.focus();f4.setSelectionRange(f4.value.length,f4.value.length);}return;}
+  if(t.id==='search'){ui.search=t.value;renderHome();var f=$('#search');if(f){f.focus();f.setSelectionRange(f.value.length,f.value.length);}return;}
+  if(t.id==='itemSearch'){ui.itemsSearch=t.value;renderItems();var f2=$('#itemSearch');if(f2){f2.focus();f2.setSelectionRange(f2.value.length,f2.value.length);}return;}
+  if(t.id==='of-custsearch'){ui.orderDraft.custSearch=t.value;renderOrderSheet();var f3=$('#of-custsearch');if(f3){f3.focus();f3.setSelectionRange(f3.value.length,f3.value.length);}return;}
+  if(t.getAttribute&&t.getAttribute('data-act')==='of-qty'){
+    var l1=ui.orderDraft.lines.find(function(l){return l.lid===t.getAttribute('data-lid');});
+    if(l1){l1.qty=t.value;updateOrderTotalDisplay();
+      var row=t.closest('.lrow');if(row){var la=row.querySelector('.lamt');if(la)la.textContent=rupee(num(l1.qty)*num(l1.rate));}
+    }
+    return;
+  }
+  if(t.getAttribute&&t.getAttribute('data-act')==='of-rate'){
+    var l2=ui.orderDraft.lines.find(function(l){return l.lid===t.getAttribute('data-lid');});
+    if(l2){l2.rate=t.value;updateOrderTotalDisplay();
+      var row2=t.closest('.lrow');if(row2){var la2=row2.querySelector('.lamt');if(la2)la2.textContent=rupee(num(l2.qty)*num(l2.rate));}
+    }
+    return;
+  }
+  if(t.getAttribute&&t.getAttribute('data-act')==='of-linedate'){
+    var l3=ui.orderDraft.lines.find(function(l){return l.lid===t.getAttribute('data-lid');});
+    if(l3){l3.date=t.value||'';}
+    return;
+  }
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(ui.orderDraft){
+    if(syncDraftField(t))return;
+    if(t.getAttribute&&t.getAttribute('data-act')==='of-linedate'){
+      var lc=ui.orderDraft.lines.find(function(l){return l.lid===t.getAttribute('data-lid');});
+      if(lc)lc.date=t.value||'';
+      return;
+    }
+  }
+  if(t.id==='b-file'&&t.files&&t.files[0]){
+    var fr=new FileReader();
+    fr.onload=function(){var ta2=$('#b-text');if(ta2){ta2.value=String(fr.result||'');toast('फ़ाइल लोड हो गई — अब "Restore karo" दबाओ');}};
+    fr.onerror=function(){toast('फ़ाइल नहीं पढ़ पाए');};
+    fr.readAsText(t.files[0]);
+  }
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&$('#ov'))softClose();
+});
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  window.deferredInstallPrompt=e;
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
+load();
+renderShell();
+renderRoute();
+checkDueReminders();
+})();
+</script>
+</body>
+</html>
