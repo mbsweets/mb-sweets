@@ -767,7 +767,7 @@ function orderCardFull(o){
   var baseDayKey=dayKey(o.date);
   var items=o.items.map(function(it){
     var amt=num(it.qty)*num(it.rate);
-    var dtag=(it.date&&it.date!==baseDayKey)?(' <span class="dtag">'+fmtDshort(it.date)+'</span>'):'';
+    var dtag=(!it.delivered&&it.date&&it.date!==baseDayKey)?(' <span class="dtag">'+fmtDshort(it.date)+'</span>'):'';
     if(cancelled){
       return '<li class="ro"><span class="chk">\u00b7</span><span class="citem">'+esc(displayName(it))+' \u00d7'+it.qty+dtag+'</span><span class="camt">'+rupee(amt)+'</span></li>';
     }
@@ -1226,7 +1226,7 @@ function billLineItems(L, o){
     var amt=num(it.qty)*num(it.rate);
     L.push((idx+1)+'. '+displayName(it)+' '+(it.delivered?('✅'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':'')):'⏳'));
     L.push('    '+fmtQty(it.qty)+' '+it.unit+' x '+rupee(it.rate)+' = '+rupee(amt));
-    if(it.date&&it.date!==baseDayKey){
+    if(!it.delivered&&it.date&&it.date!==baseDayKey){
       L.push('    Delivery: '+fmtDshort(it.date));
     }
     if(idx<o.items.length-1)L.push('');
@@ -1428,7 +1428,7 @@ function biItemRow(ctx,y,o,it,idx){
   var W=BI.W,P=BI.P,IS=34,NX=P+IS+14,nameW=BI.QX-176-NX;
   biFont(ctx,600,32);var nl=biWrap(ctx,(idx+1)+'. '+displayName(it),nameW);
   var subs=[];
-  if(it.date&&it.date!==dayKey(o.date))subs.push({t:'डिलीवरी: '+fmtDshort(it.date),c:BI.gold});
+  if(!it.delivered&&it.date&&it.date!==dayKey(o.date))subs.push({t:'डिलीवरी: '+fmtDshort(it.date),c:BI.gold});
   if(it.delivered&&it.deliveredAt)subs.push({t:'दिया गया: '+fmtDshort(it.deliveredAt),c:BI.green});
   var fy=y+50,yy=fy;
   if(it.delivered)biIconDone(ctx,P,fy-28,IS);else biIconPending(ctx,P,fy-29,IS);
@@ -1637,7 +1637,7 @@ function printOrderBill(o){
   var rows=o.items.map(function(it,idx){
     var amt=num(it.qty)*num(it.rate);
     var sub=[];
-    if(it.date&&it.date!==dayKey(o.date))sub.push('Delivery: '+fmtDshort(it.date));
+    if(!it.delivered&&it.date&&it.date!==dayKey(o.date))sub.push('Delivery: '+fmtDshort(it.date));
     if(it.delivered)sub.push('दिया गया'+(it.deliveredAt?' '+fmtDshort(it.deliveredAt):''));
     return '<tr><td>'+(idx+1)+'</td><td>'+esc(displayName(it))+(sub.length?'<br><small>'+esc(sub.join(' · '))+'</small>':'')+'</td><td>'+fmtQty(it.qty)+' '+esc(it.unit)+'</td><td>'+rupee(it.rate)+'</td><td>'+rupee(amt)+'</td></tr>';
   }).join('');
