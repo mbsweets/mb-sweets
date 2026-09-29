@@ -1,4 +1,4 @@
-var CACHE_NAME = 'mbmb-billing-v4';
+var CACHE_NAME = 'mbmb-billing-v5';
 var CORE_ASSETS = [
   './',
   './manifest.json',
@@ -6,6 +6,7 @@ var CORE_ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './logo-header.png',
+  './order-qr.png',
   './fonts/Mukta-400.woff',
   './fonts/Mukta-600.woff',
   './fonts/Mukta-700.woff',

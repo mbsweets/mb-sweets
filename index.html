@@ -1446,6 +1446,7 @@ function billMessage(o){
   L.push('===================');
   L.push('Dhanyawad');
   L.push(state.shop.owner);
+  orderPromo(L);
   return L.join('\n');
 }
 function summaryMessage(c){
@@ -1478,6 +1479,7 @@ function summaryMessage(c){
   L.push('===================');
   L.push('Dhanyawad');
   L.push(state.shop.owner);
+  orderPromo(L);
   return L.join('\n');
 }
 
@@ -1494,6 +1496,13 @@ function billButton(o){
 function summaryButton(c){
   return '<button class="btn small" data-act="bill-sheet" data-kind="summary" data-ref="'+c.id+'">📲 पूरा हिसाब भेजो</button>';
 }
+/* हर बिल के नीचे: अगली बार ऑनलाइन ऑर्डर का लिंक */
+function orderPromo(L){
+  L.push('');
+  L.push('🛍️ अगली बार घर बैठे ऑर्डर करें:');
+  L.push(orderPageUrl());
+}
+function orderPageShort(){return orderPageUrl().replace(/^https?:\/\//,'').replace(/\/$/,'');}
 function shortBillMessage(o){
   var c=findCustomer(o.customerId),L=[];
   L.push('*'+state.shop.name+'*');
@@ -1505,6 +1514,7 @@ function shortBillMessage(o){
   L.push('');
   L.push('पूरा बिल फोटो में भेज रहे हैं।');
   L.push('धन्यवाद - '+state.shop.owner);
+  orderPromo(L);
   return L.join(String.fromCharCode(10));
 }
 function shortSummaryMessage(c){
@@ -1520,6 +1530,7 @@ function shortSummaryMessage(c){
   L.push('');
   L.push('पूरा हिसाब फोटो में भेज रहे हैं।');
   L.push('धन्यवाद - '+state.shop.owner);
+  orderPromo(L);
   return L.join(String.fromCharCode(10));
 }
 
@@ -1686,20 +1697,29 @@ function biTerms(ctx,y){
   });
   return y+8;
 }
-function biFooter(ctx,y){
-  var W=BI.W;
+function biFooter(ctx,y,qr){
+  var W=BI.W,P=BI.P;
   y+=46;biFont(ctx,700,40,true);biText(ctx,'धन्यवाद!',W/2,y+38,'center',BI.maroon);y+=58;
   if(state.shop.owner){biFont(ctx,400,26);biText(ctx,'प्रोप्राइटर: '+state.shop.owner,W/2,y+28,'center',BI.muted);y+=42;}
-  y+=26;ctx.fillStyle=BI.maroon;ctx.fillRect(0,y,W,16);
+  y+=24;
+  var bh=196,qs=156;
+  biRound(ctx,P,y,W-2*P,bh,22,BI.cream,BI.gold);
+  var tx=P+28;
+  if(qr){ctx.fillStyle='#FFFFFF';ctx.fillRect(P+20,y+20,qs,qs);ctx.imageSmoothingEnabled=false;ctx.drawImage(qr,P+20,y+20,qs,qs);ctx.imageSmoothingEnabled=true;tx=P+20+qs+28;}
+  biFont(ctx,700,36,true);biText(ctx,'अगली बार घर बैठे ऑर्डर करें',tx,y+64,'left',BI.maroon);
+  biFont(ctx,400,26);biText(ctx,'मिठाई · दूध-दही-पनीर · केक — 6 km तक डिलीवरी',tx,y+106,'left',BI.ink);
+  biFont(ctx,600,27);biText(ctx,orderPageShort(),tx,y+150,'left',BI.gold);
+  y+=bh+26;
+  ctx.fillStyle=BI.maroon;ctx.fillRect(0,y,W,16);
   return y+16;
 }
 function renderBillImage(kind,ref){
-  return Promise.all([biFontsReady(),biLoadImg('logo-header.png')]).then(function(r){
-    var logo=r[1];
+  return Promise.all([biFontsReady(),biLoadImg('logo-header.png'),biLoadImg('order-qr.png')]).then(function(r){
+    var logo=r[1],qr=r[2];
     var o=kind==='order'?ref:null,c=kind==='order'?findCustomer(o.customerId):ref;
     var orders=kind==='order'?[o]:customerOrders(c.id).filter(function(x){return !x.cancelled;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
     var rowsN=0,payN=0;orders.forEach(function(x){rowsN+=x.items.length;payN+=x.payments.length;});
-    var H=Math.min(15000,Math.ceil(1600+rowsN*170+orders.length*190+payN*40+String(state.shop.terms||'').length*2));
+    var H=Math.min(15000,Math.ceil(1840+rowsN*170+orders.length*190+payN*40+String(state.shop.terms||'').length*2));
     var cv=document.createElement('canvas');cv.width=BI.W;cv.height=H;
     var ctx=cv.getContext('2d');ctx.textBaseline='alphabetic';
     ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,BI.W,H);
@@ -1724,7 +1744,7 @@ function renderBillImage(kind,ref){
       y=biTotals(ctx,y,gt,gp,null);
     }
     y=biTerms(ctx,y);
-    y=biFooter(ctx,y);
+    y=biFooter(ctx,y,qr);
     var out=document.createElement('canvas');out.width=BI.W;out.height=Math.min(Math.ceil(y),H);
     out.getContext('2d').drawImage(cv,0,0);
     return new Promise(function(res,rej){out.toBlob(function(b){if(b)res(b);else rej(new Error('blob'));},'image/png');});
@@ -1861,7 +1881,10 @@ function printOrderBill(o){
       '<div>Baaki: <b>'+rupee(orderDue(o))+'</b></div>'+
     '</div>'+
     termsHtml+
-    '<div style="margin-top:20px;text-align:center">Dhanyawad<br>'+esc(state.shop.owner)+'</div>';
+    '<div style="margin-top:20px;text-align:center">Dhanyawad<br>'+esc(state.shop.owner)+'</div>'+
+    '<div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px dashed #999;border-radius:8px;padding:8px">'+
+      '<img src="order-qr.png" alt="" style="width:70px;height:70px;image-rendering:pixelated">'+
+      '<div style="text-align:left"><b>अगली बार घर बैठे ऑर्डर करें</b><br>'+esc(orderPageShort())+'</div></div>';
   $('#printArea').innerHTML=html;
   setTimeout(function(){window.print();},80);
 }
@@ -2028,7 +2051,7 @@ document.addEventListener('click',function(e){
     case 'bill-share':
       var bsh=ui.billShare;
       if(!bsh||!bsh.file)break;
-      var bshCap=(bsh.kind==='order')?('बिल - ऑर्डर #'+findOrder(bsh.ref).no+' - '+state.shop.name):('पूरा हिसाब - '+state.shop.name);
+      var bshCap=((bsh.kind==='order')?('बिल - ऑर्डर #'+findOrder(bsh.ref).no+' - '+state.shop.name):('पूरा हिसाब - '+state.shop.name))+'\n🛍️ अगली बार घर बैठे ऑर्डर करें: '+orderPageUrl();
       try{
         if(navigator.canShare&&navigator.canShare({files:[bsh.file]})){
           navigator.share({files:[bsh.file],text:bshCap}).catch(function(err){
