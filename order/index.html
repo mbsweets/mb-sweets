@@ -684,7 +684,7 @@ function cardHtml(card){
   else if(q>0)ctl='<div class="stepper"><button data-act="dec" data-id="'+o.id+'" aria-label="कम करें">−</button><b>'+esc(qtyTxt(it.unit,q))+'</b><button data-act="inc" data-id="'+o.id+'" aria-label="बढ़ाएं">+</button></div>';
   else ctl='<button class="addbtn" data-act="inc" data-id="'+o.id+'">'+t('add')+'</button>';
   return '<article class="card'+(allOff?' dim':'')+'" id="card-'+card.key+'">'+
-    '<div class="pic">'+picHtml(card)+'</div>'+
+    '<div class="pic">'+picHtml(card,card.sample?t('sample'):'')+'</div>'+
     '<div class="body"><h3>'+esc(nm(card))+'<small>'+esc(nm2(card))+'</small></h3>'+brand+priceLine+chips+
     '<div class="qtyrow">'+ctl+'</div></div></article>';
 }
@@ -702,7 +702,7 @@ function customCardHtml(cc){
 }
 function packHtml(){
   var p=st.custom.filter(function(c){return c.type==='pack';})[0];
-  return '<div class="packbox" id="packbox"><div class="packtop"><div class="pic">'+ART.pack()+'</div>'+
+  return '<div class="packbox" id="packbox"><div class="packtop"><div class="pic">'+(C.packImg?'<img src="'+img(C.packImg)+'" alt="" loading="lazy">':ART.pack())+'</div>'+
     '<div><h3 style="margin:0;font-size:1rem;line-height:1.25">'+t('pack_title')+'</h3><p class="hint" style="margin-top:2px">'+t('pack_sub')+'</p></div></div>'+
     '<div class="chips">'+t('pack_chips').map(function(c){return '<button class="chip" data-act="packchip" data-v="'+esc(c)+'">+ '+esc(c)+'</button>';}).join('')+'</div>'+
     '<textarea id="packText" rows="3" placeholder="'+esc(t('pack_ph'))+'">'+esc(p?p.text:'')+'</textarea>'+

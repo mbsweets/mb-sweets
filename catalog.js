@@ -87,19 +87,21 @@ window.MB_CATALOG = {
     { tab: 'sweets', key: 'jalebi', hi: 'जलेबी', en: 'Jalebi', art: 'jalebi', opts: ['i12'] },
     { tab: 'sweets', key: 'boondi', hi: 'बूंदी', en: 'Boondi', art: 'boondi', opts: ['i13'] },
 
-    { tab: 'dairy', key: 'milk', hi: 'दूध', en: 'Milk', brandHi: 'सुधा', brandEn: 'Sudha', art: 'milk',
+    { tab: 'dairy', key: 'milk', hi: 'दूध', en: 'Milk', brandHi: 'सुधा', brandEn: 'Sudha', img: 'milk', art: 'milk',
       opts: [{ id: 'i14', hi: 'फुल क्रीम', en: 'Full cream' }, { id: 'i15', hi: 'हाफ क्रीम (टोंड)', en: 'Toned' }] },
     { tab: 'dairy', key: 'dahi', hi: 'दही', en: 'Dahi (Curd)', brandHi: 'अमूल', brandEn: 'Amul', art: 'dahi',
       opts: [{ id: 'i25', hi: '200 ग्राम', en: '200 g' }, { id: 'i24', hi: '400 ग्राम', en: '400 g' }, { id: 'i23', hi: '1 किलो', en: '1 kg' },
              { id: 'i18', hi: '2 किलो', en: '2 kg' }, { id: 'i19', hi: '5 किलो', en: '5 kg' }, { id: 'i20', hi: '15 किलो', en: '15 kg' }] },
-    { tab: 'dairy', key: 'paneer', hi: 'पनीर', en: 'Paneer', art: 'paneer',
-      opts: [{ id: 'i16', hi: 'अमूल पैकेट 200 ग्राम', en: 'Amul pack 200 g' }, { id: 'i17', hi: 'खुला पनीर', en: 'Loose paneer' }] },
+    { tab: 'dairy', key: 'paneer', hi: 'पनीर', en: 'Paneer', img: 'paneer', art: 'paneer',
+      opts: [{ id: 'i16', hi: 'पैकेट 200 ग्राम', en: 'Pack 200 g' }, { id: 'i17', hi: 'खुला पनीर', en: 'Loose paneer' }] },
 
-    { tab: 'cake', key: 'cake-vanilla', hi: 'वनीला केक', en: 'Vanilla Cake', art: 'cakeVanilla',
+    { tab: 'cake', key: 'cake-vanilla', hi: 'वनीला केक', en: 'Vanilla Cake', img: 'cake-vanilla', sample: true, art: 'cakeVanilla',
       opts: [{ id: 'i26', hi: '½ किलो', en: '½ kg' }, { id: 'i27', hi: '1 किलो', en: '1 kg' }] },
-    { tab: 'cake', key: 'cake-choco', hi: 'चॉकलेट केक', en: 'Chocolate Cake', art: 'cakeChoco',
+    { tab: 'cake', key: 'cake-choco', hi: 'चॉकलेट केक', en: 'Chocolate Cake', img: 'cake-choco', sample: true, art: 'cakeChoco',
       opts: [{ id: 'i29', hi: '½ किलो', en: '½ kg' }, { id: 'i28', hi: '1 किलो', en: '1 kg' }] }
   ],
+
+  packImg: 'pack',
 
   /* कस्टम केक — दाम WhatsApp पर बताया जाता है */
   customCakes: [
