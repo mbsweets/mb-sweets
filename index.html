@@ -1256,8 +1256,8 @@ function webConfirmMessage(o){
     }else{
       L.push('कृपया '+rupee(due)+' का पेमेंट UPI से कर दें, उसके बाद डिलीवरी निकलेगी।');
     }
-    L.push('UPI ID: '+((CATALOG&&CATALOG.shop.upi)||''));
-    L.push('QR / पेमेंट पेज: '+orderPageUrl()+'#pay='+due);
+    L.push('पेमेंट का QR यहाँ है: '+orderPageUrl()+'#pay='+due);
+    L.push('(QR फोटो सेव करके Google Pay / PhonePe / Paytm में "स्कैन" → गैलरी से चुनें)');
     L.push('पेमेंट के बाद स्क्रीनशॉट इसी चैट में भेजें।');
   }else{
     L.push('पेमेंट मिल गया ✅ धन्यवाद!');

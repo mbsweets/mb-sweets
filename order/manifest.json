@@ -1,7 +1,7 @@
 {
   "name": "MB Sweets — ऑर्डर करें",
   "short_name": "MB Sweets",
-  "description": "Maa Bhagwati Misthan Bhandar, नानौरा — मिठाई, दूध-दही-पनीर, केक। WhatsApp पर ऑर्डर करें।",
+  "description": "Maa Bhagwati Misthan Bhandar, ननौरा — मिठाई, दूध-दही-पनीर, केक। WhatsApp पर ऑर्डर करें।",
   "start_url": "./",
   "scope": "./",
   "id": "mbsweets-order",

@@ -11,7 +11,7 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 2,
+  version: 3,
   updated: '2026-09-29',
 
   shop: {
@@ -23,7 +23,7 @@ window.MB_CATALOG = {
     upiPayload: 'upi://pay?pa=paytmqr71dbbc@ptys&pn=Paytm',
     lat: 26.2379445,
     lng: 85.904298,
-    addrHi: 'नानौरा, दरभंगा, बिहार 846005 · NH किनारे, एयरपोर्ट से ~5 km',
+    addrHi: 'ननौरा, दरभंगा, बिहार 846005 · NH किनारे, एयरपोर्ट से ~5 km',
     addrEn: 'Nanaura, Darbhanga, Bihar 846005 · On NH, ~5 km from airport',
     maps: 'https://www.google.com/maps/search/?api=1&query=26.2379445,85.904298',
     review: 'https://g.page/r/CZ_aeVeX-ilKEBE/review',
@@ -70,7 +70,8 @@ window.MB_CATALOG = {
     ['i25', 'दही (200 ग्राम)', 'dairy', 'पैक', 30, 2],
     ['i26', 'वनीला केक (½ किलो)', 'cake', 'पीस', 350, 2],
     ['i27', 'वनीला केक (1 किलो)', 'cake', 'पीस', 600, 2],
-    ['i28', 'चॉकलेट केक (1 किलो)', 'cake', 'पीस', 700, 2]
+    ['i28', 'चॉकलेट केक (1 किलो)', 'cake', 'पीस', 700, 2],
+    ['i29', 'चॉकलेट केक (½ किलो)', 'cake', 'पीस', 380, 3]
   ],
 
   /* ग्राहक वाले मेन्यू के कार्ड। opts = कौन-कौन से आइटम इस कार्ड में चुन सकते हैं */
@@ -79,7 +80,7 @@ window.MB_CATALOG = {
     { tab: 'sweets', key: 'gulabjamun', hi: 'गुलाब जामुन', en: 'Gulab Jamun', img: 'gulabjamun', opts: ['i5', 'i6'] },
     { tab: 'sweets', key: 'chamcham', hi: 'चमचम', en: 'Cham Cham', img: 'chamcham', opts: ['i7', 'i8'] },
     { tab: 'sweets', key: 'balushahi', hi: 'बालूशाही', en: 'Balushahi', img: 'balushahi', opts: ['i3', 'i4'] },
-    { tab: 'sweets', key: 'rasmalai', hi: 'रसमलाई', en: 'Rasmalai', img: 'rasmalai', opts: ['i22'] },
+    { tab: 'sweets', key: 'rasmalai', hi: 'रसमलाई', en: 'Rasmalai', img: 'rasmalai', opts: [{ id: 'i22', hi: 'प्लेट (1 बड़ा पीस)', en: 'plate (1 big piece)' }] },
     { tab: 'sweets', key: 'peda', hi: 'पेड़ा', en: 'Peda', img: 'peda', opts: ['i9'] },
     { tab: 'sweets', key: 'laddoo', hi: 'लड्डू', en: 'Laddoo', img: 'laddoo', opts: ['i11'] },
     { tab: 'sweets', key: 'milkcake', hi: 'मिल्क केक', en: 'Milk Cake', art: 'milkcake', opts: ['i10'] },
@@ -97,7 +98,7 @@ window.MB_CATALOG = {
     { tab: 'cake', key: 'cake-vanilla', hi: 'वनीला केक', en: 'Vanilla Cake', art: 'cakeVanilla',
       opts: [{ id: 'i26', hi: '½ किलो', en: '½ kg' }, { id: 'i27', hi: '1 किलो', en: '1 kg' }] },
     { tab: 'cake', key: 'cake-choco', hi: 'चॉकलेट केक', en: 'Chocolate Cake', art: 'cakeChoco',
-      opts: [{ id: 'i28', hi: '1 किलो', en: '1 kg' }] }
+      opts: [{ id: 'i29', hi: '½ किलो', en: '½ kg' }, { id: 'i28', hi: '1 किलो', en: '1 kg' }] }
   ],
 
   /* कस्टम केक — दाम WhatsApp पर बताया जाता है */
