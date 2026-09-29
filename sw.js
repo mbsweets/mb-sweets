@@ -1,10 +1,14 @@
-var CACHE_NAME = 'mbmb-billing-v2';
+var CACHE_NAME = 'mbmb-billing-v3';
 var CORE_ASSETS = [
   './',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './logo-header.png'
+  './logo-header.png',
+  './fonts/Mukta-400.woff',
+  './fonts/Mukta-600.woff',
+  './fonts/Mukta-700.woff',
+  './fonts/Baloo2-700.woff'
 ];
 
 self.addEventListener('install', function (e) {

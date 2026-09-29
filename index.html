@@ -13,8 +13,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MB Sweets">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:'Mukta';src:url('fonts/Mukta-400.woff') format('woff');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Mukta';src:url('fonts/Mukta-600.woff') format('woff');font-weight:600;font-display:swap}
+@font-face{font-family:'Mukta';src:url('fonts/Mukta-700.woff') format('woff');font-weight:700 800;font-display:swap}
+@font-face{font-family:'Baloo 2';src:url('fonts/Baloo2-700.woff') format('woff');font-weight:600 800;font-display:swap}
 :root{
   --paper:#FAF3E7; --card:#FFFFFF; --ink:#2B1712; --muted:#8A7566; --line:#E6D9C6;
   --brandband:#5C1620; --on-brand:#FBEEDD;
@@ -247,6 +250,11 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
 .installbox p{margin:0 0 8px}
 .toast{position:fixed;left:50%;bottom:calc(126px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-weight:500;max-width:88%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
+.billprev{max-height:52vh;overflow:auto;margin:6px 0 12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;min-height:80px}
+.billprev img{width:100%;display:block}
+.billprev .hint{padding:24px 12px;text-align:center}
+.billacts{display:flex;flex-direction:column;gap:8px}
+.billacts .btn{width:100%}
 @media (prefers-reduced-motion: reduce){.sheet{animation:none}.toast{transition:none}}
 </style>
 </head>
@@ -401,9 +409,18 @@ function orderStatus(o){
   if(done<total)return 'partial';
   return 'delivered';
 }
+function displayName(it){
+  var n=String((it&&it.name)||''),u=String((it&&it.unit)||'').trim();
+  var i=n.lastIndexOf('(');
+  if(u&&i>0&&n.charAt(n.length-1)===')'){
+    var inner=n.slice(i+1,-1).trim();
+    if(inner===u)return n.slice(0,i).trim();
+  }
+  return n;
+}
 function itemDateKey(o,it){return it.date||dayKey(o.date);}
 function namesList(items,max){
-  var names=items.map(function(it){return it.name+' ×'+fmtQty(it.qty);});
+  var names=items.map(function(it){return displayName(it)+' ×'+fmtQty(it.qty);});
   if(names.length>max)return names.slice(0,max).join(', ')+' +'+(names.length-max)+' और';
   return names.join(', ');
 }
@@ -532,7 +549,7 @@ function dayItemSummary(live,dateKey){
       if(it.delivered)return;
       if(itemDateKey(o,it)!==dateKey)return;
       var k=it.name+'|'+it.unit;
-      if(!map[k])map[k]={name:it.name,unit:it.unit,qty:0,custs:{}};
+      if(!map[k])map[k]={name:displayName(it),unit:it.unit,qty:0,custs:{}};
       map[k].qty+=num(it.qty);
       var c=findCustomer(o.customerId);
       var cname=c?c.name:'?';
@@ -549,7 +566,7 @@ function daySummaryBlock(live,dateKey,label){
   var rows=items.map(function(it){
     var custNames=Object.keys(it.custs);
     var detail=custNames.map(function(cn){return cn+' ×'+fmtQty(it.custs[cn]);}).join(', ');
-    return '<div class="sumrow"><span class="sumnm">'+esc(it.name)+'</span><span class="sumqty">'+fmtQty(it.qty)+' '+esc(it.unit)+'</span>'+
+    return '<div class="sumrow"><span class="sumnm">'+esc(displayName(it))+'</span><span class="sumqty">'+fmtQty(it.qty)+' '+esc(it.unit)+'</span>'+
       '<span class="sumdetail">'+esc(detail)+'</span></div>';
   }).join('');
   return '<div class="sumcard"><div class="sumhead">'+esc(label)+' \u2013 कुल सामान तैयार करो</div>'+rows+'</div>';
@@ -752,9 +769,9 @@ function orderCardFull(o){
     var amt=num(it.qty)*num(it.rate);
     var dtag=(it.date&&it.date!==baseDayKey)?(' <span class="dtag">'+fmtDshort(it.date)+'</span>'):'';
     if(cancelled){
-      return '<li class="ro"><span class="chk">\u00b7</span><span class="citem">'+esc(it.name)+' \u00d7'+it.qty+dtag+'</span><span class="camt">'+rupee(amt)+'</span></li>';
+      return '<li class="ro"><span class="chk">\u00b7</span><span class="citem">'+esc(displayName(it))+' \u00d7'+it.qty+dtag+'</span><span class="camt">'+rupee(amt)+'</span></li>';
     }
-    return '<li><button data-act="toggle-item" data-order="'+o.id+'" data-line="'+it.lid+'"><span class="chk'+(it.delivered?' on':'')+'">\u2713</span><span class="citem">'+esc(it.name)+' ×'+fmtQty(it.qty)+' '+esc(it.unit)+dtag+(it.delivered&&it.deliveredAt?' <span class="dtag dgiven">दिया '+fmtDshort(it.deliveredAt)+'</span>':'')+'</span><span class="camt">'+rupee(amt)+'</span></button></li>';
+    return '<li><button data-act="toggle-item" data-order="'+o.id+'" data-line="'+it.lid+'"><span class="chk'+(it.delivered?' on':'')+'">\u2713</span><span class="citem">'+esc(displayName(it))+' ×'+fmtQty(it.qty)+' '+esc(it.unit)+dtag+(it.delivered&&it.deliveredAt?' <span class="dtag dgiven">दिया '+fmtDshort(it.deliveredAt)+'</span>':'')+'</span><span class="camt">'+rupee(amt)+'</span></button></li>';
   }).join('');
   var pays='';
   if(o.payments.length){
@@ -867,6 +884,8 @@ function setSheet(html){
   if(s)s.innerHTML=html;else openSheet(html);
 }
 function closeSheet(){
+  if(ui.billShare&&ui.billShare.url){try{URL.revokeObjectURL(ui.billShare.url);}catch(e){}}
+  ui.billShare=null;
   $('#sheetRoot').innerHTML='';
   document.body.classList.remove('noscroll');
   ui.orderDraft=null;ui.editId=null;
@@ -968,7 +987,7 @@ function renderOrderSheet(){
   var linesHint=d.lines.length?'<p class="hint" style="margin-top:0">हर item की डिलीवरी तारीख अलग रख सकते हो। एक ही item अलग-अलग तारीख में बाँटना हो (जैसे 10 में से 3 कल, 3 परसों) तो "+ बाँटो" दबाओ और quantity/date बदल दो।</p>':'';
   var lines=d.lines.length?linesHint+d.lines.map(function(l){
     var lval=l.date||orderDateOnly;
-    return '<div class="lrow" data-lid="'+l.lid+'"><div class="ltop"><span class="lname">'+esc(l.name)+' <span style="color:var(--muted);font-weight:400">('+esc(l.unit)+')</span></span>'+
+    return '<div class="lrow" data-lid="'+l.lid+'"><div class="ltop"><span class="lname">'+esc(displayName(l))+' <span style="color:var(--muted);font-weight:400">('+esc(l.unit)+')</span></span>'+
       '<button class="lx" data-act="of-rm-line" data-lid="'+l.lid+'">\u00d7</button></div>'+
       '<div class="lgrid"><label>Qty<input type="number" inputmode="decimal" step="any" min="0" data-act="of-qty" data-lid="'+l.lid+'" value="'+l.qty+'"></label>'+
       '<label>Rate \u20b9<input type="number" inputmode="decimal" step="any" min="0" data-act="of-rate" data-lid="'+l.lid+'" value="'+l.rate+'"></label>'+
@@ -1205,15 +1224,12 @@ function billLineItems(L, o){
   var baseDayKey=dayKey(o.date);
   o.items.forEach(function(it,idx){
     var amt=num(it.qty)*num(it.rate);
-    L.push((idx+1)+'. '+it.name+(it.delivered?(' - Diya gaya'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':'')):' - Baaki hai'));
+    L.push((idx+1)+'. '+displayName(it)+(it.delivered?(' - Diya gaya'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':'')):''));
     L.push('    '+fmtQty(it.qty)+' '+it.unit+' x '+rupee(it.rate)+' = '+rupee(amt));
     if(it.date&&it.date!==baseDayKey){
       L.push('    Delivery: '+fmtDshort(it.date));
     }
-    if(idx<o.items.length-1){
-      L.push('');
-      L.push('- - - - - - - - - -');
-    }
+    if(idx<o.items.length-1)L.push('');
   });
 }
 function billMessage(o){
@@ -1274,15 +1290,253 @@ function summaryMessage(c){
 }
 
 function billButton(o){
-  var c=findCustomer(o.customerId);
-  var href=c?waLink(c.phone,billMessage(o)):'';
-  if(href)return '<a class="btn small" href="'+esc(href)+'" target="_blank" rel="noopener">\uD83D\uDCF2 बिल भेजो</a>';
-  return '<button class="btn small" data-act="need-phone" data-kind="order" data-ref="'+o.id+'">\uD83D\uDCF2 बिल भेजो</button>';
+  return '<button class="btn small" data-act="bill-sheet" data-kind="order" data-ref="'+o.id+'">📲 बिल भेजो</button>';
 }
 function summaryButton(c){
-  var href=waLink(c.phone,summaryMessage(c));
-  if(href)return '<a class="btn small" href="'+esc(href)+'" target="_blank" rel="noopener">\uD83D\uDCF2 पूरा हिसाब भेजो</a>';
-  return '<button class="btn small" data-act="need-phone" data-kind="summary" data-ref="'+c.id+'">\uD83D\uDCF2 पूरा हिसाब भेजो</button>';
+  return '<button class="btn small" data-act="bill-sheet" data-kind="summary" data-ref="'+c.id+'">📲 पूरा हिसाब भेजो</button>';
+}
+function shortBillMessage(o){
+  var c=findCustomer(o.customerId),L=[];
+  L.push('*'+state.shop.name+'*');
+  L.push('नमस्ते '+(c?c.name:'')+' जी,');
+  L.push('आपका बिल (ऑर्डर #'+o.no+', डिलीवरी '+fmtDT(o.date)+')');
+  L.push('कुल: '+rupee(orderTotal(o)));
+  L.push('जमा: '+rupee(orderPaid(o)));
+  L.push('बाकी: '+rupee(orderDue(o)));
+  L.push('');
+  L.push('पूरा बिल फोटो में भेज रहे हैं।');
+  L.push('धन्यवाद - '+state.shop.owner);
+  return L.join(String.fromCharCode(10));
+}
+function shortSummaryMessage(c){
+  var os=customerOrders(c.id).filter(function(o){return !o.cancelled;});
+  var t=0,p=0;os.forEach(function(o){t+=orderTotal(o);p+=orderPaid(o);});
+  var L=[];
+  L.push('*'+state.shop.name+'*');
+  L.push('नमस्ते '+c.name+' जी,');
+  L.push('आपका पूरा हिसाब ('+os.length+' ऑर्डर)');
+  L.push('कुल: '+rupee(t));
+  L.push('जमा: '+rupee(p));
+  L.push('बाकी: '+rupee(Math.max(0,t-p)));
+  L.push('');
+  L.push('पूरा हिसाब फोटो में भेज रहे हैं।');
+  L.push('धन्यवाद - '+state.shop.owner);
+  return L.join(String.fromCharCode(10));
+}
+
+/* ---------- Photo bill (image for WhatsApp) ---------- */
+var BI={W:1080,P:56,QX:650,RX:830,maroon:'#5C1620',cream:'#FBEEDD',paper:'#FAF3E7',line:'#E6D9C6',ink:'#2B1712',muted:'#7A6556',gold:'#9C6B00',green:'#2F6F4E',red:'#A6332E',redbg:'#F6E1DD',greenbg:'#E3F1E8'};
+var BI_BODY="Mukta,'Noto Sans Devanagari','Nirmala UI',sans-serif";
+var BI_HEAD="'Baloo 2',Mukta,'Noto Sans Devanagari','Nirmala UI',sans-serif";
+function biFont(ctx,w,px,head){ctx.font=w+' '+px+'px '+(head?BI_HEAD:BI_BODY);}
+function biText(ctx,s,x,y,align,color){ctx.textAlign=align||'left';ctx.fillStyle=color||BI.ink;ctx.fillText(String(s),x,y);}
+function biLoadImg(src){return new Promise(function(res){var im=new Image();im.onload=function(){res(im);};im.onerror=function(){res(null);};im.src=src;});}
+function biFontsReady(){
+  try{
+    if(!document.fonts||!document.fonts.load)return Promise.resolve();
+    return Promise.all([
+      document.fonts.load("400 30px Mukta","अ"),document.fonts.load("600 30px Mukta","अ"),
+      document.fonts.load("700 30px Mukta","अ"),document.fonts.load("700 40px 'Baloo 2'","अ")
+    ]).then(function(){},function(){});
+  }catch(e){return Promise.resolve();}
+}
+function biWrap(ctx,text,maxW){
+  var words=String(text==null?'':text).split(' '),lines=[],cur='';
+  words.forEach(function(w){
+    if(!w)return;
+    var t=cur?cur+' '+w:w;
+    if(!cur||ctx.measureText(t).width<=maxW)cur=t;else{lines.push(cur);cur=w;}
+  });
+  if(cur)lines.push(cur);
+  return lines.length?lines:[''];
+}
+function biRound(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+}
+function biHeader(ctx,logo){
+  var W=BI.W,P=BI.P,tx=logo?P+178:P,tw=W-tx-P;
+  biFont(ctx,700,50,true);var nameL=biWrap(ctx,state.shop.name,tw);
+  biFont(ctx,400,29);var addrL=biWrap(ctx,state.shop.addr,tw);
+  var blockH=nameL.length*58+addrL.length*40+40;
+  var H=Math.max(logo?240:0,blockH+70);
+  ctx.fillStyle=BI.maroon;ctx.fillRect(0,0,W,H);
+  if(logo){var ls=156;ctx.drawImage(logo,P,Math.round((H-ls)/2),ls,ls);}
+  var y=Math.round((H-blockH)/2)+46;
+  biFont(ctx,700,50,true);
+  nameL.forEach(function(l,i){biText(ctx,l,tx,y,'left',BI.cream);y+=58;});
+  y-=14;
+  biFont(ctx,400,29);
+  addrL.forEach(function(l){biText(ctx,l,tx,y,'left',BI.cream);y+=40;});
+  if(state.shop.phone)biText(ctx,'फ़ोन: '+state.shop.phone,tx,y,'left',BI.cream);
+  return H;
+}
+function biTitle(ctx,y,title,rTop,rBottom){
+  var W=BI.W,P=BI.P;
+  biFont(ctx,700,48,true);biText(ctx,title,P,y+50,'left',BI.maroon);
+  biFont(ctx,700,30);biText(ctx,rTop,W-P,y+32,'right',BI.ink);
+  biFont(ctx,400,26);biText(ctx,rBottom,W-P,y+68,'right',BI.muted);
+  return y+96;
+}
+function biCustomer(ctx,y,c,extra){
+  var W=BI.W,P=BI.P,h=extra?156:118;
+  biRound(ctx,P,y,W-2*P,h,18,BI.paper,BI.line);
+  biFont(ctx,600,24);biText(ctx,'ग्राहक',P+26,y+40,'left',BI.muted);
+  biFont(ctx,700,36);biText(ctx,c?c.name:'-',P+26,y+86,'left',BI.ink);
+  if(c&&c.phone){biFont(ctx,400,28);biText(ctx,c.phone,W-P-26,y+86,'right',BI.ink);}
+  if(extra){biFont(ctx,600,28);biText(ctx,extra,P+26,y+132,'left',BI.maroon);}
+  return y+h+30;
+}
+function biTableHead(ctx,y){
+  var W=BI.W,P=BI.P;
+  biFont(ctx,700,26);
+  biText(ctx,'सामान',P,y+30,'left',BI.maroon);
+  biText(ctx,'मात्रा',BI.QX,y+30,'right',BI.maroon);
+  biText(ctx,'रेट',BI.RX,y+30,'right',BI.maroon);
+  biText(ctx,'राशि',W-P,y+30,'right',BI.maroon);
+  ctx.fillStyle=BI.maroon;ctx.fillRect(P,y+46,W-2*P,3);
+  return y+49;
+}
+function biItemRow(ctx,y,o,it,idx){
+  var W=BI.W,P=BI.P,nameW=BI.QX-176-P;
+  biFont(ctx,600,32);var nl=biWrap(ctx,(idx+1)+'. '+displayName(it),nameW);
+  var subs=[];
+  if(it.date&&it.date!==dayKey(o.date))subs.push({t:'डिलीवरी: '+fmtDshort(it.date),c:BI.gold});
+  if(it.delivered)subs.push({t:'✓ दिया गया'+(it.deliveredAt?' ('+fmtDshort(it.deliveredAt)+')':''),c:BI.green});
+  var fy=y+50,yy=fy;
+  biFont(ctx,600,32);
+  nl.forEach(function(l,i){if(i>0)yy+=42;biText(ctx,l,P,yy,'left',BI.ink);});
+  biFont(ctx,400,30);biText(ctx,fmtQty(it.qty)+' '+it.unit,BI.QX,fy,'right',BI.ink);
+  biText(ctx,rupee(it.rate),BI.RX,fy,'right',BI.muted);
+  biFont(ctx,700,31);biText(ctx,rupee(num(it.qty)*num(it.rate)),W-P,fy,'right',BI.ink);
+  subs.forEach(function(s){yy+=36;biFont(ctx,600,25);biText(ctx,s.t,P+36,yy,'left',s.c);});
+  var bottom=yy+24;
+  ctx.fillStyle=BI.line;ctx.fillRect(P,bottom,W-2*P,2);
+  return bottom+2;
+}
+function biOrderBar(ctx,y,o){
+  var W=BI.W,P=BI.P;
+  y+=22;
+  biRound(ctx,P,y,W-2*P,60,12,BI.paper,null);
+  biFont(ctx,700,27);biText(ctx,'ऑर्डर #'+o.no+'  ·  डिलीवरी: '+fmtDT(o.date),P+20,y+40,'left',BI.maroon);
+  biFont(ctx,600,25);biText(ctx,STAMP[orderStatus(o)],W-P-20,y+40,'right',BI.muted);
+  return y+64;
+}
+function biOrderSub(ctx,y,o){
+  var W=BI.W,P=BI.P;
+  biFont(ctx,600,25);
+  biText(ctx,'कुल '+rupee(orderTotal(o))+'   ·   जमा '+rupee(orderPaid(o))+'   ·   बाकी '+rupee(orderDue(o)),W-P,y+38,'right',BI.muted);
+  return y+52;
+}
+function biTotals(ctx,y,tot,paid,payments){
+  var W=BI.W,P=BI.P,bx=W-P-520;
+  y+=28;
+  biFont(ctx,600,31);biText(ctx,'कुल बिल',bx,y+32,'left',BI.ink);biText(ctx,rupee(tot),W-P,y+32,'right',BI.ink);y+=50;
+  biText(ctx,'जमा',bx,y+32,'left',BI.ink);biText(ctx,rupee(paid),W-P,y+32,'right',BI.green);y+=46;
+  (payments||[]).forEach(function(p){
+    biFont(ctx,400,25);
+    biText(ctx,fmtDshort(p.date)+(p.note?' ('+p.note+')':''),bx+22,y+26,'left',BI.muted);
+    biText(ctx,rupee(p.amount),W-P,y+26,'right',BI.muted);y+=36;
+  });
+  y+=16;
+  var due=round2(Math.max(0,tot-paid)),extra=round2(Math.max(0,paid-tot)),bg,fg,label,val;
+  if(due>0){bg=BI.redbg;fg=BI.red;label='बाकी';val=rupee(due);}
+  else if(extra>0){bg=BI.greenbg;fg=BI.green;label='ज़्यादा जमा';val=rupee(extra);}
+  else{bg=BI.greenbg;fg=BI.green;label='पूरा भुगतान हो गया';val='✓';}
+  biRound(ctx,bx-22,y,W-P-bx+22,88,16,bg,null);
+  biFont(ctx,700,36,true);biText(ctx,label,bx,y+58,'left',fg);
+  biFont(ctx,700,42,true);biText(ctx,val,W-P-22,y+60,'right',fg);
+  return y+98;
+}
+function biTerms(ctx,y){
+  var W=BI.W,P=BI.P,NL=String.fromCharCode(10);
+  var lines=String(state.shop.terms||'').split(NL).map(function(l){return l.trim();}).filter(function(l){return l;});
+  if(!lines.length)return y;
+  y+=34;ctx.fillStyle=BI.line;ctx.fillRect(P,y,W-2*P,2);y+=8;
+  biFont(ctx,700,28);biText(ctx,'नियम व शर्तें:',P,y+36,'left',BI.ink);y+=46;
+  lines.forEach(function(l){
+    biFont(ctx,400,27);
+    biWrap(ctx,l,W-2*P-34).forEach(function(w,i){y+=38;biText(ctx,(i===0?'•  ':'    ')+w,P,y,'left',BI.ink);});
+  });
+  return y+8;
+}
+function biFooter(ctx,y){
+  var W=BI.W;
+  y+=46;biFont(ctx,700,40,true);biText(ctx,'धन्यवाद!',W/2,y+38,'center',BI.maroon);y+=58;
+  if(state.shop.owner){biFont(ctx,400,26);biText(ctx,'प्रोप्राइटर: '+state.shop.owner,W/2,y+28,'center',BI.muted);y+=42;}
+  y+=26;ctx.fillStyle=BI.maroon;ctx.fillRect(0,y,W,16);
+  return y+16;
+}
+function renderBillImage(kind,ref){
+  return Promise.all([biFontsReady(),biLoadImg('logo-header.png')]).then(function(r){
+    var logo=r[1];
+    var o=kind==='order'?ref:null,c=kind==='order'?findCustomer(o.customerId):ref;
+    var orders=kind==='order'?[o]:customerOrders(c.id).filter(function(x){return !x.cancelled;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+    var rowsN=0,payN=0;orders.forEach(function(x){rowsN+=x.items.length;payN+=x.payments.length;});
+    var H=Math.min(15000,Math.ceil(1600+rowsN*170+orders.length*190+payN*40+String(state.shop.terms||'').length*2));
+    var cv=document.createElement('canvas');cv.width=BI.W;cv.height=H;
+    var ctx=cv.getContext('2d');ctx.textBaseline='alphabetic';
+    ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,BI.W,H);
+    var y=biHeader(ctx,logo)+34;
+    if(kind==='order'){
+      y=biTitle(ctx,y,'बिल','बिल नं. '+o.no,'तारीख: '+fmtDonly(new Date()));
+      y=biCustomer(ctx,y,c,'डिलीवरी: '+fmtDT(o.date));
+      y=biTableHead(ctx,y);
+      o.items.forEach(function(it,i){y=biItemRow(ctx,y,o,it,i);});
+      y=biTotals(ctx,y,orderTotal(o),orderPaid(o),o.payments);
+    }else{
+      y=biTitle(ctx,y,'पूरा हिसाब',orders.length+' ऑर्डर','तारीख: '+fmtDonly(new Date()));
+      y=biCustomer(ctx,y,c,null);
+      y=biTableHead(ctx,y);
+      var gt=0,gp=0;
+      orders.forEach(function(ox){
+        y=biOrderBar(ctx,y,ox);
+        ox.items.forEach(function(it,i){y=biItemRow(ctx,y,ox,it,i);});
+        y=biOrderSub(ctx,y,ox);
+        gt+=orderTotal(ox);gp+=orderPaid(ox);
+      });
+      y=biTotals(ctx,y,gt,gp,null);
+    }
+    y=biTerms(ctx,y);
+    y=biFooter(ctx,y);
+    var out=document.createElement('canvas');out.width=BI.W;out.height=Math.min(Math.ceil(y),H);
+    out.getContext('2d').drawImage(cv,0,0);
+    return new Promise(function(res,rej){out.toBlob(function(b){if(b)res(b);else rej(new Error('blob'));},'image/png');});
+  });
+}
+function saveBlobUrl(url,name){
+  var a=document.createElement('a');a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);},500);
+}
+function openBillSheet(kind,refId){
+  var o=kind==='order'?findOrder(refId):null;
+  var c=kind==='order'?(o&&findCustomer(o.customerId)):findCustomer(refId);
+  if(!c||(kind==='order'&&!o))return;
+  ui.billShare={kind:kind,ref:refId,file:null,url:null};
+  var chatHref=waLink(c.phone,kind==='order'?shortBillMessage(o):shortSummaryMessage(c));
+  var textHref=waLink(c.phone,kind==='order'?billMessage(o):summaryMessage(c));
+  openSheet('<div class="sh-head"><h2>'+(kind==='order'?'बिल भेजो — ऑर्डर #'+o.no:'पूरा हिसाब भेजो')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<div id="bill-prev" class="billprev"><p class="hint">बिल की फोटो बन रही है…</p></div>'+
+    '<div class="billacts">'+
+      '<button class="btn primary" data-act="bill-share" disabled>📤 फोटो WhatsApp पर भेजो</button>'+
+      (chatHref?'<a class="btn" href="'+esc(chatHref)+'" target="_blank" rel="noopener">💬 '+esc(c.name)+' की WhatsApp चैट खोलो</a>':
+        '<button class="btn" data-act="need-phone" data-kind="'+kind+'" data-ref="'+refId+'">💬 नंबर जोड़ो और चैट खोलो</button>')+
+      '<button class="btn" data-act="bill-save" disabled>⬇️ फोटो फ़ोन में सेव करो</button>'+
+      (textHref?'<a class="lnk muted" style="text-align:center;display:block;padding:8px" href="'+esc(textHref)+'" target="_blank" rel="noopener">फोटो नहीं, सिर्फ टेक्स्ट में भेजो</a>':'')+
+    '</div>'+
+    '<p class="hint" style="margin-top:10px">"फोटो WhatsApp पर भेजो" दबाओ → WhatsApp चुनो → ग्राहक की चैट चुनो। ग्राहक की चैट लिस्ट में न मिले, तो पहले "चैट खोलो" दबाओ (उसमें छोटा हिसाब भी चला जाएगा), फिर वापस आकर फोटो भेजो।</p>');
+  renderBillImage(kind,kind==='order'?o:c).then(function(blob){
+    if(!ui.billShare||ui.billShare.ref!==refId)return;
+    var base=kind==='order'?('bill-'+o.no):('hisaab-'+String(c.name||'').split(' ').join('-'));
+    ui.billShare.file=new File([blob],base+'.png',{type:'image/png'});
+    ui.billShare.url=URL.createObjectURL(blob);
+    var pv=$('#bill-prev');if(pv)pv.innerHTML='<img src="'+ui.billShare.url+'" alt="बिल की फोटो">';
+    $all('[data-act=bill-share],[data-act=bill-save]').forEach(function(b){b.disabled=false;});
+  },function(){
+    var pv=$('#bill-prev');if(pv)pv.innerHTML='<p class="err" style="padding:16px">फोटो नहीं बन पाई — नीचे "सिर्फ टेक्स्ट में भेजो" दबाओ।</p>';
+  });
 }
 function openQuickPhoneSheet(kind,refId){
   var c=kind==='order'?findCustomer(findOrder(refId).customerId):findCustomer(refId);
@@ -1309,7 +1563,7 @@ function orderIcs(o){
   var start=new Date(o.date);
   if(isNaN(start))start=new Date();
   var end=new Date(start.getTime()+30*60000);
-  var itemsTxt=o.items.map(function(it){return it.name+' x'+it.qty+' '+it.unit;}).join(', ');
+  var itemsTxt=o.items.map(function(it){return displayName(it)+' x'+fmtQty(it.qty)+' '+it.unit;}).join(', ');
   var summary='Order #'+o.no+' - '+(c?c.name:'Customer');
   var desc=itemsTxt+' | Baaki: '+rupee(orderDue(o));
   var uidv='mbmb-order-'+o.id+'@mbmb-billing';
@@ -1355,8 +1609,8 @@ function printOrderBill(o){
     var amt=num(it.qty)*num(it.rate);
     var sub=[];
     if(it.date&&it.date!==dayKey(o.date))sub.push('Delivery: '+fmtDshort(it.date));
-    sub.push(it.delivered?('दिया गया'+(it.deliveredAt?' '+fmtDshort(it.deliveredAt):'')):'बाकी');
-    return '<tr><td>'+(idx+1)+'</td><td>'+esc(it.name)+'<br><small>'+esc(sub.join(' · '))+'</small></td><td>'+fmtQty(it.qty)+' '+esc(it.unit)+'</td><td>'+rupee(it.rate)+'</td><td>'+rupee(amt)+'</td></tr>';
+    if(it.delivered)sub.push('दिया गया'+(it.deliveredAt?' '+fmtDshort(it.deliveredAt):''));
+    return '<tr><td>'+(idx+1)+'</td><td>'+esc(displayName(it))+(sub.length?'<br><small>'+esc(sub.join(' · '))+'</small>':'')+'</td><td>'+fmtQty(it.qty)+' '+esc(it.unit)+'</td><td>'+rupee(it.rate)+'</td><td>'+rupee(amt)+'</td></tr>';
   }).join('');
   var termsLines=(state.shop.terms||'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
   var termsHtml=termsLines.length?('<div style="margin-top:16px;padding-top:10px;border-top:1px dashed #999;font-size:.9em"><b>नियम व शर्तें:</b><ul style="margin:6px 0 0;padding-left:18px">'+termsLines.map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul></div>'):'';
@@ -1462,7 +1716,7 @@ document.addEventListener('click',function(e){
       if(li){
         li.delivered=!li.delivered;li.deliveredAt=li.delivered?todayStr():'';
         save();renderRoute();
-        toast(li.delivered?('"'+li.name+'" दिया गया ✓'):('"'+li.name+'" फिर से बाकी में'));
+        toast(li.delivered?('"'+displayName(li)+'" दिया गया ✓'):('"'+displayName(li)+'" फिर से बाकी में'));
       }
       break;
     case 'order-payment':openOrderPayment(id);break;
@@ -1540,6 +1794,26 @@ document.addEventListener('click',function(e){
         save();closeSheet();renderShell();renderRoute();toast('Restore हो गया');
       }else{closeSheet();}
       break;
+    case 'bill-sheet':openBillSheet(t.getAttribute('data-kind'),t.getAttribute('data-ref'));break;
+    case 'bill-share':
+      var bsh=ui.billShare;
+      if(!bsh||!bsh.file)break;
+      var bshCap=(bsh.kind==='order')?('बिल - ऑर्डर #'+findOrder(bsh.ref).no+' - '+state.shop.name):('पूरा हिसाब - '+state.shop.name);
+      try{
+        if(navigator.canShare&&navigator.canShare({files:[bsh.file]})){
+          navigator.share({files:[bsh.file],text:bshCap}).catch(function(err){
+            if(err&&err.name==='AbortError')return;
+            toast('भेज नहीं पाए — "फोटो सेव करो" दबाकर WhatsApp में गैलरी से भेजो');
+          });
+        }else{
+          saveBlobUrl(bsh.url,bsh.file.name);
+          toast('इस फ़ोन में सीधे भेजना नहीं चलता — फोटो सेव हो गई, WhatsApp में गैलरी से भेजो');
+        }
+      }catch(err){toast('भेज नहीं पाए — "फोटो सेव करो" दबाओ');}
+      break;
+    case 'bill-save':
+      if(ui.billShare&&ui.billShare.url){saveBlobUrl(ui.billShare.url,ui.billShare.file.name);toast('फोटो सेव हो गई');}
+      break;
     case 'need-phone':
       openQuickPhoneSheet(t.getAttribute('data-kind'),t.getAttribute('data-ref'));
       break;
@@ -1547,7 +1821,7 @@ document.addEventListener('click',function(e){
       var qkind=t.getAttribute('data-kind'),qref=t.getAttribute('data-ref');
       var qphoneRaw=$('#qp-phone').value.trim();
       var qc=qkind==='order'?findCustomer(findOrder(qref).customerId):findCustomer(qref);
-      var qmsg=qc&&qkind==='order'?billMessage(findOrder(qref)):(qc?summaryMessage(qc):'');
+      var qmsg=qc&&qkind==='order'?shortBillMessage(findOrder(qref)):(qc?shortSummaryMessage(qc):'');
       var qlink=qc?waLink(qphoneRaw,qmsg):'';
       if(!qlink){e.preventDefault();$('#qp-err').textContent='सही मोबाइल नंबर लिखो (10 अंकों का)।';break;}
       qc.phone=qphoneRaw;save();
