@@ -63,6 +63,10 @@ a{color:inherit}
 .facts div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;font-size:.8rem;line-height:1.25}
 .facts b{display:block;font-size:.9rem;color:var(--ink)}
 .facts span{color:var(--muted)}
+.instbar{display:flex;align-items:center;gap:10px;margin-top:8px;background:var(--goldsoft);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.instbar img{width:36px;height:36px;border-radius:8px;flex:0 0 auto}
+.instbar span{flex:1;font-size:.85rem;line-height:1.3}
+.instbar .btn{min-height:40px;padding:0 12px;font-size:.9rem;white-space:nowrap}
 .avail{margin:8px 0 0;font-size:.86rem;color:var(--amber);font-weight:600;text-align:center}
 .tabs{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);margin-top:12px}
 .tabs .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:8px;padding-bottom:8px;scrollbar-width:none}
@@ -223,6 +227,11 @@ var SLOTS=[[8,11,'सुबह 8–11','8–11 AM'],[11,14,'दोपहर 11�
 var T={
 hi:{
  lang_btn:'English',
+ inst_txt:'MB Sweets ऐप फोन में रखें — अगली बार सीधे आइकन से ऑर्डर करें',inst_btn:'📲 ऐप इंस्टॉल करें',inst_done:'ऐप इंस्टॉल हो गया ✓ होम स्क्रीन पर "MB Sweets" आइकन देखें',
+ inst_h:'ऐप इंस्टॉल करें',
+ inst_ios:['नीचे (या ऊपर) शेयर बटन ⬆️ दबाएं।','"Add to Home Screen" / "होम स्क्रीन में जोड़ें" चुनें।','"Add" दबाएं — होम स्क्रीन पर MB Sweets का आइकन आ जाएगा।'],
+ inst_and:['अगर यह पेज WhatsApp या Instagram के अंदर खुला है, तो ऊपर ⋮ दबाकर "Chrome में खोलें" चुनें।','Chrome में ऊपर ⋮ दबाएं।','"ऐप इंस्टॉल करें" या "होम स्क्रीन में जोड़ें" चुनें, फिर "इंस्टॉल" दबाएं।'],
+ inst_note:'इंस्टॉल करने के बाद ऐप में हमेशा नए दाम और मेन्यू दिखेंगे — कुछ अपडेट नहीं करना पड़ता।',
  tag:'मिठाई · दूध-दही-पनीर · केक',
  st_open:'ऑर्डर चालू · 30–60 मिनट में डिलीवरी',
  st_early:'अभी आगे के समय का ऑर्डर दें · "जल्दी" वाले ऑर्डर सुबह 7 बजे से',
@@ -327,6 +336,11 @@ hi:{
 },
 en:{
  lang_btn:'हिंदी',
+ inst_txt:'Keep the MB Sweets app on your phone — order straight from the icon next time',inst_btn:'📲 Install app',inst_done:'App installed ✓ Look for the "MB Sweets" icon on your home screen',
+ inst_h:'Install the app',
+ inst_ios:['Tap the Share button ⬆️ (bottom or top).','Choose "Add to Home Screen".','Tap "Add" — the MB Sweets icon appears on your home screen.'],
+ inst_and:['If this page opened inside WhatsApp or Instagram, tap ⋮ and choose "Open in Chrome".','In Chrome, tap ⋮ at the top.','Choose "Install app" or "Add to Home screen", then tap Install.'],
+ inst_note:'After installing, the app always shows the latest prices and menu — nothing to update.',
  tag:'Sweets · Milk-Dahi-Paneer · Cakes',
  st_open:'Taking orders · delivery in 30–60 min',
  st_early:'Order for later now · quick orders from 7 AM',
@@ -656,6 +670,34 @@ function lineName(l,lang){
   return base;
 }
 
+/* ---------- install as app ---------- */
+var installEvt=null;
+function isStandalone(){try{return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;}catch(e){return false;}}
+function isIOS(){var ua=navigator.userAgent||'';return /iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+function installBarHtml(){
+  if(isStandalone())return '';
+  return '<div class="instbar" id="instbar"><img src="../icon-192.png" alt=""><span>'+t('inst_txt')+'</span><button class="btn primary" data-act="install">'+t('inst_btn')+'</button></div>';
+}
+function doInstall(){
+  if(installEvt){
+    var ev=installEvt;installEvt=null;
+    try{
+      ev.prompt();
+      if(ev.userChoice&&ev.userChoice.then)ev.userChoice.then(function(r){if(r&&r.outcome==='accepted'){var b=$('#instbar');if(b)b.remove();}},function(){});
+    }catch(e){go('install');}
+    return;
+  }
+  go('install');
+}
+function renderInstall(){
+  var steps=isIOS()?t('inst_ios'):t('inst_and');
+  viewShell(t('inst_h'),'<div class="blk"><div class="cakehead"><img src="../icon-192.png" alt="" style="width:64px;height:64px"><div><h3 style="margin:0">MB Sweets</h3><p class="hint">'+esc(S.name)+'</p></div></div></div>'+
+    '<div class="blk"><ol class="steps">'+steps.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ol><p class="hint">'+t('inst_note')+'</p></div>'+
+    '<button class="btn primary block" data-act="back">'+t('back')+'</button>');
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();installEvt=e;});
+window.addEventListener('appinstalled',function(){installEvt=null;var b=$('#instbar');if(b)b.remove();toast(t('inst_done'));});
+
 /* ---------- MENU PAGE ---------- */
 function cardHtml(card){
   var opts=optsOf(card);
@@ -723,6 +765,7 @@ function renderMenu(){
     '<div class="wrap">'+
       '<div class="status '+si.cls+'" id="statusBox"><span class="dot"></span><span>'+esc(si.txt)+'</span></div>'+
       (notice?'<div class="notice">📢 '+esc(notice)+'</div>':'')+
+      installBarHtml()+
       '<div class="facts"><div><b>'+t('f1')+'</b><span>'+t('f1b')+'</span></div><div><b>'+t('f2')+'</b><span>'+t('f2b')+'</span></div><div><b>'+t('f3')+'</b><span>'+t('f3b')+'</span></div></div>'+
       '<p class="avail">'+t('avail')+'</p>'+
     '</div>'+
@@ -798,6 +841,7 @@ function route(){
   else if(h==='#done')v='done';
   else if(h==='#bulk')v='bulk';
   else if(h==='#rules')v='rules';
+  else if(h==='#install')v='install';
   else if((m=h.match(/^#pay(?:=([0-9.]+))?/)))v='pay';
   else if((m=h.match(/^#cake=([a-z0-9-]+)(?:,(\d+))?/)))v='cake';
   var box=$('#view');
@@ -807,6 +851,7 @@ function route(){
   else if(v==='done')renderDone();
   else if(v==='bulk')renderBulk();
   else if(v==='rules')renderRules();
+  else if(v==='install')renderInstall();
   else if(v==='pay')renderPay(m&&m[1]?num(m[1]):0);
   else if(v==='cake')renderCake(m[1],m[2]!=null?+m[2]:-1);
   var sc=$('#view .view');if(sc)sc.scrollTop=0;
@@ -1242,6 +1287,7 @@ document.addEventListener('click',function(e){
     case 'loc':syncForm();getLocation();break;
     case 'send':sendOrder();break;
     case 'copyupi':copyUpi();break;
+    case 'install':doInstall();break;
     case 'bev':syncBulk();bulk.event=+el.getAttribute('data-i');renderBulk();break;
     case 'bsend':sendBulk();break;
   }
