@@ -112,6 +112,22 @@ details summary{cursor:pointer;font-weight:700;margin-top:8px}
   <button class="btn block" id="shareSetup">🔐 सेटअप लिंक सेव करें</button>
 </div>
 
+<div class="step" id="st-milk">
+  <h2><span class="num">7</span>🥛 दूध-दही रिमाइंडर</h2>
+  <p>रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर (ntfy) घंटी: <b>परसों की मिठाई के लिए कितना दूध</b> (1 किलो = 2 लीटर) और <b>कल का दही/दूध/पनीर</b>।</p>
+  <p class="note">नया सेटअप अभी किया है (चरण 1–6)? तो यह पहले से चालू है — बस नीचे "जांचें" दबाएं।<br>
+  <b>पहले से चल रहा सेटअप है</b> तो कंप्यूटर पर एक बार कोड अपडेट करना है (5 मिनट):</p>
+  <ol>
+    <li>वही Google Sheet खोलें (<b class="m">MB Sweets ऑनलाइन ऑर्डर</b>) → <b class="m">Extensions</b> → <b class="m">Apps Script</b></li>
+    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save</li>
+    <li>ऊपर <b class="m">▶ Run</b> दबाएं (बगल में <b>setupSheet</b> लिखा हो)। नई अनुमति माँगेगा → <b class="m">Review permissions</b> → अकाउंट चुनें → <b class="m">Advanced</b> → <b class="m">Go to … (unsafe)</b> → <b class="m">Allow</b>। नीचे "Execution completed" दिखे तो ठीक।</li>
+    <li>ऊपर <b class="m">Deploy</b> → <b class="m">Manage deployments</b> → ✏️ (पेंसिल) → <b>Version:</b> <b class="m">New version</b> → <b class="m">Deploy</b>। <b>URL वही रहेगा</b> — कहीं कुछ बदलना नहीं है।</li>
+  </ol>
+  <p class="note">⚠️ क्रम यही रखें — पहले Run (अनुमति), फिर Deploy। "New deployment" मत दबाना, वरना URL बदल जाएगा।</p>
+  <button class="btn primary block" id="checkMilk">✓ जांचें — रिमाइंडर चालू है?</button>
+  <div id="milkMsg"></div>
+</div>
+
 </main>
 <script>
 (function(){
@@ -135,11 +151,11 @@ function renderStatus(){
   var c=load();
   var el=$('#st-status');
   if(c&&c.u&&c.k){
-    el.innerHTML='<h2>✅ इस फोन का बिलिंग ऐप जुड़ा हुआ है</h2><p class="hint">नया ऑनलाइन ऑर्डर बिलिंग ऐप के "🌐 ऑनलाइन" हिस्से में दिखेगा। दोबारा सेटअप की ज़रूरत नहीं — बस चरण 5 (नोटिफिकेशन) और 6 देख लें।</p>';
+    el.innerHTML='<h2>✅ इस फोन का बिलिंग ऐप जुड़ा हुआ है</h2><p class="hint">नया ऑनलाइन ऑर्डर बिलिंग ऐप के "🌐 ऑनलाइन" हिस्से में दिखेगा। दोबारा सेटअप की ज़रूरत नहीं — बस चरण 5 (नोटिफिकेशन), 6 और 7 (दूध-दही रिमाइंडर) देख लें।</p>';
     $('#urlIn').value=c.u;
     if(c.t)$('#topicTxt').textContent=c.t;
   }else{
-    el.innerHTML='<h2>ℹ️ अभी जुड़ा नहीं है</h2><p>नीचे के 6 चरण एक-एक करके करें। कहीं अटकें तो उस चरण की फोटो Claude को भेज दें।</p>';
+    el.innerHTML='<h2>ℹ️ अभी जुड़ा नहीं है</h2><p>नीचे के 7 चरण एक-एक करके करें। कहीं अटकें तो उस चरण की फोटो Claude को भेज दें।</p>';
   }
 }
 // setup link: #u=...&k=...&t=...
@@ -197,6 +213,22 @@ $('#shareSetup').addEventListener('click',function(){
   var text='MB Sweets ऑनलाइन ऑर्डर — सेटअप लिंक (किसी को न भेजें):\n'+link;
   if(navigator.share){navigator.share({text:text}).catch(function(){});}
   else copy(text,'#urlMsg');
+});
+$('#checkMilk').addEventListener('click',function(){
+  var c=load();if(!c||!c.u){msg('#milkMsg','err','पहले चरण 4 पूरा करें।');return;}
+  msg('#milkMsg','note','जांच रहे हैं…');
+  api(c.u,{action:'ping'}).then(function(r){
+    if(r&&r.ok&&r.v>=2&&r.reminder){
+      try{localStorage.removeItem('mbmb-plan-sent');}catch(e){}
+      msg('#milkMsg','ok','✅ रिमाइंडर चालू है। अब बिलिंग ऐप खोलें → बैकअप → "🔔 अभी टेस्ट भेजो" दबाकर फोन पर देख लें।');
+    }else if(r&&r.ok&&r.v>=2){
+      msg('#milkMsg','err','नया कोड चालू है, पर रोज़ का टाइमर नहीं लगा — Apps Script में ▶ Run (setupSheet) दोबारा करें और Allow दें।');
+    }else if(r&&r.ok){
+      msg('#milkMsg','err','अभी पुराना कोड चल रहा है — ऊपर के 4 काम करें (खासकर आखिरी: Manage deployments → New version → Deploy)।');
+    }else{
+      msg('#milkMsg','err','शीट से ठीक जवाब नहीं आया — थोड़ी देर बाद दोबारा दबाएं।');
+    }
+  }).catch(function(){msg('#milkMsg','err','शीट से बात नहीं हो पाई — इंटरनेट देखें और दोबारा दबाएं।');});
 });
 fromHash();
 renderStatus();

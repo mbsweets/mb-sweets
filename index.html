@@ -22,6 +22,7 @@
   --paper:#FAF3E7; --card:#FFFFFF; --ink:#2B1712; --muted:#8A7566; --line:#E6D9C6;
   --brandband:#5C1620; --on-brand:#FBEEDD;
   --gold:#9C6B00; --green:#2F6F4E; --amber:#A9720A; --red:#A6332E; --red-bg:#F6E1DD;
+  --milk:#1F5F8F; --milk-bg:#EEF6FC; --milk-line:#CFE3F2;
   color-scheme: light dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -31,11 +32,13 @@
   :root:not([data-theme="light"]){
     --paper:#1C1210; --card:#251813; --ink:#F3E9DD; --muted:#B39C89; --line:#3B2A22;
     --gold:#E0B23D; --green:#5CD39A; --amber:#F2B84B; --red:#FF8A8A; --red-bg:#3B1C1C;
+    --milk:#8CC8F0; --milk-bg:#16222B; --milk-line:#2A4254;
   }
 }
 :root[data-theme="dark"]{
   --paper:#1C1210; --card:#251813; --ink:#F3E9DD; --muted:#B39C89; --line:#3B2A22;
   --gold:#E0B23D; --green:#5CD39A; --amber:#F2B84B; --red:#FF8A8A; --red-bg:#3B1C1C;
+    --milk:#8CC8F0; --milk-bg:#16222B; --milk-line:#2A4254;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--paper)}
 *,*::before,*::after{box-sizing:inherit}
@@ -89,6 +92,17 @@ h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
 .sumnm{font-weight:700;flex:1;min-width:110px}
 .sumqty{font-weight:700;color:var(--brandband);white-space:nowrap}
 .sumdetail{width:100%;color:var(--muted);font-size:.78rem}
+.hide{display:none!important}
+.milkcard{border-color:var(--milk);background:linear-gradient(180deg,var(--milk-bg),var(--card) 60px)}
+.milkcard .sumhead{color:var(--milk)}
+.mkhead{font-weight:700;margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.mkl{background:var(--milk);color:var(--card);border-radius:999px;padding:1px 9px;font-size:.85rem;white-space:nowrap}
+.mkrow{padding:3px 0 3px 10px;border-left:3px solid var(--milk-line);margin:1px 0;font-size:.92rem}
+.mkrow.mksum{font-weight:700;color:var(--milk);border-left-color:var(--milk)}
+.mknote{color:var(--muted);font-size:.8rem;margin-top:6px}
+.mknote.mkwarn{color:var(--red)}
+.mktotal{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--milk);font-size:1.02rem}
+.mktotal span{font-weight:400;color:var(--muted);font-size:.8rem}
 
 .sechead{display:flex;align-items:baseline;gap:8px;margin:18px 0 8px}
 .sechead h2{font-size:1.05rem}
@@ -376,6 +390,7 @@ function load(){
   }
 }
 function save(){
+  planSyncSoon();
   try{localStorage.setItem(KEY,JSON.stringify(state));}
   catch(e){ui.storageOk=false;try{renderBanner();}catch(e2){}}
 }
@@ -628,6 +643,173 @@ function daySummaryBlock(live,dateKey,label){
   }).join('');
   return '<div class="sumcard"><div class="sumhead">'+esc(label)+' \u2013 कुल सामान तैयार करो</div>'+rows+'</div>';
 }
+/* ---------- 🥛 दूध-दही ऑर्डर का हिसाब ----------
+   मिठाई: डिलीवरी से 2 दिन पहले 3 बजे तक दूध ऑर्डर (25 की मिठाई → 24 को बनेगी → 23 को ऑर्डर)
+   दही / बिकने वाला दूध / पनीर: डिलीवरी से 1 दिन पहले 3 बजे तक
+   1 यूनिट मिठाई में कितना दूध — catalog.js का milk, या आइटम खोलकर बदला हुआ (item.milk) */
+var CAT_MILK=(CATALOG&&CATALOG.milk)||{};
+var HI_MONTHS=['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
+var HI_DAYS=['रविवार','सोमवार','मंगलवार','बुधवार','गुरुवार','शुक्रवार','शनिवार'];
+function hiDate(k){var d=keyToDate(k);return d.getDate()+' '+HI_MONTHS[d.getMonth()]+' ('+HI_DAYS[d.getDay()]+')';}
+function addDaysKey(n){var d=new Date();d.setDate(d.getDate()+n);return dayKey(d);}
+function r1(n){return Math.round(num(n)*10)/10;}
+function hasOwn(o,k){return Object.prototype.hasOwnProperty.call(o,k);}
+function itemByName(name){for(var i=0;i<state.items.length;i++)if(state.items[i].name===name)return state.items[i];return null;}
+function catalogRowByName(name){if(!CATALOG)return null;for(var i=0;i<CATALOG.items.length;i++)if(CATALOG.items[i][1]===name)return CATALOG.items[i];return null;}
+/* लीटर प्रति यूनिट; null = पता नहीं (हिसाब में नहीं) */
+function itemMilk(si){
+  if(!si)return null;
+  if(hasOwn(si,'milk'))return (si.milk===null||si.milk===undefined||si.milk==='')?null:num(si.milk);
+  return hasOwn(CAT_MILK,si.id)?num(CAT_MILK[si.id]):null;
+}
+function lineMeta(g){
+  var si=itemByName(g.name);
+  if(si)return {cat:si.cat,milk:itemMilk(si)};
+  var r=catalogRowByName(g.name);
+  if(r)return {cat:r[2],milk:hasOwn(CAT_MILK,r[0])?num(CAT_MILK[r[0]]):null};
+  return {cat:'',milk:null};
+}
+function isKgUnit(u){return /^(किलो|kg)$/i.test(String(u||'').trim());}
+function isLitreUnit(u){return /^(लीटर|litre|liter|ltr|l)$/i.test(String(u||'').trim());}
+/* दही का एक पैक कितने किलो — नाम से पढ़ो: "दही (400 ग्राम)" → 0.4, "दही (2 किलो पैक)" → 2 */
+function packKg(name,unit){
+  if(isKgUnit(unit))return 1;
+  var m=String(name||'').match(/(\d+(?:\.\d+)?)\s*(किलो|ग्राम|kg|gm|g)/i);
+  if(!m)return null;
+  var n=parseFloat(m[1]);
+  return /^(किलो|kg)$/i.test(m[2])?n:n/1000;
+}
+/* उस दिन की बाकी (डिलीवर नहीं हुई) लाइनें, नाम+यूनिट से जोड़कर */
+function dayLines(live,dateKey){
+  var map={},keys=[];
+  live.forEach(function(o){
+    o.items.forEach(function(it){
+      if(it.delivered||itemDateKey(o,it)!==dateKey)return;
+      var k=it.name+'|'+it.unit;
+      if(!map[k]){map[k]={name:it.name,unit:it.unit,qty:0};keys.push(k);}
+      map[k].qty+=num(it.qty);
+    });
+  });
+  return keys.map(function(k){return map[k];}).filter(function(g){return g.qty>0;});
+}
+/* मिठाई का दूध — {l: कुल लीटर, lines, none: बिना दूध वाली, unk: जिनका दूध पता नहीं} */
+function sweetsMilk(live,dateKey){
+  var res={l:0,lines:[],none:[],unk:[]},rows=[];
+  dayLines(live,dateKey).forEach(function(g){
+    var m=lineMeta(g),nm=displayName(g),q=fmtQty(g.qty)+' '+g.unit;
+    if(m.cat==='mithai'){
+      if(m.milk===null)res.unk.push(nm+' '+q);
+      else if(m.milk>0){var L=g.qty*m.milk;res.l+=L;rows.push({t:nm+' '+q+' → '+r1(L)+' L',L:L});}
+      else res.none.push(nm+' '+q);
+    }else if(!m.cat&&!/केक|cake/i.test(g.name)){
+      res.unk.push(nm+' '+q);
+    }
+  });
+  rows.sort(function(a,b){return b.L-a.L;});
+  res.lines=rows.map(function(x){return x.t;});
+  res.l=r1(res.l);
+  return (res.lines.length||res.unk.length||res.none.length)?res:null;
+}
+/* दही / बिकने वाला दूध / पनीर — {l: दूध लीटर, kg: कुल दही, lines} */
+function dairyDay(live,dateKey){
+  var dahi=[],milk=[],other=[],kg=0,l=0,dahiUnknown=false;
+  dayLines(live,dateKey).forEach(function(g){
+    var m=lineMeta(g);
+    if(m.cat!=='dairy')return;
+    var nm=displayName(g);
+    if(/दही|dahi|curd/i.test(g.name)){
+      var pk=packKg(g.name,g.unit);
+      if(isKgUnit(g.unit)){kg+=g.qty;dahi.push(nm+' '+fmtQty(g.qty)+' किलो');}
+      else if(pk){kg+=pk*g.qty;dahi.push(nm+' ×'+fmtQty(g.qty)+' '+g.unit+' = '+fmtQty(pk*g.qty)+' किलो');}
+      else{dahiUnknown=true;dahi.push(nm+' '+fmtQty(g.qty)+' '+g.unit);}
+    }else if(/दूध|milk/i.test(g.name)&&isLitreUnit(g.unit)){
+      l+=g.qty;milk.push(nm+' '+fmtQty(g.qty)+' लीटर');
+    }else{
+      other.push(nm+' '+fmtQty(g.qty)+' '+g.unit);
+    }
+  });
+  var lines=dahi.slice();
+  if(dahi.length>1||dahiUnknown)lines.push('कुल दही: '+fmtQty(kg)+' किलो'+(dahiUnknown?' + ऊपर वाले':''));
+  lines=lines.concat(milk);
+  if(milk.length>1)lines.push('कुल दूध (बिक्री): '+r1(l)+' लीटर');
+  lines=lines.concat(other);
+  if(!lines.length)return null;
+  return {l:r1(l),kg:Math.round(kg*1000)/1000,lines:lines};
+}
+/* आने वाले 31 दिन — बिलिंग ऐप से रजिस्टर पर जाता है, वहीं से रोज़ दोपहर फ़ोन पर घंटी */
+function buildPlanDays(){
+  var live=state.orders.filter(function(o){return !o.cancelled;});
+  var from=todayStr(),until=addDaysKey(31),keys={};
+  live.forEach(function(o){o.items.forEach(function(it){
+    if(it.delivered)return;var k=itemDateKey(o,it);if(k>=from&&k<=until)keys[k]=1;
+  });});
+  var days={};
+  Object.keys(keys).sort().forEach(function(k){
+    var s=sweetsMilk(live,k),d=dairyDay(live,k);
+    if(s||d){days[k]={};if(s)days[k].s=s;if(d)days[k].d=d;}
+  });
+  return days;
+}
+function milkCard(live){
+  var sK=addDaysKey(2),dK=addDaysKey(1);
+  var s=sweetsMilk(live,sK),d=dairyDay(live,dK);
+  if(!s&&!d)return '';
+  function row(t){return '<div class="mkrow'+(/^कुल /.test(t)?' mksum':'')+'">'+esc(t)+'</div>';}
+  var h='<div class="sumcard milkcard"><div class="sumhead">🥛 आज का दूध-दही ऑर्डर (3 बजे तक)</div>';
+  if(s){
+    h+='<div class="mkhead">🍬 मिठाई — परसों '+esc(hiDate(sK))+' की डिलीवरी'+(s.l?'<span class="mkl">'+s.l+' लीटर दूध</span>':'')+'</div>'+
+      s.lines.map(row).join('');
+    if(s.none.length)h+='<div class="mknote">बिना दूध: '+esc(s.none.join(', '))+'</div>';
+    if(s.unk.length)h+='<div class="mknote mkwarn">❓ दूध हिसाब में नहीं: '+esc(s.unk.join(', '))+' — आइटम लिस्ट में इनका दूध लिख दो</div>';
+  }
+  if(d){
+    h+='<div class="mkhead">🥛 दही-दूध — कल '+esc(hiDate(dK))+' की डिलीवरी</div>'+d.lines.map(row).join('');
+  }
+  if(s&&s.l&&d&&d.l)h+='<div class="mktotal">कुल दूध: '+r1(s.l+d.l)+' लीटर <span>(मिठाई '+s.l+' + बिक्री '+d.l+')</span></div>';
+  var ps=lsGet(PLAN_SENT,{})||{};
+  if(onlineCfg())h+='<div class="mknote">'+(ps.old?'📲 फ़ोन पर रोज़ का रिमाइंडर अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है (बैकअप → ⚙️ सेटअप, चरण 7)':'📲 रोज़ दोपहर 2–2:30 बजे यही हिसाब फ़ोन पर (ntfy) आता है')+'</div>';
+  return h+'</div>';
+}
+
+/* हिसाब बदले तो रजिस्टर पर भेजो (सिर्फ बदलने पर, या 12 घंटे में एक बार ताकि "कब भेजा" ताज़ा रहे) */
+var PLAN_SENT='mbmb-plan-sent',planTimer=null,planBusy=false;
+function planSyncSoon(){clearTimeout(planTimer);planTimer=setTimeout(function(){planSync();},4000);}
+function hashStr(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0)+'-'+s.length;}
+function planSync(force){
+  var cfg=onlineCfg();
+  if(!cfg||planBusy)return Promise.resolve(null);
+  var days=buildPlanDays(),h=hashStr(JSON.stringify(days)),last=lsGet(PLAN_SENT,{})||{},now=Date.now();
+  if(!force){
+    if(last.old&&now-last.old<6*3600000)return Promise.resolve(null);   // रजिस्टर का कोड पुराना — 6 घंटे बाद फिर देखो
+    if(last.h===h&&now-(last.t||0)<12*3600000)return Promise.resolve(null);
+  }
+  planBusy=true;
+  return fetch(cfg.u,{method:'POST',body:JSON.stringify({action:'plan',key:cfg.k,plan:{v:1,at:now,days:days}}),redirect:'follow'})
+    .then(function(r){return r.json();})
+    .then(function(r){
+      planBusy=false;
+      if(r&&r.ok)lsSet(PLAN_SENT,{h:h,t:now});
+      else if(r&&r.error==='action')lsSet(PLAN_SENT,{old:now});
+      return r;
+    },function(){planBusy=false;return null;});
+}
+function testMilkReminder(){
+  var cfg=onlineCfg();
+  if(!cfg){toast('पहले ऑनलाइन सेटअप करें');return;}
+  toast('हिसाब भेज रहे हैं…');
+  planSync(true).then(function(r){
+    if(!r){toast('इंटरनेट नहीं मिला — दोबारा दबाओ');return null;}
+    if(!r.ok){
+      toast(r.error==='action'?'रजिस्टर का कोड पुराना है — कंप्यूटर पर चरण 7 करें':'नहीं भेज पाए ('+(r.error||'?')+')');
+      if(ui.view==='backup'&&!$('#ov'))renderBackup();
+      return null;
+    }
+    return fetch(cfg.u+'?action=testplan&key='+encodeURIComponent(cfg.k),{redirect:'follow'}).then(function(x){return x.json();}).then(function(t){
+      toast(t&&t.ok?'भेज दिया ✓ फ़ोन पर ntfy देखो':'नहीं भेज पाए ('+((t&&t.error)||'?')+')');
+      if(ui.view==='backup'&&!$('#ov'))renderBackup();
+    });
+  }).catch(function(){toast('इंटरनेट नहीं मिला — दोबारा दबाओ');});
+}
 function renderHome(){
   var today=todayStr();
   var tmr=(function(){var d=new Date();d.setDate(d.getDate()+1);return dayKey(d);})();
@@ -658,6 +840,7 @@ function renderHome(){
       '<p class="hint" style="margin-top:-4px">इनकी तारीख निकल गई पर टिक नहीं लगा। दे दिया हो तो ग्राहक खोलकर टिक लगा दो।</p>'+
       overdueGroups.map(function(g){return miniCard(g.order,g.items,'overdue');}).join('');
   }
+  sections+=milkCard(live);
   sections+=daySummaryBlock(live,dayAfter,'परसों');
   if(dayAfterGroups.length){
     sections+='<div class="sechead"><h2>परसों डिलीवरी है</h2><span class="cnt">'+dayAfterGroups.length+'</span></div>'+dayAfterGroups.map(function(g){return miniCard(g.order,g.items,'');}).join('');
@@ -862,6 +1045,7 @@ function orderCardFull(o){
 }
 
 /* ---------- ITEMS TAB ---------- */
+function milkBadge(i){var m=itemMilk(i);return m===null?'🥛 दूध ?':(m>0?'🥛 '+m+' L/'+esc(i.unit):'दूध नहीं');}
 function renderItems(){
   var q=ui.itemsSearch.trim().toLowerCase();
   var html='<div class="sechead"><h2>आइटम लिस्ट</h2></div>'+
@@ -874,7 +1058,7 @@ function renderItems(){
     else{
       html+=its.map(function(i){
         return '<button class="itemrow" data-act="edit-item" data-id="'+i.id+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
-          '<span><span class="nm">'+esc(i.name)+'</span><br><span class="un">'+esc(i.unit)+'</span></span>'+
+          '<span><span class="nm">'+esc(i.name)+'</span><br><span class="un">'+esc(i.unit)+(i.cat==='mithai'?' · '+milkBadge(i):'')+'</span></span>'+
           '<span class="pr">'+rupee(i.price)+'</span></button>';
       }).join('');
     }
@@ -905,6 +1089,9 @@ function renderBackup(){
     '<div class="sechead" style="margin-top:22px"><h2>🌐 ऑनलाइन ऑर्डर</h2></div>'+
     (onlineCfg()?'<p class="hint" style="font-weight:700;color:var(--green)">✓ इस फोन पर जुड़ा हुआ है</p>':'<p class="hint">अभी जुड़ा नहीं है।</p>')+
     '<div class="actbar"><a class="btn small" href="online/setup.html">⚙️ '+(onlineCfg()?'सेटअप / नोटिफिकेशन टेस्ट':'सेटअप शुरू करो')+'</a></div>'+
+    (onlineCfg()?'<div class="installbox"><p>🥛 <b>दूध-दही रिमाइंडर:</b> रोज़ दोपहर 2–2:30 बजे फ़ोन पर (ntfy) — परसों की मिठाई के लिए कितना दूध, और कल का दही/दूध/पनीर। 1 किलो मिठाई = 2 लीटर दूध (हर मिठाई का "आइटम" में बदल सकते हो)।</p>'+
+      ((lsGet(PLAN_SENT,{})||{}).old?'<p class="hint" style="color:var(--red);font-weight:700">⚠️ अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है: ⚙️ सेटअप → चरण 7</p>':'')+
+      '<button class="btn small" data-act="test-milk">🔔 अभी टेस्ट भेजो</button></div>':'')+
     '<div class="sechead" style="margin-top:22px"><h2>दुकान की जानकारी</h2></div>'+
     '<label class="fl">दुकान का नाम<input id="s-name" type="text" value="'+esc(s.name)+'"></label>'+
     '<label class="fl">पता<input id="s-addr" type="text" value="'+esc(s.addr)+'"></label>'+
@@ -916,7 +1103,7 @@ function renderBackup(){
 
     '<div class="sechead" style="margin-top:22px"><h2>ऐप और रिमाइंडर</h2></div>'+
     (isStandalone?'<div class="installbox"><p>✓ ऐप इस फ़ोन में इंस्टॉल है। होम स्क्रीन के MB Sweets आइकन से खोलो।</p></div>':'<div class="installbox"><p>📲 इस ऐप को फोन में असली ऐप जैसा इंस्टॉल करो — अपना आइकन, बिना ब्राउज़र बार के, बिना इंटरनेट के भी खुलेगा।</p><button class="btn primary small" data-act="install-app">➕ ऐप इंस्टॉल करो</button></div>')+
-    '<div class="installbox"><p>🔔 <b>ऑर्डर रिमाइंडर:</b> हर ऑर्डर पर "रिमाइंडर" बटन दबाकर एक calendar फ़ाइल डाउनलोड करो — उसे खोलकर अपने Google Calendar में जोड़ लो। इससे डिलीवरी से 2 दिन और 1 दिन पहले आपके फ़ोन में पक्का notification आएगा (जैसे दूध पहले से मंगवाना है तो याद रहेगा)।</p>'+
+    '<div class="installbox"><p>🔔 <b>ऑर्डर रिमाइंडर:</b> हर ऑर्डर पर "रिमाइंडर" बटन दबाकर एक calendar फ़ाइल डाउनलोड करो — उसे खोलकर अपने Google Calendar में जोड़ लो। इससे डिलीवरी से 2 दिन और 1 दिन पहले आपके फ़ोन में पक्का notification आएगा। (दूध-दही का रोज़ का हिसाब ऊपर "🌐 ऑनलाइन ऑर्डर" वाले हिस्से से अपने-आप आता है।)</p>'+
     '<p class="hint" style="margin-top:8px">इसके अलावा, जब भी यह ऐप खोलो और कल/परसों का कोई सामान बाकी हो, ऐप खुद भी एक notification दिखा सकता है — उसके लिए नीचे से अनुमति दे दो:</p>'+
     '<button class="btn small" data-act="enable-notif">'+(notifOn?'✓ notification चालू है':'notification ऑन करो')+'</button></div>';
   $('#main').innerHTML=html;
@@ -1378,6 +1565,7 @@ function onlineSync(manual){
     });
     online.lastSync=Date.now();online.error='';
     saveOnlineCache();
+    planSync();
     alertNewOrders();
     refreshOnlineViews();
     if(manual)toast('ऑनलाइन ऑर्डर अपडेट ✓');
@@ -1657,6 +1845,8 @@ function openItemForm(id){
     '<label class="fl">Category<select id="i-cat">'+opts+'</select></label>'+
     '<label class="fl">यूनिट<input id="i-unit" list="i-units-dl" type="text" value="'+esc(i?i.unit:'किलो')+'"></label>'+
     '<label class="fl">Rate \u20b9<input id="i-price" type="number" inputmode="decimal" step="any" min="0" value="'+(i?i.price:'')+'"></label>'+
+    '<div id="i-milkwrap"'+((i?i.cat:CATS[0][0])==='mithai'?'':' class="hide"')+'><label class="fl">🥛 दूध कितना लगता है — लीटर, 1 यूनिट (किलो/पीस) में<input id="i-milk" type="number" inputmode="decimal" step="any" min="0" placeholder="जैसे 2" value="'+(i&&itemMilk(i)!==null?itemMilk(i):'')+'"></label>'+
+    '<p class="hint" style="margin-top:-6px">दूध-दही ऑर्डर के हिसाब के लिए। 0 = दूध नहीं लगता · खाली = हिसाब में नहीं</p></div>'+
     '<div class="err" id="i-err"></div>'+
     '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-item" data-id="'+(i?i.id:'')+'">Save करो</button></div>'+
     (i?'<div style="margin-top:14px;text-align:center"><button class="lnk danger" data-act="del-item" data-id="'+i.id+'">यह आइटम हटाओ</button></div>':'')+
@@ -2494,13 +2684,16 @@ document.addEventListener('click',function(e){
     case 'save-order':saveOrderFromDraft();break;
 
     case 'edit-item':openItemForm(id);break;
+    case 'test-milk':testMilkReminder();break;
     case 'save-item':
       var iname=$('#i-name').value.trim(),iprice=Math.max(0,num($('#i-price').value));
       if(!iname){$('#i-err').textContent='नाम लिखो।';break;}
       if(state.items.some(function(x){return x.id!==id&&x.name.toLowerCase()===iname.toLowerCase();})){$('#i-err').textContent='इस नाम का आइटम पहले से लिस्ट में है।';break;}
       var existI=id?findItem(id):null;
+      var milkIn=$('#i-milk'),milkV=(milkIn&&$('#i-cat').value==='mithai')?milkIn.value.trim():null;
       if(existI){existI.name=iname;existI.cat=$('#i-cat').value;existI.unit=$('#i-unit').value.trim()||'किलो';existI.price=iprice;}
-      else{state.items.push({id:uid(),name:iname,cat:$('#i-cat').value,unit:$('#i-unit').value.trim()||'किलो',price:iprice});}
+      else{existI={id:uid(),name:iname,cat:$('#i-cat').value,unit:$('#i-unit').value.trim()||'किलो',price:iprice};state.items.push(existI);}
+      if(milkV!==null){var mOld=itemMilk(existI),mNew=milkV===''?null:Math.max(0,num(milkV));if(mNew!==mOld)existI.milk=mNew;}
       save();closeSheet();renderRoute();toast('आइटम save हो गया');
       break;
     case 'del-item':openDeleteItemConfirm(id);break;
@@ -2600,6 +2793,7 @@ document.addEventListener('change',function(e){
       return;
     }
   }
+  if(t.id==='i-cat'){var mw=$('#i-milkwrap');if(mw)mw.classList.toggle('hide',t.value!=='mithai');return;}
   if(t.id==='b-file'&&t.files&&t.files[0]){
     var fr=new FileReader();
     fr.onload=function(){var ta2=$('#b-text');if(ta2){ta2.value=String(fr.result||'');toast('फ़ाइल लोड हो गई — अब "Restore karo" दबाओ');}};
