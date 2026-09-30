@@ -26,8 +26,12 @@ function setupSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   PropertiesService.getScriptProperties().setProperty('SHEET_ID', ss.getId());
   sheet_();
-  UrlFetchApp.fetch('https://ntfy.sh/', { method: 'get', muteHttpExceptions: true });
   setupReminder();
+  try {
+    UrlFetchApp.fetch('https://ntfy.sh/v1/health', { method: 'get', muteHttpExceptions: true });
+  } catch (e) {
+    Logger.log('⚠️ ntfy अभी नहीं मिला (इंटरनेट की दिक्कत) — बाकी सेटअप हो गया, Deploy के बाद टेस्ट नोटिफिकेशन भेजकर देखें');
+  }
   Logger.log('✅ सेटअप ठीक है (रिमाइंडर भी चालू) — अब Deploy करें');
 }
 
