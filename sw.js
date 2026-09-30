@@ -1,4 +1,4 @@
-var CACHE_NAME = 'mbmb-billing-v9';
+var CACHE_NAME = 'mbmb-billing-v10';
 var CORE_ASSETS = [
   './',
   './manifest.json',
@@ -7,6 +7,7 @@ var CORE_ASSETS = [
   './icon-512.png',
   './logo-header.png',
   './order-qr.png',
+  './badge-96.png',
   './fonts/Mukta-400.woff',
   './fonts/Mukta-600.woff',
   './fonts/Mukta-700.woff',
@@ -93,4 +94,67 @@ self.addEventListener('notificationclick', function (e) {
       return self.clients.openWindow(target);
     })
   );
+});
+
+/* ---------- 🔔 घंटी: नया ऑनलाइन ऑर्डर / दूध-दही रिमाइंडर (रजिस्टर से web push) ----------
+   संदेश push के साथ आता है; अगर खाली घंटी आए तो रजिस्टर से पिछले संदेश पढ़ लेते हैं।
+   रजिस्टर का पता और चाबी बिलिंग ऐप 'mbmb-cfg' cache में रखता है। */
+function readCfg() {
+  return caches.open('mbmb-cfg').then(function (c) { return c.match('cfg'); })
+    .then(function (r) { return r ? r.json() : null; }).catch(function () { return null; });
+}
+function b64uToU8(s) {
+  s = String(s || '').replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  var bin = atob(s), u = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return u;
+}
+function markSeen(id) {
+  return caches.open('mbmb-cfg').then(function (c) {
+    return c.match('seen').then(function (x) { return x ? x.text() : '0'; }).then(function (old) {
+      var v = Math.max(Number(old) || 0, Number(id) || 0);
+      return c.put('seen', new Response(String(v))).then(function () { return Number(old) || 0; });
+    });
+  }).catch(function () { return 0; });
+}
+function showItem(d, quiet) {
+  var tag = d.g || ('n' + (d.i || Date.now()));
+  return self.registration.showNotification(d.t || 'MB Sweets', {
+    body: d.b || '', tag: tag, renotify: !quiet && !d.s, silent: !!(quiet || d.s),
+    icon: 'icon-192.png', badge: 'badge-96.png', timestamp: Number(d.i) || Date.now(),
+    data: { url: d.u || './' }
+  });
+}
+var GENERIC = { t: 'MB Sweets', b: 'नया अपडेट आया है — ऐप खोलकर देखें', u: './#online' };
+self.addEventListener('push', function (e) {
+  var d = null;
+  try { d = e.data ? e.data.json() : null; } catch (err) { d = null; }
+  if (d && d.t) {
+    e.waitUntil(markSeen(d.i).then(function () { return showItem(d); }));
+    return;
+  }
+  e.waitUntil(readCfg().then(function (c) {
+    if (!c || !c.u || !c.k) throw new Error('nocfg');
+    return fetch(c.u + '?action=inbox&key=' + encodeURIComponent(c.k), { redirect: 'follow' }).then(function (r) { return r.json(); });
+  }).then(function (r) {
+    var items = (r && r.items) || [];
+    var max = items.reduce(function (m, it) { return Math.max(m, Number(it.i) || 0); }, 0);
+    return markSeen(max).then(function (seen) {
+      var fresh = items.filter(function (it) { return (Number(it.i) || 0) > seen; });
+      if (fresh.length) return Promise.all(fresh.slice(-4).map(function (it) { return showItem(it); }));
+      if (items.length) return showItem(items[items.length - 1], true);
+      return showItem(GENERIC);
+    });
+  }).catch(function () { return showItem(GENERIC); }));
+});
+// Chrome कभी-कभी घंटी का पता बदल देता है — नया पता अपने-आप रजिस्टर को भेज दो
+self.addEventListener('pushsubscriptionchange', function (e) {
+  e.waitUntil(readCfg().then(function (c) {
+    if (!c || !c.u || !c.k || !c.v) return;
+    return self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uToU8(c.v) }).then(function (sub) {
+      return fetch(c.u, { method: 'POST', redirect: 'follow',
+        body: JSON.stringify({ action: 'pushsub', key: c.k, sub: sub.toJSON(), old: e.oldSubscription ? e.oldSubscription.endpoint : '' }) });
+    });
+  }).catch(function () {}));
 });

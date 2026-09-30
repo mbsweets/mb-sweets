@@ -92,14 +92,18 @@ details summary{cursor:pointer;font-weight:700;margin-top:8px}
 </div>
 
 <div class="step">
-  <h2><span class="num">5</span>फोन पर नोटिफिकेशन (ntfy ऐप)</h2>
+  <h2><span class="num">5</span>फोन पर घंटी 🔔</h2>
+  <p>बिलिंग ऐप खोलें → नीचे <b class="m">बैकअप</b> → <b class="m">🔔 इस फ़ोन पर घंटी चालू करो</b> → Chrome पूछे तो <b class="m">Allow</b> → फिर <b class="m">🔔 टेस्ट भेजो</b>। नया ऑर्डर और दूध-दही का हिसाब सीधे बिलिंग ऐप के नोटिफिकेशन में आएगा।</p>
+  <p class="note">फ़ोन की Settings → Apps → <b>Chrome</b> (और <b>MB Sweets</b>) → Battery → <b>Unrestricted / Don't optimise</b> कर दें, ताकि घंटी देर से न आए।</p>
+  <details><summary>पुराना तरीका: ntfy ऐप (अब ज़रूरी नहीं — घंटी चालू न हो तभी काम आता है)</summary>
   <ol>
     <li>Play Store से <b class="m">ntfy</b> ऐप डालें। <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Play Store पर खोलें</a></li>
     <li>ntfy खोलें → नीचे <b class="m">+</b> दबाएं → Topic name में यह नाम डालें: <br><code class="k" id="topicTxt">— पहले चरण 4 पूरा करें —</code> <button class="btn" id="copyTopic" style="min-height:36px;margin-top:4px">कॉपी</button></li>
     <li><b class="m">Subscribe</b> दबाएं। अगर पूछे तो <b>"Instant delivery"</b> चालू करें और नोटिफिकेशन की अनुमति दें।</li>
     <li>फोन की Settings → Apps → ntfy → Battery → <b class="m">Unrestricted / Don't optimise</b> कर दें, ताकि नोटिफिकेशन देर से न आए।</li>
   </ol>
-  <button class="btn primary block" id="testNotify">🔔 टेस्ट नोटिफिकेशन भेजें</button>
+  </details>
+  <button class="btn block" id="testNotify" style="margin-top:10px">🔔 टेस्ट भेजें</button>
   <div id="testMsg"></div>
 </div>
 
@@ -114,12 +118,12 @@ details summary{cursor:pointer;font-weight:700;margin-top:8px}
 
 <div class="step" id="st-milk">
   <h2><span class="num">7</span>🥛 दूध-दही रिमाइंडर</h2>
-  <p>रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर (ntfy) घंटी: <b>परसों की मिठाई के लिए कितना दूध</b> (1 किलो = 2 लीटर) और <b>कल का दही/दूध/पनीर</b>।</p>
+  <p>रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर घंटी: <b>परसों की मिठाई के लिए कितना दूध</b> (1 किलो = 2 लीटर) और <b>कल का दही/दूध/पनीर</b>।</p>
   <p class="note">नया सेटअप अभी किया है (चरण 1–6)? तो यह पहले से चालू है — बस नीचे "जांचें" दबाएं।<br>
   <b>पहले से चल रहा सेटअप है</b> तो कंप्यूटर पर एक बार कोड अपडेट करना है (5 मिनट):</p>
   <ol>
     <li>वही Google Sheet खोलें (<b class="m">MB Sweets ऑनलाइन ऑर्डर</b>) → <b class="m">Extensions</b> → <b class="m">Apps Script</b></li>
-    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 3"</b> लिखा दिखना चाहिए।</li>
+    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 4"</b> लिखा दिखना चाहिए।</li>
     <li>ऊपर <b class="m">▶ Run</b> दबाएं (बगल में <b>setupSheet</b> लिखा हो)। नई अनुमति माँगेगा → <b class="m">Review permissions</b> → अकाउंट चुनें → <b class="m">Advanced</b> → <b class="m">Go to … (unsafe)</b> → <b class="m">Allow</b>। नीचे "Execution completed" दिखे तो ठीक।</li>
     <li>ऊपर <b class="m">Deploy</b> → <b class="m">Manage deployments</b> → ✏️ (पेंसिल) → <b>Version:</b> <b class="m">New version</b> → <b class="m">Deploy</b>। <b>URL वही रहेगा</b> — कहीं कुछ बदलना नहीं है।</li>
   </ol>
@@ -202,8 +206,9 @@ $('#testNotify').addEventListener('click',function(){
   var c=load();if(!c||!c.k){msg('#testMsg','err','पहले चरण 4 पूरा करें।');return;}
   msg('#testMsg','note','भेज रहे हैं…');
   api(c.u,{action:'testnotify',key:c.k}).then(function(r){
-    if(r&&r.ok)msg('#testMsg','ok','भेज दिया ✓ फोन पर ntfy का नोटिफिकेशन आया? नहीं आया तो topic का नाम और battery सेटिंग दोबारा देखें।');
-    else msg('#testMsg','err','नहीं भेज पाए ('+((r&&r.error)||'?')+')');
+    if(r&&r.ok&&r.via==='push')msg('#testMsg','ok','भेज दिया ✓ बिलिंग ऐप की घंटी बजी?');
+    else if(r&&r.ok)msg('#testMsg','ok','ntfy से भेजा ✓ (बिलिंग ऐप की घंटी अभी चालू नहीं — ऊपर पहली लाइन देखें)');
+    else msg('#testMsg','err','नहीं भेज पाए ('+(((r&&r.detail)||[]).join(', ')||(r&&r.error)||'?')+')');
   }).catch(function(){msg('#testMsg','err','इंटरनेट देखें और दोबारा दबाएं।');});
 });
 $('#copyUrl').addEventListener('click',function(){var c=load();if(c&&c.u)copy(c.u,'#urlMsg');else msg('#urlMsg','err','पहले चरण 4 पूरा करें।');});
@@ -218,10 +223,10 @@ $('#checkMilk').addEventListener('click',function(){
   var c=load();if(!c||!c.u){msg('#milkMsg','err','पहले चरण 4 पूरा करें।');return;}
   msg('#milkMsg','note','जांच रहे हैं…');
   api(c.u,{action:'ping'}).then(function(r){
-    if(r&&r.ok&&r.v>=3&&r.reminder){
+    if(r&&r.ok&&r.v>=4&&r.reminder){
       try{localStorage.removeItem('mbmb-plan-sent');}catch(e){}
-      msg('#milkMsg','ok','✅ रिमाइंडर चालू है। अब बिलिंग ऐप खोलें → बैकअप → "🔔 अभी टेस्ट भेजो" दबाकर फोन पर देख लें।');
-    }else if(r&&r.ok&&r.v>=3){
+      msg('#milkMsg','ok','✅ नया कोड और रिमाइंडर चालू है। अब बिलिंग ऐप खोलें → बैकअप → "🔔 इस फ़ोन पर घंटी चालू करो" → फिर "टेस्ट"।');
+    }else if(r&&r.ok&&r.v>=4){
       msg('#milkMsg','err','नया कोड चालू है, पर रोज़ का टाइमर नहीं लगा — Apps Script में ▶ Run (setupSheet) दोबारा करें और Allow दें।');
     }else if(r&&r.ok){
       msg('#milkMsg','err','अभी पुराना कोड चल रहा है — ऊपर के 4 काम करें (खासकर आखिरी: Manage deployments → New version → Deploy)।');

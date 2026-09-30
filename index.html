@@ -767,7 +767,7 @@ function milkCard(live){
   }
   if(s&&s.l&&d&&d.l)h+='<div class="mktotal">कुल दूध: '+r1(s.l+d.l)+' लीटर <span>(मिठाई '+s.l+' + बिक्री '+d.l+')</span></div>';
   var ps=lsGet(PLAN_SENT,{})||{};
-  if(onlineCfg())h+='<div class="mknote">'+(ps.old?'📲 फ़ोन पर रोज़ का रिमाइंडर अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है (बैकअप → ⚙️ सेटअप, चरण 7)':'📲 रोज़ दोपहर 2–2:30 बजे यही हिसाब फ़ोन पर (ntfy) आता है')+'</div>';
+  if(onlineCfg())h+='<div class="mknote">'+(ps.old?'📲 फ़ोन पर रोज़ का रिमाइंडर अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है (बैकअप → ⚙️ सेटअप, चरण 7)':(pushOn()?'📲 रोज़ दोपहर 2–2:30 बजे यही हिसाब इस फ़ोन पर घंटी से आता है':'📲 रोज़ की घंटी के लिए: बैकअप → 🔔 इस फ़ोन पर घंटी चालू करो'))+'</div>';
   return h+'</div>';
 }
 
@@ -805,7 +805,7 @@ function testMilkReminder(){
       return null;
     }
     return fetch(cfg.u+'?action=testplan&key='+encodeURIComponent(cfg.k),{redirect:'follow'}).then(function(x){return x.json();}).then(function(t){
-      toast(t&&t.ok?'भेज दिया ✓ फ़ोन पर ntfy देखो':'नहीं भेज पाए ('+((t&&t.error)||'?')+')');
+      toast(t&&t.ok?'भेज दिया ✓ — फ़ोन पर घंटी देखो':'नहीं भेज पाए ('+(((t&&t.detail)||[]).join(', ')||(t&&t.error)||'?')+')');
       if(ui.view==='backup'&&!$('#ov'))renderBackup();
     });
   }).catch(function(){toast('इंटरनेट नहीं मिला — दोबारा दबाओ');});
@@ -1089,7 +1089,8 @@ function renderBackup(){
     '<div class="sechead" style="margin-top:22px"><h2>🌐 ऑनलाइन ऑर्डर</h2></div>'+
     (onlineCfg()?'<p class="hint" style="font-weight:700;color:var(--green)">✓ इस फोन पर जुड़ा हुआ है</p>':'<p class="hint">अभी जुड़ा नहीं है।</p>')+
     '<div class="actbar"><a class="btn small" href="online/setup.html">⚙️ '+(onlineCfg()?'सेटअप / नोटिफिकेशन टेस्ट':'सेटअप शुरू करो')+'</a></div>'+
-    (onlineCfg()?'<div class="installbox"><p>🥛 <b>दूध-दही रिमाइंडर:</b> रोज़ दोपहर 2–2:30 बजे फ़ोन पर (ntfy) — परसों की मिठाई के लिए कितना दूध, और कल का दही/दूध/पनीर। 1 किलो मिठाई = 2 लीटर दूध (हर मिठाई का "आइटम" में बदल सकते हो)।</p>'+
+    pushBoxHtml()+
+    (onlineCfg()?'<div class="installbox"><p>🥛 <b>दूध-दही रिमाइंडर:</b> रोज़ दोपहर 2–2:30 बजे फ़ोन पर घंटी — परसों की मिठाई के लिए कितना दूध, और कल का दही/दूध/पनीर। 1 किलो मिठाई = 2 लीटर दूध (हर मिठाई का "आइटम" में बदल सकते हो)।</p>'+
       ((lsGet(PLAN_SENT,{})||{}).old?'<p class="hint" style="color:var(--red);font-weight:700">⚠️ अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है: ⚙️ सेटअप → चरण 7</p>':'')+
       '<button class="btn small" data-act="test-milk">🔔 अभी टेस्ट भेजो</button></div>':'')+
     '<div class="sechead" style="margin-top:22px"><h2>दुकान की जानकारी</h2></div>'+
@@ -1742,6 +1743,7 @@ function renderOnline(){
     $('#main').innerHTML=html;return;
   }
   if(online.error)html+='<div class="banner">'+esc(online.error)+'</div>';
+  if(!pushOn()&&pushSupported()&&Notification.permission!=='denied')html+='<button class="banner btn-banner" data-act="push-on" style="background:var(--milk-bg);color:var(--milk)">🔔 नए ऑर्डर की घंटी इस फ़ोन पर चालू करो — यहाँ दबाओ</button>';
   var tk=todayStr();
   var todays=online.orders.filter(function(o){return o.created&&dayKey(o.created)===tk&&o.status!=='rejected';});
   var todayAmt=todays.reduce(function(s,o){return s+num(o.confirmedTotal||o.total);},0);
@@ -1763,8 +1765,122 @@ function startOnline(){
   online.cfg=onlineCfg();
   if(!online.cfg)return;
   onlineSync();
+  pushCheck();
   setInterval(function(){if(document.visibilityState==='visible')onlineSync();},30000);
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')onlineSync();});
+}
+
+/* ---------- 🔔 इस फ़ोन पर घंटी (रजिस्टर → Chrome push → यही ऐप) ---------- */
+var PUSH_LS='mbmb-push';
+function pushSupported(){return ('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window);}
+function pushOn(){var p=lsGet(PUSH_LS,null);return !!(p&&p.e)&&('Notification' in window)&&Notification.permission==='granted';}
+function b64uToU8(s){s=String(s||'').replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var bin=atob(s),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;}
+function bufToB64u(buf){if(!buf)return '';var u=new Uint8Array(buf),s='';for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+/* service worker को रजिस्टर का पता/चाबी चाहिए (खाली घंटी आए तो संदेश पढ़ने के लिए) */
+function saveSwCfg(){
+  var c=onlineCfg();
+  if(!c||!('caches' in window))return Promise.resolve();
+  var v=(lsGet(PUSH_LS,{})||{}).v||'';
+  return caches.open('mbmb-cfg').then(function(cache){
+    return cache.put('cfg',new Response(JSON.stringify({u:c.u,k:c.k,v:v}),{headers:{'Content-Type':'application/json'}}));
+  }).catch(function(){});
+}
+function pushPost(cfg,sub,vapid){
+  return fetch(cfg.u,{method:'POST',redirect:'follow',body:JSON.stringify({action:'pushsub',key:cfg.k,sub:sub.toJSON(),name:'billing'})})
+    .then(function(r){return r.json();}).then(function(r){
+      if(!r||!r.ok)throw {msg:'रजिस्टर ने फ़ोन नहीं जोड़ा ('+((r&&r.error)||'?')+')'};
+      lsSet(PUSH_LS,{e:sub.endpoint,v:vapid,t:Date.now()});
+      return saveSwCfg();
+    });
+}
+/* Chrome से घंटी का पता लो (पुराना किसी और चाबी का हो तो नया) */
+function pushSubscribe(vapid){
+  return navigator.serviceWorker.ready.then(function(reg){
+    return reg.pushManager.getSubscription().then(function(old){
+      if(old){
+        var k=old.options&&old.options.applicationServerKey?bufToB64u(old.options.applicationServerKey):'';
+        if(k===vapid)return old;
+        return old.unsubscribe().then(function(){return null;},function(){return null;});
+      }
+      return null;
+    }).then(function(sub){
+      return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64uToU8(vapid)});
+    });
+  });
+}
+function enablePush(){
+  var cfg=onlineCfg();
+  if(!cfg){toast('पहले ऑनलाइन सेटअप करें (नीचे ⚙️)');return;}
+  if(!pushSupported()){openPushHelp('support');return;}
+  toast('घंटी चालू कर रहे हैं…');
+  var vapid='';
+  fetch(cfg.u+'?action=ping',{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
+    if(!r||!r.vapid)throw {msg:'रजिस्टर का कोड पुराना है — कंप्यूटर पर ⚙️ सेटअप का चरण 7 करें'};
+    vapid=r.vapid;
+    return Notification.requestPermission();
+  }).then(function(perm){
+    if(perm!=='granted')throw {perm:true};
+    return pushSubscribe(vapid);
+  }).then(function(sub){
+    return pushPost(cfg,sub,vapid);
+  }).then(function(){
+    toast('🔔 घंटी चालू ✓ — अब "टेस्ट" दबाकर देखो');
+    if(ui.view==='backup'&&!$('#ov'))renderBackup();
+  }).catch(function(e){
+    if(e&&e.perm){openPushHelp('denied');return;}
+    toast((e&&e.msg)||('घंटी चालू नहीं हो पाई: '+String((e&&e.message)||e||'?').slice(0,60)));
+  });
+}
+function testPush(){
+  var cfg=onlineCfg();if(!cfg)return;
+  toast('टेस्ट भेज रहे हैं…');
+  fetch(cfg.u+'?action=testnotify&key='+encodeURIComponent(cfg.k),{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
+    if(r&&r.ok&&r.via==='push')toast('भेज दिया ✓ — घंटी बजी? नहीं बजी तो Claude को बताओ');
+    else if(r&&r.ok)toast('घंटी नहीं गई, ntfy से भेजा ('+((r.detail||[]).join(', '))+')');
+    else toast('नहीं भेज पाए ('+(((r&&r.detail)||[]).join(', ')||(r&&r.error)||'?')+')');
+  }).catch(function(){toast('इंटरनेट नहीं मिला — दोबारा दबाओ');});
+}
+function disablePush(){
+  var cfg=onlineCfg(),p=lsGet(PUSH_LS,null);
+  lsSet(PUSH_LS,null);
+  var done=function(){toast('इस फ़ोन की घंटी बंद');if(ui.view==='backup'&&!$('#ov'))renderBackup();};
+  if(!pushSupported()){done();return;}
+  navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription();}).then(function(sub){
+    var ep=(sub&&sub.endpoint)||(p&&p.e)||'';
+    var jobs=[];
+    if(sub)jobs.push(sub.unsubscribe().catch(function(){}));
+    if(cfg&&ep)jobs.push(fetch(cfg.u,{method:'POST',redirect:'follow',body:JSON.stringify({action:'pushunsub',key:cfg.k,endpoint:ep})}).catch(function(){}));
+    return Promise.all(jobs);
+  }).then(done,done);
+}
+/* ऐप खुलते ही: घंटी का पता बदला हो तो रजिस्टर को नया भेजो (हफ़्ते में एक बार वैसे भी) */
+function pushCheck(){
+  saveSwCfg();
+  var cfg=onlineCfg(),p=lsGet(PUSH_LS,null);
+  if(!cfg||!p||!p.e||!pushSupported()||Notification.permission!=='granted')return;
+  pushSubscribe(p.v).then(function(sub){
+    if(sub.endpoint!==p.e||Date.now()-(p.t||0)>7*86400000)return pushPost(cfg,sub,p.v);
+  }).catch(function(){});
+}
+function openPushHelp(kind){
+  var body=kind==='support'
+    ?'<p>इस ब्राउज़र में घंटी नहीं चल सकती। बिलिंग ऐप को <b>Chrome</b> में खोलें (या Chrome से इंस्टॉल किया हुआ MB Sweets ऐप), फिर दोबारा दबाएँ।</p>'
+    :'<p>फ़ोन ने नोटिफिकेशन की अनुमति नहीं दी। ऐसे चालू करें:</p><ol style="margin:0 0 8px 18px;padding:0;line-height:1.7">'+
+      '<li>होम स्क्रीन पर <b>MB Sweets</b> आइकन को दबाकर रखें → <b>App info</b> (ⓘ)</li>'+
+      '<li><b>Notifications</b> → <b>चालू (Allow)</b></li>'+
+      '<li>अगर Chrome में खोल रहे हैं: Chrome ⋮ → Settings → Site settings → Notifications → mbsweets.github.io → Allow</li>'+
+      '<li>फिर वापस आकर "🔔 घंटी चालू करो" दोबारा दबाएँ</li></ol>';
+  openSheet('<div class="sh-head"><h2>🔔 घंटी</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+body+
+    '<div class="sh-actions"><button class="btn primary" data-act="close">ठीक है</button></div>');
+}
+function pushBoxHtml(){
+  if(!onlineCfg())return '';
+  var h='<div class="installbox"><p>🔔 <b>इस फ़ोन पर घंटी:</b> नया ऑनलाइन ऑर्डर और रोज़ दोपहर का दूध-दही हिसाब सीधे इसी ऐप के नोटिफिकेशन में — ऐप बंद हो तब भी।</p>';
+  if(!pushSupported())return h+'<p class="hint">इस ब्राउज़र में नहीं चलेगी — Chrome में खोलें।</p></div>';
+  if(Notification.permission==='denied')return h+'<p class="hint" style="color:var(--red);font-weight:700">फ़ोन ने नोटिफिकेशन रोक रखे हैं।</p><button class="btn small" data-act="push-help">कैसे चालू करें</button></div>';
+  if(pushOn())return h+'<p class="hint" style="color:var(--green);font-weight:700">✓ घंटी चालू है</p>'+
+    '<div class="actbar"><button class="btn small" data-act="push-test">🔔 टेस्ट भेजो</button><button class="lnk muted" data-act="push-off">बंद करो</button></div></div>';
+  return h+'<button class="btn primary small" data-act="push-on">🔔 इस फ़ोन पर घंटी चालू करो</button></div>';
 }
 
 /* ---------- Payment form ---------- */
@@ -2685,6 +2801,10 @@ document.addEventListener('click',function(e){
 
     case 'edit-item':openItemForm(id);break;
     case 'test-milk':testMilkReminder();break;
+    case 'push-on':enablePush();break;
+    case 'push-test':testPush();break;
+    case 'push-off':disablePush();break;
+    case 'push-help':openPushHelp('denied');break;
     case 'save-item':
       var iname=$('#i-name').value.trim(),iprice=Math.max(0,num($('#i-price').value));
       if(!iname){$('#i-err').textContent='नाम लिखो।';break;}

@@ -1,15 +1,16 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 3 (30 सितंबर 2026)
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 4 (30 सितंबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
- * आपके फोन पर ntfy से नोटिफिकेशन जाता है, और बिलिंग ऐप यहीं से ऑर्डर पढ़ता है।
+ * आपके फोन पर बिलिंग ऐप में सीधी घंटी (web push) जाती है — घंटी चालू न हो तो ntfy से —
+ * और बिलिंग ऐप यहीं से ऑर्डर पढ़ता है।
  * दुकान की गुप्त चाबी (key) और ntfy का नाम पहली बार सेटअप में अपने-आप बनते हैं।
  *
  * दूध-दही रिमाइंडर: बिलिंग ऐप आने वाले ऑर्डर का हिसाब "Plan" शीट में रखता है।
  * रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर घंटी — परसों की मिठाई का दूध, कल का दही/दूध/पनीर।
  */
-var VERSION = 3;
+var VERSION = 4;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -123,31 +124,64 @@ function whenText_(w, s, mode) {
   return t + (s >= 0 && s < SLOTS.length ? ', ' + SLOTS[s] : '');
 }
 
-/* ---------- notification to the owner's phone (ntfy app) ---------- */
-function notify_(title, message, priority, click, tags) {
+/* ---------- notification to the owner's phone ----------
+   पहले बिलिंग ऐप की अपनी घंटी (web push); वो चालू न हो या न पहुँचे तो ntfy ऐप। */
+function notify_(title, message, priority, click, tags, tag) {
+  return deliver_(title, message, priority, click, tags, tag).ok;
+}
+var LAST_DELIVERY_ = null;
+function deliver_(title, message, priority, click, tags, tag) {
+  var data = { t: str_(title, 200), b: str_(message, 1200), u: click || (BILLING_URL + '#online'), g: tag || '',
+    s: (priority || 4) < 3, i: Date.now() };
+  var res = { ok: false, via: '', detail: [] };
+  try { inboxAdd_(data); } catch (e) { }
+  var subs = subs_();
+  if (subs.length) {
+    var keep = [];
+    subs.forEach(function (sub) {
+      var r = pushOne_(sub, data, priority);
+      res.detail.push(r.mode + ':' + r.code + (r.err ? ' ' + r.err : ''));
+      if (r.code >= 200 && r.code < 300) res.ok = true;
+      if (r.code !== 404 && r.code !== 410) keep.push(sub);
+    });
+    if (keep.length !== subs.length) saveSubs_(keep);
+    if (res.ok) { res.via = 'push'; LAST_DELIVERY_ = res; return res; }
+  }
+  var n = ntfy_(title, message, priority, click, tags);
+  res.detail.push('ntfy:' + n);
+  if (n === 'ok') { res.ok = true; res.via = 'ntfy'; }
+  LAST_DELIVERY_ = res;
+  return res;
+}
+function ntfy_(title, message, priority, click, tags) {
   var topic = props_().getProperty('TOPIC');
-  if (!topic) return false;
+  if (!topic) return 'off';
   try {
     var res = UrlFetchApp.fetch('https://ntfy.sh/', {
       method: 'post', contentType: 'application/json', muteHttpExceptions: true,
       payload: JSON.stringify({ topic: topic, title: title, message: message, priority: priority || 4,
         tags: tags || ['shopping_bags'], click: click || (BILLING_URL + '#online') })
     });
-    return res.getResponseCode() < 300;
-  } catch (e) { return false; }
+    var c = res.getResponseCode();
+    return c < 300 ? 'ok' : String(c);
+  } catch (e) { return String(e && e.message || e).slice(0, 80); }
 }
 
 /* ---------- web app entry points ---------- */
 function doGet(e) {
   var p = (e && e.parameter) || {};
   try {
-    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on' });
+    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', vapid: wpVapid_().pub });
+    if (p.action === 'inbox') {
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      return out_({ ok: true, items: inbox_() });
+    }
     if (p.action === 'init') return out_(init_());
     if (p.action === 'status') return out_(status_(p.code, p.p4));
     if (p.action === 'list') return out_(list_(p.key, p.days));
     if (p.action === 'testnotify') {
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
-      return out_({ ok: notify_('✅ MB Sweets — टेस्ट', 'नोटिफिकेशन ठीक से आ रहा है। नया ऑनलाइन ऑर्डर आने पर ऐसे ही बजेगा।', 4) });
+      return out_(deliver_('✅ MB Sweets — टेस्ट', 'घंटी ठीक से आ रही है। नया ऑनलाइन ऑर्डर आने पर ऐसे ही बजेगी।', 4, BILLING_URL + '#online', null, 'test'));
     }
     if (p.action === 'testplan') {
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
@@ -167,6 +201,8 @@ function doPost(e) {
     if (body.action === 'update') return out_(update_(body));
     if (body.action === 'list') return out_(list_(body.key, body.days));
     if (body.action === 'plan') return out_(plan_(body));
+    if (body.action === 'pushsub') return out_(pushSub_(body));
+    if (body.action === 'pushunsub') return out_(pushUnsub_(body));
     return out_({ ok: false, error: 'action' });
   } catch (err) {
     return out_({ ok: false, error: 'server', detail: String(err) });
@@ -233,7 +269,7 @@ function create_(o) {
   }
   var n = items.length + custom.length;
   notify_('🛍️ नया ऑर्डर ' + rupee_(o.t) + (custom.length ? ' +' : ''),
-    whenText_(when, slot, mode) + ' · ' + (mode === 'p' ? '🏪 दुकान से लेंगे' : '🚚 डिलीवरी') + ' · ' + n + ' आइटम\nदबाकर बिलिंग ऐप में देखें', 5);
+    whenText_(when, slot, mode) + ' · ' + (mode === 'p' ? '🏪 दुकान से लेंगे' : '🚚 डिलीवरी') + ' · ' + n + ' आइटम\nदबाकर बिलिंग ऐप में देखें', 5, null, null, 'order-' + code);
   return { ok: true, code: code };
 }
 
@@ -372,7 +408,7 @@ function sendReminder_(test) {
   var plan = readPlan_();
   if (!plan) {
     var ok0 = notify_(pre + '⚠️ दूध-दही का हिसाब नहीं मिला',
-      'बिलिंग ऐप एक बार इंटरनेट चालू करके खोलें — उसके बाद रोज़ दोपहर यहाँ दूध-दही का हिसाब आएगा।', 4, home, []);
+      'बिलिंग ऐप एक बार इंटरनेट चालू करके खोलें — उसके बाद रोज़ दोपहर यहाँ दूध-दही का हिसाब आएगा।', 4, home, [], 'milk-none');
     return { ok: ok0, sent: ok0 ? 1 : 0, noplan: true };
   }
   var s = (plan.days[S] && plan.days[S].s) || null, d = (plan.days[D] && plan.days[D].d) || null;
@@ -396,20 +432,411 @@ function sendReminder_(test) {
     if (sL > 0 && dL > 0) b.push('+ कल बिकने वाला दूध ' + dL + ' L → कुल दूध ' + r1_(sL + dL) + ' लीटर');
     var t1 = sL > 0 ? '🍬 मिठाई का दूध: ' + sL + ' लीटर — आज 3 बजे तक ऑर्डर करें' : '🍬 परसों की मिठाई का ऑर्डर';
     tried++;
-    if (notify_(pre + t1, clip_(b.concat(foot).join('\n')), 5, home, [])) sent++;
+    if (notify_(pre + t1, clip_(b.concat(foot).join('\n')), 5, home, [], 'milk-sweets')) sent++;
   }
   if (dLines.length) {
     var b2 = ['कल ' + hiDate_(D) + ' की डिलीवरी'];
     dLines.forEach(function (x) { b2.push('• ' + x); });
     if (sL > 0 && dL > 0) b2.push('कुल दूध (मिठाई ' + sL + ' + बिक्री ' + dL + '): ' + r1_(sL + dL) + ' लीटर');
     tried++;
-    if (notify_(pre + '🥛 कल का दही-दूध — आज 3 बजे तक ऑर्डर करें', clip_(b2.concat(foot).join('\n')), 5, home, [])) sent++;
+    if (notify_(pre + '🥛 कल का दही-दूध — आज 3 बजे तक ऑर्डर करें', clip_(b2.concat(foot).join('\n')), 5, home, [], 'milk-dairy')) sent++;
   }
   if (!tried) {
     var b3 = ['परसों ' + hiDate_(S) + ' की मिठाई के लिए दूध नहीं चाहिए, और कल ' + hiDate_(D) + ' का दही-दूध भी बुक नहीं।'];
     if (sNone.length) b3.push('परसों बिना दूध वाली: ' + sNone.join(', '));
     tried++;
-    if (notify_(pre + '✅ आज दूध-दही का कोई ऑर्डर नहीं', clip_(b3.concat(foot).join('\n')), 2, home, [])) sent++;
+    if (notify_(pre + '✅ आज दूध-दही का कोई ऑर्डर नहीं', clip_(b3.concat(foot).join('\n')), 2, home, [], 'milk-none')) sent++;
   }
-  return { ok: sent === tried, sent: sent, tried: tried };
+  return { ok: sent === tried, sent: sent, tried: tried, detail: LAST_DELIVERY_ ? LAST_DELIVERY_.detail : [] };
+}
+
+/* ---------- 🔔 बिलिंग ऐप की घंटी: फ़ोन जोड़ना, भेजना ---------- */
+var PUSH_HOSTS = /^https:\/\/(fcm\.googleapis\.com|[a-z0-9.-]*push\.services\.mozilla\.com|[a-z0-9.-]*\.notify\.windows\.com|web\.push\.apple\.com|[a-z0-9.-]*\.push\.apple\.com)\//i;
+function subs_() {
+  try { var a = JSON.parse(props_().getProperty('PUSH_SUBS') || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
+function saveSubs_(a) { props_().setProperty('PUSH_SUBS', JSON.stringify(a.slice(0, 5))); }
+function pushSub_(b) {
+  if (!keyOk_(b.key)) return { ok: false, error: 'key' };
+  var sub = b.sub || {}, keys = sub.keys || {}, ep = str_(sub.endpoint, 800);
+  if (!PUSH_HOSTS.test(ep)) return { ok: false, error: 'endpoint' };
+  var p = str_(keys.p256dh, 200), a = str_(keys.auth, 60);
+  if (!wpPoint_(wpUnB64u_(p)) || wpUnB64u_(a).length !== 16) return { ok: false, error: 'keys' };
+  var old = str_(b.old, 800);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var list = subs_().filter(function (x) { return x.e !== ep && (!old || x.e !== old); });
+    list.unshift({ e: ep, p: p, a: a, t: Date.now(), n: str_(b.name, 40) });
+    saveSubs_(list);
+    return { ok: true, count: Math.min(list.length, 5) };
+  } finally {
+    lock.releaseLock();
+  }
+}
+function pushUnsub_(b) {
+  if (!keyOk_(b.key)) return { ok: false, error: 'key' };
+  var ep = str_(b.endpoint, 800);
+  saveSubs_(subs_().filter(function (x) { return x.e !== ep; }));
+  return { ok: true };
+}
+/* एक फ़ोन पर घंटी: पहले संदेश के साथ (encrypted), न चले तो खाली घंटी — फ़ोन खुद रजिस्टर से संदेश पढ़ लेता है */
+function pushOne_(sub, data, priority) {
+  var aud = (sub.e.match(/^https:\/\/[^\/]+/) || [''])[0];
+  var pr = props_(), mode = pr.getProperty('PUSH_MODE') === 'bare' ? 'bare' : 'enc', code = 0, err = '';
+  for (var attempt = 0; attempt < 2; attempt++) {
+    err = '';
+    try {
+      var headers = { TTL: '86400', Urgency: (priority || 4) >= 4 ? 'high' : 'normal',
+        Authorization: 'vapid t=' + wpJwt_(aud) + ', k=' + wpVapid_().pub };
+      var opt = { method: 'post', headers: headers, muteHttpExceptions: true, contentType: 'application/octet-stream' };
+      if (mode === 'enc') {
+        headers['Content-Encoding'] = 'aes128gcm';
+        opt.payload = wpS8_(wpEncrypt_(wpUnB64u_(sub.p), wpUnB64u_(sub.a), pushBytes_(data)));
+      } else {
+        opt.payload = '';
+      }
+      code = UrlFetchApp.fetch(sub.e, opt).getResponseCode();
+    } catch (e) { code = 0; err = String(e && e.message || e).slice(0, 80); }
+    if (code >= 200 && code < 300) {
+      if (pr.getProperty('PUSH_MODE') !== mode) pr.setProperty('PUSH_MODE', mode);
+      return { code: code, mode: mode };
+    }
+    // यह तरीका नहीं चला (या Google ने भेजा ही नहीं) — एक बार दूसरे तरीके से
+    if (attempt === 0 && (code === 0 || code === 400 || code === 411 || code === 413 || code === 415)) { mode = mode === 'enc' ? 'bare' : 'enc'; continue; }
+    break;
+  }
+  return { code: code, mode: mode, err: err };
+}
+/* push संदेश ~3000 bytes से छोटा रहे (Chrome की सीमा 4096) */
+function pushBytes_(data) {
+  var d = { t: data.t, b: data.b, u: data.u, g: data.g, s: data.s, i: data.i };
+  var bytes = wpUtf8_(JSON.stringify(d));
+  while (bytes.length > 3000 && d.b.length > 20) {
+    d.b = d.b.slice(0, Math.floor(d.b.length * 0.8)) + '…';
+    bytes = wpUtf8_(JSON.stringify(d));
+  }
+  return bytes;
+}
+/* पिछले कुछ संदेश (खाली घंटी आने पर फ़ोन यहीं से पढ़ता है), 6 घंटे तक */
+function inboxAdd_(data) {
+  var c = CacheService.getScriptCache(), list = [];
+  try { list = JSON.parse(c.get('inbox') || '[]'); } catch (e) { list = []; }
+  list.push(data);
+  c.put('inbox', JSON.stringify(list.slice(-10)), 21600);
+}
+function inbox_() {
+  try { return JSON.parse(CacheService.getScriptCache().get('inbox') || '[]'); } catch (e) { return []; }
+}
+
+/* ================= 🔔 बिलिंग ऐप में सीधी घंटी (Web Push) =================
+   Google के अपने रास्ते (Chrome की push सेवा) से नोटिफिकेशन सीधे बिलिंग ऐप में।
+   नीचे का हिस्सा सिर्फ गणित (P-256 / ECDSA / AES-GCM) है — इसमें कुछ बदलना नहीं है।
+   Apps Script में BigInt नहीं चलता, इसलिए 256-bit संख्याएँ 16 हिस्सों (16-bit) में रखी हैं। */
+
+var WP_HEX_P = 'ffffffff00000001000000000000000000000000ffffffffffffffffffffffff';
+var WP_HEX_N = 'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551';
+var WP_HEX_B = '5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b';
+var WP_HEX_GX = '6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296';
+var WP_HEX_GY = '4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5';
+var WP_SBOX = '637c777bf26b6fc53001672bfed7ab76ca82c97dfa5947f0add4a2af9ca472c0b7fd9326363ff7cc34a5e5f171d8311504c723c31896059a071280e2eb27b27509832c1a1b6e5aa0523bd6b329e32f8453d100ed20fcb15b6acbbe394a4c58cfd0efaafb434d338545f9027f503c9fa851a3408f929d38f5bcb6da2110fff3d2cd0c13ec5f974417c4a77e3d645d197360814fdc222a908846eeb814de5e0bdbe0323a0a4906245cc2d3ac629195e479e7c8376d8dd54ea96c56f4ea657aae08ba78252e1ca6b4c6e8dd741f4bbd8b8a703eb5664803f60e613557b986c11d9ee1f8981169d98e949b1e87e9ce5528df8ca1890dbfe6426841992d0fb054bb16';
+
+/* ---- bytes ---- */
+function wpU8_(a) { var r = []; for (var i = 0; i < a.length; i++) r.push(a[i] & 255); return r; }
+function wpS8_(a) { var r = []; for (var i = 0; i < a.length; i++) { var v = a[i] & 255; r.push(v > 127 ? v - 256 : v); } return r; }
+function wpUtf8_(s) {
+  var out = [];
+  for (var i = 0; i < s.length; i++) {
+    var c = s.charCodeAt(i);
+    if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+      var d = s.charCodeAt(i + 1);
+      if (d >= 0xdc00 && d <= 0xdfff) { c = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00); i++; }
+    }
+    if (c < 0x80) out.push(c);
+    else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+    else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+  }
+  return out;
+}
+function wpB64u_(bytes) { return Utilities.base64EncodeWebSafe(wpS8_(bytes)).replace(/=+$/, ''); }
+function wpB64uStr_(s) { return wpB64u_(wpUtf8_(s)); }
+function wpUnB64u_(s) {
+  s = String(s || '').replace(/[^A-Za-z0-9_-]/g, '');
+  while (s.length % 4) s += '=';
+  return wpU8_(Utilities.base64DecodeWebSafe(s));
+}
+function wpSha256_(bytes) { return wpU8_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, wpS8_(bytes))); }
+function wpHmac_(key, data) { return wpU8_(Utilities.computeHmacSha256Signature(wpS8_(data), wpS8_(key))); }
+function wpRand32_(extra) {
+  var seed = Utilities.getUuid() + Utilities.getUuid() + Utilities.getUuid() + Date.now() + Math.random() + (extra || '');
+  return wpSha256_(wpUtf8_(seed));
+}
+
+/* ---- 256-bit numbers: 16 little-endian 16-bit limbs ---- */
+function wpFromHex_(h) { var a = []; for (var i = 0; i < 16; i++) a.push(parseInt(h.substr(60 - 4 * i, 4), 16)); return a; }
+function wpFromBytes_(b) { var a = []; for (var i = 0; i < 16; i++) a.push((b[30 - 2 * i] << 8) | b[31 - 2 * i]); return a; }
+function wpToBytes_(a) { var out = []; for (var i = 15; i >= 0; i--) out.push(a[i] >> 8, a[i] & 255); return out; }
+function wpCmp_(a, b) { for (var i = 15; i >= 0; i--) if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1; return 0; }
+function wpIsZero_(a) { for (var i = 0; i < 16; i++) if (a[i]) return false; return true; }
+function wpSub_(a, b) { var r = [], c = 0; for (var i = 0; i < 16; i++) { var s = a[i] - b[i] - c; if (s < 0) { s += 65536; c = 1; } else c = 0; r.push(s); } return { r: r, c: c }; }
+function wpAdd_(a, b) { var r = [], c = 0; for (var i = 0; i < 16; i++) { var s = a[i] + b[i] + c; if (s > 65535) { s -= 65536; c = 1; } else c = 0; r.push(s); } return { r: r, c: c }; }
+function wpBit_(k, i) { return (k[i >> 4] >> (i & 15)) & 1; }
+
+/* Montgomery arithmetic modulo N (R = 2^256) */
+function wpCtx_(hexN, hexR2, np) {
+  var M = { N: wpFromHex_(hexN), R2: wpFromHex_(hexR2), np: np };
+  var one = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  M.ONE = one;
+  M.oneM = wpMul_(M.R2, one, M);
+  M.Nm2 = wpSub_(M.N, [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).r;
+  return M;
+}
+function wpMul_(a, b, M) {
+  var N = M.N, np = M.np, t = WP_T_, i, j, s, C, m, lo;
+  for (i = 0; i < 18; i++) t[i] = 0;
+  for (i = 0; i < 16; i++) {
+    var bi = b[i];
+    C = 0;
+    for (j = 0; j < 16; j++) { s = t[j] + a[j] * bi + C; lo = s & 0xffff; t[j] = lo; C = (s - lo) * 0.0000152587890625; }
+    s = t[16] + C; lo = s & 0xffff; t[16] = lo; t[17] = (s - lo) * 0.0000152587890625;
+    m = Math.imul(t[0], np) & 0xffff;
+    s = t[0] + m * N[0]; C = (s - (s & 0xffff)) * 0.0000152587890625;
+    for (j = 1; j < 16; j++) { s = t[j] + m * N[j] + C; lo = s & 0xffff; t[j - 1] = lo; C = (s - lo) * 0.0000152587890625; }
+    s = t[16] + C; lo = s & 0xffff; t[15] = lo; C = (s - lo) * 0.0000152587890625;
+    t[16] = t[17] + C; t[17] = 0;
+  }
+  var r = [t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9], t[10], t[11], t[12], t[13], t[14], t[15]];
+  if (t[16] || wpCmp_(r, N) >= 0) r = wpSub_(r, N).r;
+  return r;
+}
+var WP_T_ = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+function wpMAdd_(a, b, M) { var x = wpAdd_(a, b); return (x.c || wpCmp_(x.r, M.N) >= 0) ? wpSub_(x.r, M.N).r : x.r; }
+function wpMSub_(a, b, M) { var x = wpSub_(a, b); return x.c ? wpAdd_(x.r, M.N).r : x.r; }
+function wpTo_(a, M) { return wpMul_(a, M.R2, M); }
+function wpFrom_(a, M) { return wpMul_(a, M.ONE, M); }
+function wpPow_(aM, e, M) { var r = M.oneM; for (var i = 255; i >= 0; i--) { r = wpMul_(r, r, M); if (wpBit_(e, i)) r = wpMul_(r, aM, M); } return r; }
+function wpInv_(aM, M) { return wpPow_(aM, M.Nm2, M); }
+function wpReduce_(a, M) { return wpCmp_(a, M.N) >= 0 ? wpSub_(a, M.N).r : a; }
+
+var WP_ = null;
+function wp_() {
+  if (WP_) return WP_;
+  var P = wpCtx_(WP_HEX_P, '00000004fffffffdfffffffffffffffefffffffbffffffff0000000000000003', 1);
+  var N = wpCtx_(WP_HEX_N, '66e12d94f3d956202845b2392b6bec594699799c49bd6fa683244c95be79eea2', 48207);
+  WP_ = { P: P, N: N, B: wpTo_(wpFromHex_(WP_HEX_B), P),
+    G: { X: wpTo_(wpFromHex_(WP_HEX_GX), P), Y: wpTo_(wpFromHex_(WP_HEX_GY), P), Z: P.oneM } };
+  return WP_;
+}
+
+/* ---- P-256 points (Jacobian, Montgomery form), a = -3 ---- */
+function wpDbl_(p) {
+  var F = wp_().P;
+  if (wpIsZero_(p.Z)) return p;
+  var delta = wpMul_(p.Z, p.Z, F), gamma = wpMul_(p.Y, p.Y, F), beta = wpMul_(p.X, gamma, F);
+  var t = wpMul_(wpMSub_(p.X, delta, F), wpMAdd_(p.X, delta, F), F);
+  var alpha = wpMAdd_(wpMAdd_(t, t, F), t, F);
+  var beta4 = wpMAdd_(beta, beta, F); beta4 = wpMAdd_(beta4, beta4, F);
+  var X3 = wpMSub_(wpMul_(alpha, alpha, F), wpMAdd_(beta4, beta4, F), F);
+  var yz = wpMAdd_(p.Y, p.Z, F);
+  var Z3 = wpMSub_(wpMSub_(wpMul_(yz, yz, F), gamma, F), delta, F);
+  var g2 = wpMul_(gamma, gamma, F); var g8 = wpMAdd_(g2, g2, F); g8 = wpMAdd_(g8, g8, F); g8 = wpMAdd_(g8, g8, F);
+  var Y3 = wpMSub_(wpMul_(alpha, wpMSub_(beta4, X3, F), F), g8, F);
+  return { X: X3, Y: Y3, Z: Z3 };
+}
+function wpAddPt_(p, q) {
+  var F = wp_().P;
+  if (wpIsZero_(p.Z)) return q;
+  if (wpIsZero_(q.Z)) return p;
+  var z1z1 = wpMul_(p.Z, p.Z, F), z2z2 = wpMul_(q.Z, q.Z, F);
+  var u1 = wpMul_(p.X, z2z2, F), u2 = wpMul_(q.X, z1z1, F);
+  var s1 = wpMul_(wpMul_(p.Y, q.Z, F), z2z2, F), s2 = wpMul_(wpMul_(q.Y, p.Z, F), z1z1, F);
+  var h = wpMSub_(u2, u1, F), rr = wpMSub_(s2, s1, F);
+  if (wpIsZero_(h)) {
+    if (wpIsZero_(rr)) return wpDbl_(p);
+    return { X: F.oneM, Y: F.oneM, Z: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] };
+  }
+  var h2 = wpMAdd_(h, h, F), i = wpMul_(h2, h2, F), j = wpMul_(h, i, F);
+  var r = wpMAdd_(rr, rr, F), v = wpMul_(u1, i, F);
+  var X3 = wpMSub_(wpMSub_(wpMul_(r, r, F), j, F), wpMAdd_(v, v, F), F);
+  var s1j = wpMul_(s1, j, F);
+  var Y3 = wpMSub_(wpMul_(r, wpMSub_(v, X3, F), F), wpMAdd_(s1j, s1j, F), F);
+  var zz = wpMAdd_(p.Z, q.Z, F);
+  var Z3 = wpMul_(wpMSub_(wpMSub_(wpMul_(zz, zz, F), z1z1, F), z2z2, F), h, F);
+  return { X: X3, Y: Y3, Z: Z3 };
+}
+function wpMulPt_(k, pt) {
+  /* 4-bit window: 64 doublings + at most 64 additions */
+  var tbl = pt === wp_().G ? wpGTable_() : wpTable_(pt);
+  var R = { X: wp_().P.oneM, Y: wp_().P.oneM, Z: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] };
+  for (var w = 63; w >= 0; w--) {
+    if (w < 63) { R = wpDbl_(R); R = wpDbl_(R); R = wpDbl_(R); R = wpDbl_(R); }
+    var nib = (k[w >> 2] >> ((w & 3) * 4)) & 15;
+    if (nib) R = wpAddPt_(R, tbl[nib]);
+  }
+  return R;
+}
+function wpTable_(pt) {
+  var t = [null, pt];
+  for (var i = 2; i < 16; i++) t.push(i % 2 ? wpAddPt_(t[i - 1], pt) : wpDbl_(t[i / 2]));
+  return t;
+}
+function wpGTable_() { var W = wp_(); if (!W.GT) W.GT = wpTable_(W.G); return W.GT; }
+function wpAffine_(p) {
+  var F = wp_().P;
+  if (wpIsZero_(p.Z)) return null;
+  var zi = wpInv_(p.Z, F), zi2 = wpMul_(zi, zi, F);
+  return { x: wpFrom_(wpMul_(p.X, zi2, F), F), y: wpFrom_(wpMul_(p.Y, wpMul_(zi2, zi, F), F), F) };
+}
+function wpOnCurve_(x, y) {
+  var F = wp_().P;
+  if (wpCmp_(x, F.N) >= 0 || wpCmp_(y, F.N) >= 0) return false;
+  var X = wpTo_(x, F), Y = wpTo_(y, F);
+  var rhs = wpMul_(wpMul_(X, X, F), X, F);
+  rhs = wpMSub_(rhs, wpMAdd_(wpMAdd_(X, X, F), X, F), F);
+  rhs = wpMAdd_(rhs, wp_().B, F);
+  return wpCmp_(wpMul_(Y, Y, F), rhs) === 0;
+}
+/* public key bytes (65: 04||x||y) → point, or null if invalid */
+function wpPoint_(bytes) {
+  if (!bytes || bytes.length !== 65 || bytes[0] !== 4) return null;
+  var x = wpFromBytes_(bytes.slice(1, 33)), y = wpFromBytes_(bytes.slice(33, 65));
+  if (!wpOnCurve_(x, y)) return null;
+  var F = wp_().P;
+  return { X: wpTo_(x, F), Y: wpTo_(y, F), Z: F.oneM };
+}
+function wpNewKey_(extra) {
+  var N = wp_().N, d;
+  do { d = wpReduce_(wpFromBytes_(wpRand32_(extra)), N); } while (wpIsZero_(d));
+  var q = wpAffine_(wpMulPt_(d, wp_().G));
+  return { d: d, pub: [4].concat(wpToBytes_(q.x), wpToBytes_(q.y)) };
+}
+/* ECDSA P-256 / SHA-256 → 64 bytes r||s */
+function wpSign_(hash, d) {
+  var N = wp_().N, z = wpReduce_(wpFromBytes_(hash), N), dBytes = wpToBytes_(d);
+  for (var tries = 0; tries < 10; tries++) {
+    var k = wpReduce_(wpFromBytes_(wpSha256_(dBytes.concat(hash, wpRand32_('k' + tries)))), N);
+    if (wpIsZero_(k)) continue;
+    var R = wpAffine_(wpMulPt_(k, wp_().G));
+    var r = wpReduce_(R.x, N);
+    if (wpIsZero_(r)) continue;
+    var sum = wpMAdd_(wpTo_(z, N), wpMul_(wpTo_(r, N), wpTo_(d, N), N), N);
+    var s = wpFrom_(wpMul_(wpInv_(wpTo_(k, N), N), sum, N), N);
+    if (wpIsZero_(s)) continue;
+    return wpToBytes_(r).concat(wpToBytes_(s));
+  }
+  throw new Error('sign failed');
+}
+
+/* ---- AES-128 + GCM ---- */
+var WP_AES_ = null;
+function wpAesTables_() {
+  if (WP_AES_) return WP_AES_;
+  var sb = [];
+  for (var i = 0; i < 256; i++) sb.push(parseInt(WP_SBOX.substr(i * 2, 2), 16));
+  WP_AES_ = { sbox: sb };
+  return WP_AES_;
+}
+function wpXt_(a) { return ((a << 1) ^ (a & 0x80 ? 0x1b : 0)) & 0xff; }
+function wpAesKey_(key) {
+  var sb = wpAesTables_().sbox, w = key.slice(0, 16), rcon = 1;
+  for (var i = 16; i < 176; i += 4) {
+    var t = w.slice(i - 4, i);
+    if (i % 16 === 0) { t = [sb[t[1]] ^ rcon, sb[t[2]], sb[t[3]], sb[t[0]]]; rcon = wpXt_(rcon); }
+    for (var j = 0; j < 4; j++) w.push(w[i - 16 + j] ^ t[j]);
+  }
+  return w;
+}
+function wpAesBlock_(w, inp) {
+  var sb = wpAesTables_().sbox, s = [], r, c, i;
+  for (i = 0; i < 16; i++) s.push(inp[i] ^ w[i]);
+  for (r = 1; r <= 10; r++) {
+    for (i = 0; i < 16; i++) s[i] = sb[s[i]];
+    s = [s[0], s[5], s[10], s[15], s[4], s[9], s[14], s[3], s[8], s[13], s[2], s[7], s[12], s[1], s[6], s[11]];
+    if (r < 10) {
+      for (c = 0; c < 4; c++) {
+        var a0 = s[4 * c], a1 = s[4 * c + 1], a2 = s[4 * c + 2], a3 = s[4 * c + 3], x = a0 ^ a1 ^ a2 ^ a3;
+        s[4 * c] = a0 ^ x ^ wpXt_(a0 ^ a1);
+        s[4 * c + 1] = a1 ^ x ^ wpXt_(a1 ^ a2);
+        s[4 * c + 2] = a2 ^ x ^ wpXt_(a2 ^ a3);
+        s[4 * c + 3] = a3 ^ x ^ wpXt_(a3 ^ a0);
+      }
+    }
+    for (i = 0; i < 16; i++) s[i] ^= w[16 * r + i];
+  }
+  return s;
+}
+function wpGmul_(x, y) {
+  var z = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], v = y.slice(), i, j;
+  for (i = 0; i < 128; i++) {
+    if ((x[i >> 3] >> (7 - (i & 7))) & 1) for (j = 0; j < 16; j++) z[j] ^= v[j];
+    var lsb = v[15] & 1;
+    for (j = 15; j > 0; j--) v[j] = (v[j] >> 1) | ((v[j - 1] & 1) << 7);
+    v[0] >>= 1;
+    if (lsb) v[0] ^= 0xe1;
+  }
+  return z;
+}
+/* AES-128-GCM encrypt (no AAD) → ciphertext || 16-byte tag */
+function wpGcm_(key, iv, pt) {
+  var w = wpAesKey_(key), zero = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  var H = wpAesBlock_(w, zero), j0 = iv.concat([0, 0, 0, 1]), ctr = j0.slice(), out = [], i, j;
+  for (i = 0; i < pt.length; i += 16) {
+    for (j = 15; j >= 12; j--) { ctr[j] = (ctr[j] + 1) & 255; if (ctr[j]) break; }
+    var ks = wpAesBlock_(w, ctr);
+    for (j = 0; j < 16 && i + j < pt.length; j++) out.push(pt[i + j] ^ ks[j]);
+  }
+  var g = zero.slice();
+  for (i = 0; i < out.length; i += 16) {
+    var blk = out.slice(i, i + 16); while (blk.length < 16) blk.push(0);
+    for (j = 0; j < 16; j++) g[j] ^= blk[j];
+    g = wpGmul_(g, H);
+  }
+  var bits = out.length * 8, len = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    Math.floor(bits / 16777216) & 255, (bits >> 16) & 255, (bits >> 8) & 255, bits & 255];
+  for (j = 0; j < 16; j++) g[j] ^= len[j];
+  g = wpGmul_(g, H);
+  var ek = wpAesBlock_(w, j0);
+  for (j = 0; j < 16; j++) out.push(g[j] ^ ek[j]);
+  return out;
+}
+
+/* ---- RFC 8291 (aes128gcm) — push message encryption ---- */
+function wpEncrypt_(uaPub, auth, plaintext) {
+  var ua = wpPoint_(uaPub);
+  if (!ua) throw new Error('bad p256dh');
+  var eph = wpNewKey_('e');
+  var shared = wpToBytes_(wpAffine_(wpMulPt_(eph.d, ua)).x);
+  var prkKey = wpHmac_(auth, shared);
+  var ikm = wpHmac_(prkKey, wpUtf8_('WebPush: info').concat([0], uaPub, eph.pub, [1]));
+  var salt = wpRand32_('s').slice(0, 16);
+  var prk = wpHmac_(salt, ikm);
+  var cek = wpHmac_(prk, wpUtf8_('Content-Encoding: aes128gcm').concat([0, 1])).slice(0, 16);
+  var nonce = wpHmac_(prk, wpUtf8_('Content-Encoding: nonce').concat([0, 1])).slice(0, 12);
+  var ct = wpGcm_(cek, nonce, plaintext.concat([2]));
+  return salt.concat([0, 0, 16, 0], [65], eph.pub, ct);   // rs = 4096
+}
+
+/* ---- VAPID keys + JWT ---- */
+function wpVapid_() {
+  var pr = props_(), d = pr.getProperty('VAPID_D'), pub = pr.getProperty('VAPID_PUB');
+  if (!d || !pub) {
+    var k = wpNewKey_('vapid');
+    d = wpToBytes_(k.d).map(function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+    pub = wpB64u_(k.pub);
+    pr.setProperty('VAPID_D', d);
+    pr.setProperty('VAPID_PUB', pub);
+  }
+  return { d: wpFromHex_(d), pub: pub };
+}
+function wpJwt_(aud) {
+  var c = CacheService.getScriptCache(), ck = 'jwt_' + aud.replace(/[^a-z0-9]/gi, '').slice(0, 60);
+  var hit = c.get(ck);
+  if (hit) return hit;
+  var v = wpVapid_();
+  var input = wpB64uStr_(JSON.stringify({ typ: 'JWT', alg: 'ES256' })) + '.' +
+    wpB64uStr_(JSON.stringify({ aud: aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: 'https://mbsweets.github.io/mb-sweets/' }));
+  var jwt = input + '.' + wpB64u_(wpSign_(wpSha256_(wpUtf8_(input)), v.d));
+  c.put(ck, jwt, 6 * 3600);
+  return jwt;
 }
