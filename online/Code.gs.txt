@@ -1,5 +1,5 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 3 (30 सितंबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
@@ -9,7 +9,7 @@
  * दूध-दही रिमाइंडर: बिलिंग ऐप आने वाले ऑर्डर का हिसाब "Plan" शीट में रखता है।
  * रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर घंटी — परसों की मिठाई का दूध, कल का दही/दूध/पनीर।
  */
-var VERSION = 2;
+var VERSION = 3;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -373,6 +373,7 @@ function sendReminder_(test) {
   }
   var s = (plan.days[S] && plan.days[S].s) || null, d = (plan.days[D] && plan.days[D].d) || null;
   var sL = s ? r1_(s.l) : 0, dL = d ? r1_(d.l) : 0;
+  // unk = सिर्फ गिनती वाली मिठाई (जैसे रसमलाई) — दूध में नहीं जुड़ती, पर नोटिफिकेशन में दिखती है
   var sLines = s ? arr_(s.lines) : [], sNone = s ? arr_(s.none) : [], sUnk = s ? arr_(s.unk) : [], dLines = d ? arr_(d.lines) : [];
 
   var foot = [];
@@ -386,10 +387,10 @@ function sendReminder_(test) {
   if (sL > 0 || sUnk.length) {
     var b = ['परसों ' + hiDate_(S) + ' की डिलीवरी'];
     sLines.forEach(function (x) { b.push('• ' + x); });
+    sUnk.forEach(function (x) { b.push('• ' + x + ' (सिर्फ गिनती)'); });
     if (sNone.length) b.push('बिना दूध: ' + sNone.join(', '));
-    if (sUnk.length) b.push('❓ दूध हिसाब में नहीं: ' + sUnk.join(', '));
     if (sL > 0 && dL > 0) b.push('+ कल बिकने वाला दूध ' + dL + ' L → कुल दूध ' + r1_(sL + dL) + ' लीटर');
-    var t1 = sL > 0 ? '🍬 मिठाई का दूध: ' + sL + ' लीटर — आज 3 बजे तक ऑर्डर करें' : '🍬 परसों की मिठाई — दूध का हिसाब देखें';
+    var t1 = sL > 0 ? '🍬 मिठाई का दूध: ' + sL + ' लीटर — आज 3 बजे तक ऑर्डर करें' : '🍬 परसों की मिठाई का ऑर्डर';
     tried++;
     if (notify_(pre + t1, clip_(b.concat(foot).join('\n')), 5, home, [])) sent++;
   }

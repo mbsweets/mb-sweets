@@ -1,4 +1,4 @@
-var CACHE_NAME = 'mbmb-billing-v8';
+var CACHE_NAME = 'mbmb-billing-v9';
 var CORE_ASSETS = [
   './',
   './manifest.json',
@@ -46,6 +46,8 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
   // only this app's own files; never cache other sites (online order register, WhatsApp, maps…)
   if (new URL(req.url).origin !== self.location.origin) return;
+  // register code for the setup page: always straight from the network, never a saved copy
+  if (/\/Code\.gs\.txt(\?|$)/.test(req.url)) return;
 
   // App page: network first so updates show immediately; fall back to the saved copy when offline.
   if (isPageRequest(req)) {

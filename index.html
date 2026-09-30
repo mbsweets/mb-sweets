@@ -100,7 +100,7 @@ h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
 .mkrow{padding:3px 0 3px 10px;border-left:3px solid var(--milk-line);margin:1px 0;font-size:.92rem}
 .mkrow.mksum{font-weight:700;color:var(--milk);border-left-color:var(--milk)}
 .mknote{color:var(--muted);font-size:.8rem;margin-top:6px}
-.mknote.mkwarn{color:var(--red)}
+.mktag{font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 6px;white-space:nowrap}
 .mktotal{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--milk);font-size:1.02rem}
 .mktotal span{font-weight:400;color:var(--muted);font-size:.8rem}
 
@@ -656,7 +656,7 @@ function r1(n){return Math.round(num(n)*10)/10;}
 function hasOwn(o,k){return Object.prototype.hasOwnProperty.call(o,k);}
 function itemByName(name){for(var i=0;i<state.items.length;i++)if(state.items[i].name===name)return state.items[i];return null;}
 function catalogRowByName(name){if(!CATALOG)return null;for(var i=0;i<CATALOG.items.length;i++)if(CATALOG.items[i][1]===name)return CATALOG.items[i];return null;}
-/* लीटर प्रति यूनिट; null = पता नहीं (हिसाब में नहीं) */
+/* लीटर प्रति यूनिट; null = सिर्फ गिनती (दूध हिसाब में नहीं जुड़ता) */
 function itemMilk(si){
   if(!si)return null;
   if(hasOwn(si,'milk'))return (si.milk===null||si.milk===undefined||si.milk==='')?null:num(si.milk);
@@ -692,7 +692,7 @@ function dayLines(live,dateKey){
   });
   return keys.map(function(k){return map[k];}).filter(function(g){return g.qty>0;});
 }
-/* मिठाई का दूध — {l: कुल लीटर, lines, none: बिना दूध वाली, unk: जिनका दूध पता नहीं} */
+/* मिठाई का दूध — {l: कुल लीटर, lines, none: बिना दूध वाली, unk: सिर्फ गिनती (जैसे रसमलाई — दूध नहीं जोड़ते)} */
 function sweetsMilk(live,dateKey){
   var res={l:0,lines:[],none:[],unk:[]},rows=[];
   dayLines(live,dateKey).forEach(function(g){
@@ -758,9 +758,9 @@ function milkCard(live){
   var h='<div class="sumcard milkcard"><div class="sumhead">🥛 आज का दूध-दही ऑर्डर (3 बजे तक)</div>';
   if(s){
     h+='<div class="mkhead">🍬 मिठाई — परसों '+esc(hiDate(sK))+' की डिलीवरी'+(s.l?'<span class="mkl">'+s.l+' लीटर दूध</span>':'')+'</div>'+
-      s.lines.map(row).join('');
+      s.lines.map(row).join('')+
+      s.unk.map(function(t){return '<div class="mkrow">'+esc(t)+' <span class="mktag">सिर्फ गिनती</span></div>';}).join('');
     if(s.none.length)h+='<div class="mknote">बिना दूध: '+esc(s.none.join(', '))+'</div>';
-    if(s.unk.length)h+='<div class="mknote mkwarn">❓ दूध हिसाब में नहीं: '+esc(s.unk.join(', '))+' — आइटम लिस्ट में इनका दूध लिख दो</div>';
   }
   if(d){
     h+='<div class="mkhead">🥛 दही-दूध — कल '+esc(hiDate(dK))+' की डिलीवरी</div>'+d.lines.map(row).join('');
@@ -1045,7 +1045,7 @@ function orderCardFull(o){
 }
 
 /* ---------- ITEMS TAB ---------- */
-function milkBadge(i){var m=itemMilk(i);return m===null?'🥛 दूध ?':(m>0?'🥛 '+m+' L/'+esc(i.unit):'दूध नहीं');}
+function milkBadge(i){var m=itemMilk(i);return m===null?'सिर्फ गिनती':(m>0?'🥛 '+m+' L/'+esc(i.unit):'दूध नहीं');}
 function renderItems(){
   var q=ui.itemsSearch.trim().toLowerCase();
   var html='<div class="sechead"><h2>आइटम लिस्ट</h2></div>'+
@@ -1846,7 +1846,7 @@ function openItemForm(id){
     '<label class="fl">यूनिट<input id="i-unit" list="i-units-dl" type="text" value="'+esc(i?i.unit:'किलो')+'"></label>'+
     '<label class="fl">Rate \u20b9<input id="i-price" type="number" inputmode="decimal" step="any" min="0" value="'+(i?i.price:'')+'"></label>'+
     '<div id="i-milkwrap"'+((i?i.cat:CATS[0][0])==='mithai'?'':' class="hide"')+'><label class="fl">🥛 दूध कितना लगता है — लीटर, 1 यूनिट (किलो/पीस) में<input id="i-milk" type="number" inputmode="decimal" step="any" min="0" placeholder="जैसे 2" value="'+(i&&itemMilk(i)!==null?itemMilk(i):'')+'"></label>'+
-    '<p class="hint" style="margin-top:-6px">दूध-दही ऑर्डर के हिसाब के लिए। 0 = दूध नहीं लगता · खाली = हिसाब में नहीं</p></div>'+
+    '<p class="hint" style="margin-top:-6px">दूध-दही ऑर्डर के हिसाब के लिए। 0 = दूध नहीं लगता · खाली = सिर्फ गिनती दिखे (जैसे रसमलाई), दूध न जोड़ें</p></div>'+
     '<div class="err" id="i-err"></div>'+
     '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-item" data-id="'+(i?i.id:'')+'">Save करो</button></div>'+
     (i?'<div style="margin-top:14px;text-align:center"><button class="lnk danger" data-act="del-item" data-id="'+i.id+'">यह आइटम हटाओ</button></div>':'')+
