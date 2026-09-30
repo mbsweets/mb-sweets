@@ -64,6 +64,7 @@ a{color:inherit}
 .facts b{display:block;font-size:.9rem;color:var(--ink)}
 .facts span{color:var(--muted)}
 .instbar{display:flex;align-items:center;gap:10px;margin-top:8px;background:var(--goldsoft);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.instbar.pulse{animation:flash 2.4s ease-out 2}
 .instbar img{width:36px;height:36px;border-radius:8px;flex:0 0 auto}
 .instbar span{flex:1;font-size:.85rem;line-height:1.3}
 .instbar .btn{min-height:40px;padding:0 12px;font-size:.9rem;white-space:nowrap}
@@ -246,7 +247,7 @@ hi:{
  wk:['रविवार','सोमवार','मंगलवार','बुधवार','गुरुवार','शुक्रवार','शनिवार'],mo:['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'],d_today:'आज',d_tmr:'कल',
  m_head:'🛍️ *नया ऑर्डर — MB Sweets*',m_items:'*सामान:*',m_total:'कुल',m_plus:'+ केक/पैकेट सामान का दाम',
  inst_txt:'MB Sweets ऐप फोन में रखें — अगली बार सीधे आइकन से ऑर्डर करें',inst_btn:'📲 ऐप इंस्टॉल करें',inst_done:'ऐप इंस्टॉल हो गया ✓ होम स्क्रीन पर "MB Sweets" आइकन देखें',
- inst_h:'ऐप इंस्टॉल करें',
+ inst_h:'ऐप इंस्टॉल करें',inst_have:'MB Sweets ऐप इस फ़ोन में पहले से है — होम स्क्रीन पर MB Sweets आइकन से खोलें।',
  inst_ios:['नीचे (या ऊपर) शेयर बटन ⬆️ दबाएं।','"Add to Home Screen" / "होम स्क्रीन में जोड़ें" चुनें।','"Add" दबाएं — होम स्क्रीन पर MB Sweets का आइकन आ जाएगा।'],
  inst_and:['अगर Chrome के ⋮ मेन्यू में "ऐप खोलें" / "Open app" लिखा है, तो ऐप पहले से फोन में है — होम स्क्रीन पर MB Sweets आइकन से खोलें।','अगर यह पेज WhatsApp या Instagram के अंदर खुला है, तो ऊपर ⋮ दबाकर "Chrome में खोलें" चुनें।','Chrome में ऊपर ⋮ दबाएं।','"ऐप इंस्टॉल करें" या "होम स्क्रीन में जोड़ें" चुनें, फिर "इंस्टॉल" दबाएं।'],
  inst_note:'इंस्टॉल करने के बाद ऐप में हमेशा नए दाम और मेन्यू दिखेंगे — कुछ अपडेट नहीं करना पड़ता।',
@@ -371,7 +372,7 @@ en:{
  wk:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mo:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],d_today:'Today',d_tmr:'Tomorrow',
  m_head:'🛍️ *New order — MB Sweets*',m_items:'*Items:*',m_total:'Total',m_plus:'+ price of cake/packaged items',
  inst_txt:'Keep the MB Sweets app on your phone — order straight from the icon next time',inst_btn:'📲 Install app',inst_done:'App installed ✓ Look for the "MB Sweets" icon on your home screen',
- inst_h:'Install the app',
+ inst_h:'Install the app',inst_have:'The MB Sweets app is already on this phone — open it from the MB Sweets icon on your home screen.',
  inst_ios:['Tap the Share button ⬆️ (bottom or top).','Choose "Add to Home Screen".','Tap "Add" — the MB Sweets icon appears on your home screen.'],
  inst_and:['If Chrome\'s ⋮ menu shows "Open app", the app is already on your phone — open it from the MB Sweets icon.','If this page opened inside WhatsApp or Instagram, tap ⋮ and choose "Open in Chrome".','In Chrome, tap ⋮ at the top.','Choose "Install app" or "Add to Home screen", then tap Install.'],
  inst_note:'After installing, the app always shows the latest prices and menu — nothing to update.',
@@ -725,7 +726,8 @@ function doInstall(){
 }
 function renderInstall(){
   var steps=isIOS()?t('inst_ios'):t('inst_and');
-  viewShell(t('inst_h'),'<div class="blk"><div class="cakehead"><img src="../icon-192.png" alt="" style="width:64px;height:64px"><div><h3 style="margin:0">MB Sweets</h3><p class="hint">'+esc(S.name)+'</p></div></div></div>'+
+  var have=(appInstalled||isStandalone())?'<div class="blk" style="border-color:var(--green);color:var(--green);font-weight:700">✓ '+esc(t('inst_have'))+'</div>':'';
+  viewShell(t('inst_h'),have+'<div class="blk"><div class="cakehead"><img src="../icon-192.png" alt="" style="width:64px;height:64px"><div><h3 style="margin:0">MB Sweets</h3><p class="hint">'+esc(S.name)+'</p></div></div></div>'+
     '<div class="blk"><ol class="steps">'+steps.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ol><p class="hint">'+t('inst_note')+'</p></div>'+
     '<button class="btn primary block" data-act="back">'+t('back')+'</button>');
 }
@@ -737,6 +739,17 @@ function checkInstalled(){
       if(apps&&apps.length){appInstalled=true;var b=$('#instbar');if(b)b.remove();}
     },function(){});
   }catch(e){}
+}
+/* website link "?app=1": offer the install button, or say it's already on the phone */
+function appFromLink(){
+  if(!/[?&]app=1\b/.test(location.search))return;
+  try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}
+  setTimeout(function(){
+    if(isStandalone()||appInstalled){toast(t('inst_have'));return;}
+    var bar=$('#instbar');
+    if(installEvt&&bar){window.scrollTo(0,0);bar.classList.remove('pulse');void bar.offsetWidth;bar.classList.add('pulse');return;}
+    go('install');
+  },1500);
 }
 window.addEventListener('appinstalled',function(){installEvt=null;appInstalled=true;var b=$('#instbar');if(b)b.remove();toast(t('inst_done'));});
 
@@ -1501,6 +1514,7 @@ load();
 renderMenu();
 route();
 checkInstalled();
+appFromLink();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
 })();
 </script>
