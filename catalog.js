@@ -37,7 +37,7 @@ window.MB_CATALOG = {
   },
 
   /* ऑनलाइन ऑर्डर रजिस्टर (Google Sheet) का Web app URL — खाली हो तो ऑर्डर WhatsApp से जाते हैं */
-  orderApi: '',
+  orderApi: 'https://script.google.com/macros/s/AKfycbymPk6T9oOO9UtNOs1W4v_qmg4vZEyuS5e1bxtMOlyPodrUHgmbKoBeqJ6RIELvJfdb2Q/exec',
 
   pause: false,
   noticeHi: '',
