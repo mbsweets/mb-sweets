@@ -1164,7 +1164,67 @@ function renderRoute(){
   else if(ui.view==='party')renderParty();
   renderNav();
   renderBanner();
+  navTrack();
 }
+
+/* ---------- 📱 फ़ोन का Back बटन ----------
+   ऐप एक ही पेज है, इसलिए Android का Back सीधे ऐप बंद कर देता था।
+   अब: Back = खुली शीट बंद → पिछली स्क्रीन → होम → "एक बार और दबाओ" → ऐप बंद।
+   ब्राउज़र history में सिर्फ एक "जाल" एंट्री रहती है; असली पिछली स्क्रीनें NAV.stack में। */
+var NAV={stack:[],cur:null,restoring:false,trap:false,exitArm:0,exitTimer:null,y:0};
+var NAV_TABS=['online','orders','khata','items','backup'];
+function navKey(x){return x.v+'|'+(x.c||'')+'|'+(x.p||'');}
+function navTrack(){
+  var now={v:ui.view,c:ui.customerId||null,p:ui.partyId||null,cf:ui.cameFrom,y:0};
+  if(!NAV.cur){NAV.cur=now;return;}
+  if(navKey(now)===navKey(NAV.cur)){NAV.cur.cf=now.cf;return;}
+  if(!NAV.restoring){
+    NAV.cur.y=NAV.y;
+    if(now.v==='home'){
+      NAV.stack=[];                                       // होम = सबसे नीचे; यहाँ से Back = बाहर निकलना
+    }else if(NAV_TABS.indexOf(now.v)>-1){
+      var home=(NAV.cur.v==='home')?NAV.cur:(NAV.stack[0]&&NAV.stack[0].v==='home'?NAV.stack[0]:{v:'home'});
+      NAV.stack=[home];                                   // नीचे वाले टैब से Back = होम
+    }else{
+      var top=NAV.stack[NAV.stack.length-1];
+      if(top&&navKey(top)===navKey(now))NAV.stack.pop();  // ऐप का "← वापस" बटन = पीछे जाना
+      else{NAV.stack.push(NAV.cur);if(NAV.stack.length>40)NAV.stack.shift();}
+    }
+  }
+  NAV.cur=now;
+}
+function navGo(x){
+  NAV.restoring=true;
+  ui.view=x.v;ui.customerId=x.c||null;ui.partyId=x.p||null;if(x.cf)ui.cameFrom=x.cf;
+  try{renderRoute();}finally{NAV.restoring=false;}
+  window.scrollTo(0,x.y||0);
+}
+function navBack(){
+  if($('#ov')){softClose();return true;}
+  var prev=NAV.stack.pop();
+  if(prev){navGo(prev);return true;}
+  if(ui.view!=='home'){navGo({v:'home'});return true;}
+  return false;
+}
+function navArmTrap(){
+  if(NAV.trap)return;
+  try{history.pushState({mbTrap:1},'');NAV.trap=true;}catch(e){}
+}
+window.addEventListener('scroll',function(){NAV.y=window.scrollY||0;},{passive:true});
+['pointerdown','keydown','touchstart'].forEach(function(ev){
+  window.addEventListener(ev,function(){navArmTrap();},{capture:true,passive:true});
+});
+window.addEventListener('popstate',function(e){
+  if(location.hash)return;                       // #online / #o= लिंक — उन्हें hashchange संभालता है
+  if(e.state&&e.state.mbTrap){NAV.trap=true;return;}  // आगे (forward) आए — कुछ नहीं करना
+  NAV.trap=false;
+  clearTimeout(NAV.exitTimer);
+  if(navBack()){navArmTrap();return;}
+  // होम पर, पीछे कुछ नहीं — एक बार पूछो; 2.5 सेकंड में दोबारा Back = ऐप बंद
+  NAV.exitArm=Date.now();
+  toast('ऐप बंद करना है तो एक बार और Back दबाओ');
+  NAV.exitTimer=setTimeout(navArmTrap,2500);
+});
 
 /* ---------- SHEETS: generic ---------- */
 function openSheet(html){
