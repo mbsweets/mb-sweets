@@ -125,7 +125,8 @@ h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
 
 .addrow{display:flex;justify-content:flex-end;margin:10px 0 6px}
 .lnk{background:none;border:0;color:var(--brandband);font-weight:700;min-height:40px;padding:0 4px;border-radius:8px}
-:root[data-theme="dark"] .lnk, @media (prefers-color-scheme:dark){.lnk{color:#E9A9B0}}
+:root[data-theme="dark"] .lnk:not(.danger):not(.muted),:root[data-theme="dark"] .cphead .ph a{color:#E9A9B0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lnk:not(.danger):not(.muted),:root:not([data-theme="light"]) .cphead .ph a{color:#E9A9B0}}
 .lnk.danger{color:var(--red)}
 .lnk.muted{color:var(--muted);font-weight:500}
 
@@ -271,6 +272,39 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .homeinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:-4px 0 10px}
 .homeinfo .coll{font-size:.9rem;color:var(--muted)}
 .homeinfo .coll b{color:var(--green)}
+.homeinfo .coll b.udt{color:var(--red)}
+.quickrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.quickrow .btn{width:100%}
+.banner.remind{background:var(--brandband);color:var(--on-brand)}
+.st-udhar{color:var(--gold)}
+.order.udhar .odate{font-size:.85rem;color:var(--muted);font-weight:600}
+.order.udhar .udnote{font-weight:700;margin-top:2px;overflow-wrap:anywhere}
+.ledger{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:2px 12px 4px;margin:0 0 6px}
+.lgr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.lgr:last-of-type{border-bottom:0}
+.lgr .lt{min-width:0;overflow-wrap:anywhere;font-weight:600}
+.lgr .ld{display:block;font-size:.78rem;color:var(--muted);font-weight:400}
+.lgr .lv{text-align:right;flex:0 0 auto}
+.lgr .lv b{display:block;font-family:'Baloo 2','Mukta',system-ui,sans-serif}
+.lgr .lv b.dr{color:var(--red)}
+.lgr .lv b.cr{color:var(--green)}
+.lgr .lb{display:block;font-size:.76rem;color:var(--muted)}
+.bigamt input{font-size:1.5rem;font-weight:700;padding:8px 12px}
+.notechips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.notechips button{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:0 12px;min-height:36px;font-size:.9rem;font-family:inherit}
+.notechips button.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
+.udsearch{display:block;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:16px}
+.udsum{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--line);border-radius:12px;margin:4px 0 10px}
+.udsum>div{padding:12px 8px;text-align:center;min-width:0}
+.udsum>div+div{border-left:1px solid var(--line)}
+.udsum span{display:block;font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
+.udsum b{display:block;font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:1.25rem}
+.udsum .due b{color:var(--red)}
+.udsum .clr b{color:var(--green)}
+.duemain .rm{color:var(--muted);font-size:.78rem;margin-top:2px}
+.duemain .rm.need{color:var(--gold);font-weight:700}
+.dueacts{flex-wrap:wrap;gap:8px}
+.dueacts .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
 label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 
 .customitem{border:1px dashed var(--line);border-radius:10px;padding:10px;margin-top:10px}
@@ -511,25 +545,30 @@ function renderDues(){
     if(t.due<=0)return null;
     var oldest=customerOldestDueDate(c.id);
     var days=oldest?dayDiff(dayKey(oldest),todayStr()):0;
-    return {c:c,due:t.due,days:days};
-  }).filter(function(x){return x;}).sort(function(a,b){return b.days-a.days;});
+    return {c:c,due:t.due,days:days,need:needsReminder(c)};
+  }).filter(function(x){return x;}).sort(function(a,b){return (b.need-a.need)||(b.days-a.days);});
+  var needN=rows.filter(function(r){return r.need;}).length;
 
-  var html='<button class="backbtn" data-act="nav" data-v="home">\u2190 होम</button>'+
+  var html='<button class="backbtn" data-act="nav" data-v="home">← होम</button>'+
     '<div class="sechead"><h2>सबसे पुराना बाकी</h2><span class="cnt">'+rows.length+' ग्राहक</span></div>'+
-    (rows.length?'<p class="hint">कुल बाकी: <b style="color:var(--red)">'+rupee(allDue())+'</b> — सबसे पुराना सबसे ऊपर है।</p>':'');
+    (rows.length?'<p class="hint">कुल बाकी: <b style="color:var(--red)">'+rupee(allDue())+'</b> — सबसे पुराना सबसे ऊपर है।</p>':'')+
+    (needN?'<p class="hint" style="color:var(--gold);font-weight:700">🔔 '+needN+' ग्राहक का बकाया '+REMIND_DAYS+' दिन से पुराना है — "याद दिलाओ" दबाओ, WhatsApp पर मैसेज तैयार मिलेगा, बस Send करना है।</p>':'');
   if(!rows.length){
     html+='<div class="empty"><b>सब कुछ क्लियर है!</b>किसी भी ग्राहक का बाकी नहीं है।</div>';
   }else{
     html+=rows.map(function(r){
-      var subTxt=r.days>0?(r.days+' दिन से बाकी'):(r.days===0?'आज की डिलीवरी का बाकी':('आने वाला ऑर्डर — डिलीवरी '+(-r.days)+' दिन बाद'));
+      var subTxt=r.days>0?(r.days+' दिन से बाकी'):(r.days===0?'आज का बाकी':('आने वाला ऑर्डर — डिलीवरी '+(-r.days)+' दिन बाद'));
+      var rt=remindedText(r.c);
+      var rm=r.need?'<span class="rm need">🔔 याद दिलाना है</span>':(rt?'<span class="rm">'+rt+'</span>':'');
       return '<div class="duecard">'+
         '<button class="duemain" data-act="open-customer" data-id="'+r.c.id+'">'+
           '<span class="nm">'+esc(r.c.name)+'</span>'+
-          '<span class="sub">'+subTxt+'</span>'+
+          '<span class="sub">'+subTxt+'</span>'+rm+
         '</button>'+
         '<div class="dueacts">'+
           '<span class="dueamt">'+rupee(r.due)+'</span>'+
-          '<button class="btn small" data-act="customer-payment" data-id="'+r.c.id+'">पेमेंट लो</button>'+
+          '<span class="acts">'+waButton('remind',r.c.id,r.c,'💬 याद दिलाओ','small'+(r.need?' primary':''))+
+          '<button class="btn small" data-act="customer-payment" data-id="'+r.c.id+'">पेमेंट लो</button></span>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -825,14 +864,17 @@ function renderHome(){
   });
   overdueGroups.sort(function(a,b){return new Date(a.order.date)-new Date(b.order.date);});
   var todayColl=0;
-  state.orders.forEach(function(o){o.payments.forEach(function(p){if(p.date===today)todayColl+=num(p.amount);});});
+  state.orders.forEach(function(o){if(o.cancelled)return;o.payments.forEach(function(p){if(p.date===today)todayColl+=num(p.amount);});});
+  var todayUd=todayUdharTotal(),rlist=remindList();
+  var remindBanner=rlist.length?'<button class="banner btn-banner remind" data-act="view-dues">🔔 '+rlist.length+' ग्राहक को बकाया याद दिलाना है ('+REMIND_DAYS+' दिन से पुराना) — देखो</button>':'';
+  var quickrow='<div class="quickrow"><button class="btn primary" data-act="udhar-new">📒 उधार लिखो</button><button class="btn" data-act="jama-new">💰 जमा लिखो</button></div>';
   var band='<div class="band">'+
     '<div><b>'+todGroups.length+'</b><span>आज डिलीवरी</span></div>'+
     '<div class="tom"><b>'+tmrGroups.length+'</b><span>कल डिलीवरी</span></div>'+
     '<div class="due"><b>'+rupee(allDue())+'</b><span>कुल बाकी</span></div></div>';
 
   var dueCustCount=state.customers.filter(function(c){return customerTotals(c.id).due>0;}).length;
-  var duesLink=(state.orders.length||dueCustCount)?'<div class="homeinfo"><span class="coll">आज जमा हुआ: <b>'+rupee(todayColl)+'</b></span>'+(dueCustCount?'<button class="lnk" data-act="view-dues">📋 सबसे पुराना बाकी ('+dueCustCount+')</button>':'')+'</div>':'';
+  var duesLink=(state.orders.length||dueCustCount)?'<div class="homeinfo"><span class="coll">आज जमा हुआ: <b>'+rupee(todayColl)+'</b>'+(todayUd>0?' · आज उधार: <b class="udt">'+rupee(todayUd)+'</b>':'')+'</span>'+(dueCustCount?'<button class="lnk" data-act="view-dues">📋 सबसे पुराना बाकी ('+dueCustCount+')</button>':'')+'</div>':'';
 
   var sections='';
   if(overdueGroups.length){
@@ -878,7 +920,7 @@ function renderHome(){
     }).join('');
   }
 
-  $('#main').innerHTML=band+duesLink+sections+
+  $('#main').innerHTML=remindBanner+band+quickrow+duesLink+sections+
     '<div class="sechead" style="margin-top:20px"><h2>ग्राहक खोजो</h2></div>'+
     '<input id="search" type="search" placeholder="नाम या फोन नंबर" autocomplete="off" value="'+esc(ui.search)+'">'+
     '<div class="addrow"><button class="lnk" data-act="add-customer">+ नया ग्राहक</button></div>'+
@@ -899,16 +941,16 @@ function miniCard(o,dueItems,tag){
 function renderOrders(){
   var filter=ui.ordersFilter||'all';
   var all=state.orders.slice();
-  var totalAll=all.length;
-  var pendingCount=all.filter(function(o){var s=orderStatus(o);return s==='pending'||s==='partial';}).length;
-  var doneCount=all.filter(function(o){return orderStatus(o)==='delivered';}).length;
+  var totalAll=all.filter(function(o){return !isUdhar(o);}).length;
+  var pendingCount=all.filter(function(o){var s=orderStatus(o);return !isUdhar(o)&&(s==='pending'||s==='partial');}).length;
+  var doneCount=all.filter(function(o){return !isUdhar(o)&&orderStatus(o)==='delivered';}).length;
 
   var band='<div class="band">'+
     '<div><b>'+totalAll+'</b><span>कुल ऑर्डर</span></div>'+
     '<div class="tom"><b>'+pendingCount+'</b><span>पेंडिंग</span></div>'+
     '<div><b style="color:var(--green)">'+doneCount+'</b><span>पूरा हुआ</span></div></div>';
 
-  var filters=[['all','सभी'],['pending','पेंडिंग'],['delivered','पूरा हुआ'],['cancelled','कैंसल']];
+  var filters=[['all','सभी'],['pending','पेंडिंग'],['delivered','पूरा हुआ'],['udhar','उधार'],['cancelled','कैंसल']];
   var tabsHtml='<div class="cattabs" style="margin-top:0">'+filters.map(function(f){
     return '<button class="cattab'+(filter===f[0]?' on':'')+'" data-act="orders-filter" data-f="'+f[0]+'">'+f[1]+'</button>';
   }).join('')+'</div>';
@@ -923,12 +965,13 @@ function renderOrders(){
       if(!hit)return false;
     }
     var s=orderStatus(o);
-    if(filter==='pending')return s==='pending'||s==='partial';
-    if(filter==='delivered')return s==='delivered';
+    if(filter==='udhar')return isUdhar(o);
+    if(filter==='pending')return !isUdhar(o)&&(s==='pending'||s==='partial');
+    if(filter==='delivered')return !isUdhar(o)&&s==='delivered';
     if(filter==='cancelled')return s==='cancelled';
     return true;
   });
-  if(filter==='delivered'||filter==='cancelled'){
+  if(filter==='delivered'||filter==='cancelled'||filter==='udhar'){
     list.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   }else{
     list.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
@@ -948,6 +991,14 @@ function orderOverviewRow(o){
   var c=findCustomer(o.customerId);
   var st=orderStatus(o);
   var due=orderDue(o);
+  if(isUdhar(o)){
+    return '<button class="mini" data-act="open-customer" data-id="'+o.customerId+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
+      '<span class="l"><span class="nm">'+esc(c?c.name:'?')+'</span><span class="sub">उधार '+rupee(orderTotal(o))+' \u00b7 '+fmtDonly(o.date)+(o.udNote?' \u00b7 '+esc(o.udNote):'')+'</span></span>'+
+      '<span style="display:flex;align-items:center;gap:8px;flex:0 0 auto">'+
+      (due>0&&!o.cancelled?'<span class="r"><b>'+rupee(due)+'</b><span>बाकी</span></span>':'')+
+      '<span class="stamp st-udhar">'+(o.cancelled?'हटाया':'उधार')+'</span>'+
+      '</span></button>';
+  }
   return '<button class="mini" data-act="open-customer" data-id="'+o.customerId+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
     '<span class="l"><span class="nm">'+esc(c?c.name:'?')+'</span><span class="sub">#'+o.no+' \u00b7 '+fmtDT(o.date)+' \u00b7 '+o.items.length+' item</span></span>'+
     '<span style="display:flex;align-items:center;gap:8px;flex:0 0 auto">'+
@@ -964,6 +1015,7 @@ function renderCustomer(){
   var os=customerOrders(c.id).slice();
   var todayKey=todayStr();
   function isUp(o){
+    if(isUdhar(o))return false;
     if(dayKey(o.date)>=todayKey)return true;
     if(o.cancelled)return false;
     return o.items.some(function(it){return !it.delivered&&it.date&&it.date>=todayKey;});
@@ -980,7 +1032,7 @@ function renderCustomer(){
     '</div></div>'+
     '<div class="cpacts"><button class="lnk" data-act="edit-customer" data-id="'+c.id+'">बदलो</button><button class="lnk danger" data-act="del-customer" data-id="'+c.id+'">डिलीट</button></div>'+
     '<div class="band" style="grid-template-columns:repeat(4,1fr);margin-top:12px">'+
-    '<div><b>'+t.count+'</b><span>ऑर्डर</span></div>'+
+    '<div><b>'+os.filter(function(o){return !o.cancelled&&!isUdhar(o);}).length+'</b><span>ऑर्डर</span></div>'+
     '<div><b>'+rupee(t.billed)+'</b><span>कुल बिल</span></div>'+
     '<div><b>'+rupee(t.paid)+'</b><span>जमा</span></div>'+
     '<div class="due"><b>'+rupee(t.due)+'</b><span>बाकी</span></div></div>'+
@@ -988,19 +1040,27 @@ function renderCustomer(){
     (t.extra>0?'<p class="hint" style="color:var(--green);font-weight:600;margin-top:-6px">'+rupee(t.extra)+' ज़्यादा जमा है — वापस करो या अगले ऑर्डर में जोड़ दो।</p>':'')+
     '<div class="actbar">'+
     '<button class="btn primary small" data-act="new-order-for" data-id="'+c.id+'">+ नया ऑर्डर</button>'+
+    '<button class="btn primary small" data-act="udhar-new" data-id="'+c.id+'">📒 उधार</button>'+
     (t.due>0?'<button class="btn small" data-act="customer-payment" data-id="'+c.id+'">पेमेंट लो</button>':'')+
+    (t.due>0?waButton('remind',c.id,c,'💬 याद दिलाओ','small'):'')+
     (os.filter(function(o){return !o.cancelled;}).length?summaryButton(c):'')+
     '</div>';
+  if(t.due>0){
+    var rmTxt=needsReminder(c)?'<b style="color:var(--gold)">🔔 बकाया '+dueAgeDays(c.id)+' दिन पुराना है — याद दिलाने का समय है</b>':esc(remindedText(c));
+    if(rmTxt)html+='<p class="hint" style="margin-top:-6px">'+rmTxt+'</p>';
+  }
+  html+=ledgerHtml(c);
 
   if(!os.length){
-    html+='<div class="empty"><b>अभी कोई ऑर्डर नहीं</b>"+ नया ऑर्डर" दबाओ।</div>';
+    html+='<div class="empty"><b>अभी कोई ऑर्डर या उधार नहीं</b>"+ नया ऑर्डर" या "📒 उधार" दबाओ।</div>';
   }else{
     if(upcoming.length){html+='<div class="grouphead">आने वाले ऑर्डर</div>'+upcoming.map(orderCardFull).join('');}
-    if(past.length){html+='<div class="grouphead">पुराने ऑर्डर</div>'+past.map(orderCardFull).join('');}
+    if(past.length){html+='<div class="grouphead">'+(past.some(isUdhar)?'पुराने ऑर्डर और उधार':'पुराने ऑर्डर')+'</div>'+past.map(orderCardFull).join('');}
   }
   $('#main').innerHTML=html;
 }
 function orderCardFull(o){
+  if(isUdhar(o))return udharCard(o);
   var st=orderStatus(o);
   var tot=orderTotal(o),paid=orderPaid(o),due=orderDue(o);
   var cancelled=o.cancelled;
@@ -1138,7 +1198,7 @@ function closeSheet(){
   ui.billShare=null;
   $('#sheetRoot').innerHTML='';
   document.body.classList.remove('noscroll');
-  ui.orderDraft=null;ui.editId=null;
+  ui.orderDraft=null;ui.editId=null;ui.udDraft=null;
 }
 
 /* ---------- Customer form ---------- */
@@ -1290,6 +1350,7 @@ function syncDraftField(t){
   return false;
 }
 function softClose(){
+  if(ui.udDraft&&num(ui.udDraft.amount)>0){toast('बंद करना है तो ऊपर "बंद करो" दबाओ');return;}
   if(ui.orderDraft&&(ui.orderDraft.lines.length||ui.orderDraft.customerId)){
     toast('ऑर्डर बंद करना है तो ऊपर "बंद करो" दबाओ');return;
   }
@@ -1951,6 +2012,289 @@ function openOrderPayment(orderId){
   openPaymentForm(o.customerId,orderId);
 }
 
+/* ---------- 📒 उधारी खाता ----------
+   उधार = एक छोटा "ऑर्डर" (kind:'udhar') — एक लाइन, रकम = rate, पहले से "दिया गया"।
+   इसलिए बाकी, "पेमेंट लो", सबसे पुराना बाकी, पूरा हिसाब, बैकअप — सब पहले जैसा चलता है।
+   मैसेज: ऐप तैयार करता है, WhatsApp खुलता है, मालिक सिर्फ Send दबाता है (1 टैप, मुफ़्त)। */
+var REMIND_DAYS=15;
+var UD_CHIPS=['दूध','दही','मिठाई','पनीर','केक','नमकीन'];
+function isUdhar(o){return !!(o&&o.kind==='udhar');}
+function udItem(amt,note,dk,lid){return {lid:lid||uid(),name:note?('उधार — '+note):'उधार',unit:'',rate:amt,qty:1,delivered:true,deliveredAt:dk,date:''};}
+function hiShort(k){var d=keyToDate(k);return d.getDate()+' '+HI_MONTHS[d.getMonth()];}
+function daysSinceTs(ts){return Math.floor((Date.now()-num(ts))/86400000);}
+function dueAgeDays(cid){var od=customerOldestDueDate(cid);return od?dayDiff(dayKey(od),todayStr()):null;}
+function needsReminder(c){
+  if(customerTotals(c.id).due<=0)return false;
+  var age=dueAgeDays(c.id);
+  if(age===null||age<REMIND_DAYS)return false;
+  if(c.remindedAt&&daysSinceTs(c.remindedAt)<REMIND_DAYS)return false;
+  return true;
+}
+function remindList(){return state.customers.filter(needsReminder);}
+function remindedText(c){
+  if(!c.remindedAt)return '';
+  var d=daysSinceTs(c.remindedAt);
+  return d<=0?'आज याद दिलाया':(d===1?'कल याद दिलाया':d+' दिन पहले याद दिलाया');
+}
+function entriesLabel(list){
+  var nu=list.filter(isUdhar).length,no=list.length-nu;
+  return [no?no+' ऑर्डर':'',nu?nu+' उधार':''].filter(function(x){return x;}).join(' · ')||'0 ऑर्डर';
+}
+function todayUdharTotal(){
+  var t=todayStr(),s=0;
+  state.orders.forEach(function(o){if(isUdhar(o)&&!o.cancelled&&dayKey(o.date)===t)s+=orderTotal(o);});
+  return round2(s);
+}
+
+/* --- मैसेज --- */
+function payLine(L,due){
+  if(due>0){
+    L.push('QR से पेमेंट: '+orderPageUrl()+'#pay='+round2(due));
+    L.push('पेमेंट के बाद स्क्रीनशॉट इसी चैट में भेज दीजिए।');
+  }
+}
+function signOff(L){L.push('');L.push('धन्यवाद — '+state.shop.owner+(state.shop.phone?' ('+state.shop.phone+')':''));}
+function udharMessage(o){
+  var c=findCustomer(o.customerId),due=customerTotals(c.id).due,dk=dayKey(o.date),L=[];
+  L.push('*'+state.shop.name+'*');
+  L.push('नमस्ते '+c.name+' जी 🙏');
+  L.push((dk===todayStr()?'आज ':hiShort(dk)+' को ')+rupee(orderTotal(o))+' का उधार आपके खाते में लिखा गया'+(o.udNote?' ('+o.udNote+')':'')+'।');
+  L.push('कुल बकाया: *'+rupee(due)+'*');
+  L.push('');
+  payLine(L,due);
+  signOff(L);
+  return L.join('\n');
+}
+function jamaMessage(c,amt,dk){
+  var due=customerTotals(c.id).due,L=[];
+  L.push('*'+state.shop.name+'*');
+  L.push('नमस्ते '+c.name+' जी 🙏');
+  L.push(rupee(amt)+' जमा हो गए'+(dk&&dk!==todayStr()?' ('+hiShort(dk)+')':'')+' — धन्यवाद!');
+  if(due>0){L.push('अब बाकी: *'+rupee(due)+'*');L.push('');payLine(L,due);}
+  else L.push('आपका पूरा हिसाब साफ़ है ✅');
+  signOff(L);
+  return L.join('\n');
+}
+function remindMessage(c){
+  var due=customerTotals(c.id).due,od=customerOldestDueDate(c.id),L=[];
+  L.push('*'+state.shop.name+'*');
+  L.push('नमस्ते '+c.name+' जी 🙏');
+  L.push('आपका *'+rupee(due)+'* बकाया है'+(od&&dayKey(od)<todayStr()?' ('+hiShort(dayKey(od))+' से)':'')+'। सुविधा से जमा कर दीजिए।');
+  L.push('');
+  payLine(L,due);
+  L.push('पूरा हिसाब चाहिए तो इसी चैट में बता दीजिए।');
+  signOff(L);
+  return L.join('\n');
+}
+function waMsgFor(kind,ref,amt,dk){
+  if(kind==='udhar'){var o=findOrder(ref);return o?udharMessage(o):'';}
+  var c=findCustomer(ref);if(!c)return '';
+  if(kind==='jama')return jamaMessage(c,amt,dk);
+  return remindMessage(c);
+}
+/* WhatsApp बटन — नंबर है तो सीधा लिंक, नहीं तो नंबर डालने का बटन */
+function waButton(kind,ref,c,label,cls,amt,dk){
+  var href=c&&c.phone?waLink(c.phone,waMsgFor(kind,ref,amt,dk)):'';
+  var extra=' data-kind="'+kind+'" data-ref="'+ref+'" data-cid="'+c.id+'"'+(amt!=null?' data-amt="'+amt+'"':'')+(dk?' data-dk="'+dk+'"':'');
+  if(href)return '<a class="btn '+cls+'" href="'+esc(href)+'" target="_blank" rel="noopener" data-act="wa-go"'+extra+'>'+label+'</a>';
+  return '<button class="btn '+cls+'" data-act="wa-need-phone"'+extra+'>'+label+'</button>';
+}
+function openWaPhoneSheet(kind,ref,cid,amt,dk){
+  var c=findCustomer(cid);if(!c)return;
+  openSheet('<div class="sh-head"><h2>WhatsApp नंबर जोड़ो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">'+esc(c.name)+' का WhatsApp नंबर अभी सेव नहीं है। नंबर डालो, मैसेज उसी पर जाएगा।</p>'+
+    '<label class="fl">WhatsApp नंबर<input id="wp-phone" type="tel" inputmode="tel" placeholder="10 अंकों का मोबाइल नंबर" value="'+esc(c.phone||'')+'"></label>'+
+    '<div class="err" id="wp-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">बाद में</button>'+
+    '<a class="btn primary" href="#" target="_blank" rel="noopener" data-act="wa-phone-go" data-kind="'+kind+'" data-ref="'+ref+'" data-cid="'+cid+'"'+(amt!=null?' data-amt="'+amt+'"':'')+(dk?' data-dk="'+dk+'"':'')+'>Save और भेजो</a></div>');
+  setTimeout(function(){var f=$('#wp-phone');if(f)f.focus();},60);
+}
+
+/* --- उधार लिखो (नया / बदलो) --- */
+function openUdharForm(customerId,orderId){
+  var o=orderId?findOrder(orderId):null;
+  var c=o?findCustomer(o.customerId):(customerId?findCustomer(customerId):null);
+  ui.udDraft={customerId:c?c.id:null,locked:!!o,editId:o?o.id:null,custSearch:'',newCustOpen:false,newCustName:'',newCustPhone:'',
+    amount:o?String(orderTotal(o)):'',note:o?(o.udNote||''):'',date:o?dayKey(o.date):todayStr()};
+  openSheet('');
+  renderUdharSheet();
+  setTimeout(function(){var f=c?$('#ud-amt'):$('#ud-custsearch');if(f)f.focus();},60);
+}
+function renderUdharSheet(){
+  var d=ui.udDraft;if(!d)return;
+  var c=d.customerId?findCustomer(d.customerId):null;
+  var custBlock;
+  if(c){
+    custBlock='<div class="custchip"><span><b>'+esc(c.name)+'</b><span>'+esc(c.phone||'फ़ोन नंबर नहीं')+'</span></span>'+
+      (d.locked?'':'<button class="lnk" data-act="ud-change-cust">बदलो</button>')+'</div>';
+    if(!d.editId){var cd=customerTotals(c.id).due;custBlock+='<p class="hint" style="margin:6px 0 0">अभी का बकाया: <b style="color:'+(cd>0?'var(--red)':'var(--green)')+'">'+rupee(cd)+'</b></p>';}
+  }else if(d.newCustOpen){
+    custBlock='<div class="customitem">'+
+      '<label class="fl" style="margin-top:0">ग्राहक का नाम<input id="ud-nc-name" type="text" value="'+esc(d.newCustName||'')+'"></label>'+
+      '<label class="fl">मोबाइल नंबर (WhatsApp वाला)<input id="ud-nc-phone" type="tel" inputmode="tel" value="'+esc(d.newCustPhone||'')+'"></label>'+
+      '<div class="err" id="ud-nc-err"></div>'+
+      '<div class="sh-actions"><button class="btn small" data-act="ud-cancel-newcust">वापस</button><button class="btn primary small" data-act="ud-confirm-newcust">ग्राहक जोड़ो</button></div>'+
+      '</div>';
+  }else{
+    var q=(d.custSearch||'').trim().toLowerCase();
+    var matches=q?state.customers.filter(function(x){return x.name.toLowerCase().indexOf(q)>-1||String(x.phone||'').indexOf(q)>-1;}).slice(0,6):[];
+    custBlock='<input id="ud-custsearch" type="text" placeholder="ग्राहक का नाम या फोन" autocomplete="off" value="'+esc(d.custSearch||'')+'" class="udsearch">';
+    if(q){
+      custBlock+='<div class="suglist">'+matches.map(function(m){
+        var md=customerTotals(m.id).due;
+        return '<button class="sugrow" data-act="ud-pick-cust" data-id="'+m.id+'"><b>'+esc(m.name)+'</b><small>'+esc(m.phone||'')+(md>0?' · बकाया '+rupee(md):'')+'</small></button>';
+      }).join('')+'<button class="sugrow newc" data-act="ud-new-cust">+ "'+esc(d.custSearch)+'" नया ग्राहक जोड़ो</button></div>';
+    }
+  }
+  var chips=UD_CHIPS.map(function(n){return '<button type="button" class="'+(d.note===n?'on':'')+'" data-act="ud-note-chip" data-v="'+esc(n)+'">'+esc(n)+'</button>';}).join('');
+  setSheet('<div class="sh-head"><h2>'+(d.editId?'उधार बदलो':'📒 उधार लिखो')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<label class="fl">ग्राहक</label>'+custBlock+
+    '<label class="fl bigamt">कितने रुपये का उधार ₹<input id="ud-amt" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="'+esc(d.amount)+'"></label>'+
+    '<label class="fl">किस चीज़ का (चाहें तो)<input id="ud-note" type="text" maxlength="60" placeholder="जैसे: दूध सितंबर, मिठाई" value="'+esc(d.note)+'"></label>'+
+    '<div class="notechips">'+chips+'</div>'+
+    '<label class="fl">तारीख<input id="ud-date" type="date" max="'+todayStr()+'" value="'+esc(d.date)+'"></label>'+
+    '<div class="err" id="ud-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-udhar">Save करो</button></div>');
+}
+function syncUdField(t){
+  var d=ui.udDraft;if(!d||!t||!t.id)return false;
+  var map={'ud-amt':'amount','ud-note':'note','ud-date':'date','ud-nc-name':'newCustName','ud-nc-phone':'newCustPhone'};
+  if(map[t.id]){d[map[t.id]]=t.value;if(t.id==='ud-note')$all('[data-act=ud-note-chip]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-v')===t.value);});return true;}
+  return false;
+}
+function saveUdhar(){
+  var d=ui.udDraft,err=$('#ud-err');
+  if(!d)return;
+  if(!d.customerId){err.textContent='ग्राहक चुनो या नया जोड़ो।';return;}
+  var amt=round2(num($('#ud-amt').value));
+  if(!(amt>0)){err.textContent='उधार की रकम लिखो।';return;}
+  if(amt>1000000){err.textContent='रकम बहुत बड़ी है — एक बार जाँच लो।';return;}
+  var note=$('#ud-note').value.trim().slice(0,60);
+  var dk=$('#ud-date').value||todayStr();
+  if(dk>todayStr()){err.textContent='आगे की तारीख का उधार नहीं लिख सकते।';return;}
+  var now=new Date(),when=dk+'T'+pad(now.getHours())+':'+pad(now.getMinutes());
+  var from=ui.view==='customer'?ui.cameFrom:(ui.view==='dues'?'dues':(ui.view==='orders'?'orders':'home'));
+  if(d.editId){
+    var o=findOrder(d.editId);
+    if(!o){closeSheet();return;}
+    var paid=orderPaid(o);
+    if(amt<paid-0.001){err.textContent='इस उधार पर '+rupee(paid)+' जमा हो चुका है — रकम इससे कम नहीं हो सकती।';return;}
+    if(dayKey(o.date)!==dk)o.date=when;
+    o.udNote=note;
+    o.items=[udItem(amt,note,dk,o.items[0]&&o.items[0].lid)];
+    save();closeSheet();renderRoute();toast('उधार बदल गया');
+    return;
+  }
+  var o2={id:uid(),no:state.nextOrderNo++,kind:'udhar',udNote:note,customerId:d.customerId,date:when,items:[udItem(amt,note,dk)],payments:[],cancelled:false,notes:'',createdAt:Date.now()};
+  state.orders.push(o2);
+  save();closeSheet();
+  ui.cameFrom=from;ui.view='customer';ui.customerId=d.customerId;
+  renderRoute();window.scrollTo(0,0);
+  openUdharDone(o2);
+}
+function openUdharDone(o){
+  var c=findCustomer(o.customerId);if(!c)return;
+  var due=customerTotals(c.id).due;
+  openSheet('<div class="sh-head"><h2>✅ उधार लिखा गया</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<div class="udsum"><div><span>अभी का उधार</span><b>'+rupee(orderTotal(o))+'</b></div><div class="due"><span>'+esc(c.name)+' का कुल बकाया</span><b>'+rupee(due)+'</b></div></div>'+
+    '<p class="hint">ग्राहक को WhatsApp पर बता दो — मैसेज तैयार है, वहाँ सिर्फ Send दबाना है।</p>'+
+    '<div class="billacts">'+waButton('udhar',o.id,c,'💬 WhatsApp पर बताओ','primary')+
+    '<button class="btn" data-act="close">बाद में</button></div>');
+}
+function openJamaDone(cid,amt,dk){
+  var c=findCustomer(cid);if(!c)return;
+  var due=customerTotals(c.id).due;
+  openSheet('<div class="sh-head"><h2>✅ '+rupee(amt)+' जमा हो गया</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<div class="udsum"><div><span>जमा</span><b style="color:var(--green)">'+rupee(amt)+'</b></div><div class="'+(due>0?'due':'clr')+'"><span>अब बाकी</span><b>'+(due>0?rupee(due):'साफ़ ✓')+'</b></div></div>'+
+    '<p class="hint">ग्राहक को धन्यवाद और बचा हुआ हिसाब भेज दो — एक टैप।</p>'+
+    '<div class="billacts">'+waButton('jama',c.id,c,'💬 WhatsApp पर धन्यवाद भेजो','primary',amt,dk)+
+    '<button class="btn" data-act="close">बाद में</button></div>');
+}
+/* होम से "जमा लिखो" — पहले ग्राहक चुनो */
+function openJamaPicker(){
+  ui.jpSearch='';
+  openSheet('<div class="sh-head"><h2>💰 जमा लिखो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<input id="jp-search" type="search" placeholder="ग्राहक का नाम या फोन" autocomplete="off" class="udsearch">'+
+    '<div id="jp-list"></div>');
+  renderJamaPickList();
+  setTimeout(function(){var f=$('#jp-search');if(f)f.focus();},60);
+}
+function renderJamaPickList(){
+  var box=$('#jp-list');if(!box)return;
+  var q=(ui.jpSearch||'').trim().toLowerCase();
+  var rows=state.customers.map(function(c){return {c:c,due:customerTotals(c.id).due};})
+    .filter(function(r){return r.due>0&&(!q||r.c.name.toLowerCase().indexOf(q)>-1||String(r.c.phone||'').indexOf(q)>-1);})
+    .sort(function(a,b){return b.due-a.due;}).slice(0,40);
+  box.innerHTML=rows.length?('<p class="hint" style="margin:10px 0 6px">जिनका बकाया है:</p>'+rows.map(function(r){
+    return '<button class="mini" data-act="customer-payment" data-id="'+r.c.id+'" style="width:100%;border:1px solid var(--line);text-align:left">'+
+      '<span class="l"><span class="nm">'+esc(r.c.name)+'</span><span class="sub">'+esc(r.c.phone||'फ़ोन नहीं')+'</span></span>'+
+      '<span class="r"><b>'+rupee(r.due)+'</b><span>बाकी</span></span></button>';
+  }).join('')):'<div class="empty"><b>'+(q?'कुछ नहीं मिला':'किसी का बकाया नहीं है')+'</b>'+(q?'नाम या फोन से दोबारा खोजो।':'')+'</div>';
+}
+
+/* --- ग्राहक का खाता (उधार-जमा, चलता हुआ बकाया) --- */
+function ledgerEntries(cid){
+  var ev=[];
+  customerOrders(cid).filter(function(o){return !o.cancelled;}).forEach(function(o){
+    ev.push({ts:new Date(o.date).getTime(),dk:dayKey(o.date),dr:round2(orderTotal(o)),label:isUdhar(o)?('उधार'+(o.udNote?' — '+o.udNote:'')):('ऑर्डर #'+o.no)});
+    o.payments.forEach(function(p){
+      if(/adjust$/.test(String(p.note||'')))return; // एक ऑर्डर से दूसरे में खिसकाया — कुल पर असर नहीं
+      ev.push({ts:keyToDate(p.date).getTime()+86399000,dk:p.date,cr:round2(num(p.amount)),note:p.note||'',grp:p.date+'|'+(p.note||'')});
+    });
+  });
+  // "एक साथ जमा" कई ऑर्डर में बँटता है — खाते में एक ही लाइन दिखे
+  var out=[],byGrp={};
+  ev.forEach(function(e){
+    if(e.cr==null){out.push(e);return;}
+    if(byGrp[e.grp]){byGrp[e.grp].cr=round2(byGrp[e.grp].cr+e.cr);return;}
+    var n={ts:e.ts,dk:e.dk,cr:e.cr,label:'जमा'+(e.note&&e.note!=='एक साथ जमा'?' — '+e.note:'')};
+    byGrp[e.grp]=n;out.push(n);
+  });
+  out.sort(function(a,b){return a.ts-b.ts||((a.cr!=null)-(b.cr!=null));});
+  var bal=0;
+  out.forEach(function(e){bal=round2(bal+(e.dr||0)-(e.cr||0));e.bal=bal;});
+  return out;
+}
+function ledgerHtml(c){
+  var all=ledgerEntries(c.id);
+  if(!all.length)return '';
+  var showAll=ui.ledgerAll===c.id;
+  var list=all.slice().reverse();
+  var shown=showAll?list:list.slice(0,6);
+  return '<div class="grouphead">📒 खाता — उधार और जमा</div><div class="ledger">'+
+    shown.map(function(e){
+      var isCr=e.cr!=null;
+      return '<div class="lgr"><span class="lt">'+esc(e.label)+'<span class="ld">'+hiShort(e.dk)+'</span></span>'+
+        '<span class="lv"><b class="'+(isCr?'cr':'dr')+'">'+(isCr?'− ':'+ ')+rupee(isCr?e.cr:e.dr)+'</b>'+
+        '<span class="lb">बकाया '+rupee(Math.max(0,e.bal))+(e.bal<0?' (ज़्यादा जमा '+rupee(-e.bal)+')':'')+'</span></span></div>';
+    }).join('')+
+    (list.length>6?'<button class="lnk" style="width:100%" data-act="ledger-toggle" data-id="'+c.id+'">'+(showAll?'कम दिखाओ':'पूरा खाता देखो ('+list.length+')')+'</button>':'')+
+    '</div>';
+}
+function udharCard(o){
+  var tot=orderTotal(o),paid=orderPaid(o),due=orderDue(o),cancelled=o.cancelled;
+  var pays='';
+  if(o.payments.length){
+    pays='<div class="paylog"><div style="font-weight:600">जमा का हिसाब:</div>'+o.payments.map(function(p){
+      return '<div class="payrow"><span>'+fmtDonly(p.date)+': '+rupee(p.amount)+(p.note?' ('+esc(p.note)+')':'')+'</span>'+
+        (cancelled?'':'<button class="lnk danger" data-act="del-payment" data-order="'+o.id+'" data-pay="'+p.id+'">हटाओ</button>')+'</div>';
+    }).join('')+'</div>';
+  }
+  return '<article class="order udhar'+(cancelled?' cancelled':'')+'">'+
+    '<div class="otop"><div><div class="odate">'+fmtDonly(o.date)+'</div><div class="udnote">'+esc(o.udNote||'उधार')+'</div></div>'+
+    '<span class="stamp st-udhar">'+(cancelled?'हटाया':'उधार')+'</span></div>'+
+    pays+
+    '<div class="money"><div><span>उधार</span><b>'+rupee(tot)+'</b></div>'+
+    (cancelled?'<div class="paidall" style="color:var(--muted)">हिसाब से हटाया गया</div>':
+      '<div><span>जमा</span><b>'+rupee(paid)+'</b></div>'+
+      (due>0?'<div class="due"><span>बाकी</span><b>'+rupee(due)+'</b></div>':'<div class="paidall">पूरा जमा</div>'))+'</div>'+
+    (cancelled?'':'<div class="oacts">'+
+      (due>0?'<button class="btn small" data-act="order-payment" data-id="'+o.id+'">पेमेंट लो</button>':'')+
+      '<button class="lnk" data-act="udhar-edit" data-id="'+o.id+'">बदलो</button>'+
+      '<button class="lnk danger" data-act="cancel-order" data-id="'+o.id+'">हटाओ</button></div>')+
+    '</article>';
+}
+
 /* ---------- Item form ---------- */
 function openItemForm(id){
   var i=id?findItem(id):null;
@@ -1982,6 +2326,13 @@ function openDeleteCustomerConfirm(id){
 }
 function openCancelOrderConfirm(id){
   var o=findOrder(id);
+  if(isUdhar(o)){
+    openSheet('<div class="sh-head"><h2>उधार हटाएं?</h2></div>'+
+      '<p class="hint">'+fmtDonly(o.date)+' का '+rupee(orderTotal(o))+' का उधार'+(o.udNote?' ('+esc(o.udNote)+')':'')+' हिसाब से हट जाएगा। सिर्फ गलती से लिखा हो तभी हटाओ।</p>'+
+      (orderPaid(o)>0?'<p class="hint" style="color:var(--red);font-weight:600">इस पर '+rupee(orderPaid(o))+' जमा है — हटाने पर यह जमा भी हिसाब से हट जाएगा।</p>':'')+
+      '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-cancel-order" data-id="'+id+'">हां, हटाओ</button></div>');
+    return;
+  }
   openSheet(
     '<div class="sh-head"><h2>ऑर्डर कैंसल करें?</h2></div>'+
     '<p class="hint">ऑर्डर #'+o.no+' कैंसल हो जाएगा। यह हिसाब में नहीं जुड़ेगा। इसे मिटाया नहीं जाएगा, सिर्फ कैंसल दिखेगा।</p>'+
@@ -2028,6 +2379,7 @@ function appendTerms(L){
   });
 }
 function billLineItems(L, o){
+  if(isUdhar(o)){L.push('1. उधार'+(o.udNote?' — '+o.udNote:'')+' ('+fmtDshort(o.date)+') = '+rupee(orderTotal(o)));return;}
   var baseDayKey=dayKey(o.date);
   o.items.forEach(function(it,idx){
     var amt=num(it.qty)*num(it.rate);
@@ -2048,7 +2400,7 @@ function billMessage(o){
   L.push('===================');
   L.push('BILL');
   L.push('Bill No: '+o.no);
-  L.push('Delivery: '+fmtDT(o.date));
+  L.push(isUdhar(o)?('उधार की तारीख: '+fmtDonly(o.date)):('Delivery: '+fmtDT(o.date)));
   L.push('Customer: '+(c?c.name:'-'));
   L.push('-------------------');
   billLineItems(L, o);
@@ -2082,7 +2434,7 @@ function summaryMessage(c){
     var ot=orderTotal(o),op=orderPaid(o),od=orderDue(o);
     totBill+=ot;totPaid+=op;
     L.push('-------------------');
-    L.push('Delivery: '+fmtDT(o.date)+' (Order #'+o.no+', '+STAMP[orderStatus(o)]+')');
+    L.push(isUdhar(o)?('उधार: '+fmtDonly(o.date)):('Delivery: '+fmtDT(o.date)+' (Order #'+o.no+', '+STAMP[orderStatus(o)]+')'));
     L.push('');
     billLineItems(L, o);
     L.push('');
@@ -2125,7 +2477,7 @@ function shortBillMessage(o){
   var c=findCustomer(o.customerId),L=[];
   L.push('*'+state.shop.name+'*');
   L.push('नमस्ते '+(c?c.name:'')+' जी,');
-  L.push('आपका बिल (ऑर्डर #'+o.no+', डिलीवरी '+fmtDT(o.date)+')');
+  L.push(isUdhar(o)?('आपका उधार ('+fmtDonly(o.date)+(o.udNote?', '+o.udNote:'')+')'):('आपका बिल (ऑर्डर #'+o.no+', डिलीवरी '+fmtDT(o.date)+')'));
   L.push('कुल: '+rupee(orderTotal(o)));
   L.push('जमा: '+rupee(orderPaid(o)));
   L.push('बाकी: '+rupee(orderDue(o)));
@@ -2141,7 +2493,7 @@ function shortSummaryMessage(c){
   var L=[];
   L.push('*'+state.shop.name+'*');
   L.push('नमस्ते '+c.name+' जी,');
-  L.push('आपका पूरा हिसाब ('+os.length+' ऑर्डर)');
+  L.push('आपका पूरा हिसाब ('+entriesLabel(os)+')');
   L.push('कुल: '+rupee(t));
   L.push('जमा: '+rupee(p));
   L.push('बाकी: '+rupee(Math.max(0,t-p)));
@@ -2254,13 +2606,15 @@ function biItemRow(ctx,y,o,it,idx){
   biFont(ctx,600,32);var nl=biWrap(ctx,(idx+1)+'. '+displayName(it),nameW);
   var subs=[];
   if(!it.delivered&&it.date&&it.date!==dayKey(o.date))subs.push({t:'डिलीवरी: '+fmtDshort(it.date),c:BI.gold});
-  if(it.delivered&&it.deliveredAt)subs.push({t:'दिया गया: '+fmtDshort(it.deliveredAt),c:BI.green});
+  if(it.delivered&&it.deliveredAt&&!isUdhar(o))subs.push({t:'दिया गया: '+fmtDshort(it.deliveredAt),c:BI.green});
   var fy=y+50,yy=fy;
   if(it.delivered)biIconDone(ctx,P,fy-28,IS);else biIconPending(ctx,P,fy-29,IS);
   biFont(ctx,600,32);
   nl.forEach(function(l,i){if(i>0)yy+=42;biText(ctx,l,NX,yy,'left',BI.ink);});
-  biFont(ctx,400,30);biText(ctx,fmtQty(it.qty)+' '+it.unit,BI.QX,fy,'right',BI.ink);
-  biText(ctx,rupee(it.rate),BI.RX,fy,'right',BI.muted);
+  if(!isUdhar(o)){
+    biFont(ctx,400,30);biText(ctx,fmtQty(it.qty)+' '+it.unit,BI.QX,fy,'right',BI.ink);
+    biText(ctx,rupee(it.rate),BI.RX,fy,'right',BI.muted);
+  }
   biFont(ctx,700,31);biText(ctx,rupee(num(it.qty)*num(it.rate)),W-P,fy,'right',BI.ink);
   subs.forEach(function(s){yy+=36;biFont(ctx,600,25);biText(ctx,s.t,NX+22,yy,'left',s.c);});
   var bottom=yy+24;
@@ -2271,8 +2625,8 @@ function biOrderBar(ctx,y,o){
   var W=BI.W,P=BI.P;
   y+=22;
   biRound(ctx,P,y,W-2*P,60,12,BI.paper,null);
-  biFont(ctx,700,27);biText(ctx,'ऑर्डर #'+o.no+'  ·  डिलीवरी: '+fmtDT(o.date),P+20,y+40,'left',BI.maroon);
-  biFont(ctx,600,25);biText(ctx,STAMP[orderStatus(o)],W-P-20,y+40,'right',BI.muted);
+  biFont(ctx,700,27);biText(ctx,isUdhar(o)?('उधार  ·  '+fmtDonly(o.date)):('ऑर्डर #'+o.no+'  ·  डिलीवरी: '+fmtDT(o.date)),P+20,y+40,'left',BI.maroon);
+  biFont(ctx,600,25);biText(ctx,isUdhar(o)?'उधार':STAMP[orderStatus(o)],W-P-20,y+40,'right',BI.muted);
   return y+64;
 }
 function biOrderSub(ctx,y,o){
@@ -2344,12 +2698,12 @@ function renderBillImage(kind,ref){
     var y=biHeader(ctx,logo)+34;
     if(kind==='order'){
       y=biTitle(ctx,y,'बिल','बिल नं. '+o.no,'तारीख: '+fmtDonly(new Date()));
-      y=biCustomer(ctx,y,c,'डिलीवरी: '+fmtDT(o.date));
+      y=biCustomer(ctx,y,c,isUdhar(o)?('उधार की तारीख: '+fmtDonly(o.date)):('डिलीवरी: '+fmtDT(o.date)));
       y=biTableHead(ctx,y);
       o.items.forEach(function(it,i){y=biItemRow(ctx,y,o,it,i);});
       y=biTotals(ctx,y,orderTotal(o),orderPaid(o),o.payments);
     }else{
-      y=biTitle(ctx,y,'पूरा हिसाब',orders.length+' ऑर्डर','तारीख: '+fmtDonly(new Date()));
+      y=biTitle(ctx,y,'पूरा हिसाब',entriesLabel(orders),'तारीख: '+fmtDonly(new Date()));
       y=biCustomer(ctx,y,c,null);
       y=biTableHead(ctx,y);
       var gt=0,gp=0;
@@ -2611,7 +2965,7 @@ document.addEventListener('click',function(e){
       break;
     case 'cancel-order':openCancelOrderConfirm(id);break;
     case 'confirm-cancel-order':
-      var co=findOrder(id);co.cancelled=true;save();closeSheet();renderRoute();toast('ऑर्डर कैंसल हो गया');
+      var co=findOrder(id);co.cancelled=true;save();closeSheet();renderRoute();toast(isUdhar(co)?'उधार हट गया':'ऑर्डर कैंसल हो गया');
       break;
     case 'toggle-item':
       var too=findOrder(t.getAttribute('data-order'));
@@ -2633,8 +2987,9 @@ document.addEventListener('click',function(e){
       if(!(amt>0)){$('#p-err').textContent='सही amount लिखो।';break;}
       var poDue=orderDue(po);
       if(amt>poDue+0.001){$('#p-err').textContent='इस ऑर्डर पर सिर्फ '+rupee(poDue)+' बाकी है — इससे ज़्यादा नहीं ले सकते।';break;}
-      po.payments.push({id:uid(),amount:amt,date:$('#p-date').value||todayStr(),note:$('#p-note').value.trim()});
-      save();closeSheet();renderRoute();toast('पेमेंट जुड़ गया');
+      var pDk=$('#p-date').value||todayStr();
+      po.payments.push({id:uid(),amount:amt,date:pDk,note:$('#p-note').value.trim()});
+      save();closeSheet();renderRoute();openJamaDone(po.customerId,amt,pDk);
       break;
     case 'del-payment':
       var dpo=findOrder(t.getAttribute('data-order'));var dpid=t.getAttribute('data-pay');
@@ -2667,7 +3022,7 @@ document.addEventListener('click',function(e){
         var take=round2(Math.min(lrem,orderDue(o)));
         if(take>0){o.payments.push({id:uid(),amount:take,date:ldate,note:lnote});lrem=round2(lrem-take);lcount++;}
       });
-      save();closeSheet();renderRoute();toast(rupee(lamt)+' जमा हो गया ('+lcount+' ऑर्डर में बँटा)');
+      save();closeSheet();renderRoute();openJamaDone(id,lamt,ldate);
       break;
     case 'share-backup':
       var shTxt=JSON.stringify(state);
@@ -2799,6 +3154,58 @@ document.addEventListener('click',function(e){
       break;
     case 'save-order':saveOrderFromDraft();break;
 
+    case 'udhar-new':openUdharForm(id||null);break;
+    case 'udhar-edit':openUdharForm(null,id);break;
+    case 'jama-new':openJamaPicker();break;
+    case 'save-udhar':saveUdhar();break;
+    case 'ud-change-cust':
+      if(ui.udDraft){ui.udDraft.customerId=null;ui.udDraft.custSearch='';renderUdharSheet();setTimeout(function(){var f=$('#ud-custsearch');if(f)f.focus();},40);}
+      break;
+    case 'ud-pick-cust':
+      if(ui.udDraft){ui.udDraft.customerId=id;ui.udDraft.newCustOpen=false;renderUdharSheet();setTimeout(function(){var f=$('#ud-amt');if(f)f.focus();},40);}
+      break;
+    case 'ud-new-cust':
+      if(ui.udDraft){ui.udDraft.newCustOpen=true;ui.udDraft.newCustName=(ui.udDraft.custSearch||'').trim();ui.udDraft.newCustPhone='';renderUdharSheet();setTimeout(function(){var f=$('#ud-nc-phone');if(f)f.focus();},60);}
+      break;
+    case 'ud-cancel-newcust':if(ui.udDraft){ui.udDraft.newCustOpen=false;renderUdharSheet();}break;
+    case 'ud-confirm-newcust':
+      var unName=$('#ud-nc-name').value.trim(),unPhone=$('#ud-nc-phone').value.trim();
+      if(!unName){$('#ud-nc-err').textContent='नाम लिखो।';break;}
+      var unDup=findCustomerByPhone(unPhone,null);
+      if(unDup){$('#ud-nc-err').innerHTML='यह नंबर पहले से "'+esc(unDup.name)+'" के नाम से है। <button class="lnk" data-act="ud-pick-cust" data-id="'+unDup.id+'">उन्हीं को चुनो</button>';break;}
+      var unProb=phoneProblem(unPhone,null);
+      if(unProb){$('#ud-nc-err').textContent=unProb;break;}
+      var unC={id:uid(),name:unName,phone:unPhone,address:'',createdAt:Date.now()};
+      state.customers.push(unC);save();
+      ui.udDraft.customerId=unC.id;ui.udDraft.newCustOpen=false;renderUdharSheet();toast('नया ग्राहक जुड़ गया');
+      setTimeout(function(){var f=$('#ud-amt');if(f)f.focus();},60);
+      break;
+    case 'ud-note-chip':
+      if(ui.udDraft){
+        var nv=t.getAttribute('data-v'),ni=$('#ud-note');
+        ui.udDraft.note=(ui.udDraft.note===nv)?'':nv;if(ni)ni.value=ui.udDraft.note;
+        $all('[data-act=ud-note-chip]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-v')===ui.udDraft.note);});
+      }
+      break;
+    case 'ledger-toggle':ui.ledgerAll=(ui.ledgerAll===id)?null:id;renderRoute();break;
+    case 'wa-go':
+      var wgC=findCustomer(t.getAttribute('data-cid'));
+      if(t.getAttribute('data-kind')==='remind'&&wgC){wgC.remindedAt=Date.now();save();}
+      setTimeout(function(){if($('#ov'))closeSheet();renderRoute();},400);
+      break;
+    case 'wa-need-phone':openWaPhoneSheet(t.getAttribute('data-kind'),t.getAttribute('data-ref'),t.getAttribute('data-cid'),t.getAttribute('data-amt'),t.getAttribute('data-dk'));break;
+    case 'wa-phone-go':
+      var wpKind=t.getAttribute('data-kind'),wpRef=t.getAttribute('data-ref'),wpC=findCustomer(t.getAttribute('data-cid'));
+      var wpRaw=$('#wp-phone').value.trim(),wpAmt=t.getAttribute('data-amt'),wpDk=t.getAttribute('data-dk');
+      var wpProb=wpRaw?phoneProblem(wpRaw,wpC?wpC.id:null):'मोबाइल नंबर लिखो।';
+      if(!wpC||wpProb||!phoneNorm(wpRaw)){e.preventDefault();$('#wp-err').textContent=wpProb||'सही मोबाइल नंबर लिखो (10 अंकों का)।';break;}
+      wpC.phone=wpRaw;
+      if(wpKind==='remind')wpC.remindedAt=Date.now();
+      save();
+      t.setAttribute('href',waLink(wpRaw,waMsgFor(wpKind,wpRef,wpAmt!=null?num(wpAmt):null,wpDk)));
+      setTimeout(function(){closeSheet();renderRoute();toast('नंबर जुड़ गया, WhatsApp खुल रहा है');},80);
+      break;
+
     case 'edit-item':openItemForm(id);break;
     case 'test-milk':testMilkReminder();break;
     case 'push-on':enablePush();break;
@@ -2879,6 +3286,9 @@ document.addEventListener('click',function(e){
 document.addEventListener('input',function(e){
   var t=e.target;
   if(ui.orderDraft&&syncDraftField(t))return;
+  if(ui.udDraft&&syncUdField(t))return;
+  if(t.id==='ud-custsearch'&&ui.udDraft){ui.udDraft.custSearch=t.value;renderUdharSheet();var f5=$('#ud-custsearch');if(f5){f5.focus();f5.setSelectionRange(f5.value.length,f5.value.length);}return;}
+  if(t.id==='jp-search'){ui.jpSearch=t.value;renderJamaPickList();return;}
   if(t.id==='ordersSearch'){ui.ordersSearch=t.value;renderOrders();var f4=$('#ordersSearch');if(f4){f4.focus();f4.setSelectionRange(f4.value.length,f4.value.length);}return;}
   if(t.id==='search'){ui.search=t.value;renderHome();var f=$('#search');if(f){f.focus();f.setSelectionRange(f.value.length,f.value.length);}return;}
   if(t.id==='itemSearch'){ui.itemsSearch=t.value;renderItems();var f2=$('#itemSearch');if(f2){f2.focus();f2.setSelectionRange(f2.value.length,f2.value.length);}return;}
@@ -2905,6 +3315,7 @@ document.addEventListener('input',function(e){
 });
 document.addEventListener('change',function(e){
   var t=e.target;
+  if(ui.udDraft&&syncUdField(t))return;
   if(ui.orderDraft){
     if(syncDraftField(t))return;
     if(t.getAttribute&&t.getAttribute('data-act')==='of-linedate'){
