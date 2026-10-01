@@ -11,7 +11,7 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 5,
+  version: 6,
   updated: '2026-10-01',
 
   shop: {
@@ -65,7 +65,7 @@ window.MB_CATALOG = {
     ['i17', 'खुला पनीर', 'dairy', 'किलो', 320, 1],
     ['i18', 'दही अमृत (2 किलो पैक)', 'dairy', 'पैक', 250, 4],
     ['i19', 'दही अमूल (5 किलो पैक)', 'dairy', 'पैक', 550, 4],
-    ['i20', 'दही अमूल (15 किलो पैक)', 'dairy', 'पैक', 1500, 5],
+    ['i20', 'दही (15 किलो पैक)', 'dairy', 'पैक', 1500, 6],
     ['i21', 'नमकीन', 'namkeen', 'किलो', 200, 1],
     ['i22', 'रसमलाई (प्लेट)', 'mithai', 'प्लेट', 50, 2],
     ['i23', 'दही अमूल (1 किलो पैक)', 'dairy', 'पैक', 125, 4],
@@ -77,8 +77,7 @@ window.MB_CATALOG = {
     ['i29', 'चॉकलेट केक (½ किलो)', 'cake', 'पीस', 380, 3],
     ['i30', 'दही अमृत (200 ग्राम)', 'dairy', 'पैक', 35, 4],
     ['i31', 'दही अमृत (400 ग्राम)', 'dairy', 'पैक', 60, 4],
-    ['i32', 'दही अमृत (1 किलो पैक)', 'dairy', 'पैक', 130, 4],
-    ['i33', 'दही अमृत (15 किलो पैक)', 'dairy', 'पैक', 1500, 5]
+    ['i32', 'दही अमृत (1 किलो पैक)', 'dairy', 'पैक', 130, 4]
   ],
 
   /* ग्राहक वाले मेन्यू के कार्ड। opts = कौन-कौन से आइटम इस कार्ड में चुन सकते हैं
@@ -99,10 +98,12 @@ window.MB_CATALOG = {
       opts: [{ id: 'i14', hi: 'फुल क्रीम', en: 'Full cream' }, { id: 'i15', hi: 'हाफ क्रीम (टोंड)', en: 'Toned' }] },
     { tab: 'dairy', key: 'dahi', hi: 'दही', en: 'Dahi (Curd)', brandHi: 'अमूल', brandEn: 'Amul', lineHi: 'अमूल दही', lineEn: 'Amul curd', art: 'dahi',
       opts: [{ id: 'i25', hi: '200 ग्राम', en: '200 g' }, { id: 'i24', hi: '400 ग्राम', en: '400 g' }, { id: 'i23', hi: '1 किलो', en: '1 kg' },
-             { id: 'i19', hi: '5 किलो', en: '5 kg' }, { id: 'i20', hi: '15 किलो', en: '15 kg' }] },
+             { id: 'i19', hi: '5 किलो', en: '5 kg' }] },
     { tab: 'dairy', key: 'dahi-amrit', hi: 'दही', en: 'Dahi (Curd)', brandHi: 'अमृत', brandEn: 'Amrit', lineHi: 'अमृत दही', lineEn: 'Amrit curd', art: 'dahi',
       opts: [{ id: 'i30', hi: '200 ग्राम', en: '200 g' }, { id: 'i31', hi: '400 ग्राम', en: '400 g' }, { id: 'i32', hi: '1 किलो', en: '1 kg' },
-             { id: 'i18', hi: '2 किलो', en: '2 kg' }, { id: 'i33', hi: '15 किलो', en: '15 kg' }] },
+             { id: 'i18', hi: '2 किलो', en: '2 kg' }] },
+    { tab: 'dairy', key: 'dahi-15', hi: 'दही — 15 किलो पैक', en: 'Dahi — 15 kg pack', brandHi: 'सुधा · अमृत · अमूल', brandEn: 'Sudha · Amrit · Amul', art: 'dahi',
+      opts: ['i20'] },
     { tab: 'dairy', key: 'paneer', hi: 'पनीर', en: 'Paneer', img: 'paneer', art: 'paneer',
       opts: [{ id: 'i16', hi: 'पैकेट 200 ग्राम', en: 'Pack 200 g' }, { id: 'i17', hi: 'खुला पनीर', en: 'Loose paneer' }] },
 
