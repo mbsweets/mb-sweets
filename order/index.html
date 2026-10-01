@@ -698,7 +698,7 @@ function changeQty(id,dir){
 }
 function lineName(l,lang){
   var L=lang||st.lang;
-  var base=L==='en'?(l.card.en||l.card.hi):l.card.hi;
+  var base=L==='en'?(l.card.lineEn||l.card.en||l.card.hi):(l.card.lineHi||l.card.hi);
   var opts=optsOf(l.card);
   if(l.opt.hi&&opts.length>1)return base+' ('+(L==='en'?l.opt.en:l.opt.hi)+')';
   if(opts.length>1&&l.item.unit==='पीस')return base+(L==='en'?' (pieces)':' (पीस)');

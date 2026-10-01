@@ -11,8 +11,8 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 3,
-  updated: '2026-09-29',
+  version: 4,
+  updated: '2026-10-01',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
@@ -63,21 +63,25 @@ window.MB_CATALOG = {
     ['i15', 'दूध (टी.एम. हाफ क्रीम)', 'dairy', 'लीटर', 60, 1],
     ['i16', 'पनीर पैकेट (200 ग्राम)', 'dairy', 'पैकेट', 95, 1],
     ['i17', 'खुला पनीर', 'dairy', 'किलो', 320, 1],
-    ['i18', 'दही (2 किलो पैक)', 'dairy', 'पैक', 250, 1],
-    ['i19', 'दही (5 किलो पैक)', 'dairy', 'पैक', 550, 1],
+    ['i18', 'दही अमृत (2 किलो पैक)', 'dairy', 'पैक', 250, 4],
+    ['i19', 'दही अमूल (5 किलो पैक)', 'dairy', 'पैक', 550, 4],
     ['i20', 'दही (15 किलो पैक)', 'dairy', 'पैक', 1500, 1],
     ['i21', 'नमकीन', 'namkeen', 'किलो', 200, 1],
     ['i22', 'रसमलाई (प्लेट)', 'mithai', 'प्लेट', 50, 2],
-    ['i23', 'दही (1 किलो पैक)', 'dairy', 'पैक', 125, 2],
-    ['i24', 'दही (400 ग्राम)', 'dairy', 'पैक', 55, 2],
-    ['i25', 'दही (200 ग्राम)', 'dairy', 'पैक', 30, 2],
+    ['i23', 'दही अमूल (1 किलो पैक)', 'dairy', 'पैक', 125, 4],
+    ['i24', 'दही अमूल (400 ग्राम)', 'dairy', 'पैक', 55, 4],
+    ['i25', 'दही अमूल (200 ग्राम)', 'dairy', 'पैक', 30, 4],
     ['i26', 'वनीला केक (½ किलो)', 'cake', 'पीस', 350, 2],
     ['i27', 'वनीला केक (1 किलो)', 'cake', 'पीस', 600, 2],
     ['i28', 'चॉकलेट केक (1 किलो)', 'cake', 'पीस', 700, 2],
-    ['i29', 'चॉकलेट केक (½ किलो)', 'cake', 'पीस', 380, 3]
+    ['i29', 'चॉकलेट केक (½ किलो)', 'cake', 'पीस', 380, 3],
+    ['i30', 'दही अमृत (200 ग्राम)', 'dairy', 'पैक', 35, 4],
+    ['i31', 'दही अमृत (400 ग्राम)', 'dairy', 'पैक', 60, 4],
+    ['i32', 'दही अमृत (1 किलो पैक)', 'dairy', 'पैक', 130, 4]
   ],
 
-  /* ग्राहक वाले मेन्यू के कार्ड। opts = कौन-कौन से आइटम इस कार्ड में चुन सकते हैं */
+  /* ग्राहक वाले मेन्यू के कार्ड। opts = कौन-कौन से आइटम इस कार्ड में चुन सकते हैं
+     lineHi/lineEn = ऑर्डर की लाइन में दिखने वाला नाम (जैसे दो कंपनी का दही अलग दिखे) */
   menu: [
     { tab: 'sweets', key: 'rasgulla', hi: 'रसगुल्ला', en: 'Rasgulla', img: 'rasgulla', opts: ['i1', 'i2'] },
     { tab: 'sweets', key: 'gulabjamun', hi: 'गुलाब जामुन', en: 'Gulab Jamun', img: 'gulabjamun', opts: ['i5', 'i6'] },
@@ -92,9 +96,12 @@ window.MB_CATALOG = {
 
     { tab: 'dairy', key: 'milk', hi: 'दूध', en: 'Milk', brandHi: 'सुधा', brandEn: 'Sudha', img: 'milk', art: 'milk',
       opts: [{ id: 'i14', hi: 'फुल क्रीम', en: 'Full cream' }, { id: 'i15', hi: 'हाफ क्रीम (टोंड)', en: 'Toned' }] },
-    { tab: 'dairy', key: 'dahi', hi: 'दही', en: 'Dahi (Curd)', brandHi: 'अमूल', brandEn: 'Amul', art: 'dahi',
+    { tab: 'dairy', key: 'dahi', hi: 'दही', en: 'Dahi (Curd)', brandHi: 'अमूल', brandEn: 'Amul', lineHi: 'अमूल दही', lineEn: 'Amul curd', art: 'dahi',
       opts: [{ id: 'i25', hi: '200 ग्राम', en: '200 g' }, { id: 'i24', hi: '400 ग्राम', en: '400 g' }, { id: 'i23', hi: '1 किलो', en: '1 kg' },
-             { id: 'i18', hi: '2 किलो', en: '2 kg' }, { id: 'i19', hi: '5 किलो', en: '5 kg' }, { id: 'i20', hi: '15 किलो', en: '15 kg' }] },
+             { id: 'i19', hi: '5 किलो', en: '5 kg' }, { id: 'i20', hi: '15 किलो', en: '15 kg' }] },
+    { tab: 'dairy', key: 'dahi-amrit', hi: 'दही', en: 'Dahi (Curd)', brandHi: 'अमृत', brandEn: 'Amrit', lineHi: 'अमृत दही', lineEn: 'Amrit curd', art: 'dahi',
+      opts: [{ id: 'i30', hi: '200 ग्राम', en: '200 g' }, { id: 'i31', hi: '400 ग्राम', en: '400 g' }, { id: 'i32', hi: '1 किलो', en: '1 kg' },
+             { id: 'i18', hi: '2 किलो', en: '2 kg' }] },
     { tab: 'dairy', key: 'paneer', hi: 'पनीर', en: 'Paneer', img: 'paneer', art: 'paneer',
       opts: [{ id: 'i16', hi: 'पैकेट 200 ग्राम', en: 'Pack 200 g' }, { id: 'i17', hi: 'खुला पनीर', en: 'Loose paneer' }] },
 
