@@ -196,6 +196,39 @@ label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
 .steps{counter-reset:s;list-style:none;padding:0;margin:0}
 .steps li{position:relative;padding:0 0 12px 38px}
 .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+.lpbar{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;background:var(--goldsoft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;text-align:left;color:var(--ink);font:inherit;cursor:pointer}
+.lpbar .st{font-size:1.5rem;line-height:1}
+.lpbar b{display:block;font-size:.95rem}
+.lpbar small{display:block;color:var(--muted);font-size:.8rem;line-height:1.3}
+.lpbar .go{margin-left:auto;font-weight:700;color:var(--brand);white-space:nowrap}
+:root[data-theme="dark"] .lpbar .go{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lpbar .go{color:var(--gold)}}
+.lphero{text-align:center;background:var(--goldsoft);border:1.5px solid var(--gold);border-radius:16px;padding:14px 10px 12px;margin-bottom:12px}
+.lphero .hello{font-weight:700;font-size:1.05rem}
+.lphero .n{font-family:'Baloo 2','Mukta',sans-serif;font-size:3.4rem;line-height:1.05;color:var(--brand);margin-top:4px}
+:root[data-theme="dark"] .lphero .n{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lphero .n{color:var(--gold)}}
+.lphero .l{color:var(--muted);font-weight:700}
+.lphero .hint{margin-top:4px}
+.lprw{display:grid;gap:6px}
+.lprw div{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);font-size:.92rem}
+.lprw div b{white-space:nowrap}
+.lprw div small{color:var(--muted);text-align:right;font-size:.8rem;line-height:1.3}
+.lprw div.ok{background:var(--greenbg);border-color:var(--green);color:var(--green)}
+.lprw div.ok small{color:var(--green);font-weight:600}
+.lpstats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center}
+.lpstats b{display:block;font-size:1.1rem}
+.lpstats span{font-size:.74rem;color:var(--muted);line-height:1.2;display:block}
+.lpwarn{background:var(--redbg);color:var(--red);border-radius:12px;padding:9px 12px;font-weight:700;font-size:.92rem;margin-bottom:12px}
+.line .la .g{color:var(--green)}
+.line .la .r{color:var(--red);margin-left:6px}
+.line .la .m{color:var(--muted)}
+.lprules{margin:0;padding-left:18px;font-size:.9rem}
+.lprules li{margin:0 0 5px}
+.lpphone{display:flex;gap:8px;margin-top:6px}
+.lpphone input{flex:1;min-width:0;font-size:1.15rem;letter-spacing:.04em}
+.lpphone .btn{flex:0 0 auto}
+.lpmini{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:.82rem;padding:6px 0;min-height:0;display:block;margin:6px auto 0}
 .bigok{text-align:center;padding:8px 0 4px}
 .bigok .ic{font-size:2.6rem;line-height:1}
 .bigok h3{margin:6px 0 2px;font-size:1.3rem}
@@ -246,6 +279,22 @@ hi:{
  os_total:'कुल',os_pay_now:'नीचे से पेमेंट करें।',
  locsend_h:'📍 घर की लोकेशन भेजें',locsend_txt:'लोकेशन नहीं मिली थी। डिलीवरी वाले को घर ढूंढने में आसानी के लिए WhatsApp पर लोकेशन भेज दें: नीचे बटन दबाएं → WhatsApp में 📎 → "Location" → "अभी की लोकेशन भेजें"।',locsend_btn:'💬 WhatsApp पर लोकेशन भेजें',locsend_msg:'नमस्ते, मेरे ऑर्डर {c} के लिए घर की लोकेशन भेज रहा/रही हूँ 👇',
  talk_btn:'💬 WhatsApp पर बात करें',talk_msg:'नमस्ते, मेरा ऑर्डर कोड {c} है।',my_order:'📦 मेरा ऑर्डर देखें',
+ lp_bar_t:'माँ भगवती मिठास पॉइंट्स',lp_bar_s:'हर ₹50 की मिठाई पर 1 पॉइंट · अपने पॉइंट देखें',lp_go:'देखें ›',lp_info_btn:'⭐ मेरे पॉइंट',
+ lp_h:'⭐ मेरे मिठास पॉइंट',lp_hello:'नमस्ते {n} जी 🙏',lp_pts:'मिठास पॉइंट',lp_member_since:'सदस्य {d} से',lp_for:'नंबर {p} के पॉइंट',
+ lp_rw_h:'इनाम (एक बिल पर एक)',lp_rw_row:'{p} पॉइंट = {o} छूट',lp_rw_ok:'✓ अभी ले सकते हैं<br>{m}+ के बिल पर',lp_rw_need:'{k} पॉइंट और<br>{m}+ के बिल पर',
+ lp_soon:'⏳ {p} पॉइंट {d} तक इस्तेमाल कर लें',lp_st_e:'कुल मिले',lp_st_u:'इस्तेमाल',lp_st_x:'ख़त्म',lp_st_s:'छूट मिली',
+ lp_hist_h:'ख़रीद का हिसाब (नया ऊपर)',lp_h_buy:'ख़रीद {a}',lp_h_off:'{f} छूट',lp_h_bonus:'🎉 {b} जुड़ने का बोनस',lp_h_exp:'⌛ मियाद पूरी — पॉइंट ख़त्म',lp_none:'अभी कोई ख़रीद नहीं',
+ lp_upd:'आख़िरी अपडेट: {t}',lp_how_h:'पॉइंट कैसे मिलते हैं',
+ lp_how:['हर ₹50 की मिठाई या केक पर 1 पॉइंट','हर ₹100 के पैकेट सामान (नमकीन, बिस्किट, कोल्ड ड्रिंक…) पर 1 पॉइंट','दूध, दही, पनीर और थोक ऑर्डर पर पॉइंट नहीं','जुड़ने पर पहली ₹100+ की ख़रीद पर 5 बोनस पॉइंट','पॉइंट 1 साल चलते हैं · एक बिल पर एक इनाम · पॉइंट के बदले नकद नहीं','इनाम लेते समय आपके WhatsApp पर 4 अंकों का कोड आएगा — वही कोड काउंटर पर बताएँ'],
+ lp_phone_h:'मोबाइल नंबर से अपने पॉइंट देखें',lp_phone_ph:'10 अंकों का मोबाइल नंबर',lp_check:'देखें',lp_checking:'देख रहे हैं…',
+ lp_phone_note:'नंबर डालने पर सिर्फ़ पॉइंट दिखते हैं। पूरा हिसाब (ख़रीद, तारीख) देखने के लिए दुकान से आए WhatsApp मैसेज वाला लिंक दबाएँ।',
+ lp_e_phone:'सही मोबाइल नंबर डालें — 10 अंक, 6/7/8/9 से शुरू।',
+ lp_notmember:'यह नंबर अभी सदस्य नहीं है। अगली बार दुकान पर अपना नंबर बताकर जुड़िए — पहली ₹100+ की ख़रीद पर 5 बोनस पॉइंट 🎉',
+ lp_rate:'बहुत बार देखा गया — थोड़ी देर (1 घंटे) बाद फिर देखें।',lp_err:'अभी पॉइंट नहीं मिल पाए — इंटरनेट देखें और दोबारा कोशिश करें।',
+ lp_soon_feature:'पॉइंट ऑनलाइन देखने की सुविधा कुछ ही दिनों में शुरू होगी। तब तक WhatsApp पर पूछ लें।',
+ lp_pending:'आपका हिसाब अभी दुकान से आ रहा है — थोड़ी देर बाद यह पेज फिर खोलें।',
+ lp_ask:'💬 WhatsApp पर पूछें',lp_ask_msg:'नमस्ते, मेरे मिठास पॉइंट बताइए।',lp_forget:'यह मेरा फ़ोन नहीं — यहाँ से मेरा हिसाब हटाओ',lp_other:'किसी और नंबर से देखें',
+ lp_shop:'🛍️ ऑर्डर करें',lp_retry:'🔄 दोबारा कोशिश करें',lp_full_note:'यह पेज सिर्फ़ आपके लिए है — लिंक किसी और को न भेजें।',
  loc_stuck:'लोकेशन का जवाब नहीं आया। ऊपर पते वाली पट्टी में 🔒 या ⓘ दबाकर Location → Allow करें, फोन की लोकेशन (GPS) चालू रखें और दोबारा दबाएं। न हो पाए तो कोई बात नहीं — ऑर्डर के बाद WhatsApp पर लोकेशन भेज दें।',
  loc_inapp:'यह पेज किसी ऐप के अंदर खुला है — लोकेशन न आए तो ऊपर ⋮ दबाकर "Chrome में खोलें"।',
  loc_chrome:'🌐 Chrome में खोलें — लोकेशन वहाँ मिलेगी',loc_chrome_note:'आपका चुना सामान, नाम और पता साथ चला जाएगा।',loc_fail_inapp:'Instagram / WhatsApp के अंदर फ़ोन की लोकेशन अक्सर नहीं मिलती। नीचे "🌐 Chrome में खोलें" दबाएँ — या कोई बात नहीं, सिर्फ पता लिख दें।',
@@ -373,6 +422,22 @@ en:{
  os_total:'Total',os_pay_now:'Please pay below.',
  locsend_h:'📍 Send your home location',locsend_txt:'We did not get your location. To help the delivery reach you, send it on WhatsApp: tap below → in WhatsApp tap 📎 → "Location" → "Send your current location".',locsend_btn:'💬 Send location on WhatsApp',locsend_msg:'Hello, sending my home location for order {c} 👇',
  talk_btn:'💬 Chat on WhatsApp',talk_msg:'Hello, my order code is {c}.',my_order:'📦 View my order',
+ lp_bar_t:'Maa Bhagwati Mithas Points',lp_bar_s:'1 point on every ₹50 of sweets · check your points',lp_go:'View ›',lp_info_btn:'⭐ My points',
+ lp_h:'⭐ My Mithas Points',lp_hello:'Hello {n} 🙏',lp_pts:'Mithas points',lp_member_since:'Member since {d}',lp_for:'Points for {p}',
+ lp_rw_h:'Rewards (one per bill)',lp_rw_row:'{p} points = {o} off',lp_rw_ok:'✓ Available now<br>on bills of {m}+',lp_rw_need:'{k} more points<br>on bills of {m}+',
+ lp_soon:'⏳ Use {p} points by {d}',lp_st_e:'Earned',lp_st_u:'Used',lp_st_x:'Expired',lp_st_s:'Saved',
+ lp_hist_h:'Purchase history (newest first)',lp_h_buy:'Purchase {a}',lp_h_off:'{f} off',lp_h_bonus:'🎉 {b} joining bonus',lp_h_exp:'⌛ Points expired',lp_none:'No purchases yet',
+ lp_upd:'Last updated: {t}',lp_how_h:'How points work',
+ lp_how:['1 point on every ₹50 of sweets or cake','1 point on every ₹100 of packaged goods (namkeen, biscuits, cold drinks…)','No points on milk, curd, paneer or bulk orders','5 bonus points on your first purchase of ₹100+ after joining','Points last 1 year · one reward per bill · no cash for points','When you take a reward, a 4-digit code comes to your WhatsApp — tell that code at the counter'],
+ lp_phone_h:'Check your points with your mobile number',lp_phone_ph:'10-digit mobile number',lp_check:'Check',lp_checking:'Checking…',
+ lp_phone_note:'Your number shows only your points. To see your full history (purchases, dates), tap the link in the WhatsApp message from the shop.',
+ lp_e_phone:'Enter a valid 10-digit mobile number (starting with 6/7/8/9).',
+ lp_notmember:'This number is not a member yet. Next time at the shop, share your number to join — 5 bonus points on your first purchase of ₹100+ 🎉',
+ lp_rate:'Checked too many times — please try again in a while (1 hour).',lp_err:'Could not load points — check your internet and try again.',
+ lp_soon_feature:'Checking points online starts in a few days. Until then, ask us on WhatsApp.',
+ lp_pending:'Your account is still being updated from the shop — open this page again in a little while.',
+ lp_ask:'💬 Ask on WhatsApp',lp_ask_msg:'Hello, please tell me my Mithas points.',lp_forget:'Not my phone — remove my account from here',lp_other:'Check another number',
+ lp_shop:'🛍️ Order now',lp_retry:'🔄 Try again',lp_full_note:'This page is only for you — please don\'t forward the link.',
  loc_stuck:'No reply for location. Tap 🔒 or ⓘ in the address bar → Location → Allow, keep phone location (GPS) on and try again. If it still fails, no problem — send your location on WhatsApp after ordering.',
  loc_inapp:'This page opened inside another app — if location fails, tap ⋮ and choose "Open in Chrome".',
  loc_chrome:'🌐 Open in Chrome — location works there',loc_chrome_note:'Your items, name and address go along.',loc_fail_inapp:'Inside Instagram / WhatsApp the phone location often does not work. Tap "🌐 Open in Chrome" below — or no problem, just write your address.',
@@ -835,6 +900,7 @@ function renderMenu(){
       (notice?'<div class="notice">📢 '+esc(notice)+'</div>':'')+
       installBarHtml()+
       ((st.last&&Date.now()-st.last.ts<3*86400000)?'<button class="btn block" style="margin-top:8px" data-act="go" data-v="done">'+t('my_order')+' · '+esc(st.last.code)+'</button>':'')+
+      '<button class="lpbar" data-act="go" data-v="points"><span class="st">⭐</span><span><b>'+t('lp_bar_t')+'</b><small>'+t('lp_bar_s')+'</small></span><span class="go">'+t('lp_go')+'</span></button>'+
       '<div class="facts"><div><b>'+t('f1')+'</b><span>'+t('f1b')+'</span></div><div><b>'+t('f2')+'</b><span>'+t('f2b')+'</span></div><div><b>'+t('f3')+'</b><span>'+t('f3b')+'</span></div></div>'+
       '<p class="avail">'+t('avail')+'</p>'+
     '</div>'+
@@ -862,6 +928,7 @@ function renderMenu(){
           '<a class="btn" href="'+esc(S.review)+'" target="_blank" rel="noopener">'+t('review')+'</a>'+
         '</div>'+
         '<div style="margin-top:10px"><button class="btn block" data-act="go" data-v="rules">'+t('rules_link')+'</button></div>'+
+        '<div style="margin-top:8px"><button class="btn block" data-act="go" data-v="points">'+t('lp_info_btn')+'</button></div>'+
       '</div></section>'+
     '</main>'+
     '<footer class="wrap">© '+esc(S.name)+' · Nanaura, Darbhanga<br>'+t('foot_photo')+'</footer>'+
@@ -911,6 +978,7 @@ function route(){
   else if(h==='#bulk')v='bulk';
   else if(h==='#rules')v='rules';
   else if(h==='#install')v='install';
+  else if(h==='#points')v='points';
   else if((m=h.match(/^#pay(?:=([0-9.]+))?/)))v='pay';
   else if((m=h.match(/^#cake=([a-z0-9-]+)(?:,(\d+))?/)))v='cake';
   else if((m=h.match(/^#(item|tab)=([a-z0-9-]+)/))){
@@ -928,6 +996,7 @@ function route(){
   else if(v==='bulk')renderBulk();
   else if(v==='rules')renderRules();
   else if(v==='install')renderInstall();
+  else if(v==='points')renderPoints();
   else if(v==='pay')renderPay(m&&m[1]?num(m[1]):0);
   else if(v==='cake')renderCake(m[1],m[2]!=null?+m[2]:-1);
   var sc=$('#view .view');if(sc)sc.scrollTop=0;
@@ -1468,6 +1537,134 @@ function checkStatus(){
     },function(){box=$('#ordStatus');if(box){box.className='minbar no';box.textContent=t('os_err');}});
 }
 
+/* --- ⭐ मिठास पॉइंट्स: WhatsApp वाले लिंक से पूरा हिसाब, नंबर से सिर्फ़ पॉइंट --- */
+var LP_KEY='mbo-lp',lpMem='',lpReq=0,lpPhoneRes=null;
+function lpTokGet(){if(lpMem)return lpMem;try{return localStorage.getItem(LP_KEY)||'';}catch(e){return '';}}
+function lpTokSet(v){lpMem=v||'';try{if(v)localStorage.setItem(LP_KEY,v);else localStorage.removeItem(LP_KEY);}catch(e){}}
+function lpFromLink(){
+  var m=location.search.match(/[?&]lp=([A-Za-z0-9]{16,40})(?:&|$)/);
+  if(!m)return;
+  lpTokSet(m[1]);
+  try{history.replaceState(null,'',location.pathname+'#points');}catch(e){location.hash='points';}
+}
+function lpToday(){return dkey(nowIST());}
+function lpAdd(k,n){var d=keyToDate(k);d.setDate(d.getDate()+n);return dkey(d);}
+function lpD(k){if(!k)return '';var d=keyToDate(k),now=nowIST();return d.getDate()+' '+T[st.lang].mo[d.getMonth()]+(d.getFullYear()!==now.getFullYear()?' '+d.getFullYear():'');}
+function lpDT(ms){
+  if(!ms)return '';
+  var d=new Date(num(ms)+(330+new Date().getTimezoneOffset())*60000),h=d.getHours(),mi=d.getMinutes();
+  return lpD(dkey(d))+', '+((h%12)||12)+':'+(mi<10?'0':'')+mi+(h<12?' am':' pm');
+}
+function lpMask(p){p=String(p||'');return p.length===10?p.slice(0,2)+'xxxxxx'+p.slice(8):p;}
+/* आज की तारीख से पॉइंट (जो थैली आज तक पूरी हुई, वो ख़त्म) */
+function lpCalcView(d){
+  var today=lpToday(),lim=lpAdd(today,30),bal=0,soon=0,soonExp='',newExp=[],gone=0;
+  (Array.isArray(d.lots)?d.lots:[]).forEach(function(L){
+    var p=num(L&&L[0]),e=String(L&&L[1]||'');if(!(p>0)||!e)return;
+    if(e<=today){gone+=p;newExp.push({d:e,x:p});return;}
+    bal+=p;if(e<=lim){soon+=p;if(!soonExp||e<soonExp)soonExp=e;}
+  });
+  bal-=num(d.debt);
+  return {bal:Math.max(0,bal),soon:soon,soonLast:soonExp?lpAdd(soonExp,-1):'',expired:num(d.x)+gone,newExp:newExp};
+}
+function lpRR(d){
+  var rr=Array.isArray(d&&d.rr)&&d.rr.length?d.rr:[[10,15,250],[25,40,500],[50,100,1000]];
+  return rr.filter(function(r){return Array.isArray(r)&&r.length>=3;});
+}
+function lpRwHtml(bal,rr){
+  return '<div class="lprw">'+rr.map(function(r){
+    var ok=bal>=num(r[0]);
+    return '<div class="'+(ok?'ok':'')+'"><b>'+t('lp_rw_row',{p:num(r[0]),o:rupee(r[1])})+'</b><small>'+
+      (ok?t('lp_rw_ok',{m:rupee(r[2])}):t('lp_rw_need',{k:num(r[0])-bal,m:rupee(r[2])}))+'</small></div>';
+  }).join('')+'</div>';
+}
+function lpHowHtml(){return '<div class="blk"><h3>'+t('lp_how_h')+'</h3><ul class="lprules">'+t('lp_how').map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>';}
+function lpBtnsHtml(){
+  return '<div class="row" style="margin-top:4px"><button class="btn primary" style="flex:1" data-act="home">'+t('lp_shop')+'</button>'+
+    '<a class="btn wa" href="'+esc(waUrl(t('lp_ask_msg')))+'" target="_blank" rel="noopener">'+t('lp_ask')+'</a></div>';
+}
+function lpErrText(r){
+  var e=r&&r.error;
+  if(e==='action'||!C.orderApi)return t('lp_soon_feature');
+  if(e==='rate')return t('lp_rate');
+  if(e==='notfound')return t('lp_pending');
+  return t('lp_err');
+}
+function renderPoints(){
+  var tok=lpTokGet();
+  if(!C.orderApi){viewShell(t('lp_h'),'<div class="blk"><p>'+t('lp_soon_feature')+'</p></div>'+lpHowHtml()+lpBtnsHtml());return;}
+  if(!tok){lpRenderPhone();return;}
+  viewShell(t('lp_h'),'<div class="blk"><p class="hint" style="margin:0">'+t('lp_checking')+'</p></div>');
+  var my=++lpReq;
+  fetch(C.orderApi+'?action=lpview&t='+encodeURIComponent(tok),{redirect:'follow'})
+    .then(function(r){return r.json();})
+    .then(function(r){
+      if(my!==lpReq||location.hash!=='#points')return;
+      if(r&&r.ok&&r.d){lpRenderFull(r.d);return;}
+      lpRenderFullErr(r);
+    },function(){if(my===lpReq&&location.hash==='#points')lpRenderFullErr(null);});
+}
+function lpRenderFullErr(r){
+  viewShell(t('lp_h'),'<div class="blk"><div class="minbar no" style="margin-top:0">'+esc(lpErrText(r))+'</div>'+
+    '<button class="btn block" style="margin-top:10px" data-act="lp-retry">'+t('lp_retry')+'</button></div>'+
+    lpHowHtml()+lpBtnsHtml()+'<button class="lpmini" data-act="lp-forget">'+t('lp_forget')+'</button>');
+}
+function lpRenderFull(d){
+  var v=lpCalcView(d),rr=lpRR(d);
+  var items=(Array.isArray(d.h)?d.h:[]).slice();
+  v.newExp.forEach(function(x){items.push(x);});
+  items.sort(function(a,b){return String(a.d)<String(b.d)?1:(String(a.d)>String(b.d)?-1:0);});
+  var hist=items.length?items.map(function(x){
+    if(x.x)return '<div class="line"><div class="ln"><b>'+t('lp_h_exp')+'</b><small>'+lpD(x.d)+'</small></div><div class="la"><span class="m">− '+num(x.x)+'</span></div></div>';
+    return '<div class="line"><div class="ln"><b>'+t('lp_h_buy',{a:rupee(x.a)})+(num(x.r)>0?' · '+t('lp_h_off',{f:rupee(x.f)}):'')+'</b><small>'+lpD(x.d)+(num(x.bo)>0?' · '+t('lp_h_bonus',{b:num(x.bo)}):'')+'</small></div>'+
+      '<div class="la"><span class="'+(num(x.g)>0?'g':'m')+'">+'+num(x.g)+'</span>'+(num(x.r)>0?'<span class="r">− '+num(x.r)+'</span>':'')+'</div></div>';
+  }).join(''):'<p class="hint" style="margin:0">'+t('lp_none')+'</p>';
+  var html='<div class="lphero"><div class="hello">'+t('lp_hello',{n:esc(d.n||'')})+'</div><div class="n">'+v.bal+'</div><div class="l">'+t('lp_pts')+'</div>'+
+      (d.c?'<p class="hint">'+t('lp_member_since',{d:lpD(d.c)})+'</p>':'')+'</div>'+
+    (v.soon?'<div class="lpwarn">'+t('lp_soon',{p:v.soon,d:lpD(v.soonLast)})+'</div>':'')+
+    '<div class="blk"><h3>'+t('lp_rw_h')+'</h3>'+lpRwHtml(v.bal,rr)+'</div>'+
+    '<div class="blk lpstats"><div><b class="g" style="color:var(--green)">'+num(d.e)+'</b><span>'+t('lp_st_e')+'</span></div><div><b>'+num(d.u)+'</b><span>'+t('lp_st_u')+'</span></div>'+
+      '<div><b>'+v.expired+'</b><span>'+t('lp_st_x')+'</span></div><div><b>'+rupee(d.sv)+'</b><span>'+t('lp_st_s')+'</span></div></div>'+
+    '<div class="blk"><h3>'+t('lp_hist_h')+'</h3>'+hist+'</div>'+
+    '<p class="hint" style="text-align:center;margin:-4px 0 12px">'+t('lp_upd',{t:lpDT(d.at)})+'<br>'+t('lp_full_note')+'</p>'+
+    lpHowHtml()+lpBtnsHtml()+
+    '<button class="lpmini" data-act="lp-forget">'+t('lp_forget')+'</button>';
+  viewShell(t('lp_h'),html);
+}
+function lpRenderPhone(){
+  var r=lpPhoneRes,body;
+  var form='<div class="blk"><h3>'+t('lp_phone_h')+'</h3>'+
+    '<div class="lpphone"><input type="tel" id="lp-phone" inputmode="numeric" maxlength="14" autocomplete="tel" placeholder="'+esc(t('lp_phone_ph'))+'" value="'+esc(r?r.phone:(phone10(st.me.phone)||''))+'">'+
+    '<button class="btn primary" data-act="lp-check">'+t('lp_check')+'</button></div>'+
+    '<div class="err" id="lp-perr">'+(r&&r.err?esc(r.err):'')+'</div>'+
+    '<p class="hint" style="margin-top:0">'+t('lp_phone_note')+'</p></div>';
+  if(r&&r.d){
+    var v=lpCalcView(r.d);
+    body='<div class="lphero"><div class="hello">'+t('lp_for',{p:esc(lpMask(r.phone))})+'</div><div class="n">'+v.bal+'</div><div class="l">'+t('lp_pts')+'</div></div>'+
+      (v.soon?'<div class="lpwarn">'+t('lp_soon',{p:v.soon,d:lpD(v.soonLast)})+'</div>':'')+
+      '<div class="blk"><h3>'+t('lp_rw_h')+'</h3>'+lpRwHtml(v.bal,lpRR(r.d))+'</div>'+
+      '<p class="hint" style="text-align:center;margin:-4px 0 12px">'+t('lp_upd',{t:lpDT(r.d.at)})+'</p>'+
+      '<div class="blk"><p class="hint" style="margin:0 0 8px">'+t('lp_phone_note')+'</p><button class="btn block" data-act="lp-other">'+t('lp_other')+'</button></div>';
+  }else body=form;
+  viewShell(t('lp_h'),body+lpHowHtml()+lpBtnsHtml());
+}
+function lpCheckPhone(){
+  var inp=$('#lp-phone'),err=$('#lp-perr');if(!inp)return;
+  var ph=phone10(inp.value);
+  if(!ph){err.textContent=t('lp_e_phone');return;}
+  err.textContent=t('lp_checking');
+  var btn=$('[data-act=lp-check]');if(btn)btn.disabled=true;
+  var my=++lpReq;
+  fetch(C.orderApi+'?action=lppts&p='+ph,{redirect:'follow'})
+    .then(function(r){return r.json();})
+    .then(function(r){
+      if(my!==lpReq||location.hash!=='#points')return;
+      if(r&&r.ok&&r.d){lpPhoneRes={phone:ph,d:r.d};lpRenderPhone();return;}
+      lpPhoneRes={phone:ph,err:(r&&r.error==='notfound')?t('lp_notmember'):(r&&r.error==='phone'?t('lp_e_phone'):lpErrText(r))};
+      lpRenderPhone();
+    },function(){if(my!==lpReq)return;lpPhoneRes={phone:ph,err:t('lp_err')};lpRenderPhone();});
+}
+
 /* --- pay --- */
 function upiLink(amount){
   var u='upi://pay?pa='+encodeURIComponent(S.upi)+'&pn='+encodeURIComponent('MB Sweets')+'&cu=INR';
@@ -1657,7 +1854,14 @@ document.addEventListener('click',function(e){
     case 'install':doInstall();break;
     case 'bev':syncBulk();bulk.event=+el.getAttribute('data-i');renderBulk();break;
     case 'bsend':sendBulk();break;
+    case 'lp-check':lpCheckPhone();break;
+    case 'lp-other':lpPhoneRes=null;lpRenderPhone();setTimeout(function(){var f=$('#lp-phone');if(f){f.value='';f.focus();}},40);break;
+    case 'lp-forget':lpTokSet('');lpPhoneRes=null;renderPoints();break;
+    case 'lp-retry':renderPoints();break;
   }
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target&&e.target.id==='lp-phone'){e.preventDefault();lpCheckPhone();}
 });
 document.addEventListener('change',function(e){
   var tg=e.target;
@@ -1687,6 +1891,7 @@ setInterval(function(){
 /* ---------- start ---------- */
 load();
 takeHandoff();
+lpFromLink();
 (function(){var q=location.search.match(/[?&]lang=(en|hi)\b/);if(q&&st.lang!==q[1]){st.lang=q[1];save();}})();
 renderMenu();
 route();

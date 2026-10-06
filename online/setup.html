@@ -123,13 +123,22 @@ details summary{cursor:pointer;font-weight:700;margin-top:8px}
   <b>पहले से चल रहा सेटअप है</b> तो कंप्यूटर पर एक बार कोड अपडेट करना है (5 मिनट):</p>
   <ol>
     <li>वही Google Sheet खोलें (<b class="m">MB Sweets ऑनलाइन ऑर्डर</b>) → <b class="m">Extensions</b> → <b class="m">Apps Script</b></li>
-    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 4"</b> लिखा दिखना चाहिए।</li>
+    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 5"</b> (या उससे नया) लिखा दिखना चाहिए।</li>
     <li>ऊपर <b class="m">▶ Run</b> दबाएं (बगल में <b>setupSheet</b> लिखा हो)। नई अनुमति माँगेगा → <b class="m">Review permissions</b> → अकाउंट चुनें → <b class="m">Advanced</b> → <b class="m">Go to … (unsafe)</b> → <b class="m">Allow</b>। नीचे "Execution completed" दिखे तो ठीक।</li>
     <li>ऊपर <b class="m">Deploy</b> → <b class="m">Manage deployments</b> → ✏️ (पेंसिल) → <b>Version:</b> <b class="m">New version</b> → <b class="m">Deploy</b>। <b>URL वही रहेगा</b> — कहीं कुछ बदलना नहीं है।</li>
   </ol>
   <p class="note">⚠️ क्रम यही रखें — पहले Run (अनुमति), फिर Deploy। "New deployment" मत दबाना, वरना URL बदल जाएगा।</p>
   <button class="btn primary block" id="checkMilk">✓ जांचें — रिमाइंडर चालू है?</button>
   <div id="milkMsg"></div>
+</div>
+
+<div class="step" id="st-points">
+  <h2><span class="num">8</span>⭐ मिठास पॉइंट्स — ग्राहक ख़ुद देखें</h2>
+  <p>ग्राहक के WhatsApp मैसेज में उसका अपना लिंक जाता है — उसे दबाकर वह <b>अपने पॉइंट और पूरा हिसाब</b> देख सकता है। ऑर्डर मेन्यू में मोबाइल नंबर डालकर <b>सिर्फ़ पॉइंट</b> दिखते हैं (नाम और ख़रीद नहीं)।</p>
+  <p class="note">इसके लिए रजिस्टर का <b>कोड संस्करण 5</b> चाहिए। पहले से चल रहा सेटअप है तो ऊपर चरण 7 वाले वही 4 काम करें (नया कोड चिपकाएं → Save → ▶ Run → Manage deployments → New version → Deploy)। <b>URL वही रहेगा।</b></p>
+  <p class="note">पॉइंट सिर्फ़ आपके फ़ोन (बिलिंग ऐप) से चढ़ते हैं — Sheet के "Points" टैब में सिर्फ़ ग्राहक को दिखाने के लिए कॉपी जाती है। उसे हाथ से न बदलें।</p>
+  <button class="btn primary block" id="checkPoints">✓ जांचें — नया कोड (5) चालू है?</button>
+  <div id="pointsMsg"></div>
 </div>
 
 </main>
@@ -234,6 +243,20 @@ $('#checkMilk').addEventListener('click',function(){
       msg('#milkMsg','err','शीट से ठीक जवाब नहीं आया — थोड़ी देर बाद दोबारा दबाएं।');
     }
   }).catch(function(){msg('#milkMsg','err','शीट से बात नहीं हो पाई — इंटरनेट देखें और दोबारा दबाएं।');});
+});
+$('#checkPoints').addEventListener('click',function(){
+  var c=load();if(!c||!c.u){msg('#pointsMsg','err','पहले चरण 4 पूरा करें।');return;}
+  msg('#pointsMsg','note','जांच रहे हैं…');
+  api(c.u,{action:'ping'}).then(function(r){
+    if(r&&r.ok&&r.v>=5){
+      try{var x=JSON.parse(localStorage.getItem('mbmb-lp-sent')||'{}')||{};delete x.old;x.v5=true;localStorage.setItem('mbmb-lp-sent',JSON.stringify(x));}catch(e){}
+      msg('#pointsMsg','ok','✅ नया कोड चालू है। अब बिलिंग ऐप खोलें → ⭐ पॉइंट — थोड़ी देर में सदस्यों का हिसाब अपने-आप चला जाएगा और WhatsApp मैसेज में ग्राहक का लिंक जुड़ जाएगा।');
+    }else if(r&&r.ok){
+      msg('#pointsMsg','err','अभी पुराना कोड (संस्करण '+(r.v||'?')+') चल रहा है — चरण 7 के 4 काम करें (खासकर आखिरी: Manage deployments → New version → Deploy)।');
+    }else{
+      msg('#pointsMsg','err','शीट से ठीक जवाब नहीं आया — थोड़ी देर बाद दोबारा दबाएं।');
+    }
+  }).catch(function(){msg('#pointsMsg','err','शीट से बात नहीं हो पाई — इंटरनेट देखें और दोबारा दबाएं।');});
 });
 fromHash();
 renderStatus();

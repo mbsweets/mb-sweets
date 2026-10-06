@@ -323,6 +323,53 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
 .installbox p{margin:0 0 8px}
 .toast{position:fixed;left:50%;bottom:calc(126px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-weight:500;max-width:88%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
+.block{display:flex;width:100%}
+.lppts{text-align:center;flex:0 0 auto;min-width:56px}
+.lppts b{display:block;font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:1.25rem;color:var(--gold);line-height:1.1}
+.lppts small{font-size:.72rem;color:var(--muted)}
+.lpbig{background:var(--card);border:2px solid var(--gold);border-radius:16px;text-align:center;padding:10px 8px 8px;margin:12px 0 10px}
+.lpbig b{display:block;font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:2.6rem;line-height:1;color:var(--brand-ink)}
+.lpbig span{font-size:.85rem;color:var(--muted);font-weight:600}
+.lprw{display:grid;gap:6px;margin:0 0 10px}
+.lprw>div{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.lprw>div.ok{border-color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--card))}
+.lprw b{font-size:.95rem}
+.lprw>div.ok b{color:var(--green)}
+.lprw span{font-size:.78rem;color:var(--muted);text-align:right}
+.lprwpick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.lprwpick button{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:6px 8px;min-height:48px;font-family:inherit;text-align:center}
+.lprwpick button b{display:block;font-size:.95rem}
+.lprwpick button small{display:block;font-size:.72rem;color:var(--muted)}
+.lprwpick button.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
+.lprwpick button.on small{color:var(--on-brand)}
+.lprwpick button:disabled{opacity:.5}
+.lpsum3{grid-template-columns:1fr 1fr 1fr}
+.lpgain{background:var(--card);border:1px dashed var(--gold);border-radius:10px;padding:8px 12px;margin:0 0 6px;font-size:.92rem}
+.lpgain b{color:var(--gold)}
+.lpcheck{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:.9rem;line-height:1.35}
+.lpotp{background:var(--card);border:1.5px dashed var(--gold);border-radius:12px;padding:10px 12px;margin:10px 0 6px}
+.lpotp>b{display:block;font-size:.95rem;margin-bottom:2px}
+.lpotp .hint{margin:2px 0 8px}
+.lpotp .fl{margin-top:10px}
+.lpotp input#lp-otp-in{font-size:1.5rem;letter-spacing:.5em;text-align:center;font-weight:700;max-width:220px}
+.lpotp .lnk{margin-top:8px;font-size:.85rem;text-align:left;padding-left:0}
+.lpotp.ok{border-style:solid;border-color:var(--green);color:var(--green);font-weight:700}
+.lpotp.skip{border-style:solid;border-color:var(--amber);color:var(--amber);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lpotp.skip .lnk{margin:0;font-weight:700}
+.lpsync{font-size:.82rem;color:var(--muted);margin:-2px 0 10px}
+.lpsync.old{color:var(--amber)}
+.lpcheck input{width:22px;height:22px;flex:0 0 auto;margin-top:1px}
+.lprem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px 12px;margin:-4px 0 12px}
+.lpremrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.lpremrow:last-child{border-bottom:0}
+.lpremrow span{min-width:0}
+.lpremrow small{display:block;color:var(--muted);font-size:.78rem}
+.lgr.void .lt,.lgr.void .lv b{text-decoration:line-through;opacity:.6}
+.lgr .lv b.mut{color:var(--muted)}
+.lpdet{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px 12px;margin:6px 0 12px}
+.lpdet>div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.92rem}
+.lpdet>div:last-child{border-bottom:0}
+.lpdet span{color:var(--muted)}
 .billprev{max-height:52vh;overflow:auto;margin:6px 0 12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;min-height:80px}
 .billprev img{width:100%;display:block}
 .billprev .hint{padding:24px 12px;text-align:center}
@@ -408,6 +455,8 @@ function load(){
       state.khata=(d.khata&&typeof d.khata==='object')?d.khata:{parties:[],entries:[]};
       if(Array.isArray(state.khata.parties))state.khata.parties=objs(state.khata.parties);
       if(Array.isArray(state.khata.entries))state.khata.entries=objs(state.khata.entries);
+      state.loyal=(d.loyal&&typeof d.loyal==='object')?d.loyal:{m:[],b:[]};
+      state.loyal.m=objs(state.loyal.m);state.loyal.b=objs(state.loyal.b);
       normalizeState();
       var mx=0;state.orders.forEach(function(o){if(o.no>mx)mx=o.no;});
       state.nextOrderNo=Math.max(d.nextOrderNo||1,mx+1);
@@ -431,8 +480,9 @@ function load(){
   }
 }
 function save(){
-  ORD_IDX=null;
+  ORD_IDX=null;LP_BIDX=null;
   planSyncSoon();
+  if(typeof lpSyncSoon==='function')lpSyncSoon();
   try{localStorage.setItem(KEY,JSON.stringify(state));}
   catch(e){ui.storageOk=false;try{renderBanner();}catch(e2){}}
 }
@@ -445,7 +495,8 @@ function normalizeState(){
     o.payments.forEach(function(p){if(!p.id)p.id=uid();});
     o.items.forEach(function(it){if(!it.lid)it.lid=uid();});
   });
-  KH();
+  KH();LY();LP_BIDX=null;
+  LY().m.forEach(function(m){if(!m.tk){m.tk=lpTok();ui.lpTokNew=true;}});
 }
 
 /* दुकान की साझा लिस्ट (catalog.js) से नए दाम/आइटम — सिर्फ वही जो पिछली बार के बाद बदले */
@@ -654,17 +705,18 @@ function renderBanner(){
   $('#banner').innerHTML=html;
 }
 function renderNav(){
-  var tabs=[['home','होम','\uD83C\uDFE0'],['online','ऑनलाइन','\uD83C\uDF10'],['orders','ऑर्डर्स','\uD83E\uDDFE'],['khata','उधारी','\uD83D\uDCD2'],['items','आइटम्स','\uD83C\uDF6C'],['backup','बैकअप','\uD83D\uDCBE']];
-  var newN=onlineNewCount(),remN=khataRemindList().length;
+  var tabs=[['home','होम','\uD83C\uDFE0'],['online','ऑनलाइन','\uD83C\uDF10'],['orders','ऑर्डर्स','\uD83E\uDDFE'],['khata','उधारी','\uD83D\uDCD2'],['loyal','पॉइंट','\u2B50'],['items','आइटम्स','\uD83C\uDF6C'],['backup','बैकअप','\uD83D\uDCBE']];
+  var newN=onlineNewCount(),remN=khataRemindList().length,lpN=lpRemindList().length;
   $('#navbar').innerHTML=tabs.map(function(t){
-    var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||(ui.view==='customer'&&ui.cameFrom==='dues')))||(t[0]==='khata'&&ui.view==='party');
-    var bd=(t[0]==='online'&&newN)?'<span class="bd">'+newN+'</span>':((t[0]==='khata'&&remN)?'<span class="bd">'+remN+'</span>':'');
+    var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||(ui.view==='customer'&&ui.cameFrom==='dues')))||(t[0]==='khata'&&ui.view==='party')||(t[0]==='loyal'&&ui.view==='lmember');
+    var bd=(t[0]==='online'&&newN)?'<span class="bd">'+newN+'</span>':((t[0]==='khata'&&remN)?'<span class="bd">'+remN+'</span>':((t[0]==='loyal'&&lpN)?'<span class="bd">'+lpN+'</span>':''));
     return '<button class="navbtn'+(on?' on':'')+'" data-act="nav" data-v="'+t[0]+'">'+bd+'<span class="ic">'+t[2]+'</span>'+t[1]+'</button>';
   }).join('');
   var fab=$('#fab');
   if(ui.view==='items'){fab.style.display='';fab.textContent='+ नया आइटम';fab.setAttribute('data-fabact','item');}
   else if(ui.view==='backup'||ui.view==='online'){fab.style.display='none';}
   else if(ui.view==='khata'||ui.view==='party'){fab.style.display='';fab.textContent='+ उधार लिखो';fab.setAttribute('data-fabact','udhar');}
+  else if(ui.view==='loyal'||ui.view==='lmember'){fab.style.display='';fab.textContent='+ ख़रीद जोड़ो';fab.setAttribute('data-fabact','lbuy');}
   else{fab.style.display='';fab.textContent='+ नया ऑर्डर';fab.setAttribute('data-fabact','order');}
 }
 
@@ -1150,7 +1202,7 @@ function renderBackup(){
     '<div class="sechead" style="margin-top:4px"><h2>बैकअप (रोज़ करो)</h2></div>'+
     '<p class="hint" id="last-backup-txt" style="font-weight:700">'+backupStatusText()+'</p>'+
     (corruptKeys().length?'<div class="banner" style="margin:6px 0">⚠️ इस फ़ोन में पुराने (खराब हुए) डेटा की कॉपी रखी है। <button class="btn small" data-act="dl-corrupt">⬇️ उसकी फ़ाइल डाउनलोड करो</button> — Claude/मदद करने वाले को भेजो, उससे डेटा वापस निकाला जा सकता है।</div>':'')+
-    '<p class="hint">डेटा: '+state.customers.length+' ग्राहक, '+state.orders.length+' ऑर्डर, '+KH().parties.length+' उधारी खाते ('+KH().entries.length+' एंट्री) · जगह भरी: '+storageUsedPct()+'%'+(ui.persisted?' · Chrome सुरक्षा: पक्की ✓':'')+'</p>'+
+    '<p class="hint">डेटा: '+state.customers.length+' ग्राहक, '+state.orders.length+' ऑर्डर, '+KH().parties.length+' उधारी खाते ('+KH().entries.length+' एंट्री), '+LY().m.length+' पॉइंट सदस्य ('+LY().b.length+' ख़रीद) · जगह भरी: '+storageUsedPct()+'%'+(ui.persisted?' · Chrome सुरक्षा: पक्की ✓':'')+'</p>'+
     '<p class="hint">Data sirf isi phone me save hota hai. Roz dukaan band karte waqt backup apne hi WhatsApp number par bhej do — phone kho jaye ya kharab ho jaye to bhi data bacha rahega.</p>'+
     '<div class="actbar">'+(canShare?'<button class="btn primary small" data-act="share-backup">📤 WhatsApp पर भेजो</button>':'')+
     '<button class="btn '+(canShare?'':'primary ')+'small" data-act="copy-backup">Copy karo</button></div>'+
@@ -1196,6 +1248,8 @@ function renderRoute(){
   else if(ui.view==='online')renderOnline();
   else if(ui.view==='khata')renderKhata();
   else if(ui.view==='party')renderParty();
+  else if(ui.view==='loyal')renderLoyal();
+  else if(ui.view==='lmember')renderLMember();
   renderNav();
   renderBanner();
   navTrack();
@@ -1206,10 +1260,10 @@ function renderRoute(){
    अब: Back = खुली शीट बंद → पिछली स्क्रीन → होम → "एक बार और दबाओ" → ऐप बंद।
    ब्राउज़र history में सिर्फ एक "जाल" एंट्री रहती है; असली पिछली स्क्रीनें NAV.stack में। */
 var NAV={stack:[],cur:null,restoring:false,trap:false,exitArm:0,exitTimer:null,y:0};
-var NAV_TABS=['online','orders','khata','items','backup'];
-function navKey(x){return x.v+'|'+(x.c||'')+'|'+(x.p||'');}
+var NAV_TABS=['online','orders','khata','loyal','items','backup'];
+function navKey(x){return x.v+'|'+(x.c||'')+'|'+(x.p||'')+'|'+(x.m||'');}
 function navTrack(){
-  var now={v:ui.view,c:ui.customerId||null,p:ui.partyId||null,cf:ui.cameFrom,y:0};
+  var now={v:ui.view,c:ui.customerId||null,p:ui.partyId||null,m:ui.memberId||null,cf:ui.cameFrom,y:0};
   if(!NAV.cur){NAV.cur=now;return;}
   if(navKey(now)===navKey(NAV.cur)){NAV.cur.cf=now.cf;return;}
   if(!NAV.restoring){
@@ -1229,7 +1283,7 @@ function navTrack(){
 }
 function navGo(x){
   NAV.restoring=true;
-  ui.view=x.v;ui.customerId=x.c||null;ui.partyId=x.p||null;if(x.cf)ui.cameFrom=x.cf;
+  ui.view=x.v;ui.customerId=x.c||null;ui.partyId=x.p||null;ui.memberId=x.m||null;if(x.cf)ui.cameFrom=x.cf;
   try{renderRoute();}finally{NAV.restoring=false;}
   window.scrollTo(0,x.y||0);
 }
@@ -1240,6 +1294,8 @@ function navBack(){
   if(ui.view!=='home'){navGo({v:'home'});return true;}
   return false;
 }
+// पेज दोबारा लोड हुआ और हम पहले से "जाल" वाली एंट्री पर हैं — दूसरा जाल न बनाओ, वरना पहला Back बेकार जाता
+try{if(history.state&&history.state.mbTrap)NAV.trap=true;}catch(e){}
 function navArmTrap(){
   if(NAV.trap)return;
   try{history.pushState({mbTrap:1},'');NAV.trap=true;}catch(e){}
@@ -1301,7 +1357,7 @@ function closeSheet(){
   ui.billShare=null;
   $('#sheetRoot').innerHTML='';
   document.body.classList.remove('noscroll');
-  ui.orderDraft=null;ui.editId=null;ui.kDraft=null;
+  ui.orderDraft=null;ui.editId=null;ui.kDraft=null;ui.lDraft=null;
 }
 
 /* ---------- Customer form ---------- */
@@ -1454,6 +1510,7 @@ function syncDraftField(t){
 }
 function softClose(){
   if(ui.kDraft&&num(ui.kDraft.amount)>0){toast('बंद करना है तो ऊपर "बंद करो" दबाओ');return;}
+  if(ui.lDraft&&(num(ui.lDraft.sw)>0||num(ui.lDraft.pk)>0)){toast('बंद करना है तो ऊपर "बंद करो" दबाओ');return;}
   if(ui.orderDraft&&(ui.orderDraft.lines.length||ui.orderDraft.customerId)){
     toast('ऑर्डर बंद करना है तो ऊपर "बंद करो" दबाओ');return;
   }
@@ -2527,6 +2584,627 @@ function openKEntryDelete(id){
     '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="k-del-yes" data-id="'+id+'">हां, हटाओ</button></div>');
 }
 
+/* ================== ⭐ माँ भगवती मिठास पॉइंट्स (लॉयल्टी) ==================
+   नियम मालिक ने तय किए (6 अक्टूबर 2026) — बिना पूछे न बदलें:
+   • मिठाई + केक: हर पूरे ₹50 पर 1 पॉइंट · पैकेट सामान: हर पूरे ₹100 पर 1 पॉइंट · दूध/दही/पनीर/थोक: 0
+   • पहली ख़रीद (मिठाई/केक/पैकेट ₹100+) पर 5 बोनस, एक बार · एक बिल पर ज़्यादा से ज़्यादा 50 पॉइंट (बोनस अलग)
+   • इनाम: 10 = ₹15 (बिल ₹250+) · 25 = ₹40 (₹500+) · 50 = ₹100 (₹1,000+) — न्यूनतम बिल में सिर्फ़ मिठाई/केक/पैकेट
+   • एक बिल पर एक इनाम · नकद नहीं · इसी बिल से पहले के पॉइंट · पुराने पहले कटें (FIFO) · हर पॉइंट 365 दिन
+   • पॉइंट उस रकम पर जो ग्राहक ने दी (छूट घटाकर) · पॉइंट सिर्फ़ मालिक इस फ़ोन से चढ़ाते हैं
+   डेटा: state.loyal = {m:[सदस्य], b:[बिल]} — बिल कभी मिटता नहीं; ग़लती पर "रद्द" (v) लगता है।
+   सदस्य: {id,name,phone,c:जुड़ने का समय,ok:सहमति का समय,wa:WhatsApp की सहमति,rm:आख़िरी याद}
+   बिल: {id,m,t,s:मिठाई+केक ₹,k:पैकेट ₹,o:बिना पॉइंट वाला ₹,r:कटे पॉइंट,f:छूट ₹,p:मिले पॉइंट,bo:बोनस,v:{t,w}} */
+var LP={name:'माँ भगवती मिठास पॉइंट्स',swPer:50,pkPer:100,bonus:5,bonusMin:100,cap:50,days:365,warnDays:30,remindDays:15,bigBill:2500,
+  rewards:[{pts:10,off:15,min:250},{pts:25,off:40,min:500},{pts:50,off:100,min:1000}]};
+var LP_WHY=['ग़लत रकम लिखी गई','ग़लत ग्राहक पर चढ़ गया','ग्राहक ने सामान लौटाया','ऑर्डर कैंसल हुआ'];
+function LY(){
+  var l=state.loyal;
+  if(!l||typeof l!=='object')l=state.loyal={m:[],b:[]};
+  if(!Array.isArray(l.m))l.m=[];
+  if(!Array.isArray(l.b))l.b=[];
+  return l;
+}
+function findMember(id){var a=LY().m;for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
+function findLBill(id){var a=LY().b;for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
+function memberByPhone(ph,exceptId){
+  var n=phoneNorm(ph);if(!n)return null;
+  var a=LY().m;for(var i=0;i<a.length;i++)if(a[i].id!==exceptId&&phoneNorm(a[i].phone)===n)return a[i];
+  return null;
+}
+var LP_BIDX=null;   // सदस्य → उसके बिल (हर save पर नया बनता है)
+function memberBills(mid){
+  if(!LP_BIDX){
+    LP_BIDX={};
+    LY().b.forEach(function(x){(LP_BIDX[x.m]=LP_BIDX[x.m]||[]).push(x);});
+    Object.keys(LP_BIDX).forEach(function(k){LP_BIDX[k].sort(function(a,b){return a.t-b.t;});});
+  }
+  return (LP_BIDX[mid]||[]).slice();
+}
+function lpAddDays(k,n){var d=keyToDate(k);d.setDate(d.getDate()+n);return dayKey(d);}
+function lpDate(k){var d=keyToDate(k);return d.getDate()+' '+HI_MONTHS[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'');}
+function lpBillAmt(b){return round2(num(b.s)+num(b.k)+num(b.o));}
+
+/* सदस्य का पूरा हिसाब: हर बिल के पॉइंट की एक "थैली" (365 दिन), इनाम सबसे पुरानी थैली से कटे,
+   मियाद पूरी होते ही बचे पॉइंट ख़त्म। रद्द बिल गिनती में नहीं। */
+function lpState(mid,skipBill){
+  var today=todayStr(),lots=[],debt=0,ev=[],earned=0,used=0,expired=0,rewards=0,saved=0,bonusGiven=false;
+  var expireUpTo=function(d){
+    lots.forEach(function(L){if(L.left>0&&L.exp<=d){ev.push({k:'x',d:L.exp,pts:L.left});expired+=L.left;L.left=0;}});
+  };
+  memberBills(mid).forEach(function(b){
+    if(b.v||b.id===skipBill)return;
+    var d=dayKey(b.t);
+    expireUpTo(d);
+    if(num(b.r)>0){
+      var need=num(b.r);
+      for(var i=0;i<lots.length&&need>0;i++){var take=Math.min(lots[i].left,need);lots[i].left-=take;need-=take;}
+      if(need>0)debt+=need;
+      used+=num(b.r);rewards++;saved+=num(b.f);
+    }
+    var got=num(b.p)+num(b.bo);
+    if(num(b.bo)>0)bonusGiven=true;
+    earned+=got;
+    var pay=Math.min(debt,got);debt-=pay;
+    lots.push({d:d,exp:lpAddDays(d,LP.days),left:got-pay});
+  });
+  expireUpTo(today);
+  var bal=lots.reduce(function(s,L){return s+L.left;},0)-debt;
+  var soonTo=lpAddDays(today,LP.warnDays),soon=0,soonExp='';
+  lots.forEach(function(L){if(L.left>0&&L.exp<=soonTo){soon+=L.left;if(!soonExp||L.exp<soonExp)soonExp=L.exp;}});
+  return {bal:bal,lots:lots,earned:earned,used:used,expired:expired,rewards:rewards,saved:round2(saved),bonusGiven:bonusGiven,
+    soon:soon,soonLast:soonExp?lpAddDays(soonExp,-1):'',ev:ev};
+}
+/* इस बिल के पॉइंट — छूट दोनों हिस्सों में बराबर अनुपात से घटती है */
+function lpCalc(sw,pk,ri,bonusOk){
+  sw=Math.max(0,round2(num(sw)));pk=Math.max(0,round2(num(pk)));
+  var elig=round2(sw+pk),r=(ri>=0&&LP.rewards[ri])?LP.rewards[ri]:null,off=r?Math.min(r.off,elig):0;
+  var psw=elig>0?sw-off*sw/elig:0,ppk=elig>0?pk-off*pk/elig:0;
+  var raw=Math.floor(psw/LP.swPer+1e-9)+Math.floor(ppk/LP.pkPer+1e-9);
+  return {sw:sw,pk:pk,elig:elig,r:r,off:off,pts:Math.min(raw,LP.cap),capped:raw>LP.cap,bo:(bonusOk&&elig>=LP.bonusMin)?LP.bonus:0};
+}
+function lpRewardOk(i,bal,elig){var r=LP.rewards[i];if(bal<r.pts)return 'pts';if(elig<r.min)return 'min';return 'ok';}
+function lpRewardLines(bal){
+  var best=null,next=null,a=[];
+  LP.rewards.forEach(function(r){if(bal>=r.pts)best=r;else if(!next)next=r;});
+  if(best)a.push('🎁 अभी '+best.pts+' पॉइंट से '+rupee(best.off)+' की छूट ले सकते हैं ('+rupee(best.min)+'+ के बिल पर)');
+  if(next)a.push((best?'या ':'')+'बस '+(next.pts-bal)+' पॉइंट और — फिर '+rupee(next.off)+' की छूट!');
+  return a;
+}
+function lpSoonIn(mid,days){
+  var s=lpState(mid),lim=lpAddDays(todayStr(),days),n=0,first='';
+  s.lots.forEach(function(L){if(L.left>0&&L.exp<=lim){n+=L.left;if(!first||L.exp<first)first=L.exp;}});
+  return {n:n,last:first?lpAddDays(first,-1):'',bal:s.bal};
+}
+function lpRemindList(){
+  return LY().m.filter(function(m){
+    if(!m.wa||!m.phone)return false;
+    if(m.rm&&dayDiff(dayKey(m.rm),todayStr())<10)return false;
+    return lpSoonIn(m.id,LP.remindDays).n>0;
+  });
+}
+function lpDash(){
+  var mon=todayStr().slice(0,7),d={members:LY().m.length,newM:0,active:0,soon:0,rw:0,rwOff:0,sales:0,bills:0};
+  LY().m.forEach(function(m){if(dayKey(m.c).slice(0,7)===mon)d.newM++;var s=lpState(m.id);if(s.bal>0)d.active+=s.bal;d.soon+=s.soon;});
+  LY().b.forEach(function(b){
+    if(b.v||dayKey(b.t).slice(0,7)!==mon)return;
+    d.bills++;d.sales+=num(b.s)+num(b.k);
+    if(num(b.r)>0){d.rw++;d.rwOff+=num(b.f);}
+  });
+  d.sales=round2(d.sales);d.rwOff=round2(d.rwOff);
+  return d;
+}
+
+/* --- मैसेज (हिंदी, WhatsApp) --- */
+var LP_SIGN='— माँ भगवती मिष्ठान भंडार, ननौरा, दरभंगा';
+function lpReceiptMsg(b){
+  var m=findMember(b.m);if(!m)return '';
+  var s=lpState(m.id),bill=lpBillAmt(b),got=num(b.p)+num(b.bo);
+  var L=['🪔 *'+LP.name+'*','नमस्ते '+m.name+' जी 🙏','','आज की ख़रीद: '+rupee(bill)];
+  if(num(b.r)>0)L.push('इनाम: '+rupee(b.f)+' की छूट ('+b.r+' पॉइंट)','आपने दिए: '+rupee(round2(bill-num(b.f))));
+  L.push('आज मिले: +'+got+' पॉइंट'+(num(b.bo)>0?' (इसमें '+b.bo+' जुड़ने का बोनस 🎉)':''));
+  L.push('*अब कुल: '+s.bal+' पॉइंट*');
+  lpRewardLines(s.bal).forEach(function(x){L.push(x);});
+  if(s.soon)L.push('⏳ '+s.soon+' पॉइंट '+lpDate(s.soonLast)+' तक इस्तेमाल कर लें');
+  lpLinkLines(m,L);
+  L.push('','धन्यवाद! '+LP_SIGN);
+  return L.join('\n');
+}
+function lpRemindMsg(m){
+  var x=lpSoonIn(m.id,LP.remindDays);
+  var L=['🪔 *'+LP.name+'*','नमस्ते '+m.name+' जी 🙏','',
+    'आपके '+x.n+' मिठास पॉइंट '+lpDate(x.last)+' के बाद ख़त्म हो जाएँगे।','अभी आपके पास कुल *'+x.bal+' पॉइंट* हैं।'];
+  lpRewardLines(x.bal).forEach(function(y){L.push(y);});
+  lpLinkLines(m,L);
+  L.push('','दुकान आइए और इस्तेमाल कर लीजिए 😊',LP_SIGN);
+  return L.join('\n');
+}
+function lpCardMsg(m){
+  var s=lpState(m.id);
+  var L=['🪔 *'+LP.name+'*',m.name+' · '+m.phone,'','*अभी के पॉइंट: '+s.bal+'*'];
+  LP.rewards.forEach(function(r){L.push((s.bal>=r.pts?'✅ ':'▫️ ')+r.pts+' पॉइंट = '+rupee(r.off)+' छूट ('+rupee(r.min)+'+ के बिल पर)'+(s.bal>=r.pts?'':' — '+(r.pts-s.bal)+' और'));});
+  if(s.soon)L.push('','⏳ '+s.soon+' पॉइंट '+lpDate(s.soonLast)+' तक इस्तेमाल कर लें');
+  L.push('','अब तक: कुल मिले '+s.earned+' · इस्तेमाल '+s.used+' · ख़त्म '+s.expired+(s.saved?' · छूट मिली '+rupee(s.saved):''));
+  var last=memberBills(m.id).filter(function(b){return !b.v;}).slice(-5).reverse();
+  if(last.length){L.push('','आख़िरी ख़रीद:');last.forEach(function(b){L.push('• '+lpDate(dayKey(b.t))+' — '+rupee(lpBillAmt(b))+' → +'+(num(b.p)+num(b.bo))+(num(b.r)>0?' / −'+b.r+' (₹'+b.f+' छूट)':''));});}
+  lpLinkLines(m,L);
+  L.push('','हर ₹50 की मिठाई/केक पर 1 पॉइंट · हर ₹100 के पैकेट सामान पर 1 · दूध-दही-पनीर पर नहीं · पॉइंट 1 साल चलते हैं',LP_SIGN);
+  return L.join('\n');
+}
+function lpWaBtn(m,text,label,cls,kind){
+  if(!m||!m.phone||!m.wa)return '';
+  var href=waLink(m.phone,text);if(!href)return '';
+  return '<a class="btn '+(cls||'')+'" href="'+esc(href)+'" target="_blank" rel="noopener" data-act="lp-wa-go" data-kind="'+(kind||'')+'" data-id="'+m.id+'">'+label+'</a>';
+}
+
+/* --- 📲 ग्राहक का अपना पेज (रजिस्टर पर सार) --- */
+function lpTok(){
+  var a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789',r=new Uint8Array(22),s='',i;
+  try{crypto.getRandomValues(r);}catch(e){for(i=0;i<r.length;i++)r[i]=Math.floor(Math.random()*256);}
+  for(i=0;i<r.length;i++)s+=a.charAt(r[i]%a.length);
+  return s;
+}
+var LP_SENT='mbmb-lp-sent',lpSyncTimer=null,lpSyncBusy=false;
+function lpLinkOk(){var x=lsGet(LP_SENT,{})||{};return !!(onlineCfg()&&x.v5&&!x.old);}
+function lpLink(m){return orderPageUrl()+'?lp='+encodeURIComponent(m.tk||'');}
+function lpLinkLines(m,L){if(m&&m.tk&&lpLinkOk())L.push('','📲 अपने पॉइंट और पूरा हिसाब कभी भी देखें:',lpLink(m));}
+/* ग्राहक के पेज के लिए सदस्य का सार — असली हिसाब यहीं रहता है, वहाँ सिर्फ़ दिखाने के लिए कॉपी */
+function lpSummary(m){
+  var s=lpState(m.id),h=[],left=0;
+  memberBills(m.id).forEach(function(b){
+    if(b.v)return;
+    var x={d:dayKey(b.t),a:lpBillAmt(b),g:num(b.p)+num(b.bo)};
+    if(num(b.bo)>0)x.bo=num(b.bo);
+    if(num(b.r)>0){x.r=num(b.r);x.f=num(b.f);}
+    h.push(x);
+  });
+  s.ev.forEach(function(x){h.push({d:x.d,x:x.pts});});
+  h.sort(function(a,b){return a.d<b.d?1:(a.d>b.d?-1:0);});
+  var lots=s.lots.filter(function(L){return L.left>0;}).map(function(L){left+=L.left;return [L.left,L.exp];});
+  return {v:1,n:m.name,c:dayKey(m.c),lots:lots,debt:Math.max(0,left-s.bal),e:s.earned,u:s.used,x:s.expired,sv:s.saved,rw:s.rewards,h:h.slice(0,30),
+    rr:LP.rewards.map(function(r){return [r.pts,r.off,r.min];})};
+}
+function lpSyncSoon(ms){clearTimeout(lpSyncTimer);lpSyncTimer=setTimeout(function(){lpSync();},ms==null?5000:ms);}
+function lpSync(){
+  var cfg=onlineCfg();
+  if(!cfg||lpSyncBusy)return Promise.resolve(null);
+  var sent=lsGet(LP_SENT,{})||{},now=Date.now(),map=sent.m||{},list=[],seen={};
+  if(sent.old&&now-sent.old<6*3600000)return Promise.resolve(null);   // रजिस्टर का कोड पुराना — 6 घंटे बाद फिर देखो
+  LY().m.forEach(function(m){
+    if(!m.tk||!phoneValid(m.phone))return;
+    seen[m.id]=1;
+    var ph=phoneNorm(m.phone).slice(-10),d=lpSummary(m),h=hashStr(ph+'|'+m.tk+'|'+JSON.stringify(d));
+    if(map[m.id]!==h)list.push({id:m.id,p:ph,t:m.tk,d:d,h:h});
+  });
+  Object.keys(map).forEach(function(id){if(!seen[id])list.push({id:id,del:1});});
+  lpSyncBusy=true;
+  var done=function(r){lpSyncBusy=false;return r;};
+  if(!list.length){
+    if(sent.v5&&!sent.old)return Promise.resolve(done({ok:true,none:true}));
+    // अभी तक पता नहीं कि रजिस्टर नया है या पुराना — पूछ लो
+    return fetch(cfg.u+'?action=ping',{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
+      var s2=lsGet(LP_SENT,{})||{};
+      if(r&&r.ok&&r.v>=5){s2.v5=true;delete s2.old;}else if(r&&r.ok){s2.old=now;}
+      lsSet(LP_SENT,s2);lpSyncShow();return done(r);
+    },function(){return done(null);});
+  }
+  var batch=list.slice(0,40);
+  var body={action:'lpsync',key:cfg.k,list:batch.map(function(x){return x.del?{id:x.id,del:1}:{id:x.id,p:x.p,t:x.t,d:Object.assign({at:now},x.d)};})};
+  return fetch(cfg.u,{method:'POST',body:JSON.stringify(body),redirect:'follow'})
+    .then(function(r){return r.json();})
+    .then(function(r){
+      var s2=lsGet(LP_SENT,{})||{};s2.m=s2.m||{};
+      if(r&&r.ok){
+        var ok={};(r.done||[]).forEach(function(id){ok[id]=1;});
+        batch.forEach(function(x){if(!ok[x.id])return;if(x.del)delete s2.m[x.id];else s2.m[x.id]=x.h;});
+        s2.v5=true;delete s2.old;s2.t=now;lsSet(LP_SENT,s2);
+        if(list.length>batch.length&&(r.done||[]).length)lpSyncSoon(1500);   // बाकी सदस्य अगली बार में
+      }else if(r&&r.error==='action'){s2.old=now;lsSet(LP_SENT,s2);}
+      lpSyncShow();
+      return done(r);
+    },function(){return done(null);});
+}
+function lpSyncLine(){
+  if(!onlineCfg())return '';
+  var x=lsGet(LP_SENT,{})||{};
+  if(x.old)return '<p class="lpsync old">📲 ग्राहक अपने पॉइंट ख़ुद देख सकें — इसके लिए कंप्यूटर पर रजिस्टर का कोड एक बार अपडेट करना है (बैकअप → ⚙️ सेटअप, चरण 8)।</p>';
+  if(x.v5)return '<p class="lpsync">📲 ग्राहक अपने पॉइंट ख़ुद देख सकते हैं — WhatsApp मैसेज में उनका लिंक जाता है'+(x.t?' · आख़िरी अपडेट '+fmtDT(x.t):'')+'</p>';
+  return '';
+}
+function lpSyncShow(){if(ui.view==='loyal'&&!$('#ov')){var el=$('#lp-syncline');if(el)el.innerHTML=lpSyncLine();}}
+
+/* --- 🔐 इनाम से पहले ग्राहक के WhatsApp पर कोड --- */
+var LP_OTP_MIN=15;
+function lpOtpNew(mid){
+  var r=new Uint16Array(1);try{crypto.getRandomValues(r);}catch(e){r[0]=Math.floor(Math.random()*65536);}
+  return {c:String(1000+(r[0]%9000)),t:Date.now(),n:0,m:mid,sent:false};
+}
+function lpOtpMsg(m,code,r){
+  return ['🪔 *'+LP.name+'*','नमस्ते '+m.name+' जी 🙏','',
+    'आपका इनाम कोड: *'+code+'*',(r?'('+r.pts+' पॉइंट = '+rupee(r.off)+' की छूट)':''),'',
+    'यह कोड दुकान के काउंटर पर बताएँ। '+LP_OTP_MIN+' मिनट तक चलेगा।',
+    'आप अभी दुकान पर नहीं हैं तो यह कोड किसी को न बताएँ।',LP_SIGN].join('\n');
+}
+function lpOtpVerified(d,m){return !!(d&&m&&d.vf&&d.vfm===m.id);}
+function lpRenderOtp(){
+  var d=ui.lDraft,box=$('#lp-otp');if(!d||!box)return;
+  var m=d.mid?findMember(d.mid):null,want=!!(m&&d.ri>=0);
+  d._otpShown=want;
+  if(!want){box.innerHTML='';return;}
+  if(lpOtpVerified(d,m)){
+    box.innerHTML=d.vf==='c'?'<div class="lpotp ok">✅ ग्राहक का कोड सही — इनाम लगेगा</div>':
+      '<div class="lpotp skip"><span>⚠️ बिना कोड — हिसाब में "बिना कोड" लिखा जाएगा</span><button class="lnk" data-act="lp-otp-undo">बदलो</button></div>';
+    return;
+  }
+  if(!d.otp||d.otp.m!==m.id||d.otp.n>=3||Date.now()-d.otp.t>LP_OTP_MIN*60000)d.otp=lpOtpNew(m.id);
+  var href=waLink(m.phone,lpOtpMsg(m,d.otp.c,LP.rewards[d.ri]));
+  box.innerHTML='<div class="lpotp"><b>🔐 इनाम से पहले ग्राहक की पहचान</b>'+
+    '<p class="hint">ग्राहक के WhatsApp पर 4 अंकों का कोड भेजो — ग्राहक जो कोड बताए, नीचे डालो।</p>'+
+    '<a class="btn small'+(d.otp.sent?'':' primary')+'" href="'+esc(href)+'" target="_blank" rel="noopener" data-act="lp-otp-send">📲 '+(d.otp.sent?'कोड फिर से भेजो':'कोड भेजो (WhatsApp)')+'</a>'+
+    (d.otp.sent?'<label class="fl">ग्राहक से कोड पूछकर डालो<input id="lp-otp-in" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="····" value="'+esc(d.otpIn||'')+'"></label>':'')+
+    '<div class="err" id="lp-otp-err">'+esc(d.otpErr||'')+'</div>'+
+    '<button class="lnk" data-act="lp-otp-skip">ग्राहक के पास फ़ोन नहीं / मैं पहचानता हूँ — बिना कोड</button></div>';
+}
+function lpOtpInput(t){
+  var d=ui.lDraft,m=d&&d.mid?findMember(d.mid):null;if(!d||!m||!d.otp)return;
+  var v=String(t.value||'').replace(/\D/g,'').slice(0,4);
+  if(v!==t.value)t.value=v;
+  d.otpIn=v;
+  if(v.length<4)return;
+  if(Date.now()-d.otp.t>LP_OTP_MIN*60000){
+    d.otp=null;d.otpIn='';d.otpErr='कोड की मियाद ('+LP_OTP_MIN+' मिनट) पूरी — नया कोड भेजो।';lpRenderOtp();return;
+  }
+  if(v===d.otp.c){d.vf='c';d.vfm=m.id;d.otpIn='';d.otpErr='';lpRenderOtp();toast('✅ कोड सही');var e=$('#lp-err');if(e)e.textContent='';return;}
+  d.otp.n++;d.otpIn='';
+  if(d.otp.n>=3){d.otp=null;d.otpErr='3 बार ग़लत कोड — नया कोड भेजो।';}
+  else d.otpErr='ग़लत कोड — '+(3-d.otp.n)+' मौके बचे। ग्राहक से दोबारा पूछो।';
+  lpRenderOtp();
+  setTimeout(function(){var f=$('#lp-otp-in');if(f)f.focus();},30);
+}
+
+/* --- ⭐ टैब --- */
+function renderLoyal(){
+  var q=(ui.lpSearch||'').trim().toLowerCase(),qd=q.replace(/\s/g,'');
+  var d=lpDash(),rem=lpRemindList();
+  var rows=LY().m.map(function(m){var s=lpState(m.id);return {m:m,s:s,last:(memberBills(m.id).slice(-1)[0]||{}).t||m.c};})
+    .filter(function(r){return !q||r.m.name.toLowerCase().indexOf(q)>-1||String(r.m.phone||'').replace(/\s/g,'').indexOf(qd)>-1;})
+    .sort(function(a,b){return b.last-a.last;});
+  var html='<div class="sechead" style="margin-top:4px"><h2>⭐ मिठास पॉइंट्स</h2><span class="cnt">'+d.members+' सदस्य</span></div>'+
+    '<p class="hint" style="margin-top:-4px">'+esc(LP.name)+' — पॉइंट सिर्फ़ आप (इस फ़ोन से) चढ़ा सकते हैं।</p>'+
+    '<div id="lp-syncline">'+lpSyncLine()+'</div>'+
+    '<div class="band">'+
+      '<div><b>'+d.members+'</b><span>सदस्य'+(d.newM?' · इस महीने +'+d.newM:'')+'</span></div>'+
+      '<div class="tom"><b>'+d.active+'</b><span>चालू पॉइंट</span></div>'+
+      '<div><b style="color:var(--green)">'+d.rw+'</b><span>इस महीने इनाम'+(d.rwOff?' · '+rupee(d.rwOff):'')+'</span></div></div>'+
+    '<div class="band">'+
+      '<div><b>'+rupee(d.sales)+'</b><span>इस महीने सदस्यों की ख़रीद ('+d.bills+' बिल)</span></div>'+
+      '<div class="due"><b>'+d.soon+'</b><span>30 दिन में ख़त्म होंगे</span></div>'+
+      '<div><b>'+LP.rewards.map(function(r){return r.pts;}).join('/')+'</b><span>'+LP.rewards.map(function(r){return '₹'+r.off;}).join('/')+' छूट</span></div></div>';
+  if(rem.length){
+    html+='<div class="banner remind">🔔 '+(rem.length===1?'1 सदस्य':rem.length+' सदस्यों')+' के पॉइंट '+LP.remindDays+' दिन में ख़त्म होंगे — याद दिला दो:</div><div class="lprem">'+
+      rem.slice(0,8).map(function(m){var x=lpSoonIn(m.id,LP.remindDays);
+        return '<div class="lpremrow"><span><b>'+esc(m.name)+'</b><small>'+x.n+' पॉइंट · '+lpDate(x.last)+' तक</small></span>'+lpWaBtn(m,lpRemindMsg(m),'💬 याद दिलाओ','small','remind')+'</div>';
+      }).join('')+'</div>';
+  }
+  html+='<div class="quickrow"><button class="btn primary" data-act="lp-buy">🛍️ ख़रीद जोड़ो</button><button class="btn" data-act="lp-member-new">+ नया सदस्य</button></div>'+
+    (LY().m.length?'<input id="lp-search" class="udsearch" type="search" placeholder="नाम या मोबाइल नंबर से खोजो" autocomplete="off" value="'+esc(ui.lpSearch||'')+'">':'');
+  if(!LY().m.length){
+    html+='<div class="empty"><b>अभी कोई सदस्य नहीं</b>"+ नया सदस्य" दबाओ — नाम, मोबाइल और सहमति। पहली ₹100+ की ख़रीद पर 5 बोनस पॉइंट मिलेंगे।</div>';
+  }else if(!rows.length){
+    html+='<div class="empty"><b>कुछ नहीं मिला</b>नाम या मोबाइल नंबर से दोबारा खोजो।</div>';
+  }else{
+    html+=rows.slice(0,ui.lpAll?rows.length:150).map(function(r){
+      return '<button class="crow kparty" data-act="lp-open" data-id="'+r.m.id+'">'+
+        '<span class="l"><span class="nm">'+esc(r.m.name)+'</span><span class="ph">'+esc(r.m.phone)+(r.s.soon?' · ⏳ '+r.s.soon+' ख़त्म होंगे':'')+'</span></span>'+
+        '<span class="lppts"><b>'+r.s.bal+'</b><small>पॉइंट</small></span></button>';
+    }).join('')+(rows.length>150&&!ui.lpAll?'<button class="btn block small" data-act="lp-all">बाकी '+(rows.length-150)+' सदस्य भी दिखाओ</button>':'');
+  }
+  paint($('#main'),html);
+}
+function lpRewardRows(bal){
+  return '<div class="lprw">'+LP.rewards.map(function(r){
+    var ok=bal>=r.pts;
+    return '<div class="'+(ok?'ok':'')+'"><b>'+r.pts+' पॉइंट = '+rupee(r.off)+'</b><span>'+rupee(r.min)+'+ के बिल पर · '+(ok?'✓ ले सकते हैं':(r.pts-bal)+' पॉइंट और')+'</span></div>';
+  }).join('')+'</div>';
+}
+function renderLMember(){
+  var m=findMember(ui.memberId);
+  if(!m){ui.view='loyal';return renderRoute();}
+  var s=lpState(m.id),bills=memberBills(m.id);
+  var html='<button class="backbtn" data-act="nav" data-v="loyal">← मिठास पॉइंट्स</button>'+
+    '<div class="cphead"><div><h2>'+esc(m.name)+'</h2><div class="ph"><a href="tel:+'+phoneNorm(m.phone)+'">'+esc(m.phone)+'</a></div>'+
+    '<div class="addr">सदस्य '+lpDate(dayKey(m.c))+' से · WhatsApp मैसेज: '+(m.wa?'हाँ':'नहीं')+'</div></div></div>'+
+    '<div class="cpacts"><button class="lnk" data-act="lp-member-edit" data-id="'+m.id+'">बदलो</button>'+
+      (m.tk&&lpLinkOk()?'<a class="lnk" href="'+esc(lpLink(m))+'" target="_blank" rel="noopener">📲 ग्राहक वाला पेज देखो</a>':'')+'</div>'+
+    '<div class="lpbig"><b>'+s.bal+'</b><span>मिठास पॉइंट</span></div>'+
+    lpRewardRows(s.bal)+
+    (s.soon?'<div class="banner">⏳ '+s.soon+' पॉइंट '+lpDate(s.soonLast)+' तक ही चलेंगे</div>':'')+
+    '<div class="actbar">'+
+      '<button class="btn primary small" data-act="lp-buy" data-id="'+m.id+'">🛍️ ख़रीद जोड़ो</button>'+
+      '<button class="btn small" data-act="lp-card" data-id="'+m.id+'">📇 कार्ड भेजो</button>'+
+      (s.soon?lpWaBtn(m,lpRemindMsg(m),'💬 याद दिलाओ','small','remind'):'')+
+    '</div>'+
+    '<div class="band"><div><b style="color:var(--green)">'+s.earned+'</b><span>कुल मिले</span></div>'+
+      '<div class="tom"><b>'+s.used+'</b><span>इस्तेमाल ('+s.rewards+' इनाम'+(s.saved?' · '+rupee(s.saved):'')+')</span></div>'+
+      '<div class="due"><b>'+s.expired+'</b><span>मियाद पूरी होकर ख़त्म</span></div></div>';
+  var items=[];
+  bills.forEach(function(b){items.push({t:b.t,b:b});});
+  s.ev.forEach(function(x){items.push({t:keyToDate(x.d).getTime()+1,x:x});});
+  items.sort(function(a,b){return b.t-a.t;});
+  if(!items.length){
+    html+='<div class="empty"><b>अभी कोई ख़रीद नहीं</b>"🛍️ ख़रीद जोड़ो" दबाओ।</div>';
+  }else{
+    html+='<div class="grouphead">पॉइंट का हिसाब (नया ऊपर) <span class="cnt" style="font-weight:400;font-size:.8rem">— ग़लती हो तो लाइन दबाओ</span></div><div class="ledger">'+
+      items.slice(0,ui.lpHist===m.id?items.length:40).map(function(it){
+        if(it.x)return '<div class="lgr"><span class="lt">⌛ मियाद पूरी — पॉइंट ख़त्म<span class="ld">'+lpDate(it.x.d)+'</span></span><span class="lv"><b class="mut">− '+it.x.pts+'</b></span></div>';
+        var b=it.b,got=num(b.p)+num(b.bo),v=!!b.v;
+        return '<button class="lgr'+(v?' void':'')+'" data-act="lp-bill" data-id="'+b.id+'"><span class="lt">'+(v?'❌ रद्द · ':'')+'ख़रीद '+rupee(lpBillAmt(b))+(num(b.r)>0?' · '+rupee(b.f)+' छूट':'')+
+          '<span class="ld">'+fmtDT(b.t)+(num(b.bo)>0?' · 🎉 '+b.bo+' बोनस':'')+(num(b.r)>0&&b.vf==='s'?' · ⚠️ बिना कोड':'')+(num(b.r)>0&&b.vf==='c'?' · 🔐 कोड से':'')+(v?' · '+esc(b.v.w||''):'')+'</span></span>'+
+          '<span class="lv">'+(got?'<b class="cr">+ '+got+'</b>':'<b class="mut">0</b>')+(num(b.r)>0?'<b class="dr">− '+b.r+'</b>':'')+'</span></button>';
+      }).join('')+
+      (items.length>40?'<button class="lnk" style="width:100%" data-act="lp-hist" data-id="'+m.id+'">'+(ui.lpHist===m.id?'कम दिखाओ':'पूरा हिसाब देखो ('+items.length+')')+'</button>':'')+
+      '</div>';
+  }
+  $('#main').innerHTML=html;
+}
+
+/* --- सदस्य जोड़ो / बदलो --- */
+function openMemberForm(id){
+  var m=id?findMember(id):null;
+  openSheet('<div class="sh-head"><h2>'+(m?'सदस्य बदलो':'⭐ नया सदस्य')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<label class="fl">नाम<input id="lm-name" type="text" maxlength="60" value="'+esc(m?m.name:'')+'"></label>'+
+    '<label class="fl">मोबाइल नंबर (WhatsApp वाला)<input id="lm-phone" type="tel" inputmode="tel" value="'+esc(m?m.phone:'')+'"></label>'+
+    (m?'<p class="hint">सहमति दी: '+lpDate(dayKey(m.ok||m.c))+'</p>':
+      '<label class="lpcheck"><input type="checkbox" id="lm-ok"> <span><b>ग्राहक ने हाँ कहा:</b> नाम और नंबर पॉइंट के हिसाब के लिए दुकान में रखा जाए। (ज़रूरी)</span></label>')+
+    '<label class="lpcheck"><input type="checkbox" id="lm-wa"'+(m&&m.wa?' checked':'')+'> <span>WhatsApp पर पॉइंट के मैसेज भेजें (ग्राहक से पूछकर)</span></label>'+
+    '<div class="err" id="lm-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="lp-member-save" data-id="'+(m?m.id:'')+'">Save करो</button></div>'+
+    (m?'<button class="lnk danger" style="margin-top:10px" data-act="lp-member-del" data-id="'+m.id+'">ग्राहक के कहने पर सदस्यता और उसका डेटा हटाओ</button>':''));
+  setTimeout(function(){var f=$('#lm-name');if(f)f.focus();},50);
+}
+function lpMemberProblem(name,phone,exceptId){
+  if(!name)return 'नाम लिखो।';
+  if(!phone)return 'मोबाइल नंबर लिखो — पॉइंट इसी नंबर से चलते हैं।';
+  if(!phoneValid(phone))return 'सही मोबाइल नंबर लिखो — 10 अंक, 6/7/8/9 से शुरू।';
+  var dup=memberByPhone(phone,exceptId);
+  if(dup)return 'यह नंबर पहले से "'+dup.name+'" के नाम से सदस्य है।';
+  return '';
+}
+function lpAddMember(name,phone,wa){
+  var now=Date.now(),m={id:uid(),name:name.slice(0,60),phone:phone,c:now,ok:now,wa:!!wa,rm:0,tk:lpTok()};
+  LY().m.push(m);save();
+  return m;
+}
+
+/* --- 🛍️ ख़रीद जोड़ो (इनाम के साथ) --- */
+function openLBuy(mid){
+  ui.lDraft={mid:mid||null,q:'',newOpen:false,nName:'',nPhone:'',sw:'',pk:'',ot:'',ri:-1,bigOk:false,otp:null,otpIn:'',otpErr:'',vf:'',vfm:null,_otpShown:false};
+  openSheet('');
+  renderLSheet();
+  setTimeout(function(){var f=mid?$('#lp-sw'):$('#lp-q');if(f)f.focus();},60);
+}
+function renderLSheet(){
+  var d=ui.lDraft;if(!d)return;
+  var m=d.mid?findMember(d.mid):null,block;
+  if(m){
+    var s=lpState(m.id);
+    block='<div class="custchip"><span><b>'+esc(m.name)+'</b><span>'+esc(m.phone)+' · अभी '+s.bal+' पॉइंट'+(s.bonusGiven?'':' · 🎉 पहली ख़रीद पर 5 बोनस')+'</span></span><button class="lnk" data-act="lp-change">बदलो</button></div>';
+  }else if(d.newOpen){
+    block='<div class="customitem">'+
+      '<label class="fl" style="margin-top:0">नाम<input id="lp-n-name" type="text" maxlength="60" value="'+esc(d.nName)+'"></label>'+
+      '<label class="fl">मोबाइल नंबर (WhatsApp वाला)<input id="lp-n-phone" type="tel" inputmode="tel" value="'+esc(d.nPhone)+'"></label>'+
+      '<label class="lpcheck"><input type="checkbox" id="lp-n-ok"> <span><b>ग्राहक ने हाँ कहा:</b> नाम-नंबर पॉइंट के हिसाब के लिए रखा जाए। (ज़रूरी)</span></label>'+
+      '<label class="lpcheck"><input type="checkbox" id="lp-n-wa"> <span>WhatsApp पर पॉइंट के मैसेज भेजें</span></label>'+
+      '<div class="err" id="lp-n-err"></div>'+
+      '<div class="sh-actions"><button class="btn small" data-act="lp-new-cancel">वापस</button><button class="btn primary small" data-act="lp-new-ok">सदस्य जोड़ो</button></div></div>';
+  }else{
+    var q=(d.q||'').trim().toLowerCase(),qd=q.replace(/\s/g,'');
+    var ms=q?LY().m.filter(function(x){return x.name.toLowerCase().indexOf(q)>-1||String(x.phone).replace(/\s/g,'').indexOf(qd)>-1;}).slice(0,6):[];
+    block='<input id="lp-q" type="text" placeholder="मोबाइल नंबर या नाम" autocomplete="off" value="'+esc(d.q)+'" class="udsearch">';
+    if(q)block+='<div class="suglist">'+ms.map(function(x){return '<button class="sugrow" data-act="lp-pick" data-id="'+x.id+'"><b>'+esc(x.name)+'</b><small>'+esc(x.phone)+' · '+lpState(x.id).bal+' पॉइंट</small></button>';}).join('')+
+      '<button class="sugrow newc" data-act="lp-new">+ नया सदस्य बनाओ'+(q?' ("'+esc(d.q)+'")':'')+'</button></div>';
+    else block+='<div class="addrow"><button class="lnk" data-act="lp-new">+ नया सदस्य</button></div>';
+  }
+  setSheet('<div class="sh-head"><h2>🛍️ ख़रीद जोड़ो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<label class="fl">किसकी ख़रीद</label>'+block+
+    '<label class="fl bigamt">🍬 मिठाई + केक ₹<input id="lp-sw" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="'+esc(d.sw)+'"></label>'+
+    '<label class="fl">📦 पैकेट सामान ₹ <small>(नमकीन, बिस्किट, कोल्ड ड्रिंक…)</small><input id="lp-pk" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="'+esc(d.pk)+'"></label>'+
+    '<label class="fl">🥛 दूध, दही, पनीर, थोक ₹ <small>(पॉइंट नहीं — चाहें तो, बिल के कुल के लिए)</small><input id="lp-ot" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="'+esc(d.ot)+'"></label>'+
+    '<div id="lp-rw"></div><div id="lp-otp"></div><div id="lp-sum"></div>'+
+    '<div class="err" id="lp-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="lp-save">Save करो</button></div>');
+  lpRefreshCalc();
+  lpRenderOtp();
+}
+function lpRefreshCalc(){
+  var d=ui.lDraft;if(!d)return;
+  var m=d.mid?findMember(d.mid):null,s=m?lpState(m.id):{bal:0,bonusGiven:true};
+  var base=lpCalc(d.sw,d.pk,-1,false);
+  if(d.ri>=0&&lpRewardOk(d.ri,s.bal,base.elig)!=='ok')d.ri=-1;
+  if(d._otpShown!==!!(m&&d.ri>=0))lpRenderOtp();
+  var c=lpCalc(d.sw,d.pk,d.ri,m&&!s.bonusGiven),ot=Math.max(0,round2(num(d.ot))),bill=round2(c.elig+ot),pay=round2(bill-c.off);
+  var rw=$('#lp-rw'),sum=$('#lp-sum');
+  if(rw){
+    if(!m||s.bal<LP.rewards[0].pts){rw.innerHTML=m?'<p class="hint">इनाम: '+LP.rewards[0].pts+' पॉइंट होने पर (अभी '+s.bal+')</p>':'';}
+    else rw.innerHTML='<label class="fl">इनाम (एक बिल पर एक) — अभी '+s.bal+' पॉइंट</label><div class="lprwpick">'+
+      '<button type="button" class="'+(d.ri<0?'on':'')+'" data-act="lp-rw" data-i="-1">कोई नहीं</button>'+
+      LP.rewards.map(function(r,i){
+        var st=lpRewardOk(i,s.bal,base.elig);
+        return '<button type="button" class="'+(d.ri===i?'on':'')+'" data-act="lp-rw" data-i="'+i+'"'+(st==='ok'?'':' disabled')+'><b>'+r.pts+' = '+rupee(r.off)+'</b><small>'+
+          (st==='ok'?'लगा सकते हैं':(st==='pts'?'पॉइंट कम':'बिल '+rupee(r.min)+'+ चाहिए'))+'</small></button>';
+      }).join('')+'</div>';
+  }
+  if(sum){
+    if(!(bill>0)){sum.innerHTML='';return;}
+    sum.innerHTML='<div class="udsum lpsum3"><div><span>कुल बिल</span><b>'+rupee(bill)+'</b></div>'+
+      '<div><span>छूट</span><b style="color:var(--green)">'+(c.off?'− '+rupee(c.off):'—')+'</b></div>'+
+      '<div class="due"><span>ग्राहक देगा</span><b>'+rupee(pay)+'</b></div></div>'+
+      (m?'<p class="lpgain">⭐ मिलेंगे <b>+'+(c.pts+c.bo)+' पॉइंट</b>'+(c.bo?' (इसमें '+c.bo+' जुड़ने का बोनस)':'')+
+        ' · बाद में कुल <b>'+(s.bal-(c.r?c.r.pts:0)+c.pts+c.bo)+'</b>'+(c.capped?'<br><small>एक बिल पर ज़्यादा से ज़्यादा '+LP.cap+' पॉइंट</small>':'')+'</p>':'');
+  }
+}
+function lpSaveBuy(){
+  var d=ui.lDraft,err=$('#lp-err');if(!d)return;
+  var m=d.mid?findMember(d.mid):null;
+  if(!m){err.textContent='किसकी ख़रीद है — सदस्य चुनो या नया बनाओ।';return;}
+  var s=lpState(m.id),c=lpCalc(d.sw,d.pk,d.ri,!s.bonusGiven),ot=Math.max(0,round2(num(d.ot)));
+  if(!(c.elig+ot>0)){err.textContent='रकम लिखो।';return;}
+  if(c.elig+ot>500000){err.textContent='रकम बहुत बड़ी है — एक बार जाँच लो।';return;}
+  if(d.ri>=0&&lpRewardOk(d.ri,s.bal,c.elig)!=='ok'){err.textContent='यह इनाम इस बिल पर नहीं लग सकता।';return;}
+  if(d.ri>=0&&!lpOtpVerified(d,m)){
+    err.textContent='इनाम के लिए पहले ग्राहक का कोड डालो — या "बिना कोड" चुनो।';
+    var ob=$('#lp-otp');if(ob)ob.scrollIntoView({block:'center'});
+    return;
+  }
+  if(c.elig>LP.bigBill&&!d.bigOk){d.bigOk=true;err.textContent=rupee(c.elig)+' का बड़ा बिल है — रकम सही है? सही है तो फिर से "Save करो" दबाओ।';return;}
+  var b={id:uid(),m:m.id,t:Date.now(),s:c.sw,k:c.pk,o:ot,r:c.r?c.r.pts:0,f:c.off,p:c.pts,bo:c.bo};
+  if(b.r)b.vf=d.vf;
+  LY().b.push(b);
+  save();closeSheet();
+  lpSyncSoon(800);
+  ui.view='lmember';ui.memberId=m.id;
+  renderRoute();window.scrollTo(0,0);
+  lpDone(b);
+}
+function lpDone(b){
+  var m=findMember(b.m);if(!m)return;
+  var s=lpState(m.id),got=num(b.p)+num(b.bo),bill=lpBillAmt(b);
+  openSheet('<div class="sh-head"><h2>✅ ख़रीद जुड़ गई</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    (num(b.r)>0?'<div class="banner remind">🎁 '+b.r+' पॉइंट का इनाम लगा — '+rupee(b.f)+' छूट। ग्राहक से '+rupee(round2(bill-num(b.f)))+' लो।</div>':'')+
+    '<div class="udsum"><div><span>आज मिले</span><b style="color:var(--green)">+'+got+'</b></div><div><span>'+esc(m.name)+' के कुल पॉइंट</span><b>'+s.bal+'</b></div></div>'+
+    (m.wa?'<p class="hint">ग्राहक को WhatsApp पर बता दो — मैसेज तैयार है, वहाँ सिर्फ़ Send दबाना है।</p>':'<p class="hint">इस ग्राहक ने WhatsApp मैसेज की सहमति नहीं दी है — पॉइंट मुँह से बता दो।</p>')+
+    '<div class="billacts">'+lpWaBtn(m,lpReceiptMsg(b),'💬 WhatsApp पर भेजो','primary','receipt')+
+    '<button class="btn" data-act="lp-card" data-id="'+m.id+'">📇 कार्ड की फोटो</button><button class="btn" data-act="close">बाद में</button></div>');
+}
+
+/* --- ग़लती: बिल रद्द (मिटता नहीं) --- */
+function openLBill(id){
+  var b=findLBill(id);if(!b)return;
+  var m=findMember(b.m),bill=lpBillAmt(b);
+  var rows='<div class="lpdet"><div><span>तारीख</span><b>'+fmtDT(b.t)+'</b></div>'+
+    '<div><span>मिठाई + केक</span><b>'+rupee(b.s)+'</b></div><div><span>पैकेट सामान</span><b>'+rupee(b.k)+'</b></div>'+
+    (num(b.o)?'<div><span>दूध-दही वगैरह</span><b>'+rupee(b.o)+'</b></div>':'')+
+    (num(b.r)>0?'<div><span>इनाम</span><b>'+b.r+' पॉइंट → '+rupee(b.f)+' छूट</b></div>':'')+
+    (num(b.r)>0&&b.vf?'<div><span>पहचान</span><b>'+(b.vf==='c'?'🔐 WhatsApp कोड से':'⚠️ बिना कोड')+'</b></div>':'')+
+    '<div><span>ग्राहक ने दिए</span><b>'+rupee(round2(bill-num(b.f)))+'</b></div>'+
+    '<div><span>मिले पॉइंट</span><b>+'+(num(b.p)+num(b.bo))+(num(b.bo)?' (बोनस '+b.bo+')':'')+'</b></div></div>';
+  openSheet('<div class="sh-head"><h2>ख़रीद — '+rupee(bill)+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">'+(m?esc(m.name):'')+'</p>'+rows+
+    (b.v?'<div class="banner">❌ रद्द किया: '+esc(b.v.w||'')+' · '+fmtDT(b.v.t)+'</div>':
+      '<div class="billacts">'+(m?lpWaBtn(m,lpReceiptMsg(b),'💬 इसका मैसेज भेजो','','receipt'):'')+
+      '<button class="btn warn" data-act="lp-void" data-id="'+b.id+'">↩️ ग़लती थी — ये ख़रीद रद्द करो</button></div>'));
+}
+function openLVoid(id){
+  var b=findLBill(id);if(!b||b.v)return;
+  var after=lpState(b.m,b.id).bal;
+  ui.lpWhy=0;
+  openSheet('<div class="sh-head"><h2>ख़रीद रद्द करें?</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">ये ख़रीद मिटेगी नहीं — हिसाब में "रद्द" दिखेगी। इसके '+(num(b.p)+num(b.bo))+' पॉइंट हटेंगे'+(num(b.r)>0?' और इनाम के '+b.r+' पॉइंट वापस मिलेंगे':'')+'।</p>'+
+    '<p class="hint">इसके बाद सदस्य के पॉइंट: <b>'+after+'</b>'+(after<0?' — माइनस वाले पॉइंट अगली ख़रीद से कटेंगे':'')+'</p>'+
+    '<div class="notechips" id="lp-why">'+LP_WHY.map(function(w,i){return '<button type="button" class="'+(i===0?'on':'')+'" data-act="lp-why" data-i="'+i+'">'+esc(w)+'</button>';}).join('')+'</div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="lp-void-yes" data-id="'+b.id+'">हाँ, रद्द करो</button></div>');
+}
+
+/* --- 📇 कार्ड की फोटो --- */
+function lpCardImage(mid){
+  var m=findMember(mid);if(!m)return Promise.reject(new Error('member'));
+  return Promise.all([biFontsReady(),biLoadImg('logo-header.png')]).then(function(r){
+    var logo=r[1],s=lpState(m.id),W=BI.W,P=BI.P;
+    var hist=[];
+    memberBills(m.id).forEach(function(b){if(!b.v)hist.push({t:b.t,b:b});});
+    s.ev.forEach(function(x){hist.push({t:keyToDate(x.d).getTime()+1,x:x});});
+    hist.sort(function(a,b){return b.t-a.t;});hist=hist.slice(0,8);
+    var H=1500+hist.length*58+(s.soon?90:0);
+    var cv=document.createElement('canvas');cv.width=W;cv.height=H;
+    var ctx=cv.getContext('2d');ctx.textBaseline='alphabetic';
+    ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H);
+    // सिर
+    var hh=230;ctx.fillStyle=BI.maroon;ctx.fillRect(0,0,W,hh);
+    var tx=P;if(logo){ctx.drawImage(logo,P,37,156,156);tx=P+182;}
+    biFont(ctx,700,52,true);biText(ctx,biFit(ctx,LP.name,W-tx-P),tx,104,'left',BI.cream);
+    biFont(ctx,400,29);biText(ctx,biFit(ctx,'माँ भगवती मिष्ठान भंडार · ननौरा, दरभंगा',W-tx-P),tx,152,'left',BI.cream);
+    biFont(ctx,400,26);biText(ctx,'फ़ोन: '+(state.shop.phone||''),tx,192,'left',BI.cream);
+    var y=hh+40;
+    // सदस्य
+    biRound(ctx,P,y,W-2*P,118,18,BI.paper,BI.line);
+    biFont(ctx,600,24);biText(ctx,'सदस्य',P+26,y+38,'left',BI.muted);
+    biFont(ctx,400,28);var phW=ctx.measureText(m.phone).width+30;biText(ctx,m.phone,W-P-26,y+86,'right',BI.ink);
+    biFont(ctx,700,38);biText(ctx,biFit(ctx,m.name,W-2*P-52-phW),P+26,y+88,'left',BI.ink);
+    y+=150;
+    // पॉइंट
+    biRound(ctx,P,y,W-2*P,200,24,BI.cream,BI.gold);
+    biFont(ctx,700,120,true);biText(ctx,String(s.bal),W/2,y+132,'center',BI.maroon);
+    biFont(ctx,600,32);biText(ctx,'मिठास पॉइंट · '+lpDate(todayStr()),W/2,y+180,'center',BI.muted);
+    y+=232;
+    // इनाम
+    biFont(ctx,700,30);biText(ctx,'इनाम (एक बिल पर एक)',P,y+30,'left',BI.ink);y+=50;
+    LP.rewards.forEach(function(rw){
+      var ok=s.bal>=rw.pts;
+      biRound(ctx,P,y,W-2*P,84,14,ok?BI.greenbg:'#F7F2EA',null);
+      biFont(ctx,700,32);biText(ctx,rw.pts+' पॉइंट = '+rupee(rw.off)+' छूट',P+24,y+52,'left',ok?BI.green:BI.ink);
+      biFont(ctx,600,25);biText(ctx,(ok?'✓ अभी ले सकते हैं':(rw.pts-s.bal)+' पॉइंट और')+' · '+rupee(rw.min)+'+ बिल',W-P-24,y+52,'right',ok?BI.green:BI.muted);
+      y+=96;
+    });
+    if(s.soon){
+      biRound(ctx,P,y+6,W-2*P,70,14,BI.redbg,null);
+      biFont(ctx,700,28);biText(ctx,'⏳ '+s.soon+' पॉइंट '+lpDate(s.soonLast)+' तक इस्तेमाल कर लें',P+24,y+52,'left',BI.red);
+      y+=90;
+    }
+    // जोड़
+    y+=14;
+    var cols=[['कुल मिले',String(s.earned)],['इस्तेमाल',String(s.used)],['ख़त्म',String(s.expired)],['छूट मिली',rupee(s.saved)]];
+    var cw=(W-2*P)/4;
+    cols.forEach(function(c,i){
+      var cx=P+cw*i+cw/2;
+      biFont(ctx,700,36,true);biText(ctx,c[1],cx,y+40,'center',BI.maroon);
+      biFont(ctx,400,24);biText(ctx,c[0],cx,y+76,'center',BI.muted);
+    });
+    y+=110;
+    // हिसाब
+    if(hist.length){
+      ctx.fillStyle=BI.line;ctx.fillRect(P,y,W-2*P,2);y+=12;
+      biFont(ctx,700,28);biText(ctx,'हाल का हिसाब',P,y+34,'left',BI.ink);y+=52;
+      hist.forEach(function(h){
+        biFont(ctx,400,26);
+        if(h.x){biText(ctx,lpDate(h.x.d)+' — मियाद पूरी',P,y+30,'left',BI.muted);biText(ctx,'− '+h.x.pts,W-P,y+30,'right',BI.muted);}
+        else{
+          var b=h.b,got=num(b.p)+num(b.bo);
+          biText(ctx,biFit(ctx,lpDate(dayKey(b.t))+' — ख़रीद '+rupee(lpBillAmt(b))+(num(b.r)>0?' · '+rupee(b.f)+' छूट':''),W-2*P-220),P,y+30,'left',BI.ink);
+          biFont(ctx,700,27);
+          var gx=W-P;
+          if(num(b.r)>0){var rt='− '+b.r;biText(ctx,rt,gx,y+30,'right',BI.red);gx-=ctx.measureText(rt).width+18;}
+          biText(ctx,got?'+'+got:'0',gx,y+30,'right',got?BI.green:BI.muted);
+        }
+        y+=58;
+      });
+    }
+    // नियम
+    y+=16;ctx.fillStyle=BI.line;ctx.fillRect(P,y,W-2*P,2);y+=10;
+    biFont(ctx,400,24);
+    ['हर ₹50 की मिठाई/केक पर 1 पॉइंट · हर ₹100 के पैकेट सामान पर 1 पॉइंट','दूध, दही, पनीर और थोक ऑर्डर पर पॉइंट नहीं · पॉइंट 1 साल चलते हैं','एक बिल पर एक इनाम · पॉइंट के बदले नकद नहीं'].forEach(function(l){y+=36;biText(ctx,l,P,y,'left',BI.muted);});
+    y+=40;ctx.fillStyle=BI.maroon;ctx.fillRect(0,y,W,16);y+=16;
+    var out=document.createElement('canvas');out.width=W;out.height=Math.min(Math.ceil(y),H);
+    out.getContext('2d').drawImage(cv,0,0);
+    return new Promise(function(res,rej){out.toBlob(function(bl){if(bl)res(bl);else rej(new Error('blob'));},'image/png');});
+  });
+}
+function openLCard(mid){
+  var m=findMember(mid);if(!m)return;
+  if(ui.billShare&&ui.billShare.url){try{URL.revokeObjectURL(ui.billShare.url);}catch(e){}}
+  ui.billShare={kind:'lp',ref:mid,file:null,url:null};
+  openSheet('<div class="sh-head"><h2>📇 '+esc(m.name)+' का कार्ड</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<div id="bill-prev" class="billprev"><p class="hint">कार्ड बन रहा है…</p></div>'+
+    '<div class="billacts"><button class="btn primary" data-act="lp-card-share">📤 फोटो भेजो</button><button class="btn" data-act="lp-card-save">⬇️ फोटो सेव करो</button>'+
+    (m.wa?lpWaBtn(m,lpCardMsg(m),'💬 लिखकर भेजो','','card'):'')+'</div>');
+  lpCardImage(mid).then(function(blob){
+    if(!ui.billShare||ui.billShare.ref!==mid)return;
+    var name='mithas-points-'+String(m.phone).replace(/\D/g,'').slice(-4)+'-'+todayStr()+'.png';
+    var file;try{file=new File([blob],name,{type:'image/png'});}catch(e){file=blob;file.name=name;}
+    var url=URL.createObjectURL(blob);
+    ui.billShare.file=file;ui.billShare.url=url;
+    var pv=$('#bill-prev');if(pv)pv.innerHTML='<img src="'+url+'" alt="मिठास पॉइंट कार्ड">';
+  },function(){var pv=$('#bill-prev');if(pv)pv.innerHTML='<p class="hint">फोटो नहीं बन पाई — "लिखकर भेजो" से भेज दो।</p>';});
+}
+
 /* ---------- Item form ---------- */
 function openItemForm(id){
   var i=id?findItem(id):null;
@@ -3167,6 +3845,7 @@ document.addEventListener('click',function(e){
       var fa=$('#fab').getAttribute('data-fabact');
       if(fa==='item')openItemForm();
       else if(fa==='udhar')openKEntry('u',ui.view==='party'?ui.partyId:null);
+      else if(fa==='lbuy')openLBuy(ui.view==='lmember'?ui.memberId:null);
       else openOrderForm(ui.view==='customer'?ui.customerId:null);
       break;
     case 'open-customer':if($('#ov'))closeSheet();ui.cameFrom=(ui.view==='orders')?'orders':(ui.view==='dues'?'dues':'home');ui.view='customer';ui.customerId=id;renderRoute();window.scrollTo(0,0);break;
@@ -3336,6 +4015,7 @@ document.addEventListener('click',function(e){
         state.items=rd2.items;state.customers=rd2.customers;state.orders=rd2.orders;
         state.catalogApplied=num(rd2.catalogApplied)||0;
         if(rd2.khata&&typeof rd2.khata==='object')state.khata=rd2.khata;
+        if(rd2.loyal&&typeof rd2.loyal==='object')state.loyal=rd2.loyal;
         normalizeState();applyCatalog();migrateUdharOrders();
         var mx2=0;state.orders.forEach(function(o){if(o.no>mx2)mx2=o.no;});
         state.nextOrderNo=Math.max(rd2.nextOrderNo||1,mx2+1);
@@ -3447,6 +4127,79 @@ document.addEventListener('click',function(e){
     case 'save-order':saveOrderFromDraft();break;
 
     /* ---- 📒 उधारी खाता ---- */
+    case 'lp-buy':openLBuy(id||null);break;
+    case 'lp-open':ui.view='lmember';ui.memberId=id;renderRoute();window.scrollTo(0,0);break;
+    case 'lp-all':ui.lpAll=true;renderLoyal();break;
+    case 'lp-hist':ui.lpHist=(ui.lpHist===id)?null:id;renderLMember();break;
+    case 'lp-member-new':openMemberForm(null);break;
+    case 'lp-member-edit':openMemberForm(id);break;
+    case 'lp-member-save':
+      var lmName=$('#lm-name').value.trim(),lmPhone=$('#lm-phone').value.trim(),lmM=id?findMember(id):null;
+      var lmProb=lpMemberProblem(lmName,lmPhone,id||null);
+      if(!lmProb&&!lmM&&!$('#lm-ok').checked)lmProb='ग्राहक से पूछकर सहमति वाला ✓ लगाओ — बिना सहमति सदस्य नहीं बन सकते।';
+      if(lmProb){$('#lm-err').textContent=lmProb;break;}
+      if(lmM){lmM.name=lmName.slice(0,60);lmM.phone=lmPhone;lmM.wa=$('#lm-wa').checked;save();}
+      else lmM=lpAddMember(lmName,lmPhone,$('#lm-wa').checked);
+      closeSheet();ui.view='lmember';ui.memberId=lmM.id;renderRoute();window.scrollTo(0,0);toast('सदस्य सेव हो गया ✓');
+      break;
+    case 'lp-member-del':
+      var ldm=findMember(id);if(!ldm)break;
+      openSheet('<div class="sh-head"><h2>सदस्यता हटाएं?</h2></div><p class="hint">'+esc(ldm.name)+' का नाम, नंबर और पॉइंट का पूरा हिसाब ('+lpState(ldm.id).bal+' पॉइंट) हमेशा के लिए हट जाएगा। सिर्फ़ ग्राहक के कहने पर ही हटाओ।</p>'+
+        '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="lp-member-del-yes" data-id="'+id+'">हाँ, हटाओ</button></div>');
+      break;
+    case 'lp-member-del-yes':
+      LY().m=LY().m.filter(function(x){return x.id!==id;});LY().b=LY().b.filter(function(x){return x.m!==id;});
+      save();closeSheet();ui.view='loyal';ui.memberId=null;renderRoute();toast('सदस्यता हट गई');
+      break;
+    case 'lp-pick':ui.lDraft.mid=id;ui.lDraft.ri=-1;renderLSheet();setTimeout(function(){var f=$('#lp-sw');if(f)f.focus();},40);break;
+    case 'lp-change':ui.lDraft.mid=null;ui.lDraft.ri=-1;ui.lDraft.vf='';ui.lDraft.otp=null;ui.lDraft.otpIn='';ui.lDraft.otpErr='';renderLSheet();setTimeout(function(){var f=$('#lp-q');if(f)f.focus();},40);break;
+    case 'lp-new':
+      var lq=(ui.lDraft.q||'').trim();
+      ui.lDraft.newOpen=true;
+      if(/^[+\d\s-]{6,}$/.test(lq))ui.lDraft.nPhone=lq;else ui.lDraft.nName=lq;
+      renderLSheet();setTimeout(function(){var f=$(ui.lDraft.nName?'#lp-n-phone':'#lp-n-name');if(f)f.focus();},40);
+      break;
+    case 'lp-new-cancel':ui.lDraft.newOpen=false;renderLSheet();break;
+    case 'lp-new-ok':
+      var lnN=$('#lp-n-name').value.trim(),lnP=$('#lp-n-phone').value.trim();
+      var lnProb=lpMemberProblem(lnN,lnP,null);
+      if(!lnProb&&!$('#lp-n-ok').checked)lnProb='ग्राहक से पूछकर सहमति वाला ✓ लगाओ।';
+      if(lnProb){$('#lp-n-err').textContent=lnProb;break;}
+      var lnM=lpAddMember(lnN,lnP,$('#lp-n-wa').checked);
+      ui.lDraft.mid=lnM.id;ui.lDraft.newOpen=false;ui.lDraft.q='';
+      renderLSheet();toast('नया सदस्य जुड़ गया ✓');setTimeout(function(){var f=$('#lp-sw');if(f)f.focus();},40);
+      break;
+    case 'lp-rw':if(!t.disabled){ui.lDraft.ri=+t.getAttribute('data-i');lpRefreshCalc();lpRenderOtp();}break;
+    case 'lp-otp-send':
+      if(ui.lDraft&&ui.lDraft.otp){ui.lDraft.otp.sent=true;ui.lDraft.otp.t=Date.now();ui.lDraft.otpErr='';}
+      setTimeout(function(){lpRenderOtp();var f=$('#lp-otp-in');if(f)f.focus();},400);
+      break;
+    case 'lp-otp-skip':if(ui.lDraft){ui.lDraft.vf='s';ui.lDraft.vfm=ui.lDraft.mid;ui.lDraft.otpErr='';lpRenderOtp();var le=$('#lp-err');if(le)le.textContent='';}break;
+    case 'lp-otp-undo':if(ui.lDraft){ui.lDraft.vf='';ui.lDraft.vfm=null;lpRenderOtp();}break;
+    case 'lp-save':lpSaveBuy();break;
+    case 'lp-bill':openLBill(id);break;
+    case 'lp-void':openLVoid(id);break;
+    case 'lp-why':ui.lpWhy=+t.getAttribute('data-i');$all('#lp-why button').forEach(function(x,i){x.classList.toggle('on',i===ui.lpWhy);});break;
+    case 'lp-void-yes':
+      var lvb=findLBill(id);if(!lvb||lvb.v)break;
+      lvb.v={t:Date.now(),w:LP_WHY[ui.lpWhy||0]};
+      save();closeSheet();renderRoute();toast('ख़रीद रद्द हो गई — पॉइंट ठीक कर दिए');
+      break;
+    case 'lp-card':openLCard(id);break;
+    case 'lp-card-share':
+      var lcs=ui.billShare;
+      if(!lcs||!lcs.file){toast('कार्ड अभी बन रहा है…');break;}
+      try{
+        if(navigator.canShare&&navigator.canShare({files:[lcs.file]})){
+          navigator.share({files:[lcs.file],text:LP.name}).catch(function(err){if(err&&err.name==='AbortError')return;toast('भेज नहीं पाए — "फोटो सेव करो" दबाकर WhatsApp में गैलरी से भेजो');});
+        }else{saveBlobUrl(lcs.url,lcs.file.name);toast('फोटो सेव हो गई — WhatsApp में गैलरी से भेजो');}
+      }catch(err){toast('भेज नहीं पाए — "फोटो सेव करो" दबाओ');}
+      break;
+    case 'lp-card-save':if(ui.billShare&&ui.billShare.url){saveBlobUrl(ui.billShare.url,ui.billShare.file.name);toast('फोटो सेव हो गई');}break;
+    case 'lp-wa-go':
+      var lwm=findMember(id);
+      if(lwm&&t.getAttribute('data-kind')==='remind'){lwm.rm=Date.now();save();setTimeout(function(){renderRoute();},400);}
+      break;
     case 'k-new':openKEntry(t.getAttribute('data-type')==='j'?'j':'u',id||null);break;
     case 'k-open':ui.view='party';ui.partyId=id;renderRoute();window.scrollTo(0,0);break;
     case 'k-party-new':openPartyForm();break;
@@ -3600,6 +4353,13 @@ document.addEventListener('input',function(e){
   if(ui.orderDraft&&syncDraftField(t))return;
   if(ui.kDraft&&syncKField(t))return;
   if(t.id==='ke-search'&&ui.kDraft){ui.kDraft.search=t.value;renderKEntrySheet();var f5=$('#ke-search');if(f5&&document.activeElement!==f5){f5.focus();f5.setSelectionRange(f5.value.length,f5.value.length);}return;}
+  if(t.id==='lp-search'){ui.lpSearch=t.value;renderLoyal();return;}
+  if(ui.lDraft){
+    var lmap={'lp-sw':'sw','lp-pk':'pk','lp-ot':'ot','lp-n-name':'nName','lp-n-phone':'nPhone'};
+    if(lmap[t.id]){ui.lDraft[lmap[t.id]]=t.value;if(t.id==='lp-sw'||t.id==='lp-pk'||t.id==='lp-ot'){ui.lDraft.bigOk=false;lpRefreshCalc();}return;}
+    if(t.id==='lp-q'){ui.lDraft.q=t.value;renderLSheet();return;}
+    if(t.id==='lp-otp-in'){lpOtpInput(t);return;}
+  }
   if(t.id==='k-search'){ui.kSearch=t.value;renderKhata();var f6=$('#k-search');if(f6&&document.activeElement!==f6){f6.focus();f6.setSelectionRange(f6.value.length,f6.value.length);}return;}
   if(t.id==='ordersSearch'){ui.ordersSearch=t.value;renderOrders();var f4=$('#ordersSearch');if(f4&&document.activeElement!==f4){f4.focus();f4.setSelectionRange(f4.value.length,f4.value.length);}return;}
   if(t.id==='search'){ui.search=t.value;renderHome();var f=$('#search');if(f&&document.activeElement!==f){f.focus();f.setSelectionRange(f.value.length,f.value.length);}return;}
@@ -3675,7 +4435,7 @@ window.addEventListener('storage',function(e){
 (function(){
   var ua=navigator.userAgent||'';
   var inApp=/FBAN|FBAV|Instagram|WhatsApp|; wv\)/i.test(ua);
-  var empty=!state.customers.length&&!state.orders.length&&!(state.khata&&state.khata.parties&&state.khata.parties.length)&&!onlineCfg();
+  var empty=!state.customers.length&&!state.orders.length&&!(state.khata&&state.khata.parties&&state.khata.parties.length)&&!(state.loyal&&state.loyal.m&&state.loyal.m.length)&&!onlineCfg();
   if(inApp&&empty&&!/[?&]billing\b/.test(location.search)&&!/^#(o=|online)/.test(location.hash)){
     try{location.replace('order/');}catch(e){location.href='order/';}
   }
@@ -3689,6 +4449,9 @@ requestPersist();
 if(catUpdated)toast('दुकान की आइटम लिस्ट/दाम अपडेट हो गए ✓');
 if(udMoved)toast('उधार अब अलग "📒 उधारी" टैब में है ✓');
 startOnline();
+if(ui.lpTokNew){ui.lpTokNew=false;save();}
+lpSyncSoon(3000);
+window.addEventListener('online',function(){lpSyncSoon(2000);});
 checkWebImport();
 window.addEventListener('hashchange',checkWebImport);
 })();

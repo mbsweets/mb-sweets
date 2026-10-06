@@ -1,5 +1,5 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 4 (30 सितंबर 2026)
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 5 (6 अक्टूबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
@@ -9,8 +9,12 @@
  *
  * दूध-दही रिमाइंडर: बिलिंग ऐप आने वाले ऑर्डर का हिसाब "Plan" शीट में रखता है।
  * रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर घंटी — परसों की मिठाई का दूध, कल का दही/दूध/पनीर।
+ *
+ * ⭐ माँ भगवती मिठास पॉइंट्स: असली हिसाब मालिक के फ़ोन (बिलिंग ऐप) में है। ऐप हर सदस्य का छोटा सार
+ * "Points" शीट में भेजता है ताकि ग्राहक अपने पॉइंट ख़ुद देख सके — WhatsApp वाले लिंक से पूरा हिसाब,
+ * सिर्फ़ मोबाइल नंबर से सिर्फ़ पॉइंट (नाम और ख़रीद नहीं)।
  */
-var VERSION = 4;
+var VERSION = 5;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -179,6 +183,8 @@ function doGet(e) {
     if (p.action === 'init') return out_(init_());
     if (p.action === 'status') return out_(status_(p.code, p.p4));
     if (p.action === 'list') return out_(list_(p.key, p.days));
+    if (p.action === 'lpview') return out_(lpView_(p.t));
+    if (p.action === 'lppts') return out_(lpPts_(p.p));
     if (p.action === 'testnotify') {
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
       return out_(deliver_('✅ MB Sweets — टेस्ट', 'घंटी ठीक से आ रही है। नया ऑनलाइन ऑर्डर आने पर ऐसे ही बजेगी।', 4, BILLING_URL + '#online', null, 'test'));
@@ -203,6 +209,7 @@ function doPost(e) {
     if (body.action === 'plan') return out_(plan_(body));
     if (body.action === 'pushsub') return out_(pushSub_(body));
     if (body.action === 'pushunsub') return out_(pushUnsub_(body));
+    if (body.action === 'lpsync') return out_(lpSync_(body));
     return out_({ ok: false, error: 'action' });
   } catch (err) {
     return out_({ ok: false, error: 'server', detail: String(err) });
@@ -322,6 +329,89 @@ function update_(b) {
     lock.releaseLock();
   }
   return { ok: true };
+}
+
+/* ---------- ⭐ माँ भगवती मिठास पॉइंट्स — ग्राहक ख़ुद देखे ----------
+   बिलिंग ऐप हर सदस्य का सार भेजता है (id, फ़ोन, लिंक की चाबी, हिसाब)। यहाँ कुछ जोड़ा-घटाया नहीं जाता —
+   पॉइंट सिर्फ़ मालिक के फ़ोन से चढ़ते हैं। */
+var LP_SHEET = 'Points';
+var LP_HEAD = ['id', 'phone', 'token', 'data', 'updated'];
+function lpSheet_() {
+  var ss = ss_();
+  var sh = ss.getSheetByName(LP_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(LP_SHEET);
+    sh.appendRow(LP_HEAD);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+function lpClean_(v) { return String(v === null || v === undefined ? '' : v).replace(/^'/, ''); }
+function lpSync_(b) {
+  if (!keyOk_(b.key)) return { ok: false, error: 'key' };
+  if (!Array.isArray(b.list)) return { ok: false, error: 'list' };
+  var list = b.list.slice(0, 60), done = [];
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sh = lpSheet_();
+    var last = sh.getLastRow(), idx = {};
+    if (last >= 2) sh.getRange(2, 1, last - 1, 1).getValues().forEach(function (r, i) { idx[lpClean_(r[0])] = i + 2; });
+    var dels = [], now = new Date();
+    list.forEach(function (x) {
+      if (!x || typeof x !== 'object') return;
+      var id = str_(x.id, 40);
+      if (!/^[A-Za-z0-9_-]{1,40}$/.test(id)) return;
+      if (x.del) {
+        if (idx[id]) { dels.push(idx[id]); delete idx[id]; }
+        done.push(id);
+        return;
+      }
+      var phone = str_(x.p, 15).replace(/\D/g, '');
+      var tok = str_(x.t, 40);
+      if (!/^[6-9]\d{9}$/.test(phone) || !/^[A-Za-z0-9]{16,40}$/.test(tok)) return;
+      var data = JSON.stringify(x.d && typeof x.d === 'object' ? x.d : {});
+      if (data.length > 20000) return;
+      var row = [id, "'" + phone, "'" + tok, data, now];
+      if (idx[id]) sh.getRange(idx[id], 1, 1, LP_HEAD.length).setValues([row]);
+      else { sh.appendRow(row); idx[id] = sh.getLastRow(); }
+      done.push(id);
+    });
+    dels.sort(function (a, c) { return c - a; }).forEach(function (r) { sh.deleteRow(r); });
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, done: done };
+}
+function lpFind_(col, val) {
+  var sh = ss_().getSheetByName(LP_SHEET);
+  if (!sh || sh.getLastRow() < 2) return null;
+  var n = sh.getLastRow() - 1;
+  var vals = sh.getRange(2, col, n, 1).getValues();
+  for (var i = n - 1; i >= 0; i--) {
+    if (lpClean_(vals[i][0]) !== val) continue;
+    try { return JSON.parse(String(sh.getRange(i + 2, 4).getValue() || '')); } catch (e) { return null; }
+  }
+  return null;
+}
+/* WhatsApp वाला लिंक — पूरा हिसाब */
+function lpView_(tok) {
+  tok = str_(tok, 40);
+  if (!/^[A-Za-z0-9]{16,40}$/.test(tok)) return { ok: false, error: 'notfound' };
+  if (!rate_('rl_lv_' + tok, 60, 3600) || !rate_('rl_lv_all', 1500, 3600)) return { ok: false, error: 'rate' };
+  var d = lpFind_(3, tok);
+  if (!d) return { ok: false, error: 'notfound' };
+  return { ok: true, full: true, d: d };
+}
+/* सिर्फ़ मोबाइल नंबर — सिर्फ़ पॉइंट (नाम और ख़रीद नहीं) */
+function lpPts_(p) {
+  var phone = str_(p, 20).replace(/\D/g, '').replace(/^0+/, '');
+  if (phone.length === 12 && phone.slice(0, 2) === '91') phone = phone.slice(2);
+  if (!/^[6-9]\d{9}$/.test(phone)) return { ok: false, error: 'phone' };
+  if (!rate_('rl_lp_' + phone, 10, 3600) || !rate_('rl_lp_all', 300, 3600)) return { ok: false, error: 'rate' };
+  var d = lpFind_(2, phone);
+  if (!d) return { ok: false, error: 'notfound' };
+  return { ok: true, full: false, d: { v: d.v, at: d.at, lots: d.lots, debt: d.debt, rr: d.rr } };
 }
 
 /* ---------- 🥛 दूध-दही रिमाइंडर ---------- */
