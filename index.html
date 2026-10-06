@@ -2743,7 +2743,7 @@ function lpTok(){
   for(i=0;i<r.length;i++)s+=a.charAt(r[i]%a.length);
   return s;
 }
-var LP_SENT='mbmb-lp-sent',lpSyncTimer=null,lpSyncBusy=false;
+var LP_SENT='mbmb-lp-sent',lpSyncTimer=null,lpSyncBusy=false,lpSyncFails=0;
 function lpLinkOk(){var x=lsGet(LP_SENT,{})||{};return !!(onlineCfg()&&x.v5&&!x.old);}
 function lpLink(m){return orderPageUrl()+'?lp='+encodeURIComponent(m.tk||'');}
 function lpLinkLines(m,L){if(m&&m.tk&&lpLinkOk())L.push('','📲 अपने पॉइंट और पूरा हिसाब कभी भी देखें:',lpLink(m));}
@@ -2796,13 +2796,16 @@ function lpSync(){
       if(r&&r.ok){
         var ok={};(r.done||[]).forEach(function(id){ok[id]=1;});
         batch.forEach(function(x){if(!ok[x.id])return;if(x.del)delete s2.m[x.id];else s2.m[x.id]=x.h;});
-        s2.v5=true;delete s2.old;s2.t=now;lsSet(LP_SENT,s2);
+        s2.v5=true;delete s2.old;s2.t=now;lsSet(LP_SENT,s2);lpSyncFails=0;
         if(list.length>batch.length&&(r.done||[]).length)lpSyncSoon(1500);   // बाकी सदस्य अगली बार में
       }else if(r&&r.error==='action'){s2.old=now;lsSet(LP_SENT,s2);}
+      else if(!(r&&r.error==='key'))lpSyncRetry();
       lpSyncShow();
       return done(r);
-    },function(){return done(null);});
+    },function(){lpSyncRetry();return done(null);});
 }
+/* Google Sheet ने जवाब नहीं दिया / नेट नहीं — 1, 2, 4… मिनट बाद अपने-आप फिर (5 बार तक) */
+function lpSyncRetry(){if(lpSyncFails<5){lpSyncFails++;lpSyncSoon(30000*Math.pow(2,lpSyncFails-1));}}
 function lpSyncLine(){
   if(!onlineCfg())return '';
   var x=lsGet(LP_SENT,{})||{};

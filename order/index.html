@@ -228,6 +228,10 @@ label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
 .lpphone{display:flex;gap:8px;margin-top:6px}
 .lpphone input{flex:1;min-width:0;font-size:1.15rem;letter-spacing:.04em}
 .lpphone .btn{flex:0 0 auto}
+.lpload{display:flex;align-items:center;gap:10px}
+.lpspin{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--brand);animation:lpspin .8s linear infinite}
+@keyframes lpspin{to{transform:rotate(360deg)}}
+.lpfresh{text-align:center;font-size:.82rem;color:var(--muted);margin:-4px 0 10px}
 .lpmini{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:.82rem;padding:6px 0;min-height:0;display:block;margin:6px auto 0}
 .bigok{text-align:center;padding:8px 0 4px}
 .bigok .ic{font-size:2.6rem;line-height:1}
@@ -294,7 +298,7 @@ hi:{
  lp_soon_feature:'पॉइंट ऑनलाइन देखने की सुविधा कुछ ही दिनों में शुरू होगी। तब तक WhatsApp पर पूछ लें।',
  lp_pending:'आपका हिसाब अभी दुकान से आ रहा है — थोड़ी देर बाद यह पेज फिर खोलें।',
  lp_ask:'💬 WhatsApp पर पूछें',lp_ask_msg:'नमस्ते, मेरे मिठास पॉइंट बताइए।',lp_forget:'यह मेरा फ़ोन नहीं — यहाँ से मेरा हिसाब हटाओ',lp_other:'किसी और नंबर से देखें',
- lp_shop:'🛍️ ऑर्डर करें',lp_retry:'🔄 दोबारा कोशिश करें',lp_full_note:'यह पेज सिर्फ़ आपके लिए है — लिंक किसी और को न भेजें।',
+ lp_shop:'🛍️ ऑर्डर करें',lp_retry:'🔄 दोबारा कोशिश करें',lp_slow:'Google Sheet से हिसाब आ रहा है — कुछ सेकंड लग सकते हैं…',lp_fresh:'🔄 नया हिसाब देख रहे हैं…',lp_offline:'इंटरनेट नहीं मिला — यह पिछली बार ({t}) देखा हुआ हिसाब है।',lp_full_note:'यह पेज सिर्फ़ आपके लिए है — लिंक किसी और को न भेजें।',
  loc_stuck:'लोकेशन का जवाब नहीं आया। ऊपर पते वाली पट्टी में 🔒 या ⓘ दबाकर Location → Allow करें, फोन की लोकेशन (GPS) चालू रखें और दोबारा दबाएं। न हो पाए तो कोई बात नहीं — ऑर्डर के बाद WhatsApp पर लोकेशन भेज दें।',
  loc_inapp:'यह पेज किसी ऐप के अंदर खुला है — लोकेशन न आए तो ऊपर ⋮ दबाकर "Chrome में खोलें"।',
  loc_chrome:'🌐 Chrome में खोलें — लोकेशन वहाँ मिलेगी',loc_chrome_note:'आपका चुना सामान, नाम और पता साथ चला जाएगा।',loc_fail_inapp:'Instagram / WhatsApp के अंदर फ़ोन की लोकेशन अक्सर नहीं मिलती। नीचे "🌐 Chrome में खोलें" दबाएँ — या कोई बात नहीं, सिर्फ पता लिख दें।',
@@ -437,7 +441,7 @@ en:{
  lp_soon_feature:'Checking points online starts in a few days. Until then, ask us on WhatsApp.',
  lp_pending:'Your account is still being updated from the shop — open this page again in a little while.',
  lp_ask:'💬 Ask on WhatsApp',lp_ask_msg:'Hello, please tell me my Mithas points.',lp_forget:'Not my phone — remove my account from here',lp_other:'Check another number',
- lp_shop:'🛍️ Order now',lp_retry:'🔄 Try again',lp_full_note:'This page is only for you — please don\'t forward the link.',
+ lp_shop:'🛍️ Order now',lp_retry:'🔄 Try again',lp_slow:'Getting your account from our Google Sheet — this can take a few seconds…',lp_fresh:'🔄 Checking for the latest…',lp_offline:'No internet — this is what you saw last time ({t}).',lp_full_note:'This page is only for you — please don\'t forward the link.',
  loc_stuck:'No reply for location. Tap 🔒 or ⓘ in the address bar → Location → Allow, keep phone location (GPS) on and try again. If it still fails, no problem — send your location on WhatsApp after ordering.',
  loc_inapp:'This page opened inside another app — if location fails, tap ⋮ and choose "Open in Chrome".',
  loc_chrome:'🌐 Open in Chrome — location works there',loc_chrome_note:'Your items, name and address go along.',loc_fail_inapp:'Inside Instagram / WhatsApp the phone location often does not work. Tap "🌐 Open in Chrome" below — or no problem, just write your address.',
@@ -1547,6 +1551,26 @@ function lpFromLink(){
   lpTokSet(m[1]);
   try{history.replaceState(null,'',location.pathname+'#points');}catch(e){location.hash='points';}
 }
+/* Google Sheet कभी-कभी पहली बार देर से जवाब देता है — अपने-आप 3 बार तक कोशिश */
+function lpFetch(url,tries){
+  return new Promise(function(res){
+    var n=0;
+    (function go(){
+      n++;
+      var ctrl=window.AbortController?new AbortController():null,tm=ctrl?setTimeout(function(){ctrl.abort();},20000):null;
+      fetch(url,ctrl?{redirect:'follow',signal:ctrl.signal}:{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
+        clearTimeout(tm);
+        if(r&&(r.ok||/^(notfound|rate|action|phone)$/.test(String(r.error))))return res(r);
+        if(n<tries)setTimeout(go,n*1500);else res(r||null);
+      },function(){clearTimeout(tm);if(n<tries)setTimeout(go,n*1500);else res(null);});
+    })();
+  });
+}
+var LP_CACHE='mbo-lp-d';
+function lpCacheGet(tok){try{var c=JSON.parse(localStorage.getItem(LP_CACHE)||'null');return (c&&c.t===tok&&c.d)?c:null;}catch(e){return null;}}
+function lpCacheSet(tok,d){try{if(d)localStorage.setItem(LP_CACHE,JSON.stringify({t:tok,d:d,got:Date.now()}));else localStorage.removeItem(LP_CACHE);}catch(e){}}
+function lpLoadingHtml(){return '<div class="blk"><div class="lpload"><span class="lpspin"></span><span id="lp-loadtxt">'+t('lp_checking')+'</span></div></div>';}
+function lpSlowLater(){setTimeout(function(){var el=$('#lp-loadtxt');if(el)el.textContent=t('lp_slow');},3500);}
 function lpToday(){return dkey(nowIST());}
 function lpAdd(k,n){var d=keyToDate(k);d.setDate(d.getDate()+n);return dkey(d);}
 function lpD(k){if(!k)return '';var d=keyToDate(k),now=nowIST();return d.getDate()+' '+T[st.lang].mo[d.getMonth()]+(d.getFullYear()!==now.getFullYear()?' '+d.getFullYear():'');}
@@ -1594,22 +1618,27 @@ function renderPoints(){
   var tok=lpTokGet();
   if(!C.orderApi){viewShell(t('lp_h'),'<div class="blk"><p>'+t('lp_soon_feature')+'</p></div>'+lpHowHtml()+lpBtnsHtml());return;}
   if(!tok){lpRenderPhone();return;}
-  viewShell(t('lp_h'),'<div class="blk"><p class="hint" style="margin:0">'+t('lp_checking')+'</p></div>');
+  var cached=lpCacheGet(tok);
+  // पिछली बार का हिसाब तुरंत दिखाओ, पीछे से नया लाओ
+  if(cached)lpRenderFull(cached.d,{fresh:true});
+  else{viewShell(t('lp_h'),lpLoadingHtml());lpSlowLater();}
   var my=++lpReq;
-  fetch(C.orderApi+'?action=lpview&t='+encodeURIComponent(tok),{redirect:'follow'})
-    .then(function(r){return r.json();})
-    .then(function(r){
-      if(my!==lpReq||location.hash!=='#points')return;
-      if(r&&r.ok&&r.d){lpRenderFull(r.d);return;}
-      lpRenderFullErr(r);
-    },function(){if(my===lpReq&&location.hash==='#points')lpRenderFullErr(null);});
+  lpFetch(C.orderApi+'?action=lpview&t='+encodeURIComponent(tok),3).then(function(r){
+    if(my!==lpReq||location.hash!=='#points')return;
+    if(r&&r.ok&&r.d){lpCacheSet(tok,r.d);lpRenderFull(r.d,{keepScroll:!!cached});return;}
+    if(r&&r.error==='notfound')lpCacheSet(tok,null);
+    else if(cached){lpRenderFull(cached.d,{offline:cached.got,keepScroll:true});return;}
+    lpRenderFullErr(r);
+  });
 }
 function lpRenderFullErr(r){
   viewShell(t('lp_h'),'<div class="blk"><div class="minbar no" style="margin-top:0">'+esc(lpErrText(r))+'</div>'+
     '<button class="btn block" style="margin-top:10px" data-act="lp-retry">'+t('lp_retry')+'</button></div>'+
     lpHowHtml()+lpBtnsHtml()+'<button class="lpmini" data-act="lp-forget">'+t('lp_forget')+'</button>');
 }
-function lpRenderFull(d){
+function lpRenderFull(d,opt){
+  opt=opt||{};
+  var sc=$('#view .view'),top=(opt.keepScroll&&sc)?sc.scrollTop:0;
   var v=lpCalcView(d),rr=lpRR(d);
   var items=(Array.isArray(d.h)?d.h:[]).slice();
   v.newExp.forEach(function(x){items.push(x);});
@@ -1619,7 +1648,9 @@ function lpRenderFull(d){
     return '<div class="line"><div class="ln"><b>'+t('lp_h_buy',{a:rupee(x.a)})+(num(x.r)>0?' · '+t('lp_h_off',{f:rupee(x.f)}):'')+'</b><small>'+lpD(x.d)+(num(x.bo)>0?' · '+t('lp_h_bonus',{b:num(x.bo)}):'')+'</small></div>'+
       '<div class="la"><span class="'+(num(x.g)>0?'g':'m')+'">+'+num(x.g)+'</span>'+(num(x.r)>0?'<span class="r">− '+num(x.r)+'</span>':'')+'</div></div>';
   }).join(''):'<p class="hint" style="margin:0">'+t('lp_none')+'</p>';
-  var html='<div class="lphero"><div class="hello">'+t('lp_hello',{n:esc(d.n||'')})+'</div><div class="n">'+v.bal+'</div><div class="l">'+t('lp_pts')+'</div>'+
+  var html=(opt.fresh?'<p class="lpfresh" id="lp-fresh">'+t('lp_fresh')+'</p>':'')+
+    (opt.offline?'<div class="blk"><div class="minbar no" style="margin-top:0">'+esc(t('lp_offline',{t:lpDT(opt.offline)}))+'</div><button class="btn block small" style="margin-top:8px" data-act="lp-retry">'+t('lp_retry')+'</button></div>':'')+
+    '<div class="lphero"><div class="hello">'+t('lp_hello',{n:esc(d.n||'')})+'</div><div class="n">'+v.bal+'</div><div class="l">'+t('lp_pts')+'</div>'+
       (d.c?'<p class="hint">'+t('lp_member_since',{d:lpD(d.c)})+'</p>':'')+'</div>'+
     (v.soon?'<div class="lpwarn">'+t('lp_soon',{p:v.soon,d:lpD(v.soonLast)})+'</div>':'')+
     '<div class="blk"><h3>'+t('lp_rw_h')+'</h3>'+lpRwHtml(v.bal,rr)+'</div>'+
@@ -1630,6 +1661,7 @@ function lpRenderFull(d){
     lpHowHtml()+lpBtnsHtml()+
     '<button class="lpmini" data-act="lp-forget">'+t('lp_forget')+'</button>';
   viewShell(t('lp_h'),html);
+  if(top){var sc2=$('#view .view');if(sc2)sc2.scrollTop=top;}
 }
 function lpRenderPhone(){
   var r=lpPhoneRes,body;
@@ -1655,14 +1687,14 @@ function lpCheckPhone(){
   err.textContent=t('lp_checking');
   var btn=$('[data-act=lp-check]');if(btn)btn.disabled=true;
   var my=++lpReq;
-  fetch(C.orderApi+'?action=lppts&p='+ph,{redirect:'follow'})
-    .then(function(r){return r.json();})
-    .then(function(r){
-      if(my!==lpReq||location.hash!=='#points')return;
-      if(r&&r.ok&&r.d){lpPhoneRes={phone:ph,d:r.d};lpRenderPhone();return;}
-      lpPhoneRes={phone:ph,err:(r&&r.error==='notfound')?t('lp_notmember'):(r&&r.error==='phone'?t('lp_e_phone'):lpErrText(r))};
-      lpRenderPhone();
-    },function(){if(my!==lpReq)return;lpPhoneRes={phone:ph,err:t('lp_err')};lpRenderPhone();});
+  var slow=setTimeout(function(){var e2=$('#lp-perr');if(e2&&my===lpReq)e2.textContent=t('lp_slow');},3500);
+  lpFetch(C.orderApi+'?action=lppts&p='+ph,2).then(function(r){
+    clearTimeout(slow);
+    if(my!==lpReq||location.hash!=='#points')return;
+    if(r&&r.ok&&r.d){lpPhoneRes={phone:ph,d:r.d};lpRenderPhone();return;}
+    lpPhoneRes={phone:ph,err:(r&&r.error==='notfound')?t('lp_notmember'):(r&&r.error==='phone'?t('lp_e_phone'):lpErrText(r))};
+    lpRenderPhone();
+  });
 }
 
 /* --- pay --- */
@@ -1856,7 +1888,7 @@ document.addEventListener('click',function(e){
     case 'bsend':sendBulk();break;
     case 'lp-check':lpCheckPhone();break;
     case 'lp-other':lpPhoneRes=null;lpRenderPhone();setTimeout(function(){var f=$('#lp-phone');if(f){f.value='';f.focus();}},40);break;
-    case 'lp-forget':lpTokSet('');lpPhoneRes=null;renderPoints();break;
+    case 'lp-forget':lpTokSet('');lpCacheSet('',null);lpPhoneRes=null;renderPoints();break;
     case 'lp-retry':renderPoints();break;
   }
 });
