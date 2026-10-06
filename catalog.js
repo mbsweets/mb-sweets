@@ -39,6 +39,10 @@ window.MB_CATALOG = {
   /* ऑनलाइन ऑर्डर रजिस्टर (Google Sheet) का Web app URL — खाली हो तो ऑर्डर WhatsApp से जाते हैं */
   orderApi: 'https://script.google.com/macros/s/AKfycbymPk6T9oOO9UtNOs1W4v_qmg4vZEyuS5e1bxtMOlyPodrUHgmbKoBeqJ6RIELvJfdb2Q/exec',
 
+  /* लोकेशन से पता अपने-आप भरने की मुफ़्त सेवा (OpenStreetMap Nominatim) — खाली '' करने पर बंद।
+     नियम: ग्राहक के टैप पर ही, 1 सेकंड में 1 से ज़्यादा नहीं, नीचे "© OpenStreetMap" लिखना ज़रूरी */
+  geoApi: 'https://nominatim.openstreetmap.org/reverse',
+
   pause: false,
   noticeHi: '',
   noticeEn: '',

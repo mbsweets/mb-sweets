@@ -178,6 +178,7 @@ label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
 .locst.ok{background:var(--greenbg);color:var(--green)}
 .locst.near{background:var(--amberbg);color:var(--amber)}
 .locst.far,.locst.err{background:var(--redbg);color:var(--red)}
+.geo-credit{font-size:.72rem;color:var(--muted);margin:4px 0 0}.geo-credit a{color:inherit}
 .slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .slots button{border:1.5px solid var(--line);background:var(--paper);border-radius:10px;min-height:44px;font-weight:600}
 .slots button.on{border-color:var(--brand);background:var(--brand);color:var(--on-brand)}
@@ -294,6 +295,7 @@ hi:{
  you:'आपकी जानकारी',f_name:'नाम',f_phone:'मोबाइल नंबर (WhatsApp वाला)',
  addr_h:'डिलीवरी का पता',loc_btn:'📍 मेरी लोकेशन दें',loc_wait:'लोकेशन ढूंढ रहे हैं…',loc_again:'📍 लोकेशन दोबारा लें',
  loc_why:'लोकेशन देने से दूरी पता चलती है और डिलीवरी वाला सीधे आपके घर पहुँचता है।',
+ geo_wait:'📍 आपका पता ढूँढ रहे हैं…',geo_ok:'✓ पता अपने-आप भर दिया है — एक बार देख लें, और घर/गली व पास की पहचान (लैंडमार्क) लिख दें।',geo_none:'पता अपने-आप नहीं मिला — नीचे ख़ुद लिख दीजिए।',geo_credit:'पता:',
  loc_ok:'✓ आपका इलाका डिलीवरी में आता है (~{d} km)',
  loc_near:'आप डिलीवरी सीमा के पास हैं (~{d} km) — दुकान कॉल करके कन्फर्म करेगी',
  loc_far:'आप 6 km से बाहर लग रहे हैं (~{d} km) — डिलीवरी शायद न हो पाए। "दुकान से लूंगा" भी चुन सकते हैं।',
@@ -420,6 +422,7 @@ en:{
  you:'Your details',f_name:'Name',f_phone:'Mobile number (WhatsApp)',
  addr_h:'Delivery address',loc_btn:'📍 Share my location',loc_wait:'Finding location…',loc_again:'📍 Get location again',
  loc_why:'Your location tells us the distance and helps the delivery reach your door.',
+ geo_wait:'📍 Finding your address…',geo_ok:'✓ Address filled in for you — please check it and add your house/lane and a nearby landmark.',geo_none:"Couldn't find the address automatically — please type it below.",geo_credit:'Address:',
  loc_ok:'✓ Your area is within delivery (~{d} km)',
  loc_near:'You are near the delivery limit (~{d} km) — the shop will call to confirm',
  loc_far:'You seem to be beyond 6 km (~{d} km) — delivery may not be possible. You can choose pick-up.',
@@ -1002,6 +1005,7 @@ function renderCart(){
     locHtml='<div class="blk"><h3>'+t('addr_h')+'</h3>'+
       '<button class="btn block" data-act="loc"'+(locState==='wait'?' disabled':'')+'>'+(loc?t('loc_again'):t('loc_btn'))+'</button>'+
       '<p class="hint">'+t('loc_why')+'</p>'+(inAppBrowser()?'<p class="hint" style="color:var(--amber)">'+t('loc_inapp')+'</p>':'')+ls+
+      '<div id="geo-st">'+geoHtml()+'</div>'+
       '<label class="fl">'+t('f_village')+'<input type="text" id="f-village" autocomplete="address-level3" value="'+esc(st.me.village)+'"></label>'+
       '<p class="hint">'+t('area_hint')+'</p>'+
       '<label class="fl">'+t('f_address')+'<textarea id="f-addr" rows="2" autocomplete="street-address">'+esc(st.me.addr)+'</textarea></label>'+
@@ -1121,12 +1125,17 @@ function getLocation(){
     answered=true;clearTimeout(locTimer);
     var c=p.coords;
     if(c.accuracy&&c.accuracy>3000){loc=null;locState='weak';locWeakAcc=c.accuracy;redraw();return;}
-    setLoc(c);locState='';redraw();
+    setLoc(c);locState='';lookupAddress(c.latitude,c.longitude);redraw();
     // quietly try for a sharper fix
     if(c.accuracy>150){
       try{navigator.geolocation.getCurrentPosition(function(q){
         if(seq!==locSeq)return;
-        if(q.coords.accuracy&&q.coords.accuracy<(loc?loc.acc:1e9)){setLoc(q.coords);redraw();}
+        if(q.coords.accuracy&&q.coords.accuracy<(loc?loc.acc:1e9)){
+          setLoc(q.coords);
+          // moved a fair way from where we looked the address up — look again (once)
+          if(geoFrom&&haversine(geoFrom.lat,geoFrom.lng,q.coords.latitude,q.coords.longitude)>0.25)lookupAddress(q.coords.latitude,q.coords.longitude);
+          redraw();
+        }
       },function(){},{enableHighAccuracy:true,timeout:15000,maximumAge:0});}catch(e){}
     }
   };
@@ -1142,6 +1151,88 @@ function getLocation(){
     redraw();
   };
   navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+}
+/* ---------- address from the location (OpenStreetMap Nominatim, free) ----------
+   Policy: only when the customer taps, never more than one request a second, results cached
+   on the phone, "© OpenStreetMap" shown. Only empty boxes are filled (or ones still holding
+   our own earlier guess) — what the customer typed is never overwritten. */
+var geoState='',geoSeq=0,geoAt=0,geoFrom=null,geoAuto={v:'',a:''};
+function geoHtml(){
+  var credit='<p class="geo-credit">'+t('geo_credit')+' <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a></p>';
+  if(geoState==='wait')return '<p class="hint">'+t('geo_wait')+'</p>';
+  if(geoState==='ok')return '<div class="locst ok">'+t('geo_ok')+'</div>'+credit;
+  if(geoState==='none')return '<p class="hint">'+t('geo_none')+'</p>';
+  return '';
+}
+function paintGeo(){var b=document.getElementById('geo-st');if(b)b.innerHTML=geoHtml();}
+function geoCache(k,v){
+  try{
+    var c=JSON.parse(localStorage.getItem('mbo-geo')||'{}')||{};
+    if(v===undefined)return c[k]||null;
+    c[k]=v;var ks=Object.keys(c);while(ks.length>8)delete c[ks.shift()];
+    localStorage.setItem('mbo-geo',JSON.stringify(c));
+  }catch(e){}
+  return null;
+}
+function geoParts(a){
+  a=a||{};
+  var clean=function(x){return String(x||'').replace(/\s+/g,' ').trim().slice(0,80);};
+  var vill=clean(a.village||a.hamlet||a.neighbourhood||a.suburb||a.quarter||a.town||a.city_district||a.city||a.municipality);
+  var seen={},parts=[];
+  if(vill)seen[vill.toLowerCase()]=1;
+  [a.road,a.hamlet,a.neighbourhood,a.suburb,a.village,a.town,a.city,a.county,a.state_district].forEach(function(x){
+    x=clean(x);if(!x||seen[x.toLowerCase()])return;seen[x.toLowerCase()]=1;parts.push(x);
+  });
+  var pin=clean(a.postcode).replace(/\s/g,'');
+  var addr=parts.join(', ');
+  if(/^\d{6}$/.test(pin))addr=(addr?addr+' ':'')+pin;
+  return {v:vill,a:addr};
+}
+function lookupAddress(lat,lng){
+  var api=C.geoApi===undefined?'https://nominatim.openstreetmap.org/reverse':C.geoApi;
+  if(!api||!window.fetch||!isFinite(lat)||!isFinite(lng))return;
+  var seq=++geoSeq,k=lat.toFixed(4)+','+lng.toFixed(4);
+  geoFrom={lat:lat,lng:lng};
+  var hit=geoCache(k);
+  if(hit){applyGeo(hit,seq);return;}
+  geoState='wait';paintGeo();
+  var wait=Math.max(0,1100-(Date.now()-geoAt));
+  setTimeout(function(){
+    if(seq!==geoSeq)return;
+    geoAt=Date.now();
+    var ctrl=window.AbortController?new AbortController():null;
+    var tm=setTimeout(function(){if(ctrl)ctrl.abort();},9000);
+    var url=api+(api.indexOf('?')<0?'?':'&')+'format=jsonv2&addressdetails=1&zoom=18&lat='+lat.toFixed(6)+'&lon='+lng.toFixed(6)+'&accept-language='+(st.lang==='en'?'en':'hi,en');
+    fetch(url,{signal:ctrl?ctrl.signal:undefined}).then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.json();}).then(function(j){
+      clearTimeout(tm);
+      var p=geoParts(j&&j.address);
+      if(!p.v&&!p.a)throw new Error('empty');
+      geoCache(k,p);applyGeo(p,seq);
+    }).catch(function(){
+      clearTimeout(tm);if(seq!==geoSeq)return;
+      geoState='none';paintGeo();
+    });
+  },wait);
+}
+function applyGeo(p,seq){
+  if(seq!==geoSeq)return;
+  var onForm=location.hash==='#cart'&&document.getElementById('f-village');
+  if(onForm)syncForm();
+  var filled=false;
+  if(p.v&&(!st.me.village.trim()||st.me.village===geoAuto.v)){st.me.village=p.v;geoAuto.v=p.v;filled=true;}
+  if(p.a&&(!st.me.addr.trim()||st.me.addr===geoAuto.a)){st.me.addr=p.a;geoAuto.a=p.a;filled=true;}
+  geoState=filled?'ok':'';
+  save();
+  if(!onForm)return;
+  // update the boxes in place so a customer typing elsewhere does not lose their place
+  var fv=document.getElementById('f-village'),fa=document.getElementById('f-addr'),lm=document.getElementById('f-landmark');
+  if(fv&&fv.value!==st.me.village)fv.value=st.me.village;
+  if(fa&&fa.value!==st.me.addr)fa.value=st.me.addr;
+  paintGeo();
+  var ae=document.activeElement;
+  if(filled&&lm&&!lm.value.trim()&&(!ae||ae===document.body||/^(BUTTON|A)$/.test(ae.tagName))){
+    try{lm.focus({preventScroll:true});lm.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}
+  }
 }
 function orderCode(){
   var d=new Date();
