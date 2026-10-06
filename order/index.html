@@ -244,6 +244,7 @@ hi:{
  talk_btn:'💬 WhatsApp पर बात करें',talk_msg:'नमस्ते, मेरा ऑर्डर कोड {c} है।',my_order:'📦 मेरा ऑर्डर देखें',
  loc_stuck:'लोकेशन का जवाब नहीं आया। ऊपर पते वाली पट्टी में 🔒 या ⓘ दबाकर Location → Allow करें, फोन की लोकेशन (GPS) चालू रखें और दोबारा दबाएं। न हो पाए तो कोई बात नहीं — ऑर्डर के बाद WhatsApp पर लोकेशन भेज दें।',
  loc_inapp:'यह पेज किसी ऐप के अंदर खुला है — लोकेशन न आए तो ऊपर ⋮ दबाकर "Chrome में खोलें"।',
+ loc_chrome:'🌐 Chrome में खोलें — लोकेशन वहाँ मिलेगी',loc_chrome_note:'आपका चुना सामान, नाम और पता साथ चला जाएगा।',loc_fail_inapp:'Instagram / WhatsApp के अंदर फ़ोन की लोकेशन अक्सर नहीं मिलती। नीचे "🌐 Chrome में खोलें" दबाएँ — या कोई बात नहीं, सिर्फ पता लिख दें।',
  wk:['रविवार','सोमवार','मंगलवार','बुधवार','गुरुवार','शुक्रवार','शनिवार'],mo:['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'],d_today:'आज',d_tmr:'कल',
  m_head:'🛍️ *नया ऑर्डर — MB Sweets*',m_items:'*सामान:*',m_total:'कुल',m_plus:'+ केक/पैकेट सामान का दाम',
  inst_txt:'MB Sweets ऐप फोन में रखें — अगली बार सीधे आइकन से ऑर्डर करें',inst_btn:'📲 ऐप इंस्टॉल करें',inst_done:'ऐप इंस्टॉल हो गया ✓ होम स्क्रीन पर "MB Sweets" आइकन देखें',
@@ -369,6 +370,7 @@ en:{
  talk_btn:'💬 Chat on WhatsApp',talk_msg:'Hello, my order code is {c}.',my_order:'📦 View my order',
  loc_stuck:'No reply for location. Tap 🔒 or ⓘ in the address bar → Location → Allow, keep phone location (GPS) on and try again. If it still fails, no problem — send your location on WhatsApp after ordering.',
  loc_inapp:'This page opened inside another app — if location fails, tap ⋮ and choose "Open in Chrome".',
+ loc_chrome:'🌐 Open in Chrome — location works there',loc_chrome_note:'Your items, name and address go along.',loc_fail_inapp:'Inside Instagram / WhatsApp the phone location often does not work. Tap "🌐 Open in Chrome" below — or no problem, just write your address.',
  wk:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mo:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],d_today:'Today',d_tmr:'Tomorrow',
  m_head:'🛍️ *New order — MB Sweets*',m_items:'*Items:*',m_total:'Total',m_plus:'+ price of cake/packaged items',
  inst_txt:'Keep the MB Sweets app on your phone — order straight from the icon next time',inst_btn:'📲 Install app',inst_done:'App installed ✓ Look for the "MB Sweets" icon on your home screen',
@@ -992,7 +994,11 @@ function renderCart(){
       else if(loc.km<=7)ls='<div class="locst near">'+t('loc_near',{d:d})+'</div>';
       else ls='<div class="locst far">'+t('loc_far',{d:d})+'</div>';
     }
-    else if(locState)ls='<div class="locst err">'+t('loc_'+locState,{a:locState==='weak'&&loc===null&&locWeakAcc?(locWeakAcc/1000).toFixed(1):''})+'</div>';
+    else if(locState){
+      var lk=(inAppBrowser()&&(locState==='fail'||locState==='denied'||locState==='stuck'))?'loc_fail_inapp':'loc_'+locState;
+      ls='<div class="locst err">'+t(lk,{a:locState==='weak'&&loc===null&&locWeakAcc?(locWeakAcc/1000).toFixed(1):''})+'</div>';
+    }
+    if(inAppBrowser()&&isAndroid()&&!loc)ls+='<a class="btn block'+(locState&&locState!=='wait'?' primary':'')+'" style="margin-top:8px" href="#" data-act="chrome">'+t('loc_chrome')+'</a><p class="hint" style="margin-top:4px">'+t('loc_chrome_note')+'</p>';
     locHtml='<div class="blk"><h3>'+t('addr_h')+'</h3>'+
       '<button class="btn block" data-act="loc"'+(locState==='wait'?' disabled':'')+'>'+(loc?t('loc_again'):t('loc_btn'))+'</button>'+
       '<p class="hint">'+t('loc_why')+'</p>'+(inAppBrowser()?'<p class="hint" style="color:var(--amber)">'+t('loc_inapp')+'</p>':'')+ls+
@@ -1064,17 +1070,45 @@ function inAppBrowser(){
   var ua=navigator.userAgent||'';
   return /; wv\)|FBAN|FBAV|Instagram|WhatsApp|PhonePe|Paytm|GSA\//i.test(ua);
 }
+function isAndroid(){return /Android/i.test(navigator.userAgent||'');}
+function b64enc(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function b64dec(s){s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
+/* Instagram/WhatsApp के अंदर से Chrome खोलना — सामान, नाम, पता ?k= में साथ जाते हैं */
+function chromeUrl(){
+  var q='k='+b64enc(JSON.stringify({c:st.cart,x:st.custom,m:st.me,cm:st.cakeMsg,n:st.note,l:st.lang}));
+  var path=location.pathname;
+  var https='https://'+location.host+path+'?'+q;
+  return 'intent://'+location.host+path+'?'+q+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(https)+';end';
+}
+function takeHandoff(){
+  var m=location.search.match(/[?&]k=([A-Za-z0-9_-]+)/);if(!m)return;
+  var got=false;
+  try{
+    var d=JSON.parse(b64dec(m[1]));
+    if(d&&typeof d==='object'){
+      if(d.c&&typeof d.c==='object'){st.cart={};Object.keys(d.c).forEach(function(id){if(ITEM[id]&&num(d.c[id])>0)st.cart[id]=num(d.c[id]);});}
+      if(Array.isArray(d.x))st.custom=d.x.slice(0,20).filter(function(c){return c&&typeof c==='object';});
+      if(d.m&&typeof d.m==='object')Object.keys(st.me).forEach(function(k){if(typeof d.m[k]==='string')st.me[k]=d.m[k].slice(0,300);});
+      if(typeof d.cm==='string')st.cakeMsg=d.cm.slice(0,120);
+      if(typeof d.n==='string')st.note=d.n.slice(0,300);
+      if(d.l==='en'||d.l==='hi')st.lang=d.l;
+      save();got=true;
+    }
+  }catch(e){}
+  var rest=location.search.replace(/[?&]k=[^&]*/,'').replace(/^&/,'?');
+  try{history.replaceState(null,'',location.pathname+rest+(got&&(Object.keys(st.cart).length||st.custom.length)?'#cart':''));}catch(e){}
+}
 function setLoc(c){
   loc={lat:c.latitude,lng:c.longitude,acc:c.accuracy||0,km:haversine(S.lat,S.lng,c.latitude,c.longitude)};
 }
 function getLocation(){
   if(!navigator.geolocation){locState='nosupport';renderCart();return;}
-  var seq=++locSeq,answered=false;
+  var seq=++locSeq,answered=false,retried=false;
   locState='wait';renderCart();
-  clearTimeout(locTimer);
   var redraw=function(){if(location.hash==='#cart')renderCart();};
   // some browsers never answer (hidden permission prompt) — do not leave the customer waiting
-  locTimer=setTimeout(function(){if(seq!==locSeq||answered)return;locState='stuck';redraw();},15000);
+  var arm=function(ms){clearTimeout(locTimer);locTimer=setTimeout(function(){if(seq!==locSeq||answered)return;locState='stuck';redraw();},ms);};
+  arm(15000);
   try{
     if(navigator.permissions&&navigator.permissions.query){
       navigator.permissions.query({name:'geolocation'}).then(function(s){
@@ -1082,8 +1116,8 @@ function getLocation(){
       },function(){});
     }
   }catch(e){}
-  navigator.geolocation.getCurrentPosition(function(p){
-    if(seq!==locSeq)return;
+  var ok=function(p){
+    if(seq!==locSeq||answered)return;
     answered=true;clearTimeout(locTimer);
     var c=p.coords;
     if(c.accuracy&&c.accuracy>3000){loc=null;locState='weak';locWeakAcc=c.accuracy;redraw();return;}
@@ -1095,12 +1129,19 @@ function getLocation(){
         if(q.coords.accuracy&&q.coords.accuracy<(loc?loc.acc:1e9)){setLoc(q.coords);redraw();}
       },function(){},{enableHighAccuracy:true,timeout:15000,maximumAge:0});}catch(e){}
     }
-  },function(err){
+  };
+  var bad=function(err){
     if(seq!==locSeq||answered)return;
+    // network location failed or slow — try once more with GPS before giving up
+    if(err&&err.code!==1&&!retried){
+      retried=true;arm(24000);
+      try{navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:true,timeout:20000,maximumAge:0});return;}catch(e){}
+    }
     answered=true;clearTimeout(locTimer);
     locState=(err&&err.code===1)?'denied':'fail';
     redraw();
-  },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+  };
+  navigator.geolocation.getCurrentPosition(ok,bad,{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
 }
 function orderCode(){
   var d=new Date();
@@ -1482,6 +1523,7 @@ document.addEventListener('click',function(e){
       renderCart();break;
     case 'slot':syncForm();when.slot=+el.getAttribute('data-i');renderCart();break;
     case 'loc':syncForm();getLocation();break;
+    case 'chrome':syncForm();save();el.setAttribute('href',chromeUrl());break;
     case 'send':sendOrder();break;
     case 'send-wa':syncForm();sendPendingViaWhatsApp();break;
     case 'check-status':checkStatus();break;
@@ -1510,6 +1552,7 @@ setInterval(function(){
 
 /* ---------- start ---------- */
 load();
+takeHandoff();
 (function(){var q=location.search.match(/[?&]lang=(en|hi)\b/);if(q&&st.lang!==q[1]){st.lang=q[1];save();}})();
 renderMenu();
 route();

@@ -3534,6 +3534,15 @@ if('serviceWorker' in navigator){
 }
 
 load();
+/* इंस्टाग्राम/WhatsApp वाले ब्राउज़र से कोई ग्राहक गलती से बिलिंग ऐप पर आ गया (और इस फ़ोन में दुकान का कोई डेटा नहीं) → सीधे ऑर्डर मेन्यू */
+(function(){
+  var ua=navigator.userAgent||'';
+  var inApp=/FBAN|FBAV|Instagram|WhatsApp|; wv\)/i.test(ua);
+  var empty=!state.customers.length&&!state.orders.length&&!(state.khata&&state.khata.parties&&state.khata.parties.length)&&!onlineCfg();
+  if(inApp&&empty&&!/[?&]billing\b/.test(location.search)&&!/^#(o=|online)/.test(location.hash)){
+    try{location.replace('order/');}catch(e){location.href='order/';}
+  }
+})();
 var catUpdated=applyCatalog();
 var udMoved=migrateUdharOrders();
 renderShell();

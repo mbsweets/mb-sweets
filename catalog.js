@@ -40,8 +40,8 @@ window.MB_CATALOG = {
   orderApi: 'https://script.google.com/macros/s/AKfycbymPk6T9oOO9UtNOs1W4v_qmg4vZEyuS5e1bxtMOlyPodrUHgmbKoBeqJ6RIELvJfdb2Q/exec',
 
   pause: false,
-  noticeHi: 'जितिया के लिए दही — 2 अक्टूबर (शुक्रवार) शाम 7 बजे तक होम डिलीवरी। पहले से बुक कर लें।',
-  noticeEn: 'Dahi for Jitiya — home delivery till 7 PM on Fri, 2 Oct. Please book early.',
+  noticeHi: '',
+  noticeEn: '',
   off: [],
 
   /* [id, बिलिंग वाला नाम, category, unit, दाम, v] */
