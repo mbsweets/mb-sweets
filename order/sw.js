@@ -1,6 +1,6 @@
 // Customer order page: always try the network first (prices and stock change),
 // fall back to the saved copy when offline.
-var CACHE_NAME = 'mbo-order-v1';
+var CACHE_NAME = 'mbo-order-v2';
 var CORE = ['./', './manifest.json', '../catalog.js', '../logo-header.png',
   '../fonts/Mukta-400.woff', '../fonts/Mukta-600.woff', '../fonts/Mukta-700.woff', '../fonts/Baloo2-700.woff',
   './img/upi-card.png'];
@@ -21,15 +21,17 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  // pages are stored once, without the address (?k= hand-over links carry the customer's details)
+  var key = req.mode === 'navigate' ? new Request(new URL('./', location.href).href) : req;
   e.respondWith(
     fetch(req).then(function (res) {
       if (res && res.ok) {
         var copy = res.clone();
-        caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); });
+        caches.open(CACHE_NAME).then(function (c) { c.put(key, copy); });
       }
       return res;
     }).catch(function () {
-      return caches.match(req).then(function (hit) {
+      return caches.match(key).then(function (hit) {
         return hit || (req.mode === 'navigate' ? caches.match('./') : undefined);
       });
     })

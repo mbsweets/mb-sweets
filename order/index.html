@@ -155,7 +155,10 @@ footer{color:var(--muted);font-size:.78rem;text-align:center;padding:18px 0 110p
 .line{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
 .line:last-child{border-bottom:0}
 .line .ln{flex:1;min-width:0}
-.line .ln b{display:block;font-weight:600;line-height:1.25}
+.line .ln b{display:block;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.line .ln{min-width:0}
+.line.isoff .ln b{color:var(--red);text-decoration:line-through}
+.line.isoff small{color:var(--red);font-weight:600}
 .line .ln small{color:var(--muted)}
 .line .la{font-weight:700;white-space:nowrap}
 .line .stepper{transform:scale(.9);transform-origin:right center}
@@ -239,7 +242,7 @@ hi:{
  done_app_s2d:'कन्फर्म होने पर नीचे दिए QR/UPI से पेमेंट करें और स्क्रीनशॉट WhatsApp पर भेजें।',
  done_app_s2p:'कन्फर्म होने पर समय पर दुकान से सामान ले जाएं। पेमेंट लेते समय।',
  os_h:'ऑर्डर का स्टेटस',os_check:'🔄 स्टेटस देखें',os_loading:'स्टेटस देख रहे हैं…',os_err:'अभी स्टेटस नहीं मिला — थोड़ी देर बाद देखें।',
- os_new:'🕐 दुकान को मिल गया — कन्फर्म होने का इंतज़ार',os_accepted:'✅ कन्फर्म हो गया!',os_out:'🚚 रास्ते में है — जल्द पहुँचेगा!',os_delivered:'✔️ डिलीवर हो गया — धन्यवाद! 🙏',os_rejected:'❌ माफ़ कीजिए, यह ऑर्डर नहीं हो पाएगा।',
+ os_new:'🕐 दुकान को मिल गया — कन्फर्म होने का इंतज़ार',e_offline_items:'कुछ सामान आज उपलब्ध नहीं है — कार्ट से हटा दें ({x})।',cart_off:'आज उपलब्ध नहीं — हटा दें',cart_pause:'⛔ आज ऑनलाइन ऑर्डर बंद है — कृपया कॉल करें।',far_flag:'⚠️ लोकेशन 6 km से बाहर लगती है — दुकान पक्का करेगी',photo_btn:'📷 केक की फोटो WhatsApp पर भेजें',photo_msg:'नमस्ते, ऑर्डर {c} के फोटो केक की फोटो भेज रहा/रही हूँ:',e_bdate:'आज या आगे की तारीख चुनें।',os_accepted:'✅ कन्फर्म हो गया!',os_out:'🚚 रास्ते में है — जल्द पहुँचेगा!',os_delivered:'✔️ डिलीवर हो गया — धन्यवाद! 🙏',os_rejected:'❌ माफ़ कीजिए, यह ऑर्डर नहीं हो पाएगा।',
  os_total:'कुल',os_pay_now:'नीचे से पेमेंट करें।',
  locsend_h:'📍 घर की लोकेशन भेजें',locsend_txt:'लोकेशन नहीं मिली थी। डिलीवरी वाले को घर ढूंढने में आसानी के लिए WhatsApp पर लोकेशन भेज दें: नीचे बटन दबाएं → WhatsApp में 📎 → "Location" → "अभी की लोकेशन भेजें"।',locsend_btn:'💬 WhatsApp पर लोकेशन भेजें',locsend_msg:'नमस्ते, मेरे ऑर्डर {c} के लिए घर की लोकेशन भेज रहा/रही हूँ 👇',
  talk_btn:'💬 WhatsApp पर बात करें',talk_msg:'नमस्ते, मेरा ऑर्डर कोड {c} है।',my_order:'📦 मेरा ऑर्डर देखें',
@@ -366,7 +369,7 @@ en:{
  done_app_s2d:'After confirmation, pay with the QR/UPI below and send the screenshot on WhatsApp.',
  done_app_s2p:'After confirmation, pick up on time. Pay at the shop.',
  os_h:'Order status',os_check:'🔄 Check status',os_loading:'Checking status…',os_err:'Status not available right now — check again shortly.',
- os_new:'🕐 Received by the shop — waiting for confirmation',os_accepted:'✅ Confirmed!',os_out:'🚚 On the way — arriving soon!',os_delivered:'✔️ Delivered — thank you! 🙏',os_rejected:'❌ Sorry, this order cannot be fulfilled.',
+ os_new:'🕐 Received by the shop — waiting for confirmation',e_offline_items:'Some items are not available today — please remove them from the cart ({x}).',cart_off:'Not available today — please remove',cart_pause:'⛔ Online orders are closed today — please call.',far_flag:'⚠️ Location looks outside 6 km — the shop will confirm',photo_btn:'📷 Send the cake photo on WhatsApp',photo_msg:'Hello, sending the photo for the photo cake in order {c}:',e_bdate:'Choose today or a later date.',os_accepted:'✅ Confirmed!',os_out:'🚚 On the way — arriving soon!',os_delivered:'✔️ Delivered — thank you! 🙏',os_rejected:'❌ Sorry, this order cannot be fulfilled.',
  os_total:'Total',os_pay_now:'Please pay below.',
  locsend_h:'📍 Send your home location',locsend_txt:'We did not get your location. To help the delivery reach you, send it on WhatsApp: tap below → in WhatsApp tap 📎 → "Location" → "Send your current location".',locsend_btn:'💬 Send location on WhatsApp',locsend_msg:'Hello, sending my home location for order {c} 👇',
  talk_btn:'💬 Chat on WhatsApp',talk_msg:'Hello, my order code is {c}.',my_order:'📦 View my order',
@@ -493,6 +496,7 @@ var locState='';      // '', 'wait', 'denied', 'fail', 'weak', 'nosupport'
 var when={type:'',date:'',slot:-1};
 var ckDraft=null;     // custom cake being edited
 var bulk={event:-1,date:'',place:'',what:''};
+var packDraft='';     // typed in the packaged box but not added yet
 
 function load(){
   try{
@@ -501,7 +505,7 @@ function load(){
       var d=JSON.parse(raw);
       if(d.lang==='en')st.lang='en';
       if(d.cart&&typeof d.cart==='object')st.cart=d.cart;
-      if(Array.isArray(d.custom))st.custom=d.custom;
+      if(Array.isArray(d.custom))st.custom=d.custom.filter(function(c){return c&&typeof c==='object'&&typeof c.text==='string'&&(c.type==='cake'||c.type==='pack');});
       if(d.me&&typeof d.me==='object')Object.keys(st.me).forEach(function(k){if(typeof d.me[k]==='string')st.me[k]=d.me[k];});
       if(typeof d.cakeMsg==='string')st.cakeMsg=d.cakeMsg;
       if(typeof d.note==='string')st.note=d.note;
@@ -531,7 +535,9 @@ function nm2(o){return st.lang==='en'?(o.hi||''):(o.en||'');}
 function pad(n){return n<10?'0'+n:''+n;}
 function dkey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function keyToDate(k){var a=String(k).split('-');return new Date(+a[0],+a[1]-1,+a[2]);}
-function nowMin(){var d=new Date();return d.getHours()*60+d.getMinutes();}
+/* the shop runs on India time even if the customer's phone is set to another country */
+function nowIST(){var d=new Date();return new Date(d.getTime()+(330+d.getTimezoneOffset())*60000);}
+function nowMin(){var d=nowIST();return d.getHours()*60+d.getMinutes();}
 function unitTxt(u){return (T[st.lang].u[u])||u;}
 function stepOf(u){return u==='किलो'?0.25:(u==='लीटर'?0.5:1);}
 function qtyTxt(unit,q,lang){
@@ -566,15 +572,15 @@ function img(name){return 'img/'+name+'.webp';}
 /* ---------- time rules ---------- */
 function asapOpen(){var m=nowMin();return !C.pause&&m>=S.orderStartHour*60&&m<S.orderEndHour*60;}
 function slotOk(dateKey,i){
-  var today=dkey(new Date());
+  var today=dkey(nowIST());
   if(dateKey<today)return false;
   if(dateKey>today)return true;
   var m=nowMin();
   return m<S.orderEndHour*60&&m<=SLOTS[i][1]*60-60;
 }
 function anySlot(dateKey){for(var i=0;i<SLOTS.length;i++)if(slotOk(dateKey,i))return true;return false;}
-function firstDate(){var d=new Date();var k=dkey(d);if(anySlot(k))return k;d.setDate(d.getDate()+1);return dkey(d);}
-function maxDate(){var d=new Date();d.setDate(d.getDate()+30);return dkey(d);}
+function firstDate(){var d=nowIST();var k=dkey(d);if(anySlot(k))return k;d.setDate(d.getDate()+1);return dkey(d);}
+function maxDate(){var d=nowIST();d.setDate(d.getDate()+30);return dkey(d);}
 function statusInfo(){
   if(C.pause)return {cls:'pause',txt:t('st_pause')};
   if(asapOpen())return {cls:'open',txt:t('st_open')};
@@ -671,7 +677,9 @@ function picHtml(o,tag){
 }
 
 /* ---------- cart ---------- */
-function optsOf(card){return card.opts.map(function(o){return typeof o==='string'?{id:o}:o;});}
+function optsOf(card){return (card.opts||[]).map(function(o){return typeof o==='string'?{id:o}:o;}).filter(function(o){return o&&ITEM[o.id];});}
+function MENU(){return (C.menu||[]).filter(function(c){return c&&c.key&&optsOf(c).length;});}
+function CAKES(){return (C.customCakes||[]).filter(function(c){return c&&c.key;});}
 function optLabel(card,o){
   if(o.hi)return st.lang==='en'?o.en:o.hi;
   var u=ITEM[o.id].unit;
@@ -681,11 +689,11 @@ function optLabel(card,o){
 }
 function cartLines(){
   var L=[];
-  C.menu.forEach(function(card){
+  MENU().forEach(function(card){
     optsOf(card).forEach(function(o){
       var q=num(st.cart[o.id]);if(!(q>0))return;
       var it=ITEM[o.id];
-      L.push({id:o.id,card:card,opt:o,item:it,qty:q,amt:r2(q*it.price)});
+      L.push({id:o.id,card:card,opt:o,item:it,qty:q,amt:r2(q*it.price),off:!!OFF[o.id]});
     });
   });
   return L;
@@ -791,7 +799,7 @@ function cardHtml(card){
     '<div class="qtyrow">'+ctl+'</div></div></article>';
 }
 function refreshCard(key){
-  var card=C.menu.filter(function(c){return c.key===key;})[0];
+  var card=MENU().filter(function(c){return c.key===key;})[0];
   var el=document.getElementById('card-'+key);
   if(card&&el)el.outerHTML=cardHtml(card);
   renderCartBar();
@@ -807,7 +815,7 @@ function packHtml(){
   return '<div class="packbox" id="packbox"><div class="packtop"><div class="pic">'+(C.packImg?'<img src="'+img(C.packImg)+'" alt="" loading="lazy">':ART.pack())+'</div>'+
     '<div><h3 style="margin:0;font-size:1rem;line-height:1.25">'+t('pack_title')+'</h3><p class="hint" style="margin-top:2px">'+t('pack_sub')+'</p></div></div>'+
     '<div class="chips">'+t('pack_chips').map(function(c){return '<button class="chip" data-act="packchip" data-v="'+esc(c)+'">+ '+esc(c)+'</button>';}).join('')+'</div>'+
-    '<textarea id="packText" rows="3" placeholder="'+esc(t('pack_ph'))+'">'+esc(p?p.text:'')+'</textarea>'+
+    '<textarea id="packText" rows="3" placeholder="'+esc(t('pack_ph'))+'">'+esc(packDraft||(p?p.text:''))+'</textarea>'+
     '<div class="err" id="packErr"></div>'+
     (C.pause?'':'<div class="row">'+(p?'<span class="cq" style="color:var(--green);font-weight:700">'+t('pack_added')+'</span><span style="flex:1"></span><button class="btn small" data-act="packrm">'+t('pack_remove')+'</button><button class="btn small primary" data-act="packadd">'+t('pack_update')+'</button>'
       :'<span style="flex:1"></span><button class="btn small primary" data-act="packadd">'+t('pack_add')+'</button>')+'</div>')+
@@ -815,7 +823,7 @@ function packHtml(){
 }
 function renderMenu(){
   var si=statusInfo();
-  var notice=st.lang==='en'?C.noticeEn:C.noticeHi;
+  var notice=(st.lang==='en'&&C.noticeEn)||C.noticeHi;
   var tabs=[['sweets',t('tab_sweets')],['dairy',t('tab_dairy')],['cake',t('tab_cake')],['pack',t('tab_pack')],['bulk',t('tab_bulk')],['info',t('tab_info')]];
   var html='<header class="hero"><div class="wrap">'+
       '<img src="../logo-header.png" alt="MB Sweets">'+
@@ -833,13 +841,13 @@ function renderMenu(){
     '<nav class="tabs"><div class="wrap">'+tabs.map(function(x,i){return '<button class="tab'+(i===0?' on':'')+'" data-act="tab" data-t="'+x[0]+'">'+esc(x[1])+'</button>';}).join('')+'</div></nav>'+
     '<main class="wrap">'+
       '<section class="sec" id="sec-sweets"><h2>'+t('tab_sweets')+'</h2><p class="sub">'+t('sweets_sub')+'</p>'+
-        C.menu.filter(function(c){return c.tab==='sweets';}).map(cardHtml).join('')+'</section>'+
+        MENU().filter(function(c){return c.tab==='sweets';}).map(cardHtml).join('')+'</section>'+
       '<section class="sec" id="sec-dairy"><h2>'+t('tab_dairy')+'</h2><p class="sub">'+t('dairy_sub')+'</p>'+
-        C.menu.filter(function(c){return c.tab==='dairy';}).map(cardHtml).join('')+'</section>'+
+        MENU().filter(function(c){return c.tab==='dairy';}).map(cardHtml).join('')+'</section>'+
       '<section class="sec" id="sec-cake"><h2>'+t('tab_cake')+'</h2><p class="sub">'+t('cake_sub')+'</p>'+
-        C.menu.filter(function(c){return c.tab==='cake';}).map(cardHtml).join('')+
+        MENU().filter(function(c){return c.tab==='cake';}).map(cardHtml).join('')+
         '<h3 style="margin:16px 0 2px;font-size:1.05rem">'+t('custom_head')+'</h3><p class="sub">'+t('custom_sub')+'</p>'+
-        '<div class="grid2">'+C.customCakes.map(customCardHtml).join('')+'</div>'+
+        '<div class="grid2">'+CAKES().map(customCardHtml).join('')+'</div>'+
         '<p class="smallnote">'+t('sample_note')+'</p></section>'+
       '<section class="sec" id="sec-pack"><h2 style="margin-bottom:10px">'+t('tab_pack')+'</h2>'+packHtml()+'</section>'+
       '<section class="sec" id="sec-bulk"><div class="bulkcard"><h3>'+t('bulk_title')+'</h3><p>'+t('bulk_sub')+'</p><button class="btn" data-act="go" data-v="bulk">'+t('bulk_btn')+'</button></div></section>'+
@@ -926,9 +934,9 @@ function route(){
 }
 function refreshPackIfNeeded(){
   // cart, custom cakes or packaged list may have changed inside a view
-  var grid=$('#sec-cake .grid2');if(grid)grid.innerHTML=C.customCakes.map(customCardHtml).join('');
+  var grid=$('#sec-cake .grid2');if(grid)grid.innerHTML=CAKES().map(customCardHtml).join('');
   var pb=$('#packbox');if(pb)pb.outerHTML=packHtml();
-  C.menu.forEach(function(c){var el=document.getElementById('card-'+c.key);if(el)el.outerHTML=cardHtml(c);});
+  MENU().forEach(function(c){var el=document.getElementById('card-'+c.key);if(el)el.outerHTML=cardHtml(c);});
 }
 function jumpTo(kind,key,again){
   var el=kind==='item'?document.getElementById('card-'+key):document.getElementById('sec-'+key);
@@ -970,7 +978,10 @@ function renderCart(){
   if(when.type==='asap'&&!asapOpen())when.type='later';
   if(when.type==='later'&&!when.date)when.date=firstDate();
   var tot=pricedTotal();
+  var pauseHtml=C.pause?'<div class="minbar no" style="margin-bottom:10px">'+t('cart_pause')+'</div>':'';
   var items=lines.map(function(l){
+    if(l.off)return '<div class="line isoff"><div class="ln"><b>'+esc(lineName(l))+'</b><small>'+t('cart_off')+'</small></div>'+
+      '<button class="rm" data-act="coff" data-id="'+l.id+'" aria-label="हटाएं">✕</button></div>';
     return '<div class="line"><div class="ln"><b>'+esc(lineName(l))+'</b><small>'+rupee(l.item.price)+' / '+esc(unitTxt(l.item.unit))+'</small></div>'+
       '<div class="stepper"><button data-act="cdec" data-id="'+l.id+'">−</button><b>'+esc(qtyTxt(l.item.unit,l.qty))+'</b><button data-act="cinc" data-id="'+l.id+'">+</button></div>'+
       '<div class="la">'+rupee(l.amt)+'</div></div>';
@@ -1013,16 +1024,16 @@ function renderCart(){
       '</div>';
   }
   var asapOk=asapOpen();
-  var today=dkey(new Date());
+  var today=dkey(nowIST());
   var slotHtml='';
   if(when.type==='later'){
     var any=anySlot(when.date);
-    slotHtml='<label class="fl">'+t('f_date')+'<input type="date" id="f-date" min="'+today+'" max="'+maxDate()+'" value="'+esc(when.date)+'"></label>'+
+    slotHtml='<label class="fl">'+t('f_date')+'<input type="date" id="f-date" min="'+firstDate()+'" max="'+maxDate()+'" value="'+esc(when.date)+'"></label>'+
       '<div class="fl" style="margin-top:10px;font-weight:600;font-size:.9rem">'+t('f_slot')+'</div>'+
       '<div class="slots">'+SLOTS.map(function(s,i){var ok=slotOk(when.date,i);return '<button data-act="slot" data-i="'+i+'"'+(ok?'':' disabled')+' class="'+(when.slot===i&&ok?'on':'')+'">'+esc(st.lang==='en'?s[3]:s[2])+'</button>';}).join('')+'</div>'+
       (any?'':'<p class="hint" style="color:var(--red)">'+t('slot_none')+'</p>');
   }
-  var html=
+  var html=pauseHtml+
     '<div class="blk"><h3>'+t('co_title')+'</h3>'+items+
       '<div class="tot"><span>'+t('co_total')+'</span><span>'+rupee(tot)+'</span></div>'+minHtml+'</div>'+
     '<div class="blk"><h3>'+t('how')+'</h3><div class="seg">'+
@@ -1234,14 +1245,16 @@ function applyGeo(p,seq){
     try{lm.focus({preventScroll:true});lm.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}
   }
 }
-function orderCode(){
-  var d=new Date();
-  return 'W'+pad(d.getDate())+pad(d.getMonth()+1)+'-'+pad(d.getHours())+pad(d.getMinutes())+Math.floor(Math.random()*10);
+function orderCode(avoid){
+  var d=nowIST(),base='W'+pad(d.getDate())+pad(d.getMonth()+1)+'-'+pad(d.getHours())+pad(d.getMinutes());
+  var free=[];for(var i=0;i<10;i++)if(!avoid||avoid.indexOf(base+i)<0)free.push(i);
+  if(!free.length)free=[0,1,2,3,4,5,6,7,8,9];
+  return base+free[Math.floor(Math.random()*free.length)];
 }
 function dateText(key,L){
   var X=T[L||st.lang];
   var dt=keyToDate(key);
-  var today=dkey(new Date());var tm=new Date();tm.setDate(tm.getDate()+1);
+  var today=dkey(nowIST());var tm=nowIST();tm.setDate(tm.getDate()+1);
   var pre=key===today?X.d_today+', ':(key===dkey(tm)?X.d_tmr+', ':'');
   return pre+dt.getDate()+' '+X.mo[dt.getMonth()]+' ('+X.wk[dt.getDay()]+')';
 }
@@ -1254,6 +1267,8 @@ function validate(){
   var tot=pricedTotal();
   if(!cartCount())return t('e_empty');
   if(C.pause)return t('e_pause');
+  var offL=cartLines().filter(function(l){return l.off;});
+  if(offL.length)return t('e_offline_items',{x:offL.map(function(l){return lineName(l);}).join(', ')});
   if(String(st.me.name).trim().length<2)return t('e_name');
   if(!phone10(st.me.phone))return t('e_phone');
   if(st.me.mode==='d'){
@@ -1263,7 +1278,7 @@ function validate(){
   }
   if(when.type==='asap'&&!asapOpen())return t('e_asap');
   if(when.type!=='asap'){
-    if(!when.date||when.date<dkey(new Date())||when.date>maxDate())return t('e_date');
+    if(!when.date||when.date<dkey(nowIST())||when.date>maxDate())return t('e_date');
     if(when.slot<0||!slotOk(when.date,when.slot))return t('e_slot');
   }
   if(!st.agree)return t('e_agree');
@@ -1291,6 +1306,7 @@ function orderText(code,L){
     M.push('🏠 '+st.me.village.trim()+', '+st.me.addr.trim().replace(/\s*\n\s*/g,', '));
     if(st.me.landmark.trim())M.push('    '+X.msg_land+': '+st.me.landmark.trim());
     if(loc)M.push('📍 https://maps.google.com/?q='+loc.lat.toFixed(5)+','+loc.lng.toFixed(5)+' (~'+loc.km.toFixed(1)+' km)');
+    if(loc&&loc.km>(S.radiusKm||6)+1&&loc.acc<1000)M.push(X.far_flag);
   }
   return M.join('\n');
 }
@@ -1313,12 +1329,13 @@ function buildOrder(){
   if(hasFixedCake()&&st.cakeMsg.trim())payload.cm=st.cakeMsg.trim();
   if(st.note.trim())payload.nt=st.note.trim();
   var sigObj=JSON.parse(JSON.stringify(payload));delete sigObj.c;
-  return {code:code,text:orderText(code,st.lang),payload:payload,sig:JSON.stringify(sigObj),mode:st.me.mode,total:tot,asks:st.custom.length,p4:phone10(st.me.phone).slice(-4),hasLoc:!!loc};
+  var photo=st.custom.some(function(c){if(c.type!=='cake')return false;var cc=CAKES().filter(function(x){return x.key===c.key;})[0];return !!(cc&&cc.photo);});
+  return {code:code,text:orderText(code,st.lang),payload:payload,sig:JSON.stringify(sigObj),mode:st.me.mode,total:tot,asks:st.custom.length,p4:phone10(st.me.phone).slice(-4),hasLoc:!!loc,photo:photo,posted:0,used:[code]};
 }
 var pendingOrder=null,sending=false;
 function withCode(o,code){
   // keep the first code when retrying the same order, so the shop never gets it twice
-  o.code=code;o.payload.c=code;
+  o.code=code;o.payload.c=code;if(o.used&&o.used.indexOf(code)<0)o.used.push(code);
   var X=T[st.lang];
   o.text=o.text.replace(/(\n[^\n]*: )W\d{4}-\d{5}/,'$1'+code);
   return o;
@@ -1331,7 +1348,7 @@ function postOrder(payload){
 }
 function finishOrder(o,via){
   var url=waUrl(o.text);
-  st.last={code:o.code,via:via,url:url,mode:o.mode,total:o.total,asks:o.asks,p4:o.p4,hasLoc:o.hasLoc,ts:Date.now()};
+  st.last={code:o.code,via:via,url:url,mode:o.mode,total:o.total,asks:o.asks,p4:o.p4,hasLoc:o.hasLoc,photo:!!o.photo,ts:Date.now()};
   st.cart={};st.custom=[];st.cakeMsg='';st.note='';st.agree=false;
   when={type:'',date:'',slot:-1};
   pendingOrder=null;
@@ -1359,19 +1376,34 @@ function sendOrder(){
   syncForm();
   var e=validate();
   var box=$('#f-err');
-  if(e){if(box){box.textContent=e;box.scrollIntoView({block:'center',behavior:'smooth'});}return;}
+  if(e){
+    // time-based problems: redraw first so the screen shows what is possible right now
+    if(e===t('e_asap')||e===t('e_slot')||e===t('e_date')){renderCart();box=$('#f-err');}
+    if(box){box.textContent=e;box.scrollIntoView({block:'center',behavior:'smooth'});}
+    return;
+  }
   if(box)box.textContent='';
   var o=buildOrder();
-  if(pendingOrder&&pendingOrder.sig===o.sig)o=withCode(o,pendingOrder.code);
+  if(pendingOrder&&pendingOrder.sig===o.sig){var prev=pendingOrder;o=withCode(o,prev.code);o.posted=prev.posted;o.used=prev.used.slice();}
   pendingOrder=o;
   if(!C.orderApi){sendViaWhatsApp(o);return;}
   sending=true;setSending(true);
   var fb=$('#sendFail');if(fb)fb.innerHTML='';
-  postOrder(o.payload).then(function(r){
-    sending=false;
-    if(r&&r.ok){finishOrder(o,'app');location.replace('#done');}
-    else{setSending(false);showSendFail(r&&r.error);}
-  },function(){sending=false;setSending(false);showSendFail('net');});
+  var attempt=function(left){
+    var firstTry=!o.posted;
+    o.posted++;
+    postOrder(o.payload).then(function(r){
+      if(r&&r.ok&&r.dup&&firstTry){
+        // this code was already used by another customer this minute — take a fresh one and send again
+        if(left>0){withCode(o,orderCode(o.used));o.posted=0;attempt(left-1);return;}
+        r={ok:false,error:'busy'};
+      }
+      sending=false;
+      if(r&&r.ok){if(r.code&&r.code!==o.code&&/^W\d{4}-\d{5}$/.test(r.code))withCode(o,r.code);finishOrder(o,'app');location.replace('#done');}
+      else{setSending(false);showSendFail(r&&r.error);}
+    },function(){sending=false;setSending(false);showSendFail('net');});
+  };
+  attempt(10);
 }
 function sendPendingViaWhatsApp(){
   if(!pendingOrder){sendOrder();return;}
@@ -1391,6 +1423,7 @@ function renderDone(){
       '<div class="blk"><h3>'+t('os_h')+'</h3><div id="ordStatus" class="minbar no">'+t('os_loading')+'</div>'+
         '<button class="btn block" style="margin-top:8px" data-act="check-status">'+t('os_check')+'</button></div>'+
       '<div class="blk"><ol class="steps"><li>'+t('done_app_s1')+'</li><li>'+(isD?t('done_app_s2d'):t('done_app_s2p'))+'</li></ol></div>'+
+      (L.photo?'<div class="blk"><p class="hint" style="margin-top:0">'+t('ck_photo')+'</p><a class="btn wa block" href="'+esc(waUrl(t('photo_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('photo_btn')+'</a></div>':'')+
       (isD&&!L.hasLoc?'<div class="blk"><h3>'+t('locsend_h')+'</h3><p class="hint" style="margin-top:0">'+t('locsend_txt')+'</p><a class="btn wa block" href="'+esc(waUrl(t('locsend_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('locsend_btn')+'</a></div>':'')+
       (isD?'<div id="payWrap">'+payBlock(0,true)+'</div>':'')+
       '<div class="row" style="margin-top:4px"><button class="btn primary" style="flex:1" data-act="home">'+t('done_new')+'</button><a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a></div>'+
@@ -1419,7 +1452,7 @@ function checkStatus(){
       if(!r||!r.ok){box.className='minbar no';box.textContent=t('os_err');return;}
       var s=r.status||'new';
       var amt=num(r.confirmedTotal)||num(r.total);
-      var txt=t('os_'+s)||t('os_new');
+      var txt=(T[st.lang]['os_'+s]||T.hi['os_'+s])?t('os_'+s):t('os_new');
       if(s==='accepted'||s==='out'){txt+=' '+t('os_total')+': '+rupee(amt)+(s==='accepted'&&L.mode!=='p'?' — '+t('os_pay_now'):'');}
       if(s==='rejected'&&r.statusNote)txt+=' ('+r.statusNote+')';
       box.className='minbar '+(s==='rejected'?'no':'ok');
@@ -1478,7 +1511,7 @@ function renderRules(){
 
 /* --- custom cake --- */
 function renderCake(key,editIdx){
-  var cc=C.customCakes.filter(function(c){return c.key===key;})[0];
+  var cc=CAKES().filter(function(c){return c.key===key;})[0];
   if(!cc){go('');return;}
   if(!ckDraft||ckDraft.key!==key||ckDraft.editIdx!==editIdx){
     var ex=editIdx>=0?st.custom[editIdx]:null;
@@ -1512,7 +1545,7 @@ function saveCake(){
   d.msg=($('#ck-msg')||{}).value||'';d.msg=d.msg.trim();
   d.note=($('#ck-note')||{}).value||'';d.note=d.note.trim();
   if(d.w<0){$('#ck-err').textContent=t('e_weight');return;}
-  var cc=C.customCakes.filter(function(c){return c.key===d.key;})[0];
+  var cc=CAKES().filter(function(c){return c.key===d.key;})[0];
   var entry={type:'cake',key:d.key,w:d.w,f:d.f,msg:d.msg,note:d.note,text:cakeText(cc,d)};
   if(d.editIdx>=0&&st.custom[d.editIdx])st.custom[d.editIdx]=entry;else st.custom.push(entry);
   save();ckDraft=null;
@@ -1524,7 +1557,7 @@ function saveCake(){
 function renderBulk(){
   var html='<div class="blk"><p class="hint" style="margin-top:0">'+t('bulk_sub')+'</p>'+
     '<h3 style="margin-top:8px">'+t('b_event')+'</h3><div class="slots">'+t('b_events').map(function(e,i){return '<button data-act="bev" data-i="'+i+'" class="'+(bulk.event===i?'on':'')+'">'+esc(e)+'</button>';}).join('')+'</div>'+
-    '<label class="fl">'+t('b_date')+'<input type="date" id="b-date" min="'+dkey(new Date())+'" value="'+esc(bulk.date)+'"></label>'+
+    '<label class="fl">'+t('b_date')+'<input type="date" id="b-date" min="'+dkey(nowIST())+'" value="'+esc(bulk.date)+'"></label>'+
     '<label class="fl">'+t('b_place')+'<input type="text" id="b-place" value="'+esc(bulk.place)+'"></label>'+
     '<label class="fl">'+t('b_what')+'<textarea id="b-what" rows="4" placeholder="'+esc(t('b_what_ph'))+'">'+esc(bulk.what)+'</textarea></label>'+
     '<label class="fl">'+t('f_name')+'<input type="text" id="b-name" value="'+esc(st.me.name)+'"></label>'+
@@ -1545,6 +1578,7 @@ function sendBulk(){
   syncBulk();
   var err=$('#b-err');
   if(!bulk.what.trim()){err.textContent=t('e_bwhat');return;}
+  if(bulk.date&&bulk.date<dkey(nowIST())){err.textContent=t('e_bdate');return;}
   if(st.me.name.trim().length<2){err.textContent=t('e_name');return;}
   if(!phone10(st.me.phone)){err.textContent=t('e_phone');return;}
   save();
@@ -1582,15 +1616,16 @@ document.addEventListener('click',function(e){
     case 'inc':case 'dec':
       if(C.pause||OFF[id])break;
       changeQty(id,a==='inc'?1:-1);
-      var card=C.menu.filter(function(c){return optsOf(c).some(function(o){return o.id===id;});})[0];
+      var card=MENU().filter(function(c){return optsOf(c).some(function(o){return o.id===id;});})[0];
       if(card)refreshCard(card.key);
       break;
-    case 'cinc':case 'cdec':syncForm();changeQty(id,a==='cinc'?1:-1);renderCart();break;
+    case 'cinc':case 'cdec':syncForm();if(OFF[id])break;changeQty(id,a==='cinc'?1:-1);renderCart();break;
+    case 'coff':syncForm();delete st.cart[id];save();renderCart();break;
     case 'crm':syncForm();st.custom.splice(+el.getAttribute('data-i'),1);save();renderCart();break;
     case 'cake-edit':syncForm();var ce=st.custom[+el.getAttribute('data-i')];if(ce)go('cake='+ce.key+','+el.getAttribute('data-i'));break;
-    case 'go':syncForm();go(el.getAttribute('data-v'));break;
+    case 'go':syncForm();if(el.getAttribute('data-v')==='cart')autoPack();go(el.getAttribute('data-v'));break;
     case 'back':syncForm();syncBulk();ckDraft=null;back();break;
-    case 'home':go('');window.scrollTo(0,0);break;
+    case 'home':renderMenu();if(navDepth>0){var nd=navDepth;navDepth=0;history.go(-nd);}else go('');window.scrollTo(0,0);break;
     case 'packchip':
       var ta=$('#packText');if(ta){var v=ta.value.trim();ta.value=(v?v+', ':'')+el.getAttribute('data-v')+' ';ta.focus();}
       break;
@@ -1599,9 +1634,9 @@ document.addEventListener('click',function(e){
       if(!txt){$('#packErr').textContent=t('pack_empty');break;}
       var pi=-1;st.custom.forEach(function(c,i){if(c.type==='pack')pi=i;});
       if(pi>=0)st.custom[pi].text=txt;else st.custom.push({type:'pack',text:txt});
-      save();$('#packbox').outerHTML=packHtml();renderCartBar();toast(t('pack_added'));
+      packDraft='';save();$('#packbox').outerHTML=packHtml();renderCartBar();toast(t('pack_added'));
       break;
-    case 'packrm':st.custom=st.custom.filter(function(c){return c.type!=='pack';});save();$('#packbox').outerHTML=packHtml();renderCartBar();break;
+    case 'packrm':packDraft='';st.custom=st.custom.filter(function(c){return c.type!=='pack';});save();$('#packbox').outerHTML=packHtml();renderCartBar();break;
     case 'cake':ckDraft=null;go('cake='+el.getAttribute('data-key'));break;
     case 'ckw':ckDraft.msg=$('#ck-msg').value;ckDraft.note=$('#ck-note').value;ckDraft.w=+el.getAttribute('data-i');renderCake(ckDraft.key,ckDraft.editIdx);break;
     case 'ckf':ckDraft.msg=$('#ck-msg').value;ckDraft.note=$('#ck-note').value;ckDraft.f=+el.getAttribute('data-i');renderCake(ckDraft.key,ckDraft.editIdx);break;
@@ -1629,8 +1664,16 @@ document.addEventListener('change',function(e){
   if(tg.id==='f-date'){syncForm();renderCart();}
   else if(tg.id==='f-agree'){st.agree=tg.checked;}
 });
+function autoPack(){
+  var ta=$('#packText');if(!ta||C.pause)return;
+  var txt=ta.value.trim();if(!txt)return;
+  var p=st.custom.filter(function(c){return c.type==='pack';})[0];
+  if(p){if(p.text===txt)return;p.text=txt;}else st.custom.push({type:'pack',text:txt});
+  packDraft='';save();
+}
 document.addEventListener('input',function(e){
   var id=e.target.id;
+  if(id==='packText')packDraft=e.target.value;
   if(/^f-/.test(id)){syncForm();save();}
   if(id==='f-agree'){st.agree=e.target.checked;}
 });
