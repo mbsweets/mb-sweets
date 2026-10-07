@@ -1594,6 +1594,15 @@ function webItemInfo(id){
   if(CATALOG){for(var i=0;i<CATALOG.items.length;i++){var r=CATALOG.items[i];if(r[0]===id)return {name:r[1],unit:r[3],price:num(r[4])};}}
   return null;
 }
+/* ऑनलाइन दाम (catalog.js online) — ऑनलाइन ऑर्डर का बिल उसी दाम पर बने जो ग्राहक ने मेन्यू में देखा;
+   काउंटर पर items वाला दाम ही। fee = घर पर डिलीवरी में हर पैक/लीटर पर चार्ज (पिकअप पर नहीं) */
+function webOnline(id){var o=CATALOG&&CATALOG.online&&CATALOG.online[id];return (Array.isArray(o)&&num(o[0])>0)?{price:num(o[0]),fee:Math.max(0,num(o[1]))}:null;}
+function webFee(items,mode){
+  if(mode==='p')return 0;
+  var f=0;(items||[]).forEach(function(r){var o=webOnline(r[0]);if(o)f+=o.fee*num(r[1]);});
+  return round2(f);
+}
+var WEB_FEE_NAME='🚚 होम डिलीवरी चार्ज';
 function webWhenText(p){
   if(p.w==='asap')return p.m==='p'?'जल्दी (30 मिनट में तैयार)':'जल्दी (30–60 मिनट)';
   return fmtDshort(keyToDate(p.w))+(p.s>=0?', '+WEB_SLOTS[p.s][2]:'');
@@ -1627,11 +1636,14 @@ function webLines(p){
     var info=webItemInfo(r[0]);
     // आइटम लिस्ट में नहीं मिला (हटाया गया/नया) — छोड़ो मत, ₹0 पर दिखाओ ताकि Rate भरा जाए
     if(!info){L.push({lid:uid(),iid:'',name:'अज्ञात आइटम ('+r[0]+')',unit:'',rate:0,qty:r[1],delivered:false,date:''});return;}
-    L.push({lid:uid(),iid:r[0],name:info.name,unit:info.unit,rate:info.price,qty:r[1],delivered:false,date:''});
+    var on=webOnline(r[0]);
+    L.push({lid:uid(),iid:r[0],name:info.name,unit:info.unit,rate:on?on.price:info.price,qty:r[1],delivered:false,date:''});
   });
   p.x.forEach(function(r){
     L.push({lid:uid(),name:(r[0]==='cake'?'कस्टम केक: ':'पैकेट सामान (MRP): ')+r[1],unit:r[0]==='cake'?'पीस':'पैक',rate:0,qty:1,delivered:false,date:''});
   });
+  var fee=webFee(p.i,p.m);
+  if(fee>0)L.push({lid:uid(),iid:'',name:WEB_FEE_NAME,unit:'',rate:fee,qty:1,delivered:false,date:''});
   return L;
 }
 function openWebImport(p){
@@ -1649,7 +1661,7 @@ function openWebImport(p){
     (p.m==='d'?'<div class="hint" style="margin:4px 0 0">'+esc([p.g,p.a,p.k].filter(Boolean).join(', ')||'पता नहीं लिखा')+(p.l?' · 📍 '+(p.dk!=null?p.dk+' km':'लोकेशन है'):' · 📍 लोकेशन नहीं')+'</div>':'')+
     '</div>'+
     '<ul class="weblist">'+lines.map(function(l){
-      return '<li><span>'+esc(displayName(l))+' ×'+fmtQty(l.qty)+' '+esc(l.unit)+'</span><b>'+(num(l.rate)>0?rupee(num(l.qty)*num(l.rate)):'दाम भरना है')+'</b></li>';
+      return '<li><span>'+(l.name===WEB_FEE_NAME&&!l.iid?esc(l.name):esc(displayName(l))+' ×'+fmtQty(l.qty)+' '+esc(l.unit))+'</span><b>'+(num(l.rate)>0?rupee(num(l.qty)*num(l.rate)):'दाम भरना है')+'</b></li>';
     }).join('')+'</ul>'+
     '<div class="ftotal"><span>टोटल'+(zero?' (तय दाम वाला)':'')+'</span><b>'+rupee(tot)+'</b></div>'+
     (zero?'<p class="hint">"दाम भरना है" वाले आइटम का दाम अगली स्क्रीन पर Rate में भर देना।</p>':'')+
@@ -1700,7 +1712,10 @@ function webConfirmMessage(o){
   L.push('नमस्ते '+(c?c.name:'')+' जी 🙏');
   L.push('आपका ऑर्डर कन्फर्म है ✅ (ऑर्डर #'+o.no+')');
   L.push('');
-  o.items.forEach(function(it){L.push('• '+displayName(it)+' — '+fmtQty(it.qty)+' '+it.unit+(num(it.rate)>0?' = '+rupee(num(it.qty)*num(it.rate)):''));});
+  o.items.forEach(function(it){
+    if(it.name===WEB_FEE_NAME&&!it.iid){L.push('• '+it.name+' = '+rupee(num(it.qty)*num(it.rate)));return;}
+    L.push('• '+displayName(it)+' — '+fmtQty(it.qty)+' '+it.unit+(num(it.rate)>0?' = '+rupee(num(it.qty)*num(it.rate)):''));
+  });
   L.push('');
   L.push('कुल: '+rupee(tot));
   L.push((o.webMode==='p'?'🏪 दुकान से लेने का समय: ':'🚚 डिलीवरी: ')+fmtDT(o.date));
@@ -1848,8 +1863,11 @@ function onlineLines(o){
   (o.items||[]).forEach(function(r){
     var info=onlineItemInfo(r[0]);
     if(!info){L.push({name:'('+r[0]+')',unit:'',qty:num(r[1]),rate:0,amt:0});return;}
-    L.push({name:info.name,unit:info.unit,qty:num(r[1]),rate:info.price,amt:round2(num(r[1])*info.price)});
+    var on=webOnline(r[0]),pr=on?on.price:info.price;
+    L.push({name:info.name,unit:info.unit,qty:num(r[1]),rate:pr,amt:round2(num(r[1])*pr)});
   });
+  var fee=webFee(o.items,o.mode);
+  if(fee>0)L.push({name:WEB_FEE_NAME,unit:'',qty:1,rate:fee,amt:fee});
   return L;
 }
 function onlineWhen(o){
@@ -1952,7 +1970,7 @@ function onlineCard(o){
   return '<article class="order oncard st-'+esc(o.status)+'">'+
     '<div class="otop"><div class="when">⏰ '+esc(onlineWhen(o))+'</div><span class="obadge">'+esc(o.code)+'</span><span class="stamp st-'+esc(o.status)+'">'+(ON_LABEL[o.status]||esc(o.status))+'</span></div>'+
     '<div class="onmeta">'+(isD?'🚚 घर पर डिलीवरी':'🏪 दुकान से लेंगे')+(o.distKm!==''&&o.distKm!=null?' · ~'+esc(o.distKm)+' km':'')+(created?' · आया: '+esc(created):'')+'</div>'+
-    '<ul class="onitems">'+lines.map(function(l){return '<li><span>'+esc(displayName(l))+' — '+esc((l.unit==='किलो'&&l.qty<1)?Math.round(l.qty*1000)+' ग्राम':fmtQty(l.qty)+' '+l.unit)+'</span><b>'+rupee(l.amt)+'</b></li>';}).join('')+
+    '<ul class="onitems">'+lines.map(function(l){if(l.name===WEB_FEE_NAME)return '<li><span>'+esc(l.name)+'</span><b>'+rupee(l.amt)+'</b></li>';return '<li><span>'+esc(displayName(l))+' — '+esc((l.unit==='किलो'&&l.qty<1)?Math.round(l.qty*1000)+' ग्राम':fmtQty(l.qty)+' '+l.unit)+'</span><b>'+rupee(l.amt)+'</b></li>';}).join('')+
       custom.map(function(c){return '<li class="ask"><span>'+(c[0]==='cake'?'🎂 कस्टम केक: ':'📦 पैकेट सामान (MRP): ')+esc(c[1])+'</span><b>दाम तय करो</b></li>';}).join('')+'</ul>'+
     '<div class="ftotal"><span>कुल'+(custom.length?' (तय दाम वाला)':'')+'</span><b>'+rupee(o.confirmedTotal||tot)+'</b></div>'+
     (o.cakeMsg?'<div class="hint">🎂 केक पर लिखना: "'+esc(o.cakeMsg)+'"</div>':'')+
