@@ -1517,7 +1517,7 @@ function sendOrder(){
   var box=$('#f-err');
   if(e){
     // time-based problems: redraw first so the screen shows what is possible right now
-    if(e===t('e_asap')||e===t('e_slot')||e===t('e_date')){renderCart();box=$('#f-err');}
+    if(e===t('e_asap')||e===t('e_asap_d')||e===t('e_slot')||e===t('e_date')){renderCart();box=$('#f-err');}
     if(box){box.textContent=e;box.scrollIntoView({block:'center',behavior:'smooth'});}
     return;
   }
@@ -1553,7 +1553,7 @@ function sendPendingViaWhatsApp(){
 var statusTimer=null;
 function renderDone(){
   var L=st.last;
-  clearInterval(statusTimer);
+  clearInterval(statusTimer);lastStatus='';
   if(!L){viewShell(t('done_h'),'<div class="blk"><p>'+t('done_none')+'</p><button class="btn primary" data-act="home">'+t('co_browse')+'</button></div>');return;}
   var isD=L.mode!=='p';
   var html;
@@ -1615,7 +1615,7 @@ function checkStatus(){
       if(s==='rejected'&&r.statusNote&&!pm)txt+=' ('+r.statusNote+')';
       box.className='minbar '+(s==='rejected'?'no':'ok');
       box.textContent=txt;
-      renderTrack(s,paid>0,L.mode!=='p');
+      renderTrack(s,full,L.mode!=='p');
       var om=/(?:^|\|)\s*OTP (\d{4})/.exec(String(r.statusNote||'')),ob=$('#ordOtp');
       if(ob)ob.innerHTML=(s==='out'&&om)?'<div class="otpbox">'+esc(t('otp_h'))+'<b>'+esc(om[1])+'</b><small>'+esc(t('otp_txt'))+'</small></div>':'';
       var key=s+'|'+paid;
@@ -1963,7 +1963,7 @@ document.addEventListener('click',function(e){
     case 'ckrm':if(ckDraft&&ckDraft.editIdx>=0){st.custom.splice(ckDraft.editIdx,1);save();}ckDraft=null;back();break;
     case 'mode':syncForm();st.me.mode=el.getAttribute('data-v');
       if(when.slot>=0&&!slotOk(when.date,when.slot))when.slot=-1;
-      if(when.type==='later'&&when.date&&!anySlot(when.date)&&when.date===dkey(nowIST()))when.date=firstDate();
+      if(when.date&&!anySlot(when.date)&&when.date===dkey(nowIST()))when.date=firstDate();
       save();renderCart();break;
     case 'when':
       syncForm();when.type=el.getAttribute('data-v');
