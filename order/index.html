@@ -174,6 +174,19 @@ footer{color:var(--muted);font-size:.78rem;text-align:center;padding:18px 0 110p
 .minbar{margin-top:8px;border-radius:10px;padding:8px 10px;font-size:.88rem;font-weight:600}
 .minbar.ok{background:var(--greenbg);color:var(--green)}
 .minbar.no{background:var(--amberbg);color:var(--amber)}
+.track{display:flex;margin:14px 0 2px;padding:0;list-style:none}
+.track li{flex:1;position:relative;text-align:center;font-size:.74rem;line-height:1.25;color:var(--muted);padding-top:34px}
+.track li::before{content:'';position:absolute;top:13px;left:-50%;width:100%;height:4px;background:var(--line);z-index:0}
+.track li:first-child::before{display:none}
+.track li .d{position:absolute;top:0;left:50%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:var(--card);border:3px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.95rem;z-index:1}
+.track li.done{color:var(--green);font-weight:700}
+.track li.done::before{background:var(--green)}
+.track li.done .d{background:var(--green);border-color:var(--green);color:var(--card)}
+.track li.cur .d{border-color:var(--green);animation:trpulse 1.6s ease-in-out infinite}
+.track li.cur{color:var(--ink);font-weight:700}
+@keyframes trpulse{0%,100%{box-shadow:0 0 0 0 rgba(47,111,78,.45)}50%{box-shadow:0 0 0 8px rgba(47,111,78,0)}}
+@media (prefers-reduced-motion:reduce){.track li.cur .d{animation:none}}
+.paidok{text-align:center}.paidok .ic{font-size:2.2rem}.paidok h3{margin:4px 0 2px;color:var(--green)}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .seg button{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:8px;text-align:left;min-height:58px}
 .seg button b{display:block;font-size:.95rem}
@@ -286,7 +299,7 @@ hi:{
  done_app_s2p:'कन्फर्म होने पर आप तय समय पर दुकान से सामान ले सकते हैं। पेमेंट सामान लेते समय कर दीजिए।',
  os_h:'ऑर्डर का स्टेटस',os_check:'🔄 स्टेटस देखें',os_loading:'स्टेटस देख रहे हैं…',os_err:'अभी स्टेटस नहीं मिल पाया — कृपया थोड़ी देर बाद देखिए।',
  os_new:'🕐 आपका ऑर्डर हमें मिल गया है — कन्फर्म होने का इंतज़ार',e_offline_items:'माफ़ कीजिए, कुछ सामान आज उपलब्ध नहीं है — कृपया कार्ट से हटा दीजिए ({x})।',cart_off:'आज उपलब्ध नहीं — कृपया हटा दीजिए',cart_pause:'⛔ माफ़ कीजिए, आज ऑनलाइन ऑर्डर बंद है — कृपया कॉल कीजिए।',far_flag:'⚠️ लोकेशन 6 km से बाहर लगती है — दुकान पक्का करेगी',photo_btn:'📷 केक की फोटो WhatsApp पर भेजें',photo_msg:'नमस्ते, ऑर्डर {c} के फोटो केक की फोटो भेज रहा/रही हूँ:',e_bdate:'कृपया आज या आगे की तारीख चुनिए।',os_accepted:'✅ कन्फर्म हो गया!',os_out:'🚚 रास्ते में है — जल्द पहुँचेगा!',os_delivered:'✔️ डिलीवर हो गया — धन्यवाद! 🙏',os_rejected:'❌ माफ़ कीजिए, यह ऑर्डर नहीं हो पाएगा।',
- os_total:'कुल',os_pay_now:'कृपया नीचे से पेमेंट कर दीजिए।',
+ os_total:'कुल',os_pay_now:'कृपया नीचे से पेमेंट कर दीजिए।',os_paid:'💰 पेमेंट मिल गया — धन्यवाद! आपका ऑर्डर तैयार हो रहा है।',os_paid_part:'💰 {p} मिल गया — बाकी {r}',tr_new:'ऑर्डर मिला',tr_acc:'कन्फर्म',tr_paid:'पेमेंट मिला',tr_out:'रास्ते में',tr_del:'डिलीवर',tr_pick:'सामान मिल गया',pay_done_h:'पेमेंट मिल गया ✅',pay_done_txt:'{a} का पेमेंट हमें मिल गया है। धन्यवाद! 🙏',
  locsend_h:'📍 घर की लोकेशन भेजें',locsend_txt:'लोकेशन नहीं मिल पाई थी। डिलीवरी वाले को घर ढूँढने में आसानी हो, इसलिए कृपया WhatsApp पर लोकेशन भेज दीजिए: नीचे बटन दबाइए → WhatsApp में 📎 → "Location" → "अभी की लोकेशन भेजें"।',locsend_btn:'💬 WhatsApp पर लोकेशन भेजें',locsend_msg:'नमस्ते, मेरे ऑर्डर {c} के लिए घर की लोकेशन भेज रहा/रही हूँ 👇',
  talk_btn:'💬 WhatsApp पर बात करें',talk_msg:'नमस्ते, मेरा ऑर्डर कोड {c} है।',my_order:'📦 मेरा ऑर्डर देखें',
  lp_bar_t:'माँ भगवती मिठास पॉइंट्स',lp_bar_s:'हर ₹50 की मिठाई पर 1 पॉइंट · अपने पॉइंट देखें',lp_go:'देखें ›',lp_info_btn:'⭐ मेरे पॉइंट',
@@ -435,7 +448,7 @@ en:{
  done_app_s2p:'After confirmation, you can pick up at the agreed time and pay at the shop.',
  os_h:'Order status',os_check:'🔄 Check status',os_loading:'Checking status…',os_err:'Status not available right now — please check again shortly.',
  os_new:'🕐 We have received your order — waiting for confirmation',e_offline_items:'Sorry, some items are not available today — please remove them from the cart ({x}).',cart_off:'Not available today — please remove',cart_pause:'⛔ Sorry, online orders are closed today — please call us.',far_flag:'⚠️ Location looks outside 6 km — the shop will confirm',photo_btn:'📷 Send the cake photo on WhatsApp',photo_msg:'Hello, sending the photo for the photo cake in order {c}:',e_bdate:'Please choose today or a later date.',os_accepted:'✅ Confirmed!',os_out:'🚚 On the way — arriving soon!',os_delivered:'✔️ Delivered — thank you! 🙏',os_rejected:'❌ Sorry, this order cannot be fulfilled.',
- os_total:'Total',os_pay_now:'Please pay below.',
+ os_total:'Total',os_pay_now:'Please pay below.',os_paid:'💰 Payment received — thank you! Your order is being prepared.',os_paid_part:'💰 {p} received — {r} remaining',tr_new:'Order received',tr_acc:'Confirmed',tr_paid:'Payment received',tr_out:'On the way',tr_del:'Delivered',tr_pick:'Picked up',pay_done_h:'Payment received ✅',pay_done_txt:'We have received your payment of {a}. Thank you! 🙏',
  locsend_h:'📍 Send your home location',locsend_txt:'We did not get your location. To help the delivery reach you, please send it on WhatsApp: tap below → in WhatsApp tap 📎 → "Location" → "Send your current location".',locsend_btn:'💬 Send location on WhatsApp',locsend_msg:'Hello, sending my home location for order {c} 👇',
  talk_btn:'💬 Chat on WhatsApp',talk_msg:'Hello, my order code is {c}.',my_order:'📦 View my order',
  lp_bar_t:'Maa Bhagwati Mithas Points',lp_bar_s:'1 point on every ₹50 of sweets · check your points',lp_go:'View ›',lp_info_btn:'⭐ My points',
@@ -1526,7 +1539,7 @@ function renderDone(){
   var html;
   if(L.via==='app'){
     html='<div class="blk bigok"><div class="ic">✅</div><h3>'+t('done_app_h')+'</h3><div>'+t('done_code')+': <span class="code">'+esc(L.code)+'</span></div></div>'+
-      '<div class="blk"><h3>'+t('os_h')+'</h3><div id="ordStatus" class="minbar no">'+t('os_loading')+'</div>'+
+      '<div class="blk"><h3>'+t('os_h')+'</h3><ol class="track" id="ordTrack" aria-label="'+esc(t('os_h'))+'"></ol><div id="ordStatus" class="minbar no">'+t('os_loading')+'</div>'+
         '<button class="btn block" style="margin-top:8px" data-act="check-status">'+t('os_check')+'</button></div>'+
       '<div class="blk"><ol class="steps"><li>'+t('done_app_s1')+'</li><li>'+(isD?t('done_app_s2d'):t('done_app_s2p'))+'</li></ol></div>'+
       (L.photo?'<div class="blk"><p class="hint" style="margin-top:0">'+t('ck_photo')+'</p><a class="btn wa block" href="'+esc(waUrl(t('photo_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('photo_btn')+'</a></div>':'')+
@@ -1548,6 +1561,18 @@ function renderDone(){
   viewShell(t('done_h'),html);
 }
 var lastStatus='';
+/* Swiggy जैसी लाइन: ऑर्डर मिला → कन्फर्म → पेमेंट मिला → रास्ते में → डिलीवर (दुकान से लेने पर: मिला → कन्फर्म → सामान मिल गया) */
+function renderTrack(s,paid,isD){
+  var el=$('#ordTrack');if(!el)return;
+  if(s==='rejected'){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='';
+  var steps=isD?[['tr_new','🧾'],['tr_acc','✅'],['tr_paid','💰'],['tr_out','🚚'],['tr_del','🎉']]:[['tr_new','🧾'],['tr_acc','✅'],['tr_pick','🎉']];
+  var done=isD?[true,s!=='new',paid||s==='delivered',s==='out'||s==='delivered',s==='delivered']:[true,s!=='new',s==='delivered'];
+  var cur=done.indexOf(false);
+  el.innerHTML=steps.map(function(x,i){
+    return '<li class="'+(done[i]?'done':(i===cur?'cur':''))+'"><span class="d">'+(done[i]?'✓':x[1])+'</span>'+esc(t(x[0]))+'</li>';
+  }).join('');
+}
 function checkStatus(){
   var L=st.last;if(!L||L.via!=='app'||!C.orderApi)return;
   var box=$('#ordStatus');
@@ -1558,16 +1583,26 @@ function checkStatus(){
       if(!r||!r.ok){box.className='minbar no';box.textContent=t('os_err');return;}
       var s=r.status||'new';
       var amt=num(r.confirmedTotal)||num(r.total);
+      var pm=/^PAID\s+([\d.]+)/.exec(String(r.statusNote||'')),paid=pm?num(pm[1]):0;
+      var rest=Math.max(0,Math.round((amt-paid)*100)/100),full=paid>0&&rest<0.5;
       var txt=(T[st.lang]['os_'+s]||T.hi['os_'+s])?t('os_'+s):t('os_new');
-      if(s==='accepted'||s==='out'){txt+=' '+t('os_total')+': '+rupee(amt)+(s==='accepted'&&L.mode!=='p'?' — '+t('os_pay_now'):'');}
-      if(s==='rejected'&&r.statusNote)txt+=' ('+r.statusNote+')';
+      if(s==='accepted'||s==='out'){
+        if(s==='accepted'&&full)txt=t('os_paid');
+        txt+=' '+t('os_total')+': '+rupee(amt);
+        if(paid>0&&!full)txt+=' — '+t('os_paid_part',{p:rupee(paid),r:rupee(rest)});
+        else if(s==='accepted'&&L.mode!=='p'&&!paid)txt+=' — '+t('os_pay_now');
+      }
+      if(s==='rejected'&&r.statusNote&&!pm)txt+=' ('+r.statusNote+')';
       box.className='minbar '+(s==='rejected'?'no':'ok');
       box.textContent=txt;
-      if(s!==lastStatus){
-        lastStatus=s;
+      renderTrack(s,paid>0,L.mode!=='p');
+      var key=s+'|'+paid;
+      if(key!==lastStatus){
+        lastStatus=key;
         var pw=$('#payWrap');
         if(pw){
-          if(s==='accepted'||s==='out')pw.innerHTML=payBlock(amt,false);
+          if(full&&s!=='rejected')pw.innerHTML='<div class="blk paidok"><div class="ic">✅</div><h3>'+t('pay_done_h')+'</h3><div>'+esc(t('pay_done_txt',{a:rupee(paid)}))+'</div></div>';
+          else if(s==='accepted'||s==='out')pw.innerHTML=payBlock(paid>0?rest:amt,false);
           else if(s==='rejected'||s==='delivered')pw.innerHTML='';
         }
       }
