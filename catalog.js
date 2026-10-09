@@ -33,6 +33,8 @@ window.MB_CATALOG = {
     closeHour: 21,      // दुकान बंद
     orderStartHour: 7,  // "जल्दी" ऑर्डर कब से
     orderEndHour: 19,   // शाम 7 के बाद सिर्फ आगे की तारीख
+    deliveryStartHour: 9,  // घर पर डिलीवरी सुबह 9 बजे से (मालिक, 9 अक्टूबर 2026)
+    deliveryEndHour: 16,   // "जल्दी" वाली डिलीवरी का आख़िरी ऑर्डर शाम 4 बजे तक — डिलीवरी शाम 5 तक; दुकान से लेना पहले जैसा 7–7
     minOrder: 499,
     radiusKm: 6
   },

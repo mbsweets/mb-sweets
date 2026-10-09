@@ -438,6 +438,10 @@ var DEFAULT_ITEMS=[
 var CATALOG=(window.MB_CATALOG&&Array.isArray(window.MB_CATALOG.items))?window.MB_CATALOG:null;
 if(CATALOG)DEFAULT_ITEMS=CATALOG.items.map(function(r){return {id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
 var WEB_SLOTS=[[8,11,'सुबह 8–11'],[11,14,'दोपहर 11–2'],[14,17,'दोपहर 2–5'],[17,20,'शाम 5–8']];
+/* घर पर डिलीवरी सुबह 9 बजे से (catalog.js deliveryStartHour) — पहला समय डिलीवरी में "सुबह 9–11" */
+function webDelStart(){return (CATALOG&&CATALOG.shop&&num(CATALOG.shop.deliveryStartHour))||0;}
+function webSlotLabel(s,m){if(m!=='p'&&s===0&&webDelStart())return 'सुबह '+webDelStart()+'–11';return WEB_SLOTS[s][2];}
+function webSlotHour(s,m){if(m!=='p'&&s===0&&webDelStart())return Math.max(WEB_SLOTS[0][0],webDelStart());return WEB_SLOTS[s][0];}
 
 var state={shop:Object.assign({},DEFAULT_SHOP),items:[],customers:[],orders:[],nextOrderNo:1,catalogApplied:0,khata:{parties:[],entries:[]}};
 var ui={view:'home',customerId:null,search:'',storageOk:true,editId:null,orderDraft:null,itemsSearch:'',confirm:null,ordersFilter:'all',cameFrom:'home',ordersSearch:'',pendingRestore:null,webImport:null};
@@ -1607,7 +1611,7 @@ function webFee(items,mode){
 var WEB_FEE_NAME='🚚 होम डिलीवरी चार्ज';
 function webWhenText(p){
   if(p.w==='asap')return p.m==='p'?'जल्दी (30 मिनट में तैयार)':'जल्दी (30–60 मिनट)';
-  return fmtDshort(keyToDate(p.w))+(p.s>=0?', '+WEB_SLOTS[p.s][2]:'');
+  return fmtDshort(keyToDate(p.w))+(p.s>=0?', '+webSlotLabel(p.s,p.m):'');
 }
 function webDateValue(p){
   if(p.w==='asap'){
@@ -1615,7 +1619,7 @@ function webDateValue(p){
     var m=d.getMinutes();d.setMinutes(Math.ceil(m/15)*15,0,0);
     return dayKey(d)+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
   }
-  var h=p.s>=0?WEB_SLOTS[p.s][0]:10;
+  var h=p.s>=0?webSlotHour(p.s,p.m):10;
   return p.w+'T'+pad(h)+':00';
 }
 function webMapsLink(p){return p.l?('https://maps.google.com/?q='+p.l[0].toFixed(5)+','+p.l[1].toFixed(5)):'';}
@@ -1878,7 +1882,7 @@ function onlineWhen(o){
   var k=p.w,tk=todayStr();
   var tm=new Date();tm.setDate(tm.getDate()+1);
   var pre=k===tk?'आज, ':(k===dayKey(tm)?'कल, ':'');
-  return pre+fmtDshort(keyToDate(k))+(p.s>=0?', '+WEB_SLOTS[p.s][2]:'');
+  return pre+fmtDshort(keyToDate(k))+(p.s>=0?', '+webSlotLabel(p.s,p.m):'');
 }
 function onlineToPayload(o){
   var l=(o.lat!==''&&o.lng!==''&&o.lat!=null&&o.lng!=null&&isFinite(o.lat)&&isFinite(o.lng))?[Number(o.lat),Number(o.lng)]:null;
