@@ -186,6 +186,9 @@ footer{color:var(--muted);font-size:.78rem;text-align:center;padding:18px 0 110p
 .track li.cur{color:var(--ink);font-weight:700}
 @keyframes trpulse{0%,100%{box-shadow:0 0 0 0 rgba(47,111,78,.45)}50%{box-shadow:0 0 0 8px rgba(47,111,78,0)}}
 @media (prefers-reduced-motion:reduce){.track li.cur .d{animation:none}}
+.otpbox{margin-top:10px;border:2px dashed var(--gold);border-radius:14px;padding:10px 12px;text-align:center;background:var(--goldsoft)}
+.otpbox b{display:block;font-size:2rem;letter-spacing:.35em;color:var(--ink);margin:2px 0 4px;padding-left:.35em}
+.otpbox small{display:block;color:var(--muted);font-size:.82rem;line-height:1.35}
 .paidok{text-align:center}.paidok .ic{font-size:2.2rem}.paidok h3{margin:4px 0 2px;color:var(--green)}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .seg button{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:8px;text-align:left;min-height:58px}
@@ -299,7 +302,7 @@ hi:{
  done_app_s2p:'कन्फर्म होने पर आप तय समय पर दुकान से सामान ले सकते हैं। पेमेंट सामान लेते समय कर दीजिए।',
  os_h:'ऑर्डर का स्टेटस',os_check:'🔄 स्टेटस देखें',os_loading:'स्टेटस देख रहे हैं…',os_err:'अभी स्टेटस नहीं मिल पाया — कृपया थोड़ी देर बाद देखिए।',
  os_new:'🕐 आपका ऑर्डर हमें मिल गया है — कन्फर्म होने का इंतज़ार',e_offline_items:'माफ़ कीजिए, कुछ सामान आज उपलब्ध नहीं है — कृपया कार्ट से हटा दीजिए ({x})।',cart_off:'आज उपलब्ध नहीं — कृपया हटा दीजिए',cart_pause:'⛔ माफ़ कीजिए, आज ऑनलाइन ऑर्डर बंद है — कृपया कॉल कीजिए।',far_flag:'⚠️ लोकेशन 6 km से बाहर लगती है — दुकान पक्का करेगी',photo_btn:'📷 केक की फोटो WhatsApp पर भेजें',photo_msg:'नमस्ते, ऑर्डर {c} के फोटो केक की फोटो भेज रहा/रही हूँ:',e_bdate:'कृपया आज या आगे की तारीख चुनिए।',os_accepted:'✅ कन्फर्म हो गया!',os_out:'🚚 रास्ते में है — जल्द पहुँचेगा!',os_delivered:'✔️ डिलीवर हो गया — धन्यवाद! 🙏',os_rejected:'❌ माफ़ कीजिए, यह ऑर्डर नहीं हो पाएगा।',
- os_total:'कुल',os_pay_now:'कृपया नीचे से पेमेंट कर दीजिए।',os_paid:'💰 पेमेंट मिल गया — धन्यवाद! आपका ऑर्डर तैयार हो रहा है।',os_paid_part:'💰 {p} मिल गया — बाकी {r}',tr_new:'ऑर्डर मिला',tr_acc:'कन्फर्म',tr_paid:'पेमेंट मिला',tr_out:'रास्ते में',tr_del:'डिलीवर',tr_pick:'सामान मिल गया',pay_done_h:'पेमेंट मिल गया ✅',pay_done_txt:'{a} का पेमेंट हमें मिल गया है। धन्यवाद! 🙏',
+ os_total:'कुल',os_pay_now:'कृपया नीचे से पेमेंट कर दीजिए।',os_paid:'💰 पेमेंट मिल गया — धन्यवाद! आपका ऑर्डर तैयार हो रहा है।',os_paid_part:'💰 {p} मिल गया — बाकी {r}',tr_new:'ऑर्डर मिला',tr_acc:'कन्फर्म',tr_paid:'पेमेंट मिला',tr_out:'रास्ते में',tr_del:'डिलीवर',tr_pick:'सामान मिल गया',pay_done_h:'पेमेंट मिल गया ✅',otp_h:'🔐 आपका डिलीवरी कोड',otp_txt:'सामान लेते समय डिलीवरी वाले को यह कोड बताइए — पहले किसी को मत बताइए।',pay_done_txt:'{a} का पेमेंट हमें मिल गया है। धन्यवाद! 🙏',
  locsend_h:'📍 घर की लोकेशन भेजें',locsend_txt:'लोकेशन नहीं मिल पाई थी। डिलीवरी वाले को घर ढूँढने में आसानी हो, इसलिए कृपया WhatsApp पर लोकेशन भेज दीजिए: नीचे बटन दबाइए → WhatsApp में 📎 → "Location" → "अभी की लोकेशन भेजें"।',locsend_btn:'💬 WhatsApp पर लोकेशन भेजें',locsend_msg:'नमस्ते, मेरे ऑर्डर {c} के लिए घर की लोकेशन भेज रहा/रही हूँ 👇',
  talk_btn:'💬 WhatsApp पर बात करें',talk_msg:'नमस्ते, मेरा ऑर्डर कोड {c} है।',my_order:'📦 मेरा ऑर्डर देखें',
  lp_bar_t:'माँ भगवती मिठास पॉइंट्स',lp_bar_s:'हर ₹50 की मिठाई पर 1 पॉइंट · अपने पॉइंट देखें',lp_go:'देखें ›',lp_info_btn:'⭐ मेरे पॉइंट',
@@ -330,8 +333,8 @@ hi:{
  inst_note:'इंस्टॉल करने के बाद ऐप में हमेशा नए दाम और मेन्यू दिखेंगे — कुछ अपडेट नहीं करना पड़ता।',
  tag:'मिठाई · दूध-दही-पनीर · केक',
  st_open:'ऑर्डर चालू · 30–60 मिनट में डिलीवरी',
- st_early:'अभी आप आगे के समय का ऑर्डर दे सकते हैं · "जल्दी" वाले ऑर्डर: दुकान से लेने के सुबह 7 बजे से, घर पर डिलीवरी के सुबह 9 बजे से',st_del_early:'ऑर्डर चालू · दुकान से लेने के लिए 30 मिनट में तैयार · घर पर डिलीवरी सुबह 9 बजे से',st_del_late:'ऑर्डर चालू · दुकान से लेने के लिए 30 मिनट में तैयार · आज की घर पर डिलीवरी के ऑर्डर शाम 4 बजे तक थे — आप कल के लिए डिलीवरी बुक कर सकते हैं',
- st_late:'आज के ऑर्डर बंद (शाम 7 के बाद) · आप कल के लिए ऑर्डर दे सकते हैं',
+ st_early:'अभी आप आगे के समय का ऑर्डर दे सकते हैं · "जल्दी" वाले ऑर्डर: दुकान से लेने के सुबह 7 बजे से, घर पर डिलीवरी के सुबह 9 बजे से',st_del_early:'ऑर्डर चालू · दुकान से लेने के लिए 30 मिनट में तैयार · घर पर डिलीवरी सुबह 9 बजे से',st_del_late:'ऑर्डर चालू · दुकान से लेने के लिए 30 मिनट में तैयार · आज की घर पर डिलीवरी का अंतिम ऑर्डर शाम 4 बजे तक था — आप कल के लिए डिलीवरी बुक कर सकते हैं',
+ st_late:'आज के ऑर्डर बंद (रात 8:30 के बाद) · आप कल के लिए ऑर्डर दे सकते हैं',
  st_pause:'माफ़ कीजिए, आज ऑनलाइन ऑर्डर बंद है · कृपया कॉल कीजिए',
  fee_item:'+ {f} डिलीवरी चार्ज एक्स्ट्रा / {u} (घर पर डिलीवरी में)',fee_cart:'+ {f} डिलीवरी / {u}',
  fee_line:'दूध-दही डिलीवरी चार्ज',fee_sub:'400 ग्राम तक के दही पैक व 1 लीटर दूध पर ₹5, 1 किलो दही पर ₹10',
@@ -357,7 +360,7 @@ hi:{
  add:'+ जोड़ें',off:'आज उपलब्ध नहीं',in_kg:'किलो में',in_pc:'पीस में',
  bulk_title:'शादी, तिलक, पूजा या पार्टी का बड़ा ऑर्डर?',bulk_sub:'मात्रा और तारीख बता दीजिए — दाम और बाकी बात हम WhatsApp / फ़ोन पर कर लेंगे।',bulk_btn:'बड़ा ऑर्डर पूछें',
  info_title:'दुकान की जानकारी',
- i_hours:'🕖 दुकान: सुबह 7 – रात 9 · घर पर डिलीवरी: सुबह 9 – शाम 5 · दुकान से लेने के ऑर्डर: सुबह 7 – शाम 7',
+ i_hours:'🏪 दुकान खुलने का समय: सुबह 7 बजे से रात 9 बजे तक<br>🚚 घर पर डिलीवरी का समय: सुबह 9 बजे से शाम 5 बजे तक<br>🛍️ दुकान से ख़ुद ले जाने का समय: सुबह 7 बजे से रात 9 बजे तक<br>⏰ घर पर डिलीवरी का अंतिम ऑर्डर शाम 4 बजे तक लिया जाएगा',
  i_del:'🚚 डिलीवरी: दुकान से 6 km तक · ₹499 या ज़्यादा पर फ्री · आम तौर पर 30–60 मिनट · दूध-दही पर ₹5/₹10 प्रति पैक',
  i_pick:'🏪 दुकान से ख़ुद लेने पर: कोई न्यूनतम रकम नहीं',
  i_pay:'💳 पेमेंट: ऑर्डर कन्फर्म होने के बाद UPI से',
@@ -386,7 +389,7 @@ hi:{
  f_village:'गाँव / मोहल्ला',f_address:'पूरा पता (घर, वार्ड, गली)',f_landmark:'पास की पहचान (मंदिर, स्कूल, दुकान) — ज़रूरी नहीं',
  area_hint:'दुकान से 6 km तक — जैसे खिरमा, एयरपोर्ट, केवटी रनवे, पिंडारुच की तरफ।',
  when_h:'कब चाहिए?',w_asap:'⚡ जल्दी',w_asap_d:'30–60 मिनट में',w_asap_p:'30 मिनट में तैयार',w_later:'📅 दूसरा समय',w_later_sub:'तारीख और समय चुनें',
- w_asap_no:'"जल्दी" वाला ऑर्डर सुबह 7 से शाम 7 बजे तक ही होता है — कृपया अभी "दूसरा समय" चुनिए।',w_asap_no_d:'"जल्दी" वाली घर पर डिलीवरी के ऑर्डर सुबह 9 से शाम 4 बजे तक ही लेते हैं — कृपया अभी "दूसरा समय" चुनिए।',del_hours:'घर पर डिलीवरी: सुबह 9 – शाम 5 बजे तक',
+ w_asap_no:'"जल्दी" वाला ऑर्डर सुबह 7 से रात 8:30 बजे तक ही होता है — कृपया अभी "दूसरा समय" चुनिए।',w_asap_no_d:'"जल्दी" वाली घर पर डिलीवरी के ऑर्डर सुबह 9 से शाम 4 बजे तक ही लेते हैं — कृपया अभी "दूसरा समय" चुनिए।',del_hours:'घर पर डिलीवरी का समय: सुबह 9 बजे से शाम 5 बजे तक · अंतिम ऑर्डर शाम 4 बजे तक',
  f_date:'तारीख',f_slot:'समय',slot_none:'माफ़ कीजिए, इस तारीख के लिए अब कोई समय नहीं बचा — कृपया अगली तारीख चुनिए।',
  cake_time:'केक का समय हम कन्फर्म कर देंगे।',
  cake_msg:'केक पर क्या लिखना है? (अगर लिखवाना है)',cake_msg_ph:'जैसे: Happy Birthday Riya',
@@ -425,7 +428,7 @@ hi:{
   'हम WhatsApp पर आपका ऑर्डर कन्फर्म करेंगे। उसके बाद कृपया पूरा पेमेंट पहले UPI से कर दीजिए, तभी डिलीवरी निकलेगी। कैश ऑन डिलीवरी (COD) की सुविधा नहीं है।',
   'माफ़ कीजिए, पेमेंट के बाद अगर आप ख़ुद ऑर्डर कैंसिल करते हैं, तो पैसा वापस नहीं हो पाएगा।',
   'अगर हमने ऑर्डर कन्फर्म किया और समय पर डिलीवरी नहीं कर पाए, तो आप ऑर्डर कैंसिल कर सकते हैं — आपको पूरा पैसा वापस मिलेगा।',
-  'घर पर डिलीवरी सुबह 9 से शाम 5 बजे तक होती है — "जल्दी" वाली डिलीवरी के ऑर्डर आप सुबह 9 से शाम 4 बजे तक दे सकते हैं। दुकान से ख़ुद लेने के ऑर्डर सुबह 7 से शाम 7 बजे तक। उसके बाद आप अगले दिन या आगे की तारीख के लिए ऑर्डर दे सकते हैं।',
+  'दुकान खुलने का समय: सुबह 7 बजे से रात 9 बजे तक। घर पर डिलीवरी का समय: सुबह 9 बजे से शाम 5 बजे तक — घर पर डिलीवरी का अंतिम ऑर्डर शाम 4 बजे तक लिया जाएगा। दुकान से ख़ुद ले जाने का समय: सुबह 7 बजे से रात 9 बजे तक। उसके बाद आप अगले दिन या आगे की तारीख के लिए ऑर्डर दे सकते हैं।',
   'दाम वही जो दुकान में। पैकेट सामान MRP पर।',
   'मिठाई कम से कम 250 ग्राम, या पीस में।',
   'केक 100% अंडा-रहित हैं। केक की फोटो सिर्फ नमूने के लिए — असली केक थोड़ा अलग दिख सकता है। कस्टम केक का दाम हम WhatsApp पर बता देंगे।',
@@ -448,7 +451,7 @@ en:{
  done_app_s2p:'After confirmation, you can pick up at the agreed time and pay at the shop.',
  os_h:'Order status',os_check:'🔄 Check status',os_loading:'Checking status…',os_err:'Status not available right now — please check again shortly.',
  os_new:'🕐 We have received your order — waiting for confirmation',e_offline_items:'Sorry, some items are not available today — please remove them from the cart ({x}).',cart_off:'Not available today — please remove',cart_pause:'⛔ Sorry, online orders are closed today — please call us.',far_flag:'⚠️ Location looks outside 6 km — the shop will confirm',photo_btn:'📷 Send the cake photo on WhatsApp',photo_msg:'Hello, sending the photo for the photo cake in order {c}:',e_bdate:'Please choose today or a later date.',os_accepted:'✅ Confirmed!',os_out:'🚚 On the way — arriving soon!',os_delivered:'✔️ Delivered — thank you! 🙏',os_rejected:'❌ Sorry, this order cannot be fulfilled.',
- os_total:'Total',os_pay_now:'Please pay below.',os_paid:'💰 Payment received — thank you! Your order is being prepared.',os_paid_part:'💰 {p} received — {r} remaining',tr_new:'Order received',tr_acc:'Confirmed',tr_paid:'Payment received',tr_out:'On the way',tr_del:'Delivered',tr_pick:'Picked up',pay_done_h:'Payment received ✅',pay_done_txt:'We have received your payment of {a}. Thank you! 🙏',
+ os_total:'Total',os_pay_now:'Please pay below.',os_paid:'💰 Payment received — thank you! Your order is being prepared.',os_paid_part:'💰 {p} received — {r} remaining',tr_new:'Order received',tr_acc:'Confirmed',tr_paid:'Payment received',tr_out:'On the way',tr_del:'Delivered',tr_pick:'Picked up',pay_done_h:'Payment received ✅',otp_h:'🔐 Your delivery code',otp_txt:'Tell this code to the delivery person only when you receive your order — please do not share it before.',pay_done_txt:'We have received your payment of {a}. Thank you! 🙏',
  locsend_h:'📍 Send your home location',locsend_txt:'We did not get your location. To help the delivery reach you, please send it on WhatsApp: tap below → in WhatsApp tap 📎 → "Location" → "Send your current location".',locsend_btn:'💬 Send location on WhatsApp',locsend_msg:'Hello, sending my home location for order {c} 👇',
  talk_btn:'💬 Chat on WhatsApp',talk_msg:'Hello, my order code is {c}.',my_order:'📦 View my order',
  lp_bar_t:'Maa Bhagwati Mithas Points',lp_bar_s:'1 point on every ₹50 of sweets · check your points',lp_go:'View ›',lp_info_btn:'⭐ My points',
@@ -479,8 +482,8 @@ en:{
  inst_note:'After installing, the app always shows the latest prices and menu — nothing to update.',
  tag:'Sweets · Milk-Dahi-Paneer · Cakes',
  st_open:'Taking orders · delivery in 30–60 min',
- st_early:'You can order for later now · ASAP orders: pickup from 7 AM, home delivery from 9 AM',st_del_early:'Taking orders · pickup ready in 30 min · home delivery from 9 AM',st_del_late:'Taking orders · pickup ready in 30 min · today\'s home-delivery orders closed at 4 PM — you can book delivery for tomorrow',
- st_late:'Today\'s orders closed (after 7 PM) · you can order for tomorrow',
+ st_early:'You can order for later now · ASAP orders: pickup from 7 AM, home delivery from 9 AM',st_del_early:'Taking orders · pickup ready in 30 min · home delivery from 9 AM',st_del_late:'Taking orders · pickup ready in 30 min · last order for today\'s home delivery was 4 PM — you can book delivery for tomorrow',
+ st_late:'Today\'s orders closed (after 8:30 PM) · you can order for tomorrow',
  st_pause:'Sorry, online orders are closed today · please call',
  fee_item:'+ {f} extra delivery charge / {u} (home delivery)',fee_cart:'+ {f} delivery / {u}',
  fee_line:'Milk & curd delivery charge',fee_sub:'₹5 per curd pack up to 400 g and per litre of milk, ₹10 per 1 kg curd',
@@ -506,7 +509,7 @@ en:{
  add:'+ Add',off:'Not available today',in_kg:'By kg',in_pc:'By piece',
  bulk_title:'Big order for a wedding, tilak, puja or party?',bulk_sub:'Tell us the quantity and date — we will discuss price and details on WhatsApp / phone.',bulk_btn:'Ask for a big order',
  info_title:'Shop info',
- i_hours:'🕖 Shop: 7 AM – 9 PM · Home delivery: 9 AM – 5 PM · Pickup orders: 7 AM – 7 PM',
+ i_hours:'🏪 Shop hours: 7 AM to 9 PM<br>🚚 Home delivery: 9 AM to 5 PM<br>🛍️ Pickup from the shop: 7 AM to 9 PM<br>⏰ Last order for home delivery: 4 PM',
  i_del:'🚚 Delivery: up to 6 km · free on ₹499+ · usually 30–60 min · milk & curd ₹5/₹10 per pack',
  i_pick:'🏪 Pick up from shop: no minimum',
  i_pay:'💳 Payment: by UPI after the order is confirmed',
@@ -535,7 +538,7 @@ en:{
  f_village:'Village / locality',f_address:'Full address (house, ward, lane)',f_landmark:'Nearby landmark (temple, school, shop) — optional',
  area_hint:'Up to 6 km from the shop — e.g. towards Khirma, Airport, Keoti Runway, Pindaruch.',
  when_h:'When do you need it?',w_asap:'⚡ ASAP',w_asap_d:'in 30–60 min',w_asap_p:'ready in 30 min',w_later:'📅 Later',w_later_sub:'pick date & time',
- w_asap_no:'ASAP orders only 7 AM – 7 PM — please choose "Later".',w_asap_no_d:'ASAP home-delivery orders only 9 AM – 4 PM — please choose "Later".',del_hours:'Home delivery: 9 AM – 5 PM',
+ w_asap_no:'ASAP orders only 7 AM – 8:30 PM — please choose "Later".',w_asap_no_d:'ASAP home-delivery orders only 9 AM – 4 PM — please choose "Later".',del_hours:'Home delivery: 9 AM to 5 PM · last order 4 PM',
  f_date:'Date',f_slot:'Time',slot_none:'Sorry, no time left for this date — please choose the next date.',
  cake_time:'We will confirm the cake timing.',
  cake_msg:'Message on the cake? (optional)',cake_msg_ph:'e.g. Happy Birthday Riya',
@@ -574,7 +577,7 @@ en:{
   'We will confirm your order on WhatsApp. Then please pay in full by UPI first — delivery leaves only after payment. Sorry, no cash on delivery (COD).',
   'Sorry, if you cancel after paying, the money cannot be refunded.',
   'If we confirmed your order but could not deliver on time, you can cancel — you will get a full refund.',
-  'Home delivery is from 9 AM to 5 PM — ASAP delivery orders can be placed from 9 AM to 4 PM. Pickup orders from 7 AM to 7 PM. After that, you can order for the next day or a later date.',
+  'Shop hours: 7 AM to 9 PM. Home delivery: 9 AM to 5 PM — the last order for home delivery is taken at 4 PM. Pickup from the shop: 7 AM to 9 PM. After that, you can order for the next day or a later date.',
   'Same prices as in the shop. Packaged items at MRP.',
   'Sweets minimum 250 g, or by the piece.',
   'Cakes are 100% eggless. Cake photos are samples — the actual cake may look a little different. We will tell you the custom cake price on WhatsApp.',
@@ -672,13 +675,18 @@ function billingBase(){try{return new URL('../',location.href).href;}catch(e){re
 function img(name){return 'img/'+name+'.webp';}
 
 /* ---------- time rules ---------- */
-/* घर पर डिलीवरी: सुबह 9 – शाम 5 ("जल्दी" वाले ऑर्डर 9–4, समय: 9–11, 11–2, 2–5) · दुकान से लेना: पहले जैसा 7–7, समय 8–11 … 5–8 */
+/* घर पर डिलीवरी: सुबह 9 – शाम 5 ("जल्दी" वाले ऑर्डर 9–4, समय: 9–11, 11–2, 2–5)
+   दुकान से ख़ुद ले जाना: सुबह 7 – रात 9 ("जल्दी" वाले ऑर्डर 7 – 8:30, समय: 7–11, 11–2, 2–5, 5–9)
+   रजिस्टर में समय के नंबर वही 0–3 रहते हैं, सिर्फ़ पहले/आख़िरी समय का घंटा मोड के हिसाब से */
 function isDel(mode){return (mode||st.me.mode)!=='p';}
 function hrStart(mode){return isDel(mode)?(S.deliveryStartHour||S.orderStartHour):S.orderStartHour;}
 function hrEnd(mode){return isDel(mode)?(S.deliveryEndHour||S.orderEndHour):S.orderEndHour;}
 function slotAllowed(i,mode){return !isDel(mode)||SLOTS[i][1]<=(S.deliveryEndHour||S.orderEndHour)+1;}
+function slotEnd(i,mode){return (!isDel(mode)&&i===SLOTS.length-1&&S.closeHour)?S.closeHour:SLOTS[i][1];}
 function slotLabel(i,L,mode){
-  if(isDel(mode)&&i===0&&S.deliveryStartHour)return L==='en'?S.deliveryStartHour+'–11 AM':'सुबह '+S.deliveryStartHour+'–11';
+  var d=isDel(mode);
+  if(i===0){var h=d?S.deliveryStartHour:S.openHour;if(h)return L==='en'?h+'–11 AM':'सुबह '+h+'–11';}
+  if(!d&&i===SLOTS.length-1&&S.closeHour){var e=S.closeHour-12;return L==='en'?'5–'+e+' PM':'शाम 5–'+e;}
   return L==='en'?SLOTS[i][3]:SLOTS[i][2];
 }
 function asapOpen(mode){var m=nowMin();return !C.pause&&m>=hrStart(mode)*60&&m<hrEnd(mode)*60;}
@@ -688,7 +696,7 @@ function slotOk(dateKey,i,mode){
   if(dateKey<today)return false;
   if(dateKey>today)return true;
   var m=nowMin();
-  return m<hrEnd(mode)*60&&m<=SLOTS[i][1]*60-60;
+  return m<hrEnd(mode)*60&&m<=slotEnd(i,mode)*60-60;
 }
 function anySlot(dateKey){for(var i=0;i<SLOTS.length;i++)if(slotOk(dateKey,i))return true;return false;}
 function firstDate(){var d=nowIST();var k=dkey(d);if(anySlot(k))return k;d.setDate(d.getDate()+1);return dkey(d);}
@@ -1551,7 +1559,7 @@ function renderDone(){
   var html;
   if(L.via==='app'){
     html='<div class="blk bigok"><div class="ic">✅</div><h3>'+t('done_app_h')+'</h3><div>'+t('done_code')+': <span class="code">'+esc(L.code)+'</span></div></div>'+
-      '<div class="blk"><h3>'+t('os_h')+'</h3><ol class="track" id="ordTrack" aria-label="'+esc(t('os_h'))+'"></ol><div id="ordStatus" class="minbar no">'+t('os_loading')+'</div>'+
+      '<div class="blk"><h3>'+t('os_h')+'</h3><ol class="track" id="ordTrack" aria-label="'+esc(t('os_h'))+'"></ol><div id="ordStatus" class="minbar no">'+t('os_loading')+'</div><div id="ordOtp"></div>'+
         '<button class="btn block" style="margin-top:8px" data-act="check-status">'+t('os_check')+'</button></div>'+
       '<div class="blk"><ol class="steps"><li>'+t('done_app_s1')+'</li><li>'+(isD?t('done_app_s2d'):t('done_app_s2p'))+'</li></ol></div>'+
       (L.photo?'<div class="blk"><p class="hint" style="margin-top:0">'+t('ck_photo')+'</p><a class="btn wa block" href="'+esc(waUrl(t('photo_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('photo_btn')+'</a></div>':'')+
@@ -1608,6 +1616,8 @@ function checkStatus(){
       box.className='minbar '+(s==='rejected'?'no':'ok');
       box.textContent=txt;
       renderTrack(s,paid>0,L.mode!=='p');
+      var om=/(?:^|\|)\s*OTP (\d{4})/.exec(String(r.statusNote||'')),ob=$('#ordOtp');
+      if(ob)ob.innerHTML=(s==='out'&&om)?'<div class="otpbox">'+esc(t('otp_h'))+'<b>'+esc(om[1])+'</b><small>'+esc(t('otp_txt'))+'</small></div>':'';
       var key=s+'|'+paid;
       if(key!==lastStatus){
         lastStatus=key;

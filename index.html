@@ -438,10 +438,18 @@ var DEFAULT_ITEMS=[
 var CATALOG=(window.MB_CATALOG&&Array.isArray(window.MB_CATALOG.items))?window.MB_CATALOG:null;
 if(CATALOG)DEFAULT_ITEMS=CATALOG.items.map(function(r){return {id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
 var WEB_SLOTS=[[8,11,'सुबह 8–11'],[11,14,'दोपहर 11–2'],[14,17,'दोपहर 2–5'],[17,20,'शाम 5–8']];
-/* घर पर डिलीवरी सुबह 9 बजे से (catalog.js deliveryStartHour) — पहला समय डिलीवरी में "सुबह 9–11" */
-function webDelStart(){return (CATALOG&&CATALOG.shop&&num(CATALOG.shop.deliveryStartHour))||0;}
-function webSlotLabel(s,m){if(m!=='p'&&s===0&&webDelStart())return 'सुबह '+webDelStart()+'–11';return WEB_SLOTS[s][2];}
-function webSlotHour(s,m){if(m!=='p'&&s===0&&webDelStart())return Math.max(WEB_SLOTS[0][0],webDelStart());return WEB_SLOTS[s][0];}
+/* समय के नंबर 0–3 वही (रजिस्टर में), घंटे मोड के हिसाब से (catalog.js):
+   घर पर डिलीवरी: सुबह 9–11, 11–2, 2–5 · दुकान से ले जाना: सुबह 7–11, 11–2, 2–5, शाम 5–9 */
+function webShopH(k){return (CATALOG&&CATALOG.shop&&num(CATALOG.shop[k]))||0;}
+function webSlotHour(s,m){
+  if(s===0){var h=m!=='p'?webShopH('deliveryStartHour'):webShopH('openHour');if(h)return h;}
+  return WEB_SLOTS[s][0];
+}
+function webSlotLabel(s,m){
+  if(s===0&&webSlotHour(0,m)!==WEB_SLOTS[0][0])return 'सुबह '+webSlotHour(0,m)+'–11';
+  if(m==='p'&&s===WEB_SLOTS.length-1&&webShopH('closeHour'))return 'शाम 5–'+(webShopH('closeHour')-12);
+  return WEB_SLOTS[s][2];
+}
 
 var state={shop:Object.assign({},DEFAULT_SHOP),items:[],customers:[],orders:[],nextOrderNo:1,catalogApplied:0,khata:{parties:[],entries:[]}};
 var ui={view:'home',customerId:null,search:'',storageOk:true,editId:null,orderDraft:null,itemsSearch:'',confirm:null,ordersFilter:'all',cameFrom:'home',ordersSearch:'',pendingRestore:null,webImport:null};
@@ -1935,8 +1943,10 @@ function rejectMessage(o,reason){
   return ['नमस्ते '+o.name+' जी 🙏','माफ़ कीजिए, आपका ऑर्डर '+o.code+' अभी पूरा नहीं कर पाएंगे।','वजह: '+reason,'',
     'किसी और समय या सामान के लिए दोबारा ऑर्डर कर सकते हैं: '+orderPageUrl(),'— '+state.shop.name].join('\n');
 }
-function outMessage(o,bo){
-  return ['नमस्ते '+o.name+' जी,','आपका ऑर्डर '+(bo?'#'+bo.no+' ':'')+'('+o.code+') रास्ते में है 🚚 जल्द पहुँचेगा।'+(bo&&orderDue(bo)>0?'\nबाकी पेमेंट: '+rupee(orderDue(bo)):''),'— '+state.shop.name].join('\n');
+function outMessage(o,bo,otp){
+  return ['नमस्ते '+o.name+' जी,','आपका ऑर्डर '+(bo?'#'+bo.no+' ':'')+'('+o.code+') रास्ते में है 🚚 जल्द पहुँचेगा।'+(bo&&orderDue(bo)>0?'\nबाकी पेमेंट: '+rupee(orderDue(bo)):''),
+    otp?('\n🔐 आपका डिलीवरी कोड: *'+otp+'*\nकृपया सामान लेते समय ही यह कोड बताइए — पहले किसी को मत बताइए।'):'',
+    '— '+state.shop.name].filter(Boolean).join('\n');
 }
 function reviewMessage(o){
   var link=(CATALOG&&CATALOG.shop&&CATALOG.shop.review)||'';
@@ -1944,6 +1954,14 @@ function reviewMessage(o){
 }
 /* पेमेंट मिला: रजिस्टर में statusNote = "PAID <कुल जमा> <UPI|नकद> <समय>" (रजिस्टर बदले बिना ग्राहक के पेज तक पहुँचता है) */
 function onlinePaidAmt(o){var m=/^PAID\s+([\d.]+)/.exec(String((o&&o.statusNote)||''));return m?num(m[1]):0;}
+/* statusNote = "PAID … | OTP 4821 | NOCODE" — हर हिस्सा अलग, एक बदलने पर बाकी बचे रहें */
+function notePaidPart(o){var m=/^PAID[^|]*/.exec(String((o&&o.statusNote)||''));return m?m[0].trim():'';}
+function onlineOtp(o){
+  var m=/(?:^|\|)\s*OTP (\d{4})/.exec(String((o&&o.statusNote)||''));if(m)return m[1];
+  var bo=o?billingOrderFor(o.code):null;return (bo&&bo.deliveryOtp)||'';
+}
+function buildNote(paid,otp,extra){return [paid,otp?'OTP '+otp:'',extra||''].filter(Boolean).join(' | ');}
+function makeOtp(){var a=new Uint32Array(1);try{crypto.getRandomValues(a);}catch(e){a[0]=Math.floor(Math.random()*1e9);}return String(1000+a[0]%9000);}
 function onlineTotal(o){var bo=billingOrderFor(o.code);return (bo&&orderTotal(bo)>0)?orderTotal(bo):(num(o.confirmedTotal)||num(o.total));}
 function onlineIsPaid(o){
   var bo=billingOrderFor(o.code),pa=onlinePaidAmt(o),tot=onlineTotal(o);
@@ -2000,7 +2018,7 @@ function savePaid(code){
   }
   closeSheet();
   openWa(o.phone,paidMessage(o,bo,amt,rest));
-  queueStatus(code,o.status,{note:'PAID '+total+' '+(mode==='UPI'?'UPI':'CASH')+' '+fmtDT(new Date().toISOString())});
+  queueStatus(code,o.status,{note:buildNote('PAID '+total+' '+(mode==='UPI'?'UPI':'CASH')+' '+fmtDT(new Date().toISOString()),onlineOtp(o))});
   toast(rupee(amt)+' जमा ✓ ग्राहक को मैसेज भेजिए');
 }
 function openOutWarn(code){
@@ -2013,12 +2031,58 @@ function openOutWarn(code){
 }
 function sendOut(code){
   var o=findOnline(code);if(!o)return;
-  openWa(o.phone,outMessage(o,billingOrderFor(o.code)));queueStatus(o.code,'out');
+  var bo=billingOrderFor(o.code),otp='';
+  if(o.mode!=='p'){
+    otp=onlineOtp(o)||makeOtp();
+    if(bo&&bo.deliveryOtp!==otp){bo.deliveryOtp=otp;save();}
+  }
+  openWa(o.phone,outMessage(o,bo,otp));
+  queueStatus(o.code,'out',otp?{note:buildNote(notePaidPart(o),otp)}:{});
 }
-function deliverOnline(code){
+/* डिलीवरी पर: ग्राहक से कोड पूछकर डालिए — सही हो तभी "डिलीवर" */
+function openOtpSheet(code){
+  var o=findOnline(code);if(!o)return;
+  ui.otpTries=0;
+  openSheet('<div class="sh-head"><h2>🔐 डिलीवरी कोड</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">'+esc(o.name)+' · '+esc(o.code)+' — ग्राहक से उनका 4 अंकों का डिलीवरी कोड पूछिए (WhatsApp पर भेजा गया था) और यहाँ डालिए। कोड सही होने पर ही सामान दीजिए।</p>'+
+    '<label class="fl">ग्राहक का बताया कोड<input id="otp-in" type="tel" inputmode="numeric" maxlength="4" autocomplete="off" style="font-size:1.6rem;letter-spacing:.5em;text-align:center"></label>'+
+    '<div class="err" id="otp-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">वापस</button><button class="btn primary" data-act="on-otp-check" data-code="'+esc(code)+'">✅ जाँचें और डिलीवर करें</button></div>'+
+    '<p style="margin-top:14px;text-align:center"><button class="lnk muted" data-act="on-otp-skip" data-code="'+esc(code)+'">ग्राहक के पास कोड नहीं है?</button></p>');
+  setTimeout(function(){var f=$('#otp-in');if(f)f.focus();},60);
+}
+function checkOtp(code){
+  var o=findOnline(code);if(!o)return;
+  var got=String($('#otp-in').value||'').replace(/\D/g,''),want=onlineOtp(o),err=$('#otp-err');
+  if(got.length!==4){err.textContent='कृपया 4 अंकों का कोड डालिए।';return;}
+  if(got!==want){
+    ui.otpTries=(ui.otpTries||0)+1;
+    err.textContent='❌ कोड ग़लत है — सामान मत दीजिए। ग्राहक से दोबारा पूछिए।'+(ui.otpTries>=3?' (3 बार ग़लत — ग्राहक को उसके नंबर पर फ़ोन करके पक्का कीजिए)':'');
+    $('#otp-in').select();return;
+  }
+  closeSheet();finishDelivery(code,'');
+}
+function openOtpSkip(code){
+  var o=findOnline(code);if(!o)return;
+  openSheet('<div class="sh-head"><h2>कोड के बिना डिलीवर?</h2></div>'+
+    '<p class="hint">'+esc(o.name)+' · '+esc(o.code)+' — पहले ग्राहक को उसके नंबर पर फ़ोन करके पक्का कर लीजिए कि सामान सही व्यक्ति को मिल रहा है। बिल में "⚠️ बिना कोड डिलीवर" लिखा जाएगा।</p>'+
+    '<div class="sh-actions" style="flex-wrap:wrap"><button class="btn" data-act="close">वापस</button>'+
+    '<a class="btn" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 ग्राहक को कॉल</a>'+
+    '<button class="btn warn" data-act="on-otp-skip-ok" data-code="'+esc(code)+'">हाँ, बिना कोड डिलीवर करें</button></div>');
+}
+function finishDelivery(code,flag){
+  var o=findOnline(code);if(!o)return;
+  if(flag==='NOCODE'){
+    var bo=billingOrderFor(code);
+    if(bo){bo.notes=(bo.notes?bo.notes+'\n':'')+'⚠️ बिना कोड डिलीवर ('+fmtDT(new Date().toISOString())+')';save();}
+  }
+  openWa(o.phone,deliveredMessage(o));
+  deliverOnline(code,flag==='NOCODE'?buildNote(notePaidPart(o),onlineOtp(o),'NOCODE'):undefined);
+}
+function deliverOnline(code,note){
   var bo=billingOrderFor(code);
   if(bo){var dt=todayStr();bo.items.forEach(function(it){if(!it.delivered){it.delivered=true;it.deliveredAt=dt;}});save();}
-  queueStatus(code,'delivered');
+  queueStatus(code,'delivered',note!==undefined?{note:note}:{});
   toast('डिलीवर ✓'+(bo&&orderDue(bo)>0?' — बाकी '+rupee(orderDue(bo))+' बिल में दर्ज है':''));
 }
 function onlineCard(o){
@@ -2040,7 +2104,8 @@ function onlineCard(o){
       (isD&&o.status==='accepted'?'<button class="btn small'+(paidOk?' primary':'')+'" data-act="on-out" data-code="'+esc(o.code)+'">🚚 निकल गया</button>':'')+
       '<button class="btn small'+(o.status==='out'||!isD?' primary':'')+'" data-act="on-deliver" data-code="'+esc(o.code)+'">✔️ '+(isD?'डिलीवर हो गया':'ग्राहक ले गया')+'</button>'+
       (bo?'<button class="lnk" data-act="on-open-bill" data-code="'+esc(o.code)+'">बिल #'+bo.no+' देखो</button>':'')+
-      (bo?'<button class="lnk" data-act="on-pay-msg" data-code="'+esc(o.code)+'">📲 पेमेंट मैसेज दोबारा</button>':'')+
+      (bo&&!paidOk?'<button class="lnk" data-act="on-pay-msg" data-code="'+esc(o.code)+'">📲 पेमेंट मैसेज दोबारा</button>':'')+
+      (o.status==='out'&&isD&&onlineOtp(o)?'<button class="lnk" data-act="on-otp-resend" data-code="'+esc(o.code)+'">🔐 कोड वाला मैसेज दोबारा</button>':'')+
       '<a class="lnk" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>';
   }else if(o.status==='delivered'){
     acts='<button class="btn small" data-act="on-review" data-code="'+esc(o.code)+'">⭐ रिव्यू माँगो</button>'+
@@ -2051,6 +2116,8 @@ function onlineCard(o){
   return '<article class="order oncard st-'+esc(o.status)+'">'+
     '<div class="otop"><div class="when">⏰ '+esc(onlineWhen(o))+'</div><span class="obadge">'+esc(o.code)+'</span><span class="stamp st-'+esc(o.status)+'">'+(ON_LABEL[o.status]||esc(o.status))+'</span></div>'+
     '<div class="onmeta">'+(isD?'🚚 घर पर डिलीवरी':'🏪 दुकान से लेंगे')+(o.distKm!==''&&o.distKm!=null?' · ~'+esc(o.distKm)+' km':'')+(created?' · आया: '+esc(created):'')+'</div>'+
+    (o.status==='out'&&isD&&onlineOtp(o)?'<div class="onmeta">🔐 डिलीवरी कोड ग्राहक को भेजा गया — देते समय पूछिए</div>':'')+
+    (o.status==='delivered'&&/\|\s*NOCODE/.test(String(o.statusNote||''))?'<div class="onwait">⚠️ बिना कोड डिलीवर</div>':'')+
     ((o.status==='accepted'||o.status==='out'||o.status==='delivered')?(onlineIsPaid(o)?'<div class="onpaid">💰 पेमेंट मिला'+(onlinePaidAmt(o)>0?' '+rupee(onlinePaidAmt(o)):'')+' ✓</div>':
       (onlinePaidAmt(o)>0?'<div class="onwait">💰 '+rupee(onlinePaidAmt(o))+' जमा — बाकी '+rupee(Math.max(0,round2(onlineTotal(o)-onlinePaidAmt(o))))+'</div>':
       ((o.status!=='delivered'&&isD)?'<div class="onwait">⏳ पेमेंट का इंतज़ार</div>':''))):'')+
@@ -3998,7 +4065,14 @@ document.addEventListener('click',function(e){
     case 'on-paid-save':savePaid(t.getAttribute('data-code'));break;
     case 'on-deliver':
       var dlo=findOnline(t.getAttribute('data-code'));
-      if(dlo){openWa(dlo.phone,deliveredMessage(dlo));deliverOnline(dlo.code);}
+      if(dlo){if(dlo.mode!=='p'&&onlineOtp(dlo))openOtpSheet(dlo.code);else finishDelivery(dlo.code,'');}
+      break;
+    case 'on-otp-check':checkOtp(t.getAttribute('data-code'));break;
+    case 'on-otp-skip':closeSheet();openOtpSkip(t.getAttribute('data-code'));break;
+    case 'on-otp-skip-ok':closeSheet();finishDelivery(t.getAttribute('data-code'),'NOCODE');break;
+    case 'on-otp-resend':
+      var oro=findOnline(t.getAttribute('data-code'));
+      if(oro)openWa(oro.phone,outMessage(oro,billingOrderFor(oro.code),onlineOtp(oro)));
       break;
     case 'on-review':
       var rvo=findOnline(t.getAttribute('data-code'));
