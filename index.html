@@ -220,6 +220,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .cattabs{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px}
 .cattab{flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:6px 13px;min-height:36px;font-weight:600;font-size:.88rem}
 .cattab.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
+.onchips{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:6px;margin:2px 0 8px}
+.onchip{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:12px;padding:6px 4px;min-height:48px;font:inherit;font-weight:600;font-size:.84rem;line-height:1.25;text-align:center}
+.onchip b{display:block;font-size:1.05rem;color:var(--ink)}
+.onchip.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
+.onchip.on b{color:var(--on-brand)}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
 .chip{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:7px 11px;font-size:.88rem;min-height:38px}
 .chip small{display:block;color:var(--muted);font-size:.74rem}
@@ -252,6 +257,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .oncust{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0;line-height:1.5}
 .oncust a{font-weight:700}
 .onmeta{color:var(--muted);font-size:.84rem}
+.onhome{display:flex;align-items:center;gap:6px;width:100%;margin:10px 0 2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-size:.92rem;text-align:left}
+.onhome.hot{border:2px solid var(--gold)}
+.onhome span{margin-left:auto;color:var(--muted);font-size:.84rem}
+.webtag{display:inline-block;font-size:.72rem;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
 .onpaid{color:var(--green);font-weight:700;font-size:.88rem}
 .onwait{color:var(--amber);font-weight:700;font-size:.88rem}
 .st-new{color:var(--red)} .st-accepted{color:var(--gold)} .st-out{color:var(--amber)} .st-rejected{color:var(--muted);text-decoration:line-through}
@@ -615,14 +624,17 @@ function namesList(items,max){
   if(names.length>max)return names.slice(0,max).join(', ')+' +'+(names.length-max)+' और';
   return names.join(', ');
 }
+/* ऑनलाइन ऑर्डर का बिल (webCode) सिर्फ़ 🌐 ऑनलाइन टैब में चलता है; "बाकी" में तभी गिनें जब डिलीवर हो चुका हो (असली उधार) */
+function isWebOrder(o){return !!(o&&o.webCode);}
+function countsAsDue(o){return !o.cancelled&&(!isWebOrder(o)||orderStatus(o)==='delivered');}
 function customerTotals(cid){
   var t=0,p=0,cnt=0;
-  customerOrders(cid).forEach(function(o){if(!o.cancelled){t+=orderTotal(o);p+=orderPaid(o);cnt++;}});
+  customerOrders(cid).forEach(function(o){if(!o.cancelled)cnt++;if(countsAsDue(o)){t+=orderTotal(o);p+=orderPaid(o);}});
   return {billed:t,paid:p,due:round2(Math.max(0,t-p)),extra:round2(Math.max(0,p-t)),count:cnt};
 }
 function allDue(){var t=0;state.customers.forEach(function(c){t+=customerTotals(c.id).due;});return t;}
 function customerOldestDueDate(cid){
-  var os=customerOrders(cid).filter(function(o){return !o.cancelled&&orderDue(o)>0;});
+  var os=customerOrders(cid).filter(function(o){return countsAsDue(o)&&orderDue(o)>0;});
   if(!os.length)return null;
   var min=os[0].date;
   os.forEach(function(o){if(new Date(o.date)<new Date(min))min=o.date;});
@@ -952,11 +964,12 @@ function renderHome(){
   var tmr=(function(){var d=new Date();d.setDate(d.getDate()+1);return dayKey(d);})();
   var dayAfter=(function(){var d=new Date();d.setDate(d.getDate()+2);return dayKey(d);})();
   var live=state.orders.filter(function(o){return !o.cancelled;});
-  var tmrGroups=dueGroups(live,tmr);
-  var todGroups=dueGroups(live,today);
-  var dayAfterGroups=dueGroups(live,dayAfter);
+  var shopLive=live.filter(function(o){return !isWebOrder(o);});   // डिलीवरी लिस्ट: सिर्फ़ अपने ऑर्डर; ऑनलाइन वाले 🌐 टैब में
+  var tmrGroups=dueGroups(shopLive,tmr);
+  var todGroups=dueGroups(shopLive,today);
+  var dayAfterGroups=dueGroups(shopLive,dayAfter);
   var overdueGroups=[];
-  live.forEach(function(o){
+  shopLive.forEach(function(o){
     var od=o.items.filter(function(it){return !it.delivered&&itemDateKey(o,it)<today;});
     if(od.length)overdueGroups.push({order:o,items:od});
   });
@@ -972,6 +985,11 @@ function renderHome(){
   var duesLink=(state.orders.length||dueCustCount)?'<div class="homeinfo"><span class="coll">आज जमा हुआ: <b>'+rupee(todayColl)+'</b></span>'+(dueCustCount?'<button class="lnk" data-act="view-dues">📋 सबसे पुराना बाकी ('+dueCustCount+')</button>':'')+'</div>':'';
 
   var sections='';
+  if(online.cfg){
+    var onNew=online.orders.filter(function(o){return o.status==='new';}).length;
+    var onRun=online.orders.filter(function(o){return o.status==='accepted'||o.status==='out';}).length;
+    if(onNew||onRun)sections+='<button class="onhome'+(onNew?' hot':'')+'" data-act="nav" data-v="online" data-f="live">🌐 ऑनलाइन: '+(onNew?'<b>'+onNew+' नए</b>':'0 नए')+' · '+onRun+' चल रहे<span>देखो →</span></button>';
+  }
   if(overdueGroups.length){
     sections+='<div class="sechead"><h2 style="color:var(--red)">⚠️ छूटी डिलीवरी</h2><span class="cnt">'+overdueGroups.length+'</span></div>'+
       '<p class="hint" style="margin-top:-4px">इनकी तारीख निकल गई पर टिक नहीं लगा। दे दिया हो तो ग्राहक खोलकर टिक लगा दो।</p>'+
@@ -1037,7 +1055,7 @@ function miniCard(o,dueItems,tag){
 /* ---------- ORDERS OVERVIEW ---------- */
 function renderOrders(){
   var filter=ui.ordersFilter||'all';
-  var all=state.orders.slice();
+  var all=state.orders.filter(function(o){return !isWebOrder(o);});   // ऑनलाइन ऑर्डर सिर्फ़ 🌐 ऑनलाइन टैब में
   var totalAll=all.length;
   var pendingCount=all.filter(function(o){var s=orderStatus(o);return s==='pending'||s==='partial';}).length;
   var doneCount=all.filter(function(o){return orderStatus(o)==='delivered';}).length;
@@ -1080,7 +1098,7 @@ function renderOrders(){
     rows=list.map(orderOverviewRow).join('');
   }
 
-  paint($('#main'),'<div class="sechead"><h2>सारे ऑर्डर</h2></div>'+band+
+  paint($('#main'),'<div class="sechead"><h2>सारे ऑर्डर</h2></div>'+(online.cfg?'<p class="hint" style="margin-top:-4px">ऑनलाइन ऑर्डर अलग <button class="lnk" data-act="nav" data-v="online">🌐 ऑनलाइन</button> टैब में हैं।</p>':'')+band+
     '<input id="ordersSearch" type="search" placeholder="नाम, फोन या ऑर्डर नंबर से खोजो" autocomplete="off" value="'+esc(ui.ordersSearch||'')+'">'+tabsHtml+'<div style="margin-top:12px">'+rows+'</div>');
 }
 function orderOverviewRow(o){
@@ -1173,8 +1191,9 @@ function orderCardFull(o){
   }
   return '<article class="order'+(cancelled?' cancelled':'')+'">'+
     '<div class="otop"><div><div class="odate">'+fmtDT(o.date)+'</div></div>'+
-    '<span class="obadge">#'+o.no+'</span>'+
+    '<span class="obadge">#'+o.no+'</span>'+(isWebOrder(o)?'<span class="webtag">🌐 ऑनलाइन</span>':'')+
     '<span class="stamp st-'+st+'">'+STAMP[st]+'</span></div>'+
+    (isWebOrder(o)&&!o.cancelled&&st!=='delivered'?'<div class="hint" style="margin-top:0">ऑनलाइन ऑर्डर — पेमेंट और डिलीवरी 🌐 ऑनलाइन टैब से; डिलीवर होने तक "कुल बाकी" में नहीं गिना जाता।</div>':'')+
     (o.notes?'<div class="hint">'+esc(o.notes)+'</div>':'')+
     '<ul class="checklist">'+items+'</ul>'+
     pays+
@@ -1272,14 +1291,25 @@ function renderRoute(){
 /* ---------- 📱 फ़ोन का Back बटन ----------
    ऐप एक ही पेज है, इसलिए Android का Back सीधे ऐप बंद कर देता था।
    अब: Back = खुली शीट बंद → पिछली स्क्रीन → होम → "एक बार और दबाओ" → ऐप बंद।
-   ब्राउज़र history में सिर्फ एक "जाल" एंट्री रहती है; असली पिछली स्क्रीनें NAV.stack में। */
-var NAV={stack:[],cur:null,restoring:false,trap:false,exitArm:0,exitTimer:null,y:0};
+   हर स्क्रीन-गहराई के लिए ब्राउज़र history में एक एंट्री ({mbTrap:1,d:गहराई}) रहती है — होम = 1, होम से खुली स्क्रीन = 2 …
+   Chrome सिर्फ़ वही एंट्री Back पर मानता है जो असली टैप के बाद बनी हो (Back दबाने के बाद बनी एंट्री वो छोड़ देता है
+   और पूरा ऐप एक Back में बंद हो जाता है) — इसलिए एंट्री सिर्फ़ टैप के बाद बनती हैं, Back के बीच में कभी नहीं। */
+var NAV={stack:[],cur:null,restoring:false,hd:0,act:false,ignore:0,hashType:'',exitArm:0,exitTimer:null,y:0};
+try{if(history.state&&history.state.mbTrap)NAV.hd=history.state.d||1;}catch(e){}
 var NAV_TABS=['online','orders','khata','loyal','items','backup'];
 function navKey(x){return x.v+'|'+(x.c||'')+'|'+(x.p||'')+'|'+(x.m||'');}
+var VIEW_KEY='mbmb-view';
+function saveView(){   // रिफ़्रेश के बाद इसी टैब/पेज पर लौटने के लिए
+  try{sessionStorage.setItem(VIEW_KEY,JSON.stringify({v:ui.view,c:ui.customerId||null,p:ui.partyId||null,m:ui.memberId||null,cf:ui.cameFrom||'home',of:ui.onFilter||'',d:NAV.hd}));}catch(e){}
+}
 function navTrack(){
   var now={v:ui.view,c:ui.customerId||null,p:ui.partyId||null,m:ui.memberId||null,cf:ui.cameFrom,y:0};
-  if(!NAV.cur){NAV.cur=now;return;}
-  if(navKey(now)===navKey(NAV.cur)){NAV.cur.cf=now.cf;return;}
+  if(!NAV.cur){
+    NAV.cur=now;
+    if(now.v!=='home')NAV.stack=[{v:'home',y:0}];         // सीधे किसी टैब पर खुला (रिफ़्रेश / #online) — Back = होम
+    navSync();return;
+  }
+  if(navKey(now)===navKey(NAV.cur)){NAV.cur.cf=now.cf;navSync();return;}
   if(!NAV.restoring){
     NAV.cur.y=NAV.y;
     if(now.v==='home'){
@@ -1294,6 +1324,18 @@ function navTrack(){
     }
   }
   NAV.cur=now;
+  navSync();
+}
+/* history की गहराई ≥ स्क्रीनों की गहराई (+1 अगर शीट खुली)। कम हो तो (सिर्फ़ टैप के बाद) एंट्री जोड़ो।
+   ज़्यादा हो तो कोई बात नहीं — हर Back एक कदम पीछे ही जाता है; होम पर "एक बार और" के समय बची एंट्री हटा देते हैं। */
+function navSync(){
+  var t=NAV.stack.length+1+($('#ov')?1:0);
+  if(!NAV.ignore&&NAV.act&&!NAV.exitArm){
+    while(NAV.hd<t){
+      try{history.pushState({mbTrap:1,d:NAV.hd+1},'');NAV.hd++;}catch(e){break;}
+    }
+  }
+  saveView();
 }
 function navGo(x){
   NAV.restoring=true;
@@ -1308,26 +1350,41 @@ function navBack(){
   if(ui.view!=='home'){navGo({v:'home'});return true;}
   return false;
 }
-// पेज दोबारा लोड हुआ और हम पहले से "जाल" वाली एंट्री पर हैं — दूसरा जाल न बनाओ, वरना पहला Back बेकार जाता
-try{if(history.state&&history.state.mbTrap)NAV.trap=true;}catch(e){}
-function navArmTrap(){
-  if(NAV.trap)return;
-  try{history.pushState({mbTrap:1},'');NAV.trap=true;}catch(e){}
-}
 window.addEventListener('scroll',function(){NAV.y=window.scrollY||0;},{passive:true});
-['pointerdown','keydown','touchstart'].forEach(function(ev){
-  window.addEventListener(ev,function(){navArmTrap();},{capture:true,passive:true});
+// शीट (नीचे से खुलने वाला डिब्बा) खुली/बंद — Back से पहले शीट बंद हो, इसलिए उसकी भी एक एंट्री
+try{new MutationObserver(function(){navSync();}).observe($('#sheetRoot'),{childList:true});}catch(e){}
+// असली टैप/बटन (click/pointerup/touchend/keydown) = Chrome की "user activation" — तभी नई एंट्री बनाना सुरक्षित है
+['click','pointerup','touchend','keydown'].forEach(function(ev){
+  window.addEventListener(ev,function(){
+    var ua=navigator.userActivation;
+    if(ua&&!ua.isActive)return;                    // स्क्रॉल वगैरह — टैप नहीं
+    NAV.act=true;
+    if(NAV.exitArm){NAV.exitArm=0;clearTimeout(NAV.exitTimer);}
+    navSync();
+  },{capture:true,passive:true});
 });
+// #online वाला लिंक नई एंट्री बनाता है (push) या मौजूदा बदलता है (replace) — Navigation API से पता चलता है
+try{if(window.navigation&&navigation.addEventListener)navigation.addEventListener('navigate',function(e){if(e.hashChange)NAV.hashType=e.navigationType;});}catch(e){}
 window.addEventListener('popstate',function(e){
   if(location.hash)return;                       // #online / #o= लिंक — उन्हें hashchange संभालता है
-  if(e.state&&e.state.mbTrap){NAV.trap=true;return;}  // आगे (forward) आए — कुछ नहीं करना
-  NAV.trap=false;
+  var old=NAV.hd,d=(e.state&&e.state.mbTrap)?(e.state.d||1):0;
+  NAV.hd=d;
+  NAV.act=false;                                 // Back/Forward के बाद Chrome पुराना टैप नहीं मानता — अगले टैप तक नई एंट्री नहीं
+  if(NAV.ignore){NAV.ignore--;saveView();return;} // हमारा अपना पीछे खिसकाना — Back नहीं
+  if(d>old){saveView();return;}                  // आगे (forward) आए — कुछ नहीं करना
   clearTimeout(NAV.exitTimer);
-  if(navBack()){navArmTrap();return;}
+  NAV.exitArm=0;
+  if(navBack()){navSync();return;}
   // होम पर, पीछे कुछ नहीं — एक बार पूछो; 2.5 सेकंड में दोबारा Back = ऐप बंद
   NAV.exitArm=Date.now();
+  if(d>0){NAV.ignore++;try{history.go(-d);}catch(err){NAV.ignore=0;}}   // पीछे फ़ालतू एंट्री बची हो तो सबसे नीचे — अगला Back सीधे बाहर
+  saveView();
   toast('ऐप बंद करना है तो एक बार और Back दबाओ');
-  NAV.exitTimer=setTimeout(navArmTrap,2500);
+  NAV.exitTimer=setTimeout(function(){
+    NAV.exitArm=0;
+    // Chrome के अलावा दूसरे ब्राउज़रों के लिए फिर से "एक बार और" वाली एंट्री (Chrome इसे अगले टैप तक नहीं मानता)
+    if(NAV.hd===0&&ui.view==='home'&&!NAV.stack.length){try{history.pushState({mbTrap:1,d:1,na:1},'');NAV.hd=1;}catch(err){}saveView();}
+  },2500);
 });
 
 /* ---------- SHEETS: generic ---------- */
@@ -1700,18 +1757,28 @@ function startWebOrderDraft(p){
   openSheet('');
   renderOrderSheet();
 }
-function checkWebImport(){
+/* लिंक का #… हटाओ, पर history वाली गहराई (d) सही रखो — नहीं तो Back गिनती गड़बड़ा जाती है */
+function navHashStrip(ev){
+  var d=NAV.hd;
+  if(ev&&ev.type==='hashchange'){                 // ऐप खुला था और लिंक आया: नई एंट्री (push) या वही एंट्री (replace)
+    if(NAV.hashType!=='replace')d=NAV.hd+1;
+    NAV.hashType='';
+  }
+  try{history.replaceState(d>0?{mbTrap:1,d:d}:null,'',location.pathname+location.search);}catch(e){}
+  NAV.hd=d;
+}
+function checkWebImport(ev){
   var h=location.hash||'';
   if(h==='#online'){
-    try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+    navHashStrip(ev);
     if($('#ov'))closeSheet();
-    ui.view='online';renderRoute();window.scrollTo(0,0);
+    ui.view='online';ui.onFilter='live';renderRoute();window.scrollTo(0,0);
     onlineSync();
     return;
   }
   var m=h.match(/^#o=([A-Za-z0-9_-]+)/);
   if(!m)return;
-  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  navHashStrip(ev);
   var p=parseWebOrder(m[1]);
   if(!p){toast('ऑनलाइन ऑर्डर का लिंक खुल नहीं पाया — पूरा लिंक दोबारा दबाओ');return;}
   openWebImport(p);
@@ -2179,14 +2246,23 @@ function renderOnline(){
   var todayAmt=todays.reduce(function(s,o){return s+num(o.confirmedTotal||o.total);},0);
   var fresh=online.orders.filter(function(o){return o.status==='new';}).sort(function(a,b){return String(a.created).localeCompare(String(b.created));});
   var running=online.orders.filter(function(o){return o.status==='accepted'||o.status==='out';});
-  var done=online.orders.filter(function(o){return o.status==='delivered'||o.status==='rejected';}).sort(function(a,b){return String(b.updated||b.created).localeCompare(String(a.updated||a.created));});
+  var byLatest=function(a,b){return String(b.updated||b.created).localeCompare(String(a.updated||a.created));};
+  var done=online.orders.filter(function(o){return o.status==='delivered';}).sort(byLatest);
+  var rejected=online.orders.filter(function(o){return o.status==='rejected';}).sort(byLatest);
+  var of=ui.onFilter||'live';
   html+='<div class="onsum"><div><b style="color:var(--red)">'+fresh.length+'</b><span>नए</span></div><div><b>'+running.length+'</b><span>चल रहे</span></div><div><b>'+rupee(todayAmt)+'</b><span>आज ('+todays.length+' ऑर्डर)</span></div></div>';
   if(online.lastSync)html+='<p class="hint" style="margin-top:-4px">आखिरी बार देखा: '+esc(fmtDT(online.lastSync))+' · खुला रहने पर हर 30 सेकंड में खुद देखता है</p>';
-  html+='<h3 class="grouphead">🆕 नए ऑर्डर</h3>'+(fresh.length?fresh.map(onlineCard).join(''):'<p class="hint">अभी कोई नया ऑर्डर नहीं।</p>');
-  html+='<h3 class="grouphead">⏳ चल रहे</h3>'+(running.length?running.map(onlineCard).join(''):'<p class="hint">कोई नहीं।</p>');
-  if(done.length){
-    html+='<h3 class="grouphead">पूरे हुए (पिछले 10 दिन)</h3>'+
-      (online.showDone?done.map(onlineCard).join('')+'<button class="lnk" data-act="on-toggle-done">छिपाओ</button>':'<button class="btn small" data-act="on-toggle-done">'+done.length+' ऑर्डर दिखाओ</button>');
+  html+='<div class="onchips">'+[['live','🆕 नए + चल रहे',fresh.length+running.length],['done','✅ पूरे हुए',done.length],['rej','❌ मना किए',rejected.length]].map(function(f){
+    return '<button class="onchip'+(of===f[0]?' on':'')+'" data-act="on-filter" data-f="'+f[0]+'">'+f[1]+'<b>'+f[2]+'</b></button>';
+  }).join('')+'</div>';
+  if(of!=='live'&&fresh.length)html+='<button class="banner btn-banner" data-act="on-filter" data-f="live">🆕 '+fresh.length+' नया ऑर्डर आया है — देखने के लिए यहाँ दबाओ</button>';
+  if(of==='done'){
+    html+='<h3 class="grouphead">✅ पूरे हुए (पिछले 10 दिन)</h3>'+(done.length?done.map(onlineCard).join(''):'<p class="hint">पिछले 10 दिन में कोई नहीं।</p>');
+  }else if(of==='rej'){
+    html+='<h3 class="grouphead">❌ मना किए (पिछले 10 दिन)</h3>'+(rejected.length?rejected.map(onlineCard).join(''):'<p class="hint">पिछले 10 दिन में कोई नहीं।</p>');
+  }else{
+    html+='<h3 class="grouphead">🆕 नए ऑर्डर</h3>'+(fresh.length?fresh.map(onlineCard).join(''):'<p class="hint">अभी कोई नया ऑर्डर नहीं।</p>');
+    html+='<h3 class="grouphead">⏳ चल रहे</h3>'+(running.length?running.map(onlineCard).join(''):'<p class="hint">कोई नहीं।</p>');
   }
   $('#main').innerHTML=html;
 }
@@ -4043,6 +4119,7 @@ document.addEventListener('click',function(e){
   switch(act){
     case 'nav':
       ui.view=t.getAttribute('data-v');
+      if(t.getAttribute('data-f'))ui.onFilter=t.getAttribute('data-f');
       if(ui.view!=='customer')ui.customerId=null;
       renderRoute();window.scrollTo(0,0);break;
     case 'fab':
@@ -4119,7 +4196,7 @@ document.addEventListener('click',function(e){
       var obo=billingOrderFor(t.getAttribute('data-code'));
       if(obo){ui.cameFrom='home';ui.view='customer';ui.customerId=obo.customerId;renderRoute();window.scrollTo(0,0);}
       break;
-    case 'on-toggle-done':online.showDone=!online.showDone;renderOnline();break;
+    case 'on-filter':ui.onFilter=t.getAttribute('data-f');renderOnline();saveView();window.scrollTo(0,0);break;
     case 'web-import-go':
       var wp=ui.webImport;
       if(wp){closeSheet();startWebOrderDraft(wp);}
@@ -4664,6 +4741,21 @@ window.addEventListener('storage',function(e){
 })();
 var catUpdated=applyCatalog();
 var udMoved=migrateUdharOrders();
+/* पेज रिफ़्रेश हुआ — जिस टैब/पेज पर थे वहीं खोलो (होम पर मत भेजो) */
+(function(){
+  if(/^#(o=|online)/.test(location.hash))return;
+  var r=null;try{r=JSON.parse(sessionStorage.getItem(VIEW_KEY)||'null');}catch(e){r=null;}
+  if(!r||!r.v)return;
+  var nt='';try{var ne=performance.getEntriesByType('navigation')[0];nt=ne?ne.type:'';}catch(e){}
+  if(nt==='back_forward'&&(r.d||0)!==NAV.hd)return;   // Back से किसी पुरानी एंट्री पर नया लोड हुआ — होम ही सही
+  var ok={home:1,online:1,orders:1,khata:1,loyal:1,items:1,backup:1,dues:1};
+  if(r.v==='customer')ok.customer=!!findCustomer(r.c);
+  if(r.v==='party')ok.party=!!findParty(r.p);
+  if(r.v==='lmember')ok.lmember=!!findMember(r.m);
+  if(!ok[r.v])return;
+  ui.view=r.v;ui.customerId=r.c||null;ui.partyId=r.p||null;ui.memberId=r.m||null;ui.cameFrom=r.cf||'home';
+  if(r.of)ui.onFilter=r.of;
+})();
 renderShell();
 renderRoute();
 checkDueReminders();
