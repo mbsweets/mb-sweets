@@ -1428,9 +1428,10 @@ function ssCommit(ch,msg,undo,lines){
         SS.text=res.text;SS.sha=(p.j.content&&p.j.content.sha)||'';SS.cat=res.cat;SS.d=ssDraftFrom(res.cat);SS.saving=false;
         if(undo)lsSet(GH.UNDO,{at:Date.now(),ch:undo,lines:lines});else localStorage.removeItem(GH.UNDO);
         // इस फ़ोन का ऐप तुरंत नए दाम ले ले
-        try{window.MB_CATALOG=res.cat;CATALOG=res.cat;var n=applyCatalog();if(n)toast('बिलिंग ऐप में '+n+' आइटम के दाम बदले');}catch(e){}
+        var n=0;try{window.MB_CATALOG=res.cat;CATALOG=res.cat;n=applyCatalog();}catch(e){}
         closeSheet();
         openSheet('<div class="sh-head"><h2>✅ सेव हो गया</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+          (n?'<p>इस फ़ोन के बिल में <b>'+n+' आइटम का दाम अभी</b> बदल गया।</p>':'')+
           '<p>बदलाव GitHub पर सेव हो गया। <b>5–10 मिनट में</b> वेबसाइट, ऑनलाइन ऑर्डर पेज और बाकी फ़ोन में दिखने लगेगा।</p>'+
           '<p class="hint">ग़लती हो गई हो तो सेटिंग में नीचे "↩️ वापस करो" दबाओ।</p><div class="sh-actions"><button class="btn primary" data-act="close">ठीक है</button></div>');
         renderShopSet();renderBanner();
