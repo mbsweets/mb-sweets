@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>MB Sweets हैंडबुक</title>
+<meta name="description" content="MB Sweets के ऐप, ऑर्डर पेज और वेबसाइट को ख़ुद संभालने का तरीका — आसान हिंदी में।">
+<meta name="theme-color" content="#5C1620">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<style>
+@font-face{font-family:'Mukta';src:url('fonts/Mukta-400.woff') format('woff');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Mukta';src:url('fonts/Mukta-600.woff') format('woff');font-weight:600;font-display:swap}
+@font-face{font-family:'Mukta';src:url('fonts/Mukta-700.woff') format('woff');font-weight:700 800;font-display:swap}
+@font-face{font-family:'Baloo 2';src:url('fonts/Baloo2-700.woff') format('woff');font-weight:600 800;font-display:swap}
+:root{
+  --paper:#FAF3E7; --card:#FFFFFF; --ink:#2B1712; --muted:#7A6555; --line:#E6D9C6;
+  --brand:#5C1620; --on-brand:#FBEEDD; --brand-ink:#5C1620; --gold:#9C6B00; --gold-bg:#FFF4DC;
+  --green:#2F6F4E; --green-bg:#E6F2EA; --red:#A6332E; --red-bg:#F6E1DD; --code:#F3EADB;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1C1210; --card:#251813; --ink:#F3E9DD; --muted:#B39C89; --line:#3B2A22;
+    --brand-ink:#E9A9B0; --gold:#E0B23D; --gold-bg:#2E2213; --green:#5CD39A; --green-bg:#16271E;
+    --red:#FF8A8A; --red-bg:#3B1C1C; --code:#2E211B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1C1210; --card:#251813; --ink:#F3E9DD; --muted:#B39C89; --line:#3B2A22;
+  --brand-ink:#E9A9B0; --gold:#E0B23D; --gold-bg:#2E2213; --green:#5CD39A; --green-bg:#16271E;
+  --red:#FF8A8A; --red-bg:#3B1C1C; --code:#2E211B;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Mukta',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+a{color:var(--brand-ink);font-weight:600;overflow-wrap:anywhere}
+.top{background:var(--brand);color:var(--on-brand);padding:16px 16px 14px;padding-top:calc(16px + env(safe-area-inset-top,0px))}
+.top .in{max-width:760px;margin:0 auto}
+.top a{color:#F7DC8C}
+.top h1{font-family:'Baloo 2','Mukta',sans-serif;font-size:1.5rem;line-height:1.2;margin:6px 0 2px}
+.top p{margin:0;opacity:.9;font-size:.92rem}
+main{max-width:760px;margin:0 auto;padding:6px 16px 60px}
+h2{font-family:'Baloo 2','Mukta',sans-serif;font-size:1.25rem;line-height:1.25;margin:30px 0 8px;color:var(--brand-ink);scroll-margin-top:10px}
+h3{font-size:1.04rem;margin:18px 0 6px}
+p{margin:6px 0}
+ul,ol{margin:6px 0;padding-left:22px}
+li{margin:4px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.toc{columns:2;column-gap:18px;margin:0;padding-left:20px}
+.toc li{break-inside:avoid}
+.ok{background:var(--green-bg);border:1px solid var(--green);color:var(--ink);border-radius:12px;padding:10px 12px;margin:10px 0}
+.warn{background:var(--red-bg);border:1px solid var(--red);color:var(--ink);border-radius:12px;padding:10px 12px;margin:10px 0}
+.tip{background:var(--gold-bg);border:1px solid var(--gold);color:var(--ink);border-radius:12px;padding:10px 12px;margin:10px 0}
+.ok>b:first-child,.warn>b:first-child,.tip>b:first-child{display:block;margin-bottom:2px}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.95rem;background:var(--card);border-radius:12px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--code);font-weight:700}
+code,kbd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:var(--code);border-radius:6px;padding:1px 5px;overflow-wrap:anywhere}
+pre{background:var(--code);border-radius:10px;padding:10px 12px;overflow-x:auto;font-size:.82rem;line-height:1.45}
+pre code{background:none;padding:0}
+.path{font-weight:700}
+.muted{color:var(--muted);font-size:.9rem}
+.dev{font-size:.94rem}
+.dev h3{margin-top:14px}
+footer{max-width:760px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:.85rem}
+@media (max-width:520px){.toc{columns:1}}
+@media print{
+  :root{--paper:#fff;--card:#fff}
+  body{font-size:11.5pt}
+  .top{background:#fff;color:#000;border-bottom:3px solid #5C1620;padding:0 0 8px}
+  .top a.back{display:none}
+  .top h1{color:#5C1620}
+  main{padding:0}
+  h2{break-after:avoid;margin-top:20px}
+  .card,.ok,.warn,.tip,table,pre{break-inside:avoid}
+  a{color:#5C1620;text-decoration:none}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <a class="back" href="./">← बिलिंग ऐप पर वापस</a>
+  <h1>📘 MB Sweets हैंडबुक</h1>
+  <p>ऐप, ऑनलाइन ऑर्डर पेज और वेबसाइट — सब कुछ ख़ुद कैसे संभालें · माँ भगवती मिष्ठान भंडार, ननौरा, दरभंगा</p>
+  <p class="upd">आख़िरी बार बदला: 13 अक्टूबर 2026</p>
+</div></header>
+<main>
+
+<div class="ok"><b>✅ सबसे ज़रूरी बात</b>
+आपका सब कुछ (बिलिंग ऐप, ऑनलाइन ऑर्डर पेज, वेबसाइट, ऑर्डर रजिस्टर) <b>मुफ़्त सेवाओं पर चलता है</b> — GitHub Pages और आपकी Google Sheet। कोई महीने का किराया नहीं। <b>Claude की सदस्यता ख़त्म हो जाए तब भी सब पहले जैसा चलता रहेगा।</b> दाम, आज ख़त्म, ऑनलाइन बंद/चालू और सूचना — ये आप ख़ुद बदल सकते हैं (भाग 3)।</div>
+
+<div class="card">
+<b>इस हैंडबुक में</b>
+<ol class="toc">
+  <li><a href="#links">क्या-क्या बना है (लिंक)</a></li>
+  <li><a href="#daily">रोज़ के काम</a></li>
+  <li><a href="#settings">⚙️ दुकान सेटिंग — दाम, स्टॉक, बंद/चालू, सूचना</a></li>
+  <li><a href="#key">🔑 GitHub चाबी — बनाना, हटाना</a></li>
+  <li><a href="#online">🛒 ऑनलाइन ऑर्डर कैसे संभालें</a></li>
+  <li><a href="#backup">💾 बैकअप और नया फ़ोन</a></li>
+  <li><a href="#accounts">🔐 खाते और पासवर्ड</a></li>
+  <li><a href="#trouble">🛠️ कुछ गड़बड़ हो तो</a></li>
+  <li><a href="#emergency">🆘 आपातकाल: GitHub पर सीधे दाम बदलना</a></li>
+  <li><a href="#help">👨‍💻 किन कामों में मदद चाहिए</a></li>
+  <li><a href="#dev">Developer notes (English)</a></li>
+</ol>
+</div>
+
+<h2 id="links">1. क्या-क्या बना है</h2>
+<table>
+<tr><th>चीज़</th><th>किसके लिए</th><th>लिंक</th></tr>
+<tr><td>🧾 बिलिंग ऐप</td><td>सिर्फ़ आपके लिए — बिल, ऑर्डर, उधारी, पॉइंट, ऑनलाइन ऑर्डर, बैकअप, दुकान सेटिंग</td><td><a href="https://mbsweets.github.io/mb-sweets/">mbsweets.github.io/mb-sweets/</a></td></tr>
+<tr><td>🛒 ऑनलाइन ऑर्डर पेज</td><td>ग्राहक — मेन्यू, कार्ट, ऑर्डर, पेमेंट QR, ऑर्डर का हाल</td><td><a href="https://mbsweets.github.io/mb-sweets/order/">mbsweets.github.io/mb-sweets/order/</a></td></tr>
+<tr><td>🌐 वेबसाइट</td><td>ग्राहक — दुकान, मिठाइयाँ, केक, दूध-दही, थोक, शादी, संपर्क</td><td><a href="https://mbsweets.github.io/">mbsweets.github.io</a></td></tr>
+<tr><td>📋 ऑनलाइन ऑर्डर रजिस्टर</td><td>आपकी Google Sheet — हर ऑनलाइन ऑर्डर यहीं आता है, फिर आपके फ़ोन पर घंटी</td><td>सेटअप पेज: <a href="https://mbsweets.github.io/mb-sweets/online/setup.html">…/online/setup.html</a></td></tr>
+<tr><td>📦 कोड और दाम की फ़ाइल</td><td>GitHub (खाता <b>mbsweets</b>)</td><td><a href="https://github.com/mbsweets/mb-sweets">github.com/mbsweets/mb-sweets</a> (ऐप + ऑर्डर पेज)<br><a href="https://github.com/mbsweets/mbsweets.github.io">github.com/mbsweets/mbsweets.github.io</a> (वेबसाइट)</td></tr>
+</table>
+<p><b>कैसे जुड़े हैं:</b> दाम और स्टॉक की <b>एक ही फ़ाइल</b> है — <code>catalog.js</code>। वेबसाइट, ऑर्डर पेज और बिलिंग ऐप तीनों उसी से पढ़ते हैं। इसलिए एक जगह (⚙️ दुकान सेटिंग) बदलो, तीनों जगह बदल जाता है।</p>
+
+<h2 id="daily">2. रोज़ के काम</h2>
+<div class="card">
+<ul>
+  <li><b>ऑनलाइन ऑर्डर:</b> फ़ोन पर घंटी बजे → बिलिंग ऐप → 🌐 ऑनलाइन टैब (भाग 5)।</li>
+  <li><b>दोपहर 2–2:30 बजे:</b> 🥛 दूध-दही की घंटी — परसों की मिठाई का दूध और कल का दही/दूध/पनीर। उसी हिसाब से दूध ऑर्डर करो।</li>
+  <li><b>कोई चीज़ ख़त्म हो जाए / दाम बदलना हो / छुट्टी हो:</b> ⚙️ दुकान सेटिंग (भाग 3)।</li>
+  <li><b>रात को दुकान बंद करते समय:</b> 💾 बैकअप → "📤 WhatsApp पर भेजो" → अपने ही नंबर पर (भाग 6)।</li>
+</ul>
+</div>
+
+<h2 id="settings">3. ⚙️ दुकान सेटिंग — दाम, स्टॉक, बंद/चालू, सूचना</h2>
+<p class="path">कहाँ: बिलिंग ऐप → नीचे 💾 बैकअप → सबसे ऊपर "⚙️ दुकान सेटिंग"</p>
+<p>पहली बार एक "GitHub चाबी" डालनी होती है (भाग 4, बस एक बार, 5 मिनट)। उसके बाद:</p>
+<table>
+<tr><th>क्या करना है</th><th>कैसे</th></tr>
+<tr><td>🛒 आज ऑनलाइन ऑर्डर बंद (छुट्टी, शादी का बड़ा काम)</td><td>"ऑनलाइन ऑर्डर" में <b>⛔ बंद</b> → 💾 सेव करो। ग्राहक मेन्यू देख सकेंगे पर ऑर्डर नहीं भेज पाएँगे; वेबसाइट और ऑर्डर पेज पर "माफ़ कीजिए, आज ऑनलाइन ऑर्डर बंद है" दिखेगा। <b>अगले दिन ✅ चालू करके सेव करना न भूलें</b> — बंद रहने तक ऐप के होम पर लाल पट्टी याद दिलाती रहेगी।</td></tr>
+<tr><td>📢 सूचना (जैसे "दिवाली पर दुकान 2 बजे तक")</td><td>"सूचना पट्टी" के डिब्बे में लिखो (200 अक्षर तक) → सेव। हटानी हो तो "सूचना हटाओ" → सेव।</td></tr>
+<tr><td>🚫 आज कोई मिठाई ख़त्म</td><td>"आज कौन सी चीज़ ख़त्म है?" में उस चीज़ को दबाओ (लाल हो जाएगी) → सेव। ग्राहक उसे ऑर्डर नहीं कर पाएँगे। वापस आ जाए तो फिर दबाओ (लाल हटेगा) → सेव।</td></tr>
+<tr><td>💰 दाम बदलना</td><td>"दाम" में मिठाई/केक/दूध-दही/नमकीन खोलो → नया दाम लिखो → सेव। <b>यह काउंटर का दाम है</b> — बिल, वेबसाइट और ऑर्डर पेज में।</td></tr>
+<tr><td>🌐 दूध-दही का ऑनलाइन दाम + डिलीवरी चार्ज</td><td>"दूध-दही-पनीर" में हर दूध/दही के नीचे दूसरी लाइन: पहला डिब्बा = ऑनलाइन दाम, दूसरा = घर पर डिलीवरी चार्ज (हर पैक/लीटर)। चार्ज हटाना हो तो 0 लिखो।</td></tr>
+</table>
+<h3>सेव कैसे होता है</h3>
+<ol>
+  <li>बदलाव करते ही नीचे बटन पर गिनती दिखती है: "💾 सेव करो (2 बदलाव)"।</li>
+  <li>बटन दबाओ → एक लिस्ट आएगी कि क्या-क्या बदलेगा (जैसे "💰 पेड़ा: ₹500 → ₹520")। ध्यान से पढ़ो।</li>
+  <li>"✅ हाँ, सेव करो" दबाओ। <b>इसी फ़ोन के बिल में दाम तुरंत</b> बदल जाता है; वेबसाइट, ऑर्डर पेज और दूसरे फ़ोन में <b>5–10 मिनट</b> में।</li>
+</ol>
+<div class="tip"><b>↩️ ग़लती हो गई?</b>
+सेटिंग में सबसे नीचे "पिछला बदलाव" में <b>↩️ वापस करो</b> दबाओ — आख़िरी बार वाला बदलाव पहले जैसा हो जाएगा। या सही दाम डालकर दोबारा सेव कर दो।</div>
+<div class="warn"><b>⚠️ ध्यान रखें</b>
+<ul>
+  <li>बिलिंग ऐप के <b>🍬 आइटम्स</b> टैब में बदला दाम <b>सिर्फ़ उसी फ़ोन</b> के बिल में बदलता है — वेबसाइट और ऑनलाइन में नहीं। हमेशा ⚙️ दुकान सेटिंग से बदलो।</li>
+  <li>दाम सिर्फ़ अंकों में (जैसे <code>320</code> या <code>12.5</code>)। ख़ाली या 0 दाम ऐप सेव नहीं करेगा।</li>
+  <li>नया आइटम जोड़ना, आइटम हटाना, फोटो बदलना — यहाँ से नहीं होता (भाग 10)।</li>
+</ul></div>
+
+<h2 id="key">4. 🔑 GitHub चाबी — बनाना, हटाना</h2>
+<p>दुकान सेटिंग आपकी फ़ाइल <code>catalog.js</code> को GitHub पर बदलती है। इसके लिए एक "चाबी" (GitHub token) चाहिए — जो <b>सिर्फ़ mb-sweets की फ़ाइलें</b> बदल सकती है, आपके खाते का पासवर्ड नहीं।</p>
+<h3>चाबी बनाना (एक बार, हर फ़ोन पर)</h3>
+<ol>
+  <li>फ़ोन के Chrome में <a href="https://github.com/login">github.com</a> पर <b>mbsweets</b> खाते से लॉग-इन रहो।</li>
+  <li>बिलिंग ऐप → बैकअप → ⚙️ दुकान सेटिंग → <b>"🔑 GitHub पर चाबी बनाओ"</b>। GitHub का पेज खुलेगा — नाम ("MB Sweets दुकान सेटिंग"), Resource owner (mbsweets), Expiration (No expiration) और इजाज़त (Contents: Read and write) <b>पहले से भरे होंगे</b>।</li>
+  <li><b>Repository access</b> में <b>"Only select repositories"</b> चुनो → डिब्बे में <b>mb-sweets</b> चुनो।</li>
+  <li>सबसे नीचे <b>"Generate token"</b> दबाओ (पूछे तो पासवर्ड/कोड डालो)।</li>
+  <li><code>github_pat_…</code> वाली लंबी चाबी दिखेगी — <b>Copy</b> करो। (यह चाबी GitHub सिर्फ़ एक बार दिखाता है।)</li>
+  <li>बिलिंग ऐप में वापस आकर डिब्बे में चिपकाओ → <b>जोड़ो</b>। "✓ GitHub से जुड़ा है" दिखेगा।</li>
+</ol>
+<p class="muted">GitHub पेज छोटा/अजीब दिखे तो Chrome के ⋮ मेन्यू में "Desktop site" चालू करके देखो। अगर GitHub आगे कभी Expiration में "No expiration" न दे, तो सबसे लंबी तारीख़ चुनो — तारीख़ ख़त्म होने पर ऐप "चाबी ग़लत" बताएगा, तब नई चाबी बना लेना।</p>
+<h3>चाबी हटाना (फ़ोन खो जाए, बेचना हो, या चाबी किसी ने देख ली)</h3>
+<ol>
+  <li>किसी भी फ़ोन/कंप्यूटर पर github.com → ऊपर दाएँ अपनी फोटो → <b>Settings</b></li>
+  <li>बाएँ सबसे नीचे <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b></li>
+  <li>"MB Sweets दुकान सेटिंग" के आगे <b>Delete</b> दबाओ। अब वो चाबी कहीं काम नहीं करेगी।</li>
+</ol>
+<div class="warn"><b>🔒 चाबी के नियम</b>
+<ul>
+  <li>चाबी किसी को WhatsApp/मैसेज पर <b>मत भेजो</b> — Claude या किसी डेवलपर को भी नहीं।</li>
+  <li>चाबी सिर्फ़ उसी फ़ोन में रहती है जिसमें डाली। दूसरे फ़ोन में अलग चाबी बनाओ।</li>
+  <li>ऐप में "चाबी हटाओ" दबाने से सिर्फ़ इस फ़ोन से हटती है — पूरी तरह बंद करनी हो तो GitHub से भी Delete करो।</li>
+</ul></div>
+
+<h2 id="online">5. 🛒 ऑनलाइन ऑर्डर कैसे संभालें</h2>
+<ol>
+  <li><b>घंटी बजी</b> → बिलिंग ऐप → 🌐 ऑनलाइन → "🆕 नए + चल रहे"।</li>
+  <li><b>✅ स्वीकार</b> → बिल अपने-आप बनता है और ग्राहक को कन्फर्म का मैसेज (रकम वाले पेमेंट QR के लिंक के साथ) WhatsApp पर जाता है — Send आप दबाते हो। नहीं बना सकते तो <b>❌ मना</b> (वजह के साथ)।</li>
+  <li>Paytm/बैंक में पैसा आया देखकर <b>💰 पेमेंट मिला</b>। (पेमेंट अपने-आप पक्का नहीं होता — हमेशा पैसा देखकर ही दबाओ।)</li>
+  <li>घर पर डिलीवरी: <b>🚚 निकल गया</b> → ग्राहक को 4 अंकों का डिलीवरी कोड जाता है → पहुँचकर ग्राहक से कोड पूछो → <b>✔️ डिलीवर हो गया</b> में कोड डालो।</li>
+  <li>बाद में <b>⭐ रिव्यू माँगो</b>।</li>
+</ol>
+<div class="tip"><b>नियम जो ऑर्डर पेज पर लगे हैं</b>
+ऑनलाइन ऑर्डर में मिठाई या केक ज़रूरी (दूध-दही, कोल्ड ड्रिंक, पैकेट सामान सिर्फ़ उनके साथ) · घर पर डिलीवरी कुल ₹499 से, 6 km तक · कैश ऑन डिलीवरी नहीं — पहले UPI पेमेंट · घर पर डिलीवरी सुबह 9 – शाम 5 (आख़िरी ऑर्डर 4 बजे), दुकान से ले जाना सुबह 7 – रात 9।</div>
+
+<h2 id="backup">6. 💾 बैकअप और नया फ़ोन</h2>
+<p>ग्राहक, ऑर्डर, उधारी और पॉइंट का हिसाब <b>सिर्फ़ आपके फ़ोन में</b> रहता है (इंटरनेट पर नहीं)। इसलिए:</p>
+<ul>
+  <li><b>रोज़</b> बैकअप → "📤 WhatsApp पर भेजो" → अपने ही नंबर पर भेज दो।</li>
+  <li>Chrome की Settings में <b>"Clear data / Clear storage"</b> कभी मत दबाना (mbsweets.github.io के लिए) — फ़ोन का हिसाब मिट जाएगा।</li>
+</ul>
+<h3>नया फ़ोन / फ़ोन बदलना</h3>
+<ol>
+  <li>नए फ़ोन के Chrome में <a href="https://mbsweets.github.io/mb-sweets/">mbsweets.github.io/mb-sweets/</a> खोलो → बैकअप → "➕ ऐप इंस्टॉल करो"।</li>
+  <li>WhatsApp से आख़िरी बैकअप फ़ाइल डाउनलोड करो → ऐप → बैकअप → "📂 फ़ाइल से" → चुनो → <b>Restore karo</b>।</li>
+  <li>ऑनलाइन ऑर्डर जोड़ना: अपने पास सेव किया <b>🔐 सेटअप लिंक</b> नए फ़ोन में खोलो (या सेटअप पेज चरण 4)।</li>
+  <li>बैकअप → <b>🔔 इस फ़ोन पर घंटी चालू करो</b> → Allow → "🔔 टेस्ट भेजो"। फ़ोन की Settings → Apps → Chrome → Battery → <b>Unrestricted</b>।</li>
+  <li>⚙️ दुकान सेटिंग के लिए नई GitHub चाबी (भाग 4)। <b>पुराने फ़ोन वाली चाबी GitHub से Delete कर दो।</b></li>
+</ol>
+
+<h2 id="accounts">7. 🔐 खाते और पासवर्ड</h2>
+<table>
+<tr><th>खाता</th><th>किस काम का</th></tr>
+<tr><td>GitHub — <b>mbsweets</b></td><td>वेबसाइट, ऑर्डर पेज, बिलिंग ऐप का कोड और दाम की फ़ाइल। <b>यही सबसे ज़रूरी है।</b></td></tr>
+<tr><td>Google खाता (ऑनलाइन रजिस्टर वाला)</td><td>ऑनलाइन ऑर्डर की Google Sheet और उसका कोड (Apps Script)</td></tr>
+<tr><td>Google Business Profile</td><td>Google Maps पर दुकान, रिव्यू, फोटो</td></tr>
+<tr><td>Paytm for Business</td><td>UPI QR (<code>paytmqr71dbbc@ptys</code>) — पेमेंट आपके बैंक में</td></tr>
+<tr><td>WhatsApp Business (8002010218)</td><td>ग्राहकों से बात, Meta AI जवाब, Status</td></tr>
+<tr><td>Instagram / Facebook</td><td>@maabhagwatimisthanbhandar और Facebook पेज</td></tr>
+<tr><td>FSSAI (FoSCoS)</td><td>फ़ूड रजिस्ट्रेशन का हाल और जवाब</td></tr>
+</table>
+<div class="warn"><b>🔒 सुरक्षा के 5 नियम</b>
+<ol>
+  <li>सारे पासवर्ड एक डायरी में लिखकर घर पर सुरक्षित रखो (या Google Password Manager में)। यह हैंडबुक इंटरनेट पर है — इसमें कभी पासवर्ड मत लिखना।</li>
+  <li>GitHub और Google पर <b>2-step verification</b> चालू रखो।</li>
+  <li>GitHub के <b>Recovery codes</b> (Settings → Password and authentication → Recovery codes) डाउनलोड करके प्रिंट/डायरी में रखो — फ़ोन खो जाए तो इन्हीं से खाता खुलेगा।</li>
+  <li>ईमेल वाले खाते का पासवर्ड सबसे संभालकर — बाकी सब खाते उसी से वापस मिलते हैं।</li>
+  <li>किसी डेवलपर को अपना पासवर्ड कभी मत दो — उसे अलग से जोड़ो (भाग 10)।</li>
+</ol></div>
+
+<h2 id="trouble">8. 🛠️ कुछ गड़बड़ हो तो</h2>
+<table>
+<tr><th>दिक्कत</th><th>क्या करें</th></tr>
+<tr><td>सेव किया, पर वेबसाइट पर पुराना दाम</td><td>10 मिनट रुको, पेज ऊपर से खींचकर रिफ़्रेश करो। फिर भी नहीं → <a href="https://github.com/mbsweets/mb-sweets/commits/main">github.com/mbsweets/mb-sweets/commits/main</a> पर सबसे ऊपर "दुकान सेटिंग: …" दिखना चाहिए।</td></tr>
+<tr><td>सेटिंग में "चाबी ग़लत है या तारीख़ ख़त्म"</td><td>"चाबी हटाओ" → नई चाबी बनाओ (भाग 4)।</td></tr>
+<tr><td>"चाबी को इजाज़त नहीं मिली"</td><td>चाबी बनाते समय mb-sweets नहीं चुना या Contents "Read and write" नहीं था → चाबी हटाओ, नई बनाओ।</td></tr>
+<tr><td>"इसी बीच फ़ाइल कहीं और से बदली गई"</td><td>दोबारा "💾 सेव करो" दबाओ।</td></tr>
+<tr><td>ऑर्डर पेज पर "आज ऑनलाइन ऑर्डर बंद है"</td><td>दुकान सेटिंग → ✅ चालू → सेव।</td></tr>
+<tr><td>ऑनलाइन ऑर्डर की घंटी नहीं बजी</td><td>बैकअप → "🔔 टेस्ट भेजो"। Chrome की Battery → Unrestricted। ऑनलाइन टैब खोलकर भी देखते रहो।</td></tr>
+<tr><td>ऑनलाइन टैब में "जुड़ा नहीं है"</td><td>🔐 सेटअप लिंक खोलो (भाग 6)।</td></tr>
+<tr><td>ऐप ख़ाली/सफ़ेद दिखे</td><td>Chrome अपडेट करो, फ़ोन रीस्टार्ट करो, लिंक सीधे Chrome में खोलो। हिसाब ग़ायब लगे तो बैकअप से Restore।</td></tr>
+<tr><td>ग़लत दाम सेव हो गया</td><td>सेटिंग → ↩️ वापस करो, या सही दाम डालकर सेव।</td></tr>
+</table>
+
+<h2 id="emergency">9. 🆘 आपातकाल: GitHub पर सीधे दाम बदलना</h2>
+<p>सिर्फ़ तब, जब ऐप वाली सेटिंग किसी वजह से न चले।</p>
+<ol>
+  <li>लॉग-इन करके खोलो: <a href="https://github.com/mbsweets/mb-sweets/edit/main/catalog.js">github.com/mbsweets/mb-sweets/edit/main/catalog.js</a></li>
+  <li>ऊपर <code>version: 7,</code> जैसी लाइन में नंबर <b>1 बढ़ाओ</b> (7 → 8)।</li>
+  <li>जिस आइटम का दाम बदलना है, उसकी लाइन में दाम बदलो और <b>आख़िरी नंबर = नया version</b> करो:<br>
+    उदाहरण: <code>['i9', 'पेड़ा', 'mithai', 'किलो', 500, 7],</code> → <code>['i9', 'पेड़ा', 'mithai', 'किलो', 520, 8],</code></li>
+  <li>आज ख़त्म: <code>off: [],</code> → <code>off: ['i9'],</code> · ऑनलाइन बंद: <code>pause: false,</code> → <code>pause: true,</code></li>
+  <li>ऊपर हरा <b>"Commit changes…"</b> → फिर से <b>Commit changes</b>।</li>
+</ol>
+<div class="warn"><b>⚠️</b> कॉमा <code>,</code> और उल्टे कॉमा <code>'</code> वैसे ही रहें — एक भी छूटा तो मेन्यू बिगड़ सकता है। गड़बड़ हो जाए तो उसी पेज के "History" से पिछला वर्ज़न देखकर वैसा ही कर दो, या डेवलपर से ठीक करवाओ।</div>
+
+<h2 id="help">10. 👨‍💻 किन कामों में मदद चाहिए</h2>
+<p>ये काम दुकान सेटिंग से नहीं होते — इनके लिए कोई वेब डेवलपर (HTML/JavaScript जानने वाला) या Claude चाहिए:</p>
+<ul>
+  <li>नया आइटम जोड़ना, आइटम हटाना, नाम बदलना, नई फोटो लगाना</li>
+  <li>दुकान/डिलीवरी का समय, ₹499 या 6 km का नियम बदलना</li>
+  <li>वेबसाइट पर लिखी बातें, डिज़ाइन, नया पेज</li>
+  <li>Google Sheet रजिस्टर का कोड (Apps Script) अपडेट</li>
+  <li>FSSAI नंबर आने पर बिल, मेन्यू और वेबसाइट पर डालना</li>
+  <li>Google खोज के नतीजे में दिखने वाले दाम (वेबसाइट दोबारा बनाना — नीचे Developer notes)</li>
+</ul>
+<h3>मदद लेने का सुरक्षित तरीका</h3>
+<ol>
+  <li>उन्हें यह हैंडबुक का लिंक और "दुकान की पूरी जानकारी" वाली फ़ाइल (MB-Sweets-Project-Knowledge.md — Claude ने आपको दी है) दो।</li>
+  <li>GitHub पर उन्हें अलग से जोड़ो: repo खोलो → <b>Settings → Collaborators → Add people</b> → उनका GitHub नाम। काम ख़त्म होने पर वहीं से <b>Remove</b>।</li>
+  <li>अपना पासवर्ड या GitHub चाबी कभी मत दो।</li>
+</ol>
+<div class="warn"><b>🚫 कभी नहीं (किसी को भी करने मत देना)</b>
+बिलिंग ऐप का पता <code>mbsweets.github.io/mb-sweets/</code> नहीं बदलना चाहिए — न दूसरा डोमेन (जैसे mbsweets.in) इस पर या <code>mbsweets.github.io</code> पर लगाना। पता बदला तो फ़ोन में रखा पूरा हिसाब ऐप को नहीं मिलेगा। अपना डोमेन चाहिए तो अलग नई वेबसाइट बनवाओ।</div>
+
+<h2 id="dev">11. Developer notes (English)</h2>
+<div class="dev">
+<p>For any developer or AI assistant helping MB Sweets. Talk to the owner in simple Hindi. Show the plan and get his "हाँ" before building; show a preview before going live.</p>
+<h3>Repos (GitHub user <code>mbsweets</code>, both public, GitHub Pages from <code>main</code>)</h3>
+<ul>
+  <li><code>mbsweets/mb-sweets</code> → <code>https://mbsweets.github.io/mb-sweets/</code>: <code>index.html</code> (billing PWA, one file), <code>sw.js</code> (bump <code>CACHE_NAME</code> when core assets change), <code>catalog.js</code>, <code>help.html</code> (this page), <code>order/</code> (customer order page with its own <code>sw.js</code>/manifest), <code>online/Code.gs.txt</code> (Apps Script register) + <code>online/setup.html</code>, <code>fonts/</code>.</li>
+  <li><code>mbsweets/mbsweets.github.io</code> → <code>https://mbsweets.github.io/</code>: static site generated by <code>_src/build.py</code> (<code>python3 build.py</code>); images listed in <code>_src/img-meta.json</code>. <code>site.js</code> applies catalog prices / <code>off</code> / <code>pause</code> / notice live; prices in meta descriptions and JSON-LD are baked at build time, so rebuild after price changes for search snippets.</li>
+</ul>
+<h3>Hard rules</h3>
+<ul>
+  <li><b>Never</b> change the origin of the billing app: no custom domain on <code>mb-sweets</code> or on <code>mbsweets.github.io</code>, never move/rename the repo. All billing data lives in the owner's browser <code>localStorage</code> (<code>mbmb-billing-v1</code>) for origin <code>https://mbsweets.github.io</code>.</li>
+  <li>No fake claims, no invented reviews; customer-facing Hindi is polite ("हम … करेंगे", "कृपया …").</li>
+  <li>Brand: maroon <code>#4A0C10</code>/<code>#6E1616</code>, gold <code>#E2B14A</code>/<code>#F7DC8C</code>, cream <code>#FFF4DC</code>.</li>
+</ul>
+<h3><code>catalog.js</code> (shared by billing app, order page and website)</h3>
+<pre><code>window.MB_CATALOG = {
+  version: 7,            // +1 on every price change
+  updated: 'YYYY-MM-DD',
+  shop: {...},           // hours, minOrder 499, radiusKm 6, upi…
+  orderApi: '…/exec',    // Apps Script web app
+  pause: false, noticeHi: '', noticeEn: '', off: ['i7'],
+  items: [ ['i1','रसगुल्ला (किलो)','mithai','किलो',300, 1], … ],  // [id,name,cat,unit,price,v]
+  online: { i14: [60, 5], … },   // online price + home-delivery fee (dairy)
+  menu: [...], milk: {...}, customCakes: [...]
+};</code></pre>
+<ul>
+  <li>Billing app upserts only items whose <code>v</code> &gt; its stored <code>catalogApplied</code> — so a changed row must get <code>v = new version</code>.</li>
+  <li>The in-app "दुकान सेटिंग" edits this file through the GitHub Contents API with a fine-grained token (only <code>mb-sweets</code>, Contents read/write) kept in the owner's <code>localStorage</code> (<code>mbmb-gh</code>). It regex-edits <code>version</code>, <code>updated</code>, item price + <code>v</code>, <code>online</code>, <code>off</code>, <code>pause</code>, <code>noticeHi</code> (clears <code>noticeEn</code>), then executes the new file and verifies it before the PUT. <b>Keep those keys on their own lines in this exact shape</b>, or the settings page will refuse to save.</li>
+</ul>
+<h3>Online register</h3>
+<p>Google Sheet + Apps Script (<code>online/Code.gs.txt</code>, header shows the code version). Orders, statuses (new/accepted/out/delivered/rejected), web push to the owner's phone, daily milk reminder, loyalty points. The secret key lives only on the owner's phone and in his "सेटअप लिंक" — never in the repo.</p>
+</div>
+
+</main>
+<footer>MB Sweets · माँ भगवती मिष्ठान भंडार · ननौरा, दरभंगा · यह पेज बिना इंटरनेट के भी खुलता है (ऐप में एक बार खुलने के बाद)।</footer>
+</body>
+</html>

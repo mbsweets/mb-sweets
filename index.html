@@ -155,6 +155,34 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .btn.primary{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
 .btn.warn{background:var(--warn-bg);border-color:var(--warn-bg);color:#fff}
 .btn.small{min-height:40px;padding:0 12px;font-size:.92rem}
+.btn.block{display:flex;width:100%;align-items:center;justify-content:center}
+.btn[disabled]{opacity:.6}
+/* ⚙️ दुकान सेटिंग */
+.ssentry{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--gold);border-radius:14px;padding:12px 14px;margin-top:4px;font:inherit;color:var(--ink)}
+.ssentry b{font-size:1.02rem}
+.ssentry span{color:var(--muted);font-size:.84rem}
+.sscard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px}
+.sscard h3{font-size:1rem;margin-bottom:6px}
+.ssbox ol.ssol{margin:0 0 12px 20px;padding:0}
+.ssol li{margin:5px 0;font-size:.92rem}
+.sstoggle{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sschips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
+.sschip{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:40px;font:inherit;font-size:.88rem;font-weight:600}
+.sschip.off{background:var(--red-bg);border-color:var(--red);color:var(--red);text-decoration:line-through}
+.ssgh{font-weight:700;font-size:.86rem;color:var(--muted);margin-top:8px}
+.ssdet{border-top:1px dashed var(--line);padding:4px 0}
+.ssdet summary{font-weight:700;padding:8px 0;min-height:40px;cursor:pointer}
+.ssrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.ssrow>span{flex:1;min-width:0;font-weight:600;font-size:.92rem}
+.ssrow small{color:var(--muted);font-weight:400}
+.ssrow label{display:flex;align-items:center;gap:3px;font-weight:700;color:var(--muted)}
+.ssrow input{width:84px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:16px;text-align:right}
+.ssrow.sub{border-top:0;padding-top:0;flex-wrap:wrap}
+.ssrow.sub>span{flex-basis:100%;font-weight:400;font-size:.8rem;color:var(--muted)}
+.ssrow.sub input{width:72px}
+.sslist{margin:6px 0 8px 18px;padding:0}
+.sslist li{margin:4px 0}
+.sssave{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));margin-top:14px;padding:8px 0;background:linear-gradient(180deg,transparent,var(--paper) 30%)}
 .btn:disabled{opacity:.45}
 
 .grouphead{margin:18px 0 8px;font-size:1rem;color:var(--muted);font-weight:700}
@@ -724,6 +752,7 @@ function renderBanner(){
   if(ui.loadFailed)html+='<button class="banner btn-banner" data-act="nav" data-v="backup">⚠️ पुराना डेटा पढ़ा नहीं जा सका — उसकी कॉपी इसी फ़ोन में सुरक्षित है। बैकअप टैब से आख़िरी बैकअप Restore करो।</button>';
   if(!ui.storageOk)html+='<div class="banner">Is browser me data save nahi ho pa raha. Backup zaroor le lo, warna data chala jayega.</div>';
   html+=backupWarningHtml();
+  html=ssPauseBannerHtml()+html;
   var used=storageUsedPct();
   var onN=onlineNewCount();
   if(onN&&ui.view!=='online')html='<button class="banner btn-banner online" data-act="nav" data-v="online">🌐 '+onN+' नया ऑनलाइन ऑर्डर आया है — देखो</button>'+html;
@@ -734,13 +763,13 @@ function renderNav(){
   var tabs=[['home','होम','\uD83C\uDFE0'],['online','ऑनलाइन','\uD83C\uDF10'],['orders','ऑर्डर्स','\uD83E\uDDFE'],['khata','उधारी','\uD83D\uDCD2'],['loyal','पॉइंट','\u2B50'],['items','आइटम्स','\uD83C\uDF6C'],['backup','बैकअप','\uD83D\uDCBE']];
   var newN=onlineNewCount(),remN=khataRemindList().length,lpN=lpRemindList().length;
   $('#navbar').innerHTML=tabs.map(function(t){
-    var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||(ui.view==='customer'&&ui.cameFrom==='dues')))||(t[0]==='khata'&&ui.view==='party')||(t[0]==='loyal'&&ui.view==='lmember');
+    var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||(ui.view==='customer'&&ui.cameFrom==='dues')))||(t[0]==='khata'&&ui.view==='party')||(t[0]==='loyal'&&ui.view==='lmember')||(t[0]==='backup'&&ui.view==='shopset');
     var bd=(t[0]==='online'&&newN)?'<span class="bd">'+newN+'</span>':((t[0]==='khata'&&remN)?'<span class="bd">'+remN+'</span>':((t[0]==='loyal'&&lpN)?'<span class="bd">'+lpN+'</span>':''));
     return '<button class="navbtn'+(on?' on':'')+'" data-act="nav" data-v="'+t[0]+'">'+bd+'<span class="ic">'+t[2]+'</span>'+t[1]+'</button>';
   }).join('');
   var fab=$('#fab');
   if(ui.view==='items'){fab.style.display='';fab.textContent='+ नया आइटम';fab.setAttribute('data-fabact','item');}
-  else if(ui.view==='backup'||ui.view==='online'){fab.style.display='none';}
+  else if(ui.view==='backup'||ui.view==='online'||ui.view==='shopset'){fab.style.display='none';}
   else if(ui.view==='khata'||ui.view==='party'){fab.style.display='';fab.textContent='+ उधार लिखो';fab.setAttribute('data-fabact','udhar');}
   else if(ui.view==='loyal'||ui.view==='lmember'){fab.style.display='';fab.textContent='+ ख़रीद जोड़ो';fab.setAttribute('data-fabact','lbuy');}
   else{fab.style.display='';fab.textContent='+ नया ऑर्डर';fab.setAttribute('data-fabact','order');}
@@ -1207,6 +1236,7 @@ function milkBadge(i){var m=itemMilk(i);return m===null?'सिर्फ गि�
 function renderItems(){
   var q=ui.itemsSearch.trim().toLowerCase();
   var html='<div class="sechead"><h2>आइटम लिस्ट</h2></div>'+
+    '<p class="hint">यहाँ बदला दाम सिर्फ़ इस फ़ोन के बिल में बदलता है। वेबसाइट और ऑनलाइन ऑर्डर पेज में भी बदलना हो तो <button class="lnk" style="min-height:0;padding:0" data-act="nav" data-v="shopset">⚙️ दुकान सेटिंग</button> से बदलो।</p>'+
     '<input id="itemSearch" type="search" placeholder="आइटम खोजो" autocomplete="off" value="'+esc(ui.itemsSearch)+'">';
   CATS.forEach(function(cd){
     var its=state.items.filter(function(i){return i.cat===cd[0]&&(!q||i.name.toLowerCase().indexOf(q)>-1);});
@@ -1232,7 +1262,9 @@ function renderBackup(){
   var canShare=!!navigator.share;
   var isStandalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
   var html=
-    '<div class="sechead" style="margin-top:4px"><h2>बैकअप (रोज़ करो)</h2></div>'+
+    '<button class="ssentry" data-act="nav" data-v="shopset"><b>⚙️ दुकान सेटिंग</b><span>दाम · आज क्या ख़त्म · ऑनलाइन बंद/चालू · सूचना — वेबसाइट और ऑर्डर पेज में अपने-आप</span></button>'+
+    '<p class="hint"><a class="lnk" style="padding:0" href="help.html" target="_blank" rel="noopener">📘 हैंडबुक — सब कुछ ख़ुद कैसे संभालें</a></p>'+
+    '<div class="sechead" style="margin-top:14px"><h2>बैकअप (रोज़ करो)</h2></div>'+
     '<p class="hint" id="last-backup-txt" style="font-weight:700">'+backupStatusText()+'</p>'+
     (corruptKeys().length?'<div class="banner" style="margin:6px 0">⚠️ इस फ़ोन में पुराने (खराब हुए) डेटा की कॉपी रखी है। <button class="btn small" data-act="dl-corrupt">⬇️ उसकी फ़ाइल डाउनलोड करो</button> — Claude/मदद करने वाले को भेजो, उससे डेटा वापस निकाला जा सकता है।</div>':'')+
     '<p class="hint">डेटा: '+state.customers.length+' ग्राहक, '+state.orders.length+' ऑर्डर, '+KH().parties.length+' उधारी खाते ('+KH().entries.length+' एंट्री), '+LY().m.length+' पॉइंट सदस्य ('+LY().b.length+' ख़रीद) · जगह भरी: '+storageUsedPct()+'%'+(ui.persisted?' · Chrome सुरक्षा: पक्की ✓':'')+'</p>'+
@@ -1270,6 +1302,239 @@ function renderBackup(){
   $('#b-text').value=JSON.stringify(state);
 }
 
+/* ---------- ⚙️ दुकान सेटिंग — catalog.js सीधे GitHub पर बदलना (Claude या किसी डेवलपर के बिना) ----------
+   मालिक एक बार GitHub "चाबी" (fine-grained token: सिर्फ़ mbsweets/mb-sweets, Contents: Read and write) डालते हैं।
+   फिर दाम / आज ख़त्म / ऑनलाइन बंद-चालू / सूचना यहाँ से बदलते हैं → catalog.js में बदलाव → वेबसाइट, ऑर्डर पेज
+   और यह ऐप तीनों उसी फ़ाइल से पढ़ते हैं। फ़ाइल का बाकी हिस्सा (टिप्पणियाँ, मेन्यू) जैसा का तैसा रहता है;
+   हर सेव से पहले नई फ़ाइल चलाकर जाँची जाती है — ग़लत फ़ाइल कभी सेव नहीं होती। */
+var GH={repo:'mbsweets/mb-sweets',path:'catalog.js',branch:'main',KEY:'mbmb-gh',UNDO:'mbmb-gh-undo',
+  NEWKEY:'https://github.com/settings/personal-access-tokens/new?name='+encodeURIComponent('MB Sweets दुकान सेटिंग')+
+    '&description='+encodeURIComponent('बिलिंग ऐप की दुकान सेटिंग: सिर्फ़ mb-sweets की catalog.js बदलने के लिए')+'&target_name=mbsweets&expires_in=none&contents=write'};
+var SS={state:'idle',err:'',text:'',sha:'',cat:null,d:null,saving:false,keyErr:'',at:0};
+function ghTok(){var t=lsGet(GH.KEY,'');return typeof t==='string'?t:'';}
+function ghApi(path,method,body){
+  var ctrl=window.AbortController?new AbortController():null,tm=ctrl?setTimeout(function(){ctrl.abort();},30000):null;
+  var opt={method:method||'GET',cache:'no-store',headers:{'Authorization':'Bearer '+ghTok(),'Accept':'application/vnd.github+json'}};   // सिर्फ़ वही हेडर जो GitHub का CORS मानता है
+  if(body){opt.headers['Content-Type']='application/json';opt.body=JSON.stringify(body);}
+  if(ctrl)opt.signal=ctrl.signal;
+  return fetch('https://api.github.com/repos/'+GH.repo+path,opt).then(function(r){
+    clearTimeout(tm);
+    return r.json().catch(function(){return {};}).then(function(j){return {status:r.status,ok:r.ok,j:j};});
+  },function(){clearTimeout(tm);return {status:0,ok:false,j:{}};});
+}
+function ghErrText(r){
+  if(!r||r.status===0)return 'इंटरनेट नहीं मिला — नेट चालू करके दोबारा कोशिश करो।';
+  if(r.status===401)return 'GitHub चाबी ग़लत है या उसकी तारीख़ ख़त्म हो गई — नीचे "चाबी हटाओ" दबाकर नई चाबी डालो (हैंडबुक में तरीका है)।';
+  if(r.status===403||r.status===404)return 'चाबी को इजाज़त नहीं मिली — चाबी बनाते समय "Only select repositories" में mb-sweets चुनना और Contents को "Read and write" करना ज़रूरी है।';
+  if(r.status===409||r.status===422)return 'इसी बीच फ़ाइल कहीं और से बदली गई — दोबारा "सेव करो" दबाओ।';
+  return 'GitHub से जवाब नहीं मिला ('+r.status+') — थोड़ी देर बाद दोबारा कोशिश करो।';
+}
+function b64ToUtf8(b){var s=atob(String(b||'').replace(/\s/g,''));var a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return new TextDecoder().decode(a);}
+function utf8ToB64(t){var a=new TextEncoder().encode(t),s='';for(var i=0;i<a.length;i+=0x8000)s+=String.fromCharCode.apply(null,a.subarray(i,i+0x8000));return btoa(s);}
+function catParse(text){var w={};(new Function('window',text))(w);var c=w.MB_CATALOG;if(!c||!Array.isArray(c.items)||!c.shop)throw new Error('catalog');return c;}
+function jsStr(s){return "'"+String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,' ')+"'";}
+function reEsc(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+/* ch = {prices:{id:₹}, online:{id:[₹,चार्ज]}, off:[ids]|undefined, pause:bool|undefined, notice:str|undefined} */
+function catEdit(text,ch){
+  var c0=catParse(text),ver=(parseInt(c0.version,10)||0)+1,t=text,miss=[];
+  function rep(re,fn,what){if(!re.test(t)){miss.push(what);return;}t=t.replace(re,fn);}
+  rep(/(\n[ \t]*version:[ \t]*)(\d+)/,function(m,a){return a+ver;},'version');
+  rep(/(\n[ \t]*updated:[ \t]*)'[^'\n]*'/,function(m,a){return a+"'"+todayStr()+"'";},'updated');
+  Object.keys(ch.prices||{}).forEach(function(id){
+    rep(new RegExp("(\\['"+reEsc(id)+"',\\s*'[^'\\n]*',\\s*'[^'\\n]*',\\s*'[^'\\n]*',\\s*)([\\d.]+)(,\\s*)(\\d+)(\\])"),
+      function(m,a,p,b,v,e){return a+ch.prices[id]+b+ver+e;},id);
+  });
+  Object.keys(ch.online||{}).forEach(function(id){
+    rep(new RegExp("(\\b"+reEsc(id)+":\\s*\\[)([\\d.]+)(,\\s*)([\\d.]+)(\\])"),
+      function(m,a,p,b,f,e){return a+ch.online[id][0]+b+ch.online[id][1]+e;},'online '+id);
+  });
+  if(ch.off)rep(/(\n[ \t]*off:[ \t]*)\[[^\]]*\]/,function(m,a){return a+'['+ch.off.map(function(x){return "'"+x+"'";}).join(', ')+']';},'off');
+  if(ch.pause!=null)rep(/(\n[ \t]*pause:[ \t]*)(true|false)/,function(m,a){return a+(ch.pause?'true':'false');},'pause');
+  if(ch.notice!=null)rep(/(\n[ \t]*noticeHi:[ \t]*)'(?:[^'\\\n]|\\.)*'/,function(m,a){return a+jsStr(ch.notice);},'noticeHi');
+  if(ch.notice!=null&&/\n[ \t]*noticeEn:/.test(t))t=t.replace(/(\n[ \t]*noticeEn:[ \t]*)'(?:[^'\\\n]|\\.)*'/,function(m,a){return a+"''";});   // अंग्रेज़ी पेज पर भी यही (हिंदी) सूचना दिखे
+  if(miss.length)throw new Error('फ़ाइल में ये जगह नहीं मिली: '+miss.join(', '));
+  var c1=catParse(t);                          // नई फ़ाइल चलाकर जाँचो — हर बदलाव सच में हुआ?
+  var bad=[];
+  if(c1.version!==ver)bad.push('version');
+  Object.keys(ch.prices||{}).forEach(function(id){var r=c1.items.filter(function(x){return x[0]===id;})[0];if(!r||r[4]!==ch.prices[id]||r[5]!==ver)bad.push(id);});
+  Object.keys(ch.online||{}).forEach(function(id){var o=(c1.online||{})[id];if(!o||o[0]!==ch.online[id][0]||o[1]!==ch.online[id][1])bad.push('online '+id);});
+  if(ch.off&&JSON.stringify(c1.off)!==JSON.stringify(ch.off))bad.push('off');
+  if(ch.pause!=null&&c1.pause!==ch.pause)bad.push('pause');
+  if(ch.notice!=null&&c1.noticeHi!==String(ch.notice).replace(/\r?\n/g,' '))bad.push('notice');
+  if(c1.items.length!==c0.items.length||JSON.stringify(c1.menu)!==JSON.stringify(c0.menu))bad.push('बाकी फ़ाइल');
+  if(bad.length)throw new Error('जाँच में गड़बड़: '+bad.join(', '));
+  return {text:t,cat:c1};
+}
+function ssDraftFrom(c){
+  var d={prices:{},online:{},off:{},pause:!!c.pause,notice:String(c.noticeHi||'')};
+  c.items.forEach(function(r){d.prices[r[0]]=String(r[4]);});
+  Object.keys(c.online||{}).forEach(function(id){d.online[id]=[String(c.online[id][0]),String(c.online[id][1])];});
+  (c.off||[]).forEach(function(id){d.off[id]=1;});
+  return d;
+}
+function ssItemName(id){var r=SS.cat&&SS.cat.items.filter(function(x){return x[0]===id;})[0];return r?r[1]:id;}
+function ssValidNum(v){var s=String(v).trim();return /^\d+(\.\d{1,2})?$/.test(s)&&parseFloat(s)>0&&parseFloat(s)<100000;}
+/* बदलाव: {ch (catEdit वाला), lines (हिंदी में), undo (उल्टा ch), err} */
+function ssChanges(){
+  var c=SS.cat,d=SS.d,ch={prices:{},online:{}},undo={prices:{},online:{}},L=[],err='';
+  c.items.forEach(function(r){
+    var v=String(d.prices[r[0]]).trim();
+    if(!ssValidNum(v)){err=err||('"'+r[1]+'" का दाम सही नहीं है — सिर्फ़ अंक लिखो, जैसे 300');return;}
+    var n=parseFloat(v);
+    if(n!==r[4]){ch.prices[r[0]]=n;undo.prices[r[0]]=r[4];L.push('💰 '+r[1]+': ₹'+r[4]+' → ₹'+n);}
+  });
+  Object.keys(c.online||{}).forEach(function(id){
+    var p=String(d.online[id][0]).trim(),f=String(d.online[id][1]).trim(),o=c.online[id];
+    if(!ssValidNum(p)){err=err||('"'+ssItemName(id)+'" का ऑनलाइन दाम सही नहीं है');return;}
+    if(!/^\d+(\.\d{1,2})?$/.test(f)||parseFloat(f)>1000){err=err||('"'+ssItemName(id)+'" का डिलीवरी चार्ज सही नहीं है (0 भी चलेगा)');return;}
+    var np=parseFloat(p),nf=parseFloat(f);
+    if(np!==o[0]||nf!==o[1]){ch.online[id]=[np,nf];undo.online[id]=[o[0],o[1]];L.push('🌐 '+ssItemName(id)+' (ऑनलाइन): ₹'+o[0]+' + ₹'+o[1]+' चार्ज → ₹'+np+' + ₹'+nf+' चार्ज');}
+  });
+  var offNow=c.items.map(function(r){return r[0];}).filter(function(id){return d.off[id];});
+  var offOld=(c.off||[]).slice();
+  if(offNow.slice().sort().join()!==offOld.slice().sort().join()){
+    ch.off=offNow;undo.off=offOld;
+    offNow.filter(function(id){return offOld.indexOf(id)<0;}).forEach(function(id){L.push('🚫 आज ख़त्म: '+ssItemName(id));});
+    offOld.filter(function(id){return offNow.indexOf(id)<0;}).forEach(function(id){L.push('✅ फिर से मिलेगा: '+ssItemName(id));});
+  }
+  if(d.pause!==!!c.pause){ch.pause=d.pause;undo.pause=!!c.pause;L.push(d.pause?'⛔ ऑनलाइन ऑर्डर बंद':'✅ ऑनलाइन ऑर्डर चालू');}
+  var nt=String(d.notice).replace(/\r?\n/g,' ').trim();
+  if(nt.length>200)err=err||'सूचना बहुत लंबी है — 200 अक्षर तक लिखो';
+  if(nt!==String(c.noticeHi||'')){ch.notice=nt;undo.notice=String(c.noticeHi||'');L.push(nt?'📢 सूचना: "'+nt+'"':'📢 सूचना हटाई');}
+  return {ch:ch,undo:undo,lines:L,err:err};
+}
+function ssLoad(){
+  SS.state='loading';SS.err='';renderShopSet();
+  ghApi('/contents/'+GH.path+'?ref='+GH.branch).then(function(r){
+    if(!r.ok){SS.state='error';SS.err=ghErrText(r);renderShopSet();return;}
+    try{SS.text=b64ToUtf8(r.j.content);SS.sha=r.j.sha;SS.cat=catParse(SS.text);}
+    catch(e){SS.state='error';SS.err='catalog.js पढ़ी नहीं जा सकी — हैंडबुक का "कुछ गड़बड़ हो तो" भाग देखो।';renderShopSet();return;}
+    SS.d=ssDraftFrom(SS.cat);SS.state='ready';SS.at=Date.now();renderShopSet();
+  });
+}
+/* GitHub पर सेव: ताज़ी फ़ाइल लेकर उसी पर बदलाव (बीच में कहीं और से बदली हो तो भी कुछ न टूटे) */
+function ssCommit(ch,msg,undo,lines){
+  SS.saving=true;renderShopSet();
+  var tries=0;
+  function go(){
+    tries++;
+    ghApi('/contents/'+GH.path+'?ref='+GH.branch).then(function(r){
+      if(!r.ok)return fail(r);
+      var text,res;
+      try{text=b64ToUtf8(r.j.content);res=catEdit(text,ch);}
+      catch(e){SS.saving=false;toast(String(e.message||e));renderShopSet();return;}
+      ghApi('/contents/'+GH.path,'PUT',{message:msg,content:utf8ToB64(res.text),sha:r.j.sha,branch:GH.branch}).then(function(p){
+        if(!p.ok){if((p.status===409||p.status===422)&&tries<3)return go();return fail(p);}
+        SS.text=res.text;SS.sha=(p.j.content&&p.j.content.sha)||'';SS.cat=res.cat;SS.d=ssDraftFrom(res.cat);SS.saving=false;
+        if(undo)lsSet(GH.UNDO,{at:Date.now(),ch:undo,lines:lines});else localStorage.removeItem(GH.UNDO);
+        // इस फ़ोन का ऐप तुरंत नए दाम ले ले
+        try{window.MB_CATALOG=res.cat;CATALOG=res.cat;var n=applyCatalog();if(n)toast('बिलिंग ऐप में '+n+' आइटम के दाम बदले');}catch(e){}
+        closeSheet();
+        openSheet('<div class="sh-head"><h2>✅ सेव हो गया</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+          '<p>बदलाव GitHub पर सेव हो गया। <b>5–10 मिनट में</b> वेबसाइट, ऑनलाइन ऑर्डर पेज और बाकी फ़ोन में दिखने लगेगा।</p>'+
+          '<p class="hint">ग़लती हो गई हो तो सेटिंग में नीचे "↩️ वापस करो" दबाओ।</p><div class="sh-actions"><button class="btn primary" data-act="close">ठीक है</button></div>');
+        renderShopSet();renderBanner();
+      });
+    });
+  }
+  function fail(r){SS.saving=false;toast(ghErrText(r));renderShopSet();}
+  go();
+}
+function ssConfirm(){
+  var c=ssChanges();
+  if(c.err){toast(c.err);return;}
+  if(!c.lines.length){toast('कुछ बदला नहीं है');return;}
+  openSheet('<div class="sh-head"><h2>ये बदलाव सेव करें?</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<ul class="sslist">'+c.lines.map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul>'+
+    '<p class="hint">ये वेबसाइट, ऑनलाइन ऑर्डर पेज और बिलिंग ऐप — तीनों में बदलेगा।</p>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">रुको</button><button class="btn primary" data-act="ss-save-ok">✅ हाँ, सेव करो</button></div>');
+}
+function ssDoSave(){
+  var c=ssChanges();if(c.err||!c.lines.length){closeSheet();return;}
+  ssCommit(c.ch,'दुकान सेटिंग: '+c.lines.join(' · ').slice(0,200),c.undo,c.lines);
+}
+function ssUndo(){
+  var u=lsGet(GH.UNDO,null);if(!u||!u.ch)return;
+  openSheet('<div class="sh-head"><h2>↩️ पिछला बदलाव वापस करें?</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p>ये बदलाव हटाकर पहले जैसा कर देंगे:</p><ul class="sslist">'+(u.lines||[]).map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">रुको</button><button class="btn primary" data-act="ss-undo-ok">↩️ हाँ, वापस करो</button></div>');
+}
+function ssDoUndo(){var u=lsGet(GH.UNDO,null);if(!u||!u.ch){closeSheet();return;}closeSheet();ssCommit(u.ch,'दुकान सेटिंग: पिछला बदलाव वापस',null,null);}
+function ssSyncForm(){
+  if(!SS.d)return;
+  $all('[data-ssp]').forEach(function(el){SS.d.prices[el.getAttribute('data-ssp')]=el.value;});
+  $all('[data-sso]').forEach(function(el){var id=el.getAttribute('data-sso'),k=+el.getAttribute('data-k');SS.d.online[id][k]=el.value;});
+  var n=$('#ss-notice');if(n)SS.d.notice=n.value;
+}
+function ssCount(){try{var c=ssChanges();return c.lines.length;}catch(e){return 0;}}
+function renderShopSet(){
+  if(ui.view!=='shopset')return;
+  if(SS.d&&SS.formD===SS.d&&$('#main [data-ssp]'))ssSyncForm();   // दोबारा बनाते समय लिखा हुआ न मिटे (नया ड्राफ़्ट आया हो तो पुराना फ़ॉर्म नहीं)
+  var tok=ghTok(),html='<div class="sechead" style="margin-top:4px"><button class="backbtn" data-act="nav" data-v="backup">← बैकअप</button></div>'+
+    '<div class="sechead" style="margin-top:0"><h2>⚙️ दुकान सेटिंग</h2><a class="lnk" href="help.html" target="_blank" rel="noopener">📘 हैंडबुक</a></div>'+
+    '<p class="hint">यहाँ से बदला दाम, स्टॉक, सूचना और ऑनलाइन बंद/चालू — <b>वेबसाइट, ऑनलाइन ऑर्डर पेज और यह ऐप</b>, तीनों में अपने-आप बदल जाता है। किसी की मदद की ज़रूरत नहीं।</p>';
+  if(!tok){
+    html+='<div class="installbox ssbox"><p><b>🔑 पहली बार: GitHub चाबी जोड़ो</b> (बस एक बार, 5 मिनट)</p><ol class="ssol">'+
+      '<li>नीचे वाला बटन दबाओ — GitHub खुलेगा (mbsweets खाते से लॉग-इन रहना चाहिए)। नाम और इजाज़त पहले से भरी होगी।</li>'+
+      '<li><b>Repository access</b> में <b>"Only select repositories"</b> चुनो → <b>mb-sweets</b> चुनो।</li>'+
+      '<li>सबसे नीचे <b>"Generate token"</b> दबाओ → जो लंबी चाबी (github_pat_…) दिखे उसे <b>Copy</b> करो।</li>'+
+      '<li>यहाँ वापस आकर नीचे डिब्बे में चिपकाओ और "जोड़ो" दबाओ।</li></ol>'+
+      '<a class="btn primary block" href="'+esc(GH.NEWKEY)+'" target="_blank" rel="noopener">🔑 GitHub पर चाबी बनाओ</a>'+
+      '<label class="fl" style="margin-top:10px">चाबी यहाँ चिपकाओ<input id="ss-key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…"></label>'+
+      '<div class="err" id="ss-keyerr">'+esc(SS.keyErr||'')+'</div>'+
+      '<div class="actbar"><button class="btn primary" data-act="ss-key-save">जोड़ो</button></div>'+
+      '<p class="hint">चाबी सिर्फ़ इसी फ़ोन में रहती है और सिर्फ़ mb-sweets की फ़ाइलें बदल सकती है। फ़ोन खो जाए तो GitHub में जाकर चाबी हटा देना (हैंडबुक देखो)।</p></div>';
+    $('#main').innerHTML=html;return;
+  }
+  html+='<p class="hint" style="color:var(--green);font-weight:700">✓ GitHub से जुड़ा है <button class="lnk" data-act="ss-key-del">चाबी हटाओ</button></p>';
+  if(SS.state==='loading'||SS.state==='idle'){html+='<p class="hint">लोड हो रहा है…</p>';$('#main').innerHTML=html;return;}
+  if(SS.state==='error'){html+='<div class="banner">'+esc(SS.err)+'</div><div class="actbar"><button class="btn primary" data-act="ss-reload">🔄 दोबारा कोशिश करो</button></div>';$('#main').innerHTML=html;return;}
+  var c=SS.cat,d=SS.d;
+  // 1) ऑनलाइन बंद/चालू
+  html+='<div class="sscard"><h3>🛒 ऑनलाइन ऑर्डर</h3><div class="sstoggle">'+
+    '<button class="btn'+(!d.pause?' primary':'')+'" data-act="ss-pause" data-v="0">✅ चालू</button>'+
+    '<button class="btn'+(d.pause?' warn':'')+'" data-act="ss-pause" data-v="1">⛔ बंद</button></div>'+
+    '<p class="hint">बंद करने पर ग्राहक ऑर्डर नहीं भेज पाएँगे, मेन्यू दिखता रहेगा। <b>चालू करना न भूलें।</b></p></div>';
+  // 2) सूचना
+  html+='<div class="sscard"><h3>📢 सूचना पट्टी</h3><label class="fl">वेबसाइट और ऑर्डर पेज पर सबसे ऊपर दिखेगी (खाली = कोई सूचना नहीं)'+
+    '<textarea id="ss-notice" rows="2" maxlength="200" placeholder="जैसे: दिवाली पर दुकान दोपहर 2 बजे तक खुली है">'+esc(d.notice)+'</textarea></label>'+
+    (d.notice?'<button class="lnk" data-act="ss-notice-clear">सूचना हटाओ</button>':'')+'</div>';
+  // 3) आज ख़त्म
+  var groups=[['mithai','🍬 मिठाई'],['cake','🎂 केक'],['dairy','🥛 दूध-दही-पनीर'],['namkeen','🥨 नमकीन']];
+  c.items.forEach(function(r){if(!groups.some(function(x){return x[0]===r[2];}))groups.push([r[2],'📦 '+r[2]]);});
+  html+='<div class="sscard"><h3>🚫 आज कौन सी चीज़ ख़त्म है?</h3><p class="hint">दबाओ तो लाल = "आज नहीं"। दोबारा दबाओ तो फिर से मिलेगा।</p>'+
+    groups.map(function(g){
+      var rows=c.items.filter(function(r){return r[2]===g[0];});if(!rows.length)return '';
+      return '<div class="ssgh">'+g[1]+'</div><div class="sschips">'+rows.map(function(r){
+        return '<button class="sschip'+(d.off[r[0]]?' off':'')+'" data-act="ss-off" data-id="'+r[0]+'">'+(d.off[r[0]]?'🚫 ':'')+esc(r[1])+'</button>';
+      }).join('')+'</div>';
+    }).join('')+'</div>';
+  // 4) दाम
+  html+='<div class="sscard"><h3>💰 दाम</h3><p class="hint">काउंटर (दुकान) का दाम — बिल, वेबसाइट और ऑर्डर पेज में। दूध-दही का ऑनलाइन दाम और डिलीवरी चार्ज अलग है।</p>'+
+    groups.map(function(g,gi){
+      var rows=c.items.filter(function(r){return r[2]===g[0];});if(!rows.length)return '';
+      return '<details class="ssdet"'+(gi===0?' open':'')+'><summary>'+g[1]+' ('+rows.length+')</summary>'+rows.map(function(r){
+        var o=d.online[r[0]];
+        return '<div class="ssrow"><span>'+esc(r[1])+' <small>/ '+esc(r[3])+'</small></span>'+
+          '<label>₹<input type="number" inputmode="decimal" min="1" step="any" data-ssp="'+r[0]+'" value="'+esc(d.prices[r[0]])+'"></label></div>'+
+          (o?'<div class="ssrow sub"><span>🌐 ऑनलाइन दाम + घर पर डिलीवरी चार्ज</span><label>₹<input type="number" inputmode="decimal" min="1" step="any" data-sso="'+r[0]+'" data-k="0" value="'+esc(o[0])+'"></label>'+
+            '<label>+₹<input type="number" inputmode="decimal" min="0" step="any" data-sso="'+r[0]+'" data-k="1" value="'+esc(o[1])+'"></label></div>':'');
+      }).join('')+'</details>';
+    }).join('')+'</div>';
+  // 5) पिछला बदलाव
+  var u=lsGet(GH.UNDO,null);
+  if(u&&u.ch)html+='<div class="sscard"><h3>↩️ पिछला बदलाव</h3><p class="hint">'+esc(fmtDT(u.at))+'</p><ul class="sslist">'+(u.lines||[]).map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul>'+
+    '<button class="btn" data-act="ss-undo">↩️ वापस करो</button></div>';
+  var n=ssCount();
+  html+='<div class="sssave"><button class="btn primary block" data-act="ss-save"'+(SS.saving?' disabled':'')+'>'+(SS.saving?'सेव हो रहा है…':'💾 सेव करो'+(n?' ('+n+' बदलाव)':''))+'</button></div>';
+  $('#main').innerHTML=html;
+  SS.formD=d;
+}
+function ssRefreshSaveBtn(){var b=$('[data-act="ss-save"]');if(!b||SS.saving)return;ssSyncForm();var n=ssCount();b.textContent='💾 सेव करो'+(n?' ('+n+' बदलाव)':'');}
+function ssPauseBannerHtml(){
+  return (CATALOG&&CATALOG.pause&&ui.view!=='shopset')?'<button class="banner btn-banner" data-act="nav" data-v="shopset">⛔ ऑनलाइन ऑर्डर अभी बंद है — चालू करने के लिए यहाँ दबाओ</button>':'';
+}
+
 /* ---------- ROUTE ---------- */
 function renderRoute(){
   if(ui.view==='home')renderHome();
@@ -1283,6 +1548,7 @@ function renderRoute(){
   else if(ui.view==='party')renderParty();
   else if(ui.view==='loyal')renderLoyal();
   else if(ui.view==='lmember')renderLMember();
+  else if(ui.view==='shopset'){if(ghTok()&&SS.state!=='loading'&&!SS.saving&&(SS.state!=='ready'||Date.now()-SS.at>60000))ssLoad();else renderShopSet();}
   renderNav();
   renderBanner();
   navTrack();
@@ -1306,7 +1572,8 @@ function navTrack(){
   var now={v:ui.view,c:ui.customerId||null,p:ui.partyId||null,m:ui.memberId||null,cf:ui.cameFrom,y:0};
   if(!NAV.cur){
     NAV.cur=now;
-    if(now.v!=='home')NAV.stack=[{v:'home',y:0}];         // सीधे किसी टैब पर खुला (रिफ़्रेश / #online) — Back = होम
+    if(now.v!=='home')NAV.stack=[{v:'home',y:0}];
+    if(now.v==='shopset')NAV.stack.push({v:'backup',y:0});         // सीधे किसी टैब पर खुला (रिफ़्रेश / #online) — Back = होम
     navSync();return;
   }
   if(navKey(now)===navKey(NAV.cur)){NAV.cur.cf=now.cf;navSync();return;}
@@ -4616,6 +4883,25 @@ document.addEventListener('click',function(e){
         toast('Is browser me notification support nahi hai');
       }
       break;
+    case 'ss-key-save':
+      var kv=($('#ss-key')||{}).value||'';kv=kv.replace(/\s+/g,'');
+      if(!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(kv)){SS.keyErr='यह चाबी सही नहीं लग रही — github_pat_ से शुरू होने वाली पूरी चाबी चिपकाओ।';renderShopSet();break;}
+      SS.keyErr='';lsSet(GH.KEY,kv);ssLoad();break;
+    case 'ss-key-del':
+      openSheet('<div class="sh-head"><h2>GitHub चाबी हटाएँ?</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+        '<p>इस फ़ोन से चाबी हट जाएगी। दोबारा सेटिंग बदलने के लिए नई चाबी डालनी होगी।</p><p class="hint">फ़ोन बेचना/बदलना हो या चाबी किसी और ने देखी हो, तो GitHub में भी चाबी Delete कर देना (हैंडबुक देखो)।</p>'+
+        '<div class="sh-actions"><button class="btn" data-act="close">रुको</button><button class="btn warn" data-act="ss-key-del-ok">हाँ, हटाओ</button></div>');break;
+    case 'ss-key-del-ok':
+      try{localStorage.removeItem(GH.KEY);}catch(err){}
+      SS.state='idle';SS.cat=null;SS.d=null;SS.err='';closeSheet();renderShopSet();toast('चाबी हटा दी');break;
+    case 'ss-reload':ssLoad();break;
+    case 'ss-pause':if(!SS.d)break;ssSyncForm();SS.d.pause=t.getAttribute('data-v')==='1';renderShopSet();break;
+    case 'ss-notice-clear':if(!SS.d)break;ssSyncForm();SS.d.notice='';renderShopSet();break;
+    case 'ss-off':if(!SS.d)break;ssSyncForm();if(SS.d.off[id])delete SS.d.off[id];else SS.d.off[id]=1;renderShopSet();break;
+    case 'ss-save':if(!SS.d||SS.saving)break;ssSyncForm();ssConfirm();break;
+    case 'ss-save-ok':closeSheet();ssDoSave();break;
+    case 'ss-undo':ssUndo();break;
+    case 'ss-undo-ok':ssDoUndo();break;
     case 'save-shopinfo':
       var sn=$('#s-name').value.trim();
       if(!sn){$('#s-err').textContent='दुकान का नाम लिखो।';break;}
@@ -4649,6 +4935,7 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('input',function(e){
   var t=e.target;
+  if(ui.view==='shopset'&&(t.hasAttribute('data-ssp')||t.hasAttribute('data-sso')||t.id==='ss-notice')){ssRefreshSaveBtn();return;}
   if(ui.orderDraft&&syncDraftField(t))return;
   if(ui.kDraft&&syncKField(t))return;
   if(t.id==='ke-search'&&ui.kDraft){ui.kDraft.search=t.value;renderKEntrySheet();var f5=$('#ke-search');if(f5&&document.activeElement!==f5){f5.focus();f5.setSelectionRange(f5.value.length,f5.value.length);}return;}
@@ -4748,7 +5035,7 @@ var udMoved=migrateUdharOrders();
   if(!r||!r.v)return;
   var nt='';try{var ne=performance.getEntriesByType('navigation')[0];nt=ne?ne.type:'';}catch(e){}
   if(nt==='back_forward'&&(r.d||0)!==NAV.hd)return;   // Back से किसी पुरानी एंट्री पर नया लोड हुआ — होम ही सही
-  var ok={home:1,online:1,orders:1,khata:1,loyal:1,items:1,backup:1,dues:1};
+  var ok={home:1,online:1,orders:1,khata:1,loyal:1,items:1,backup:1,dues:1,shopset:1};
   if(r.v==='customer')ok.customer=!!findCustomer(r.c);
   if(r.v==='party')ok.party=!!findParty(r.p);
   if(r.v==='lmember')ok.lmember=!!findMember(r.m);
