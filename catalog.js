@@ -106,7 +106,7 @@ window.MB_CATALOG = {
     { tab: 'sweets', key: 'gulabjamun', hi: 'गुलाब जामुन', en: 'Gulab Jamun', img: 'gulabjamun', opts: ['i5', 'i6'] },
     { tab: 'sweets', key: 'chamcham', hi: 'चमचम', en: 'Cham Cham', img: 'chamcham', opts: ['i7', 'i8'] },
     { tab: 'sweets', key: 'balushahi', hi: 'बालूशाही', en: 'Balushahi', img: 'balushahi', opts: ['i3', 'i4'] },
-    { tab: 'sweets', key: 'rasmalai', hi: 'रसमलाई', en: 'Rasmalai', img: 'rasmalai', opts: [{ id: 'i22', hi: 'प्लेट (1 बड़ा पीस)', en: 'plate (1 big piece)' }] },
+    { tab: 'sweets', key: 'rasmalai', hi: 'रसमलाई', en: 'Rasmalai', img: 'rasmalai-real', opts: [{ id: 'i22', hi: 'प्लेट (1 बड़ा पीस)', en: 'plate (1 big piece)' }] },
     { tab: 'sweets', key: 'peda', hi: 'पेड़ा', en: 'Peda', img: 'peda', opts: ['i9'] },
     { tab: 'sweets', key: 'laddoo', hi: 'लड्डू', en: 'Laddoo', img: 'laddoo', opts: ['i11'] },
     { tab: 'sweets', key: 'milkcake', hi: 'मिल्क केक', en: 'Milk Cake', img: 'milkcake', art: 'milkcake', opts: ['i10'] },
