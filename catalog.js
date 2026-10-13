@@ -17,8 +17,8 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 6,
-  updated: '2026-10-07',
+  version: 7,
+  updated: '2026-10-13',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
@@ -54,7 +54,7 @@ window.MB_CATALOG = {
   pause: false,
   noticeHi: '',
   noticeEn: '',
-  off: [],
+  off: ['i12'],
 
   /* [id, बिलिंग वाला नाम, category, unit, दाम, v] */
   items: [
