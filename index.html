@@ -1807,7 +1807,7 @@ function webConfirmMessage(o){
     }else{
       L.push('कृपया '+rupee(due)+' का पेमेंट UPI से कर दें, उसके बाद डिलीवरी निकलेगी।');
     }
-    L.push('पेमेंट का QR यहाँ है: '+orderPageUrl()+'#pay='+due);
+    L.push('पेमेंट का QR (रकम अपने-आप भरी आएगी): '+orderPageUrl()+'#pay='+due+(o.webCode?','+o.webCode:''));
     L.push('(QR फोटो सेव करके Google Pay / PhonePe / Paytm में "स्कैन" → गैलरी से चुनें)');
     L.push('पेमेंट के बाद स्क्रीनशॉट इसी चैट में भेजें।');
   }else{
@@ -2559,7 +2559,7 @@ function migrateUdharOrders(){
 /* --- मैसेज --- */
 function payLine(L,due){
   if(due>0){
-    L.push('QR से पेमेंट: '+orderPageUrl()+'#pay='+round2(due));
+    L.push('QR से पेमेंट (रकम अपने-आप भरी आएगी): '+orderPageUrl()+'#pay='+round2(due));
     L.push('पेमेंट के बाद स्क्रीनशॉट इसी चैट में भेज दीजिए।');
   }
 }

@@ -273,6 +273,9 @@ label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
 .upibox{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:8px}
 .upibox code{flex:1;font-size:1rem;font-weight:700;word-break:break-all;font-family:inherit}
 .qrimg{display:block;width:100%;max-width:300px;margin:10px auto 0;border-radius:12px;border:1px solid var(--line);background:#fff}
+.qrdyn{display:block;width:100%;max-width:280px;margin:10px auto 0;padding:10px;border-radius:14px;border:3px solid var(--gold);background:#fff;image-rendering:pixelated;box-sizing:border-box}
+.autoamt{margin:8px 0 0;text-align:center;font-weight:700;color:var(--green);font-size:.92rem}
+.oldqr{margin-top:12px}.oldqr summary{cursor:pointer;color:var(--muted);font-size:.86rem;text-align:center}
 .amt{font-family:'Baloo 2','Mukta',sans-serif;font-size:2rem;color:var(--brand);text-align:center;line-height:1.1}
 :root[data-theme="dark"] .amt{color:var(--gold)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .amt{color:var(--gold)}}
@@ -291,6 +294,7 @@ label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:16px">यह पेज चलाने के लिए ब्राउज़र में JavaScript चालू करें, या सीधे WhatsApp करें: 8002010218</p></noscript>
 <script src="../catalog.js"></script>
+<script src="qrcode.js"></script>
 <script>
 (function(){
 'use strict';
@@ -430,6 +434,9 @@ hi:{
  open_upi:'UPI ऐप में पेमेंट करें',save_qr:'⬇️ QR फोटो सेव करें',
  pay_how:'पेमेंट कैसे करें',
  pay_h1:'ऊपर "QR फोटो सेव करें" दबाएं।',
+ pay_auto:'✅ स्कैन करते ही {a} अपने-आप भरा आएगा — बस UPI PIN डालिए।',
+ pay_h2a:'Google Pay / PhonePe / Paytm खोलें → "स्कैन" → गैलरी (🖼️) से वही फोटो चुनें → रकम पहले से भरी होगी, PIN डालकर पेमेंट करें।',
+ old_qr:'रकम ख़ुद भरनी हो तो दुकान का पुराना QR देखें',
  pay_h2:'Google Pay / PhonePe / Paytm खोलें → "स्कैन" → गैलरी (🖼️) से वही फोटो चुनें → रकम डालकर पेमेंट करें।',
  pay_h3:'या किसी दूसरे फ़ोन से सीधे यह QR स्कैन कर लें।',
  pay_id_note:'यह दुकान का QR वाला UPI है — कृपया पेमेंट QR स्कैन करके ही कीजिए। सीधे बटन/लिंक से यह पेमेंट नहीं लेता।',
@@ -587,6 +594,9 @@ en:{
  open_upi:'Pay in UPI app',save_qr:'⬇️ Save QR photo',
  pay_how:'How to pay',
  pay_h1:'Tap "Save QR photo" above.',
+ pay_auto:'✅ Scan and {a} is filled in for you — just enter your UPI PIN.',
+ pay_h2a:'Open Google Pay / PhonePe / Paytm → "Scan" → pick the photo from gallery (🖼️) → the amount is already filled in, enter PIN and pay.',
+ old_qr:'Shop\'s usual QR (you type the amount)',
  pay_h2:'Open Google Pay / PhonePe / Paytm → "Scan" → pick the photo from gallery (🖼️) → enter amount and pay.',
  pay_h3:'Or scan this QR directly from another phone.',
  pay_id_note:'This is the shop\'s QR-type UPI — please pay by scanning the QR. It does not accept payment from a direct button/link.',
@@ -1090,7 +1100,7 @@ function route(){
   else if(h==='#rules')v='rules';
   else if(h==='#install')v='install';
   else if(h==='#points')v='points';
-  else if((m=h.match(/^#pay(?:=([0-9.]+))?/)))v='pay';
+  else if((m=h.match(/^#pay(?:=([0-9.]+))?(?:,([A-Za-z0-9-]{3,20}))?/)))v='pay';
   else if((m=h.match(/^#cake=([a-z0-9-]+)(?:,(\d+))?/)))v='cake';
   else if((m=h.match(/^#(item|tab)=([a-z0-9-]+)/))){
     // website links: open the menu right at one sweet (#item=rasgulla) or a section (#tab=cake)
@@ -1108,7 +1118,7 @@ function route(){
   else if(v==='rules')renderRules();
   else if(v==='install')renderInstall();
   else if(v==='points')renderPoints();
-  else if(v==='pay')renderPay(m&&m[1]?num(m[1]):0);
+  else if(v==='pay')renderPay(m&&m[1]?num(m[1]):0,m&&m[2]?m[2]:'');
   else if(v==='cake')renderCake(m[1],m[2]!=null?+m[2]:-1);
   var sc=$('#view .view');if(sc)sc.scrollTop=0;
 }
@@ -1672,7 +1682,7 @@ function checkStatus(){
         var pw=$('#payWrap');
         if(pw){
           if(full&&s!=='rejected')pw.innerHTML='<div class="blk paidok"><div class="ic">✅</div><h3>'+t('pay_done_h')+'</h3><div>'+esc(t('pay_done_txt',{a:rupee(paid)}))+'</div></div>';
-          else if(s==='accepted'||s==='out')pw.innerHTML=payBlock(paid>0?rest:amt,false);
+          else if(s==='accepted'||s==='out')pw.innerHTML=payBlock(paid>0?rest:amt,false,L.code);
           else if(s==='rejected'||s==='delivered')pw.innerHTML='';
         }
       }
@@ -1836,25 +1846,48 @@ function lpCheckPhone(){
 }
 
 /* --- pay --- */
-function upiLink(amount){
-  var u='upi://pay?pa='+encodeURIComponent(S.upi)+'&pn='+encodeURIComponent('MB Sweets')+'&cu=INR';
+function upiLink(amount,code){
+  /* मालिक ने 13 अक्टूबर 2026 को ₹1 वाला टेस्ट QR स्कैन करके जाँचा: रकम वाला QR इसी क्रम में चलता है */
+  // UPI ID जैसा है वैसा ही ('@' को %40 नहीं करना — कुछ ऐप पहचान नहीं पाते)
+  var u='upi://pay?pa='+String(S.upi).replace(/[^A-Za-z0-9@._-]/g,'')+'&pn='+encodeURIComponent('MB Sweets');
   if(amount>0)u+='&am='+r2(amount).toFixed(2);
+  u+='&cu=INR';
+  if(code&&/^[A-Za-z0-9-]{3,20}$/.test(code))u+='&tn='+encodeURIComponent('MB '+code);
   return u;
 }
-function payBlock(amount,beforeConfirm){
+/* रकम वाला QR (ग्राहक के फ़ोन में ही बनता है) — लाइब्रेरी न मिले तो '' */
+function amountQr(amount,code){
+  try{
+    if(!(amount>0)||typeof qrcode!=='function')return '';
+    var q=qrcode(0,'M');q.addData(upiLink(amount,code));q.make();
+    // PNG (गैलरी से स्कैन करने में हर ऐप पढ़ लेता है), हर खाना 10px, चारों ओर 4 खाने सफ़ेद
+    var n=q.getModuleCount(),cs=10,pad=4*cs,cv=document.createElement('canvas');cv.width=cv.height=n*cs+2*pad;
+    var g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.fillStyle='#000';
+    for(var r=0;r<n;r++)for(var c=0;c<n;c++)if(q.isDark(r,c))g.fillRect(pad+c*cs,pad+r*cs,cs,cs);
+    return cv.toDataURL('image/png');
+  }catch(e){return '';}
+}
+function payBlock(amount,beforeConfirm,code){
+  var dq=beforeConfirm?'':amountQr(amount,code);
+  var qrHtml=dq?
+      '<img class="qrdyn" src="'+dq+'" alt="UPI QR — '+esc(rupee(amount))+'">'+
+      '<p class="autoamt">'+esc(t('pay_auto',{a:rupee(amount)}))+'</p>'+
+      '<a class="btn primary block" style="margin-top:10px" href="'+dq+'" download="MB-Sweets-QR-'+String(r2(amount)).replace('.','-')+'.png">'+t('save_qr')+'</a>'
+    : '<img class="qrimg" src="img/upi-card.png" alt="UPI QR — '+esc(S.upi)+'">'+
+      '<a class="btn primary block" style="margin-top:10px" href="img/upi-card.png" download="MB-Sweets-UPI-QR.png">'+t('save_qr')+'</a>';
   return '<div class="blk"><h3>'+t('pay_h')+'</h3>'+
     (amount>0?'<div class="hint" style="text-align:center">'+t('pay_amt')+'</div><div class="amt">'+rupee(amount)+'</div>':'')+
     (beforeConfirm?'<div class="paynote" style="margin-top:6px">'+t('pay_after')+'</div>':'')+
-    '<img class="qrimg" src="img/upi-card.png" alt="UPI QR — '+esc(S.upi)+'">'+
-    '<a class="btn primary block" style="margin-top:10px" href="img/upi-card.png" download="MB-Sweets-UPI-QR.png">'+t('save_qr')+'</a>'+
-    '<h3 style="margin:14px 0 6px">'+t('pay_how')+'</h3><ol class="steps"><li>'+t('pay_h1')+'</li><li>'+t('pay_h2')+'</li><li>'+t('pay_h3')+'</li></ol>'+
+    qrHtml+
+    '<h3 style="margin:14px 0 6px">'+t('pay_how')+'</h3><ol class="steps"><li>'+t('pay_h1')+'</li><li>'+t(dq?'pay_h2a':'pay_h2')+'</li><li>'+t('pay_h3')+'</li></ol>'+
+    (dq?'<details class="oldqr"><summary>'+t('old_qr')+'</summary><img class="qrimg" src="img/upi-card.png" alt="UPI QR — '+esc(S.upi)+'" loading="lazy"></details>':'')+
     '<p class="hint" style="margin-top:10px">'+t('pay_id_note')+'</p>'+
     '<div class="upibox"><span class="hint" style="margin:0">'+t('upi_id')+'</span><code id="upiText">'+esc(S.upi)+'</code><button class="btn small" data-act="copyupi">'+t('copy')+'</button></div>'+
     '</div>';
 }
-function renderPay(amount){
+function renderPay(amount,code){
   var txt=t('pay_wa_text',{a:amount>0?' ('+rupee(amount)+')':''});
-  var html=payBlock(amount,false)+
+  var html=payBlock(amount,false,code)+
     '<div class="blk"><h3>'+t('pay_ss')+'</h3><a class="btn wa block" href="'+esc(waUrl(txt))+'" target="_blank" rel="noopener">'+t('pay_wa')+'</a></div>';
   viewShell(t('pay_h'),html);
 }
