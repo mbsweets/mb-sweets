@@ -58,6 +58,17 @@ a{color:inherit}
 .status.open .dot{background:#2FA84F;box-shadow:0 0 0 4px rgba(47,168,79,.18)}
 .status.later .dot{background:#E0A21B}
 .status.pause .dot{background:#C8372D}
+.rulebox{background:var(--goldsoft);border:1.5px solid var(--gold);color:var(--ink);border-radius:12px;padding:9px 12px;margin-top:8px;font-size:.9rem;line-height:1.45}
+.rulebox b{color:var(--brand)}
+.rulebox ul{margin:4px 0 0;padding-left:18px}
+.rulebox li{margin:2px 0}
+.gate{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--redbg);border:1px solid var(--line);color:var(--red);border-radius:10px;padding:9px 10px;margin:0 0 10px;font-size:.88rem;font-weight:700;line-height:1.4}
+.gate span{flex:1 1 200px}
+.gate .btn{flex:0 0 auto}
+.gate[hidden]{display:none}
+.gate.flash{animation:gflash .9s ease 2}
+@keyframes gflash{50%{box-shadow:0 0 0 4px var(--red)}}
+.sec.locked .card,.sec.locked .packbox{opacity:.55}
 .notice{background:var(--amberbg);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:8px 12px;margin-top:8px;font-size:.9rem}
 .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .facts div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;font-size:.8rem;line-height:1.25}
@@ -338,14 +349,21 @@ hi:{
  st_pause:'माफ़ कीजिए, आज ऑनलाइन ऑर्डर बंद है · कृपया कॉल कीजिए',
  fee_item:'+ {f} डिलीवरी चार्ज एक्स्ट्रा / {u} (घर पर डिलीवरी में)',fee_cart:'+ {f} डिलीवरी / {u}',
  fee_line:'दूध-दही डिलीवरी चार्ज',fee_sub:'400 ग्राम तक के दही पैक व 1 लीटर दूध पर ₹5, 1 किलो दही पर ₹10',
- min_dairy:'✓ सिर्फ़ दूध-दही — कोई न्यूनतम रकम नहीं, बस डिलीवरी चार्ज',min_ok_fee:'✓ ₹499 पूरा — डिलीवरी फ्री (सिर्फ़ दूध-दही का चार्ज)',
- dairy_fee:'🚚 घर पर डिलीवरी: 400 ग्राम तक के दही पैक और हर 1 लीटर दूध पर ₹5, 1 किलो दही पर ₹10 · दुकान से ख़ुद लेने पर कोई चार्ज नहीं · सिर्फ़ दूध-दही का ऑर्डर ₹499 से कम का भी हम पहुँचा देंगे।',
+ min_ok_fee:'✓ ₹499 पूरा — डिलीवरी फ्री (सिर्फ़ दूध-दही का चार्ज)',
+ dairy_fee:'🚚 घर पर डिलीवरी: 400 ग्राम तक के दही पैक और हर 1 लीटर दूध पर ₹5, 1 किलो दही पर ₹10 · दुकान से ख़ुद लेने पर कोई चार्ज नहीं।',
+ rule_h:'🍬 ज़रूरी सूचना',
+ rule_l:['ऑनलाइन ऑर्डर में <b>मिठाई या केक ज़रूर लें</b>।','मिठाई या केक के साथ ही आप दूध-दही-पनीर, कोल्ड ड्रिंक और पैकेट सामान मँगवा सकते हैं — सिर्फ़ इन चीज़ों का अलग से ऑर्डर हम स्वीकार नहीं कर पाएँगे। ये सामान आप दुकान पर आकर ले सकते हैं।','₹499 या उससे ज़्यादा के ऑर्डर पर हम घर तक पहुँचा देंगे।'],
+ gate_txt:'🍬 पहले कोई मिठाई या केक जोड़िए — उसके साथ ही ये सामान मँगवा सकते हैं।',gate_btn:'मिठाई देखें',
+ gate_toast:'पहले कोई मिठाई या केक जोड़िए — उसके साथ ही ये सामान जुड़ेगा 🙏',
+ e_need_main:'ऑनलाइन ऑर्डर में मिठाई या केक ज़रूरी है — कृपया कोई मिठाई या केक जोड़िए। सिर्फ़ दूध-दही, कोल्ड ड्रिंक या पैकेट सामान का अलग से ऑर्डर हम स्वीकार नहीं कर पाएँगे।',
+ cart_need_main:'🍬 इस ऑर्डर में मिठाई या केक नहीं है। मिठाई या केक के साथ ही ये सामान मँगवा सकते हैं — कृपया मिठाई जोड़िए।',
+ i_rule:'🍬 ऑनलाइन ऑर्डर में मिठाई या केक ज़रूरी है — उसी के साथ दूध-दही, कोल्ड ड्रिंक और पैकेट सामान मँगवा सकते हैं।',
  dairy_big:'🥛 दही के बड़े पैक (2 किलो, 5 किलो, 15 किलो) — थोक दूध-दही ऑर्डर से मँगवाइए →',
  f1:'6 km तक',f1b:'डिलीवरी',f2:'₹499+ पर',f2b:'डिलीवरी फ्री',f3:'30–60 मिनट',f3b:'सुबह 9 – शाम 5',
  avail:'डिलीवरी की उपलब्धता देखकर ही हम आपकी डिलीवरी कन्फर्म करेंगे।',
  tab_sweets:'मिठाई',tab_dairy:'दूध-दही-पनीर',tab_cake:'केक',tab_pack:'पैकेट सामान',tab_bulk:'शादी-पार्टी',tab_info:'जानकारी',
  sweets_sub:'कम से कम 250 ग्राम, या पीस में',
- dairy_sub:'रोज़ ताज़ा — जब चाहें ऑर्डर करें',
+ dairy_sub:'रोज़ ताज़ा — मिठाई या केक के साथ मँगवाइए',
  cake_sub:'100% अंडा-रहित (Eggless)',
  custom_head:'कस्टम केक — दाम WhatsApp पर पूछ लीजिए',
  custom_sub:'डिज़ाइन चुनिए, वज़न-फ्लेवर बताइए — हम दाम बताकर कन्फर्म कर देंगे।',
@@ -353,7 +371,7 @@ hi:{
  sample_note:'केक की फोटो सिर्फ नमूने के लिए हैं — असली केक थोड़ा अलग दिख सकता है।',
  ask_price:'दाम पूछें',ask_added:'✓ जुड़ा — बदलें',
  pack_title:'कोल्ड ड्रिंक · नमकीन-मिक्सचर · बिस्किट · पैकेट सामान',
- pack_sub:'सब MRP पर। जो चाहिए बस लिख दीजिए — हम दाम जोड़कर बता देंगे।',
+ pack_sub:'सब MRP पर — मिठाई या केक के साथ मँगवाइए। जो चाहिए बस लिख दीजिए, हम दाम जोड़कर बता देंगे।',
  pack_ph:'जैसे: कोल्ड ड्रिंक 2 लीटर – 1, भुजिया 400 ग्राम – 2, बिस्किट – 5 पैकेट',
  pack_add:'ऑर्डर में जोड़ें',pack_update:'बदलाव सेव करें',pack_added:'✓ ऑर्डर में जुड़ गया',pack_remove:'हटाएं',pack_empty:'कृपया पहले लिखिए कि क्या चाहिए।',
  pack_chips:['कोल्ड ड्रिंक','नमकीन','मिक्सचर','बिस्किट','चिप्स','पानी की बोतल','जूस'],
@@ -422,8 +440,9 @@ hi:{
  ck_add:'ऑर्डर में जोड़ें',ck_save:'बदलाव सेव करें',ck_remove:'ऑर्डर से हटाएं',ck_price:'दाम हम WhatsApp पर बता देंगे',e_weight:'कृपया वज़न चुनिए।',
  rules_h:'ऑर्डर के नियम',
  rules:[
+  'ऑनलाइन ऑर्डर में मिठाई या केक ज़रूर लें। उसी के साथ आप दूध-दही-पनीर, कोल्ड ड्रिंक और पैकेट सामान मँगवा सकते हैं — सिर्फ़ इन चीज़ों का अलग से ऑर्डर हम स्वीकार नहीं कर पाएँगे; ये सामान आप दुकान पर आकर ले सकते हैं।',
   'हम दुकान से 6 km तक डिलीवरी करते हैं — ₹499 या ज़्यादा के ऑर्डर पर डिलीवरी फ्री (सिर्फ़ दूध-दही का अलग चार्ज, अगला नियम देखिए)।',
-  'दूध-दही की घर पर डिलीवरी पर चार्ज: 400 ग्राम तक के दही पैक और हर 1 लीटर दूध पर ₹5, 1 किलो दही पर ₹10। सिर्फ़ दूध-दही का ऑर्डर ₹499 से कम का भी हम पहुँचा देंगे; मिठाई साथ हो तो कुल ₹499 चाहिए।',
+  'दूध-दही की घर पर डिलीवरी पर चार्ज: 400 ग्राम तक के दही पैक और हर 1 लीटर दूध पर ₹5, 1 किलो दही पर ₹10 — ये ₹499 से ज़्यादा के ऑर्डर पर भी लगेगा।',
   'डिलीवरी की उपलब्धता देखकर ही हम आपकी डिलीवरी कन्फर्म करेंगे।',
   'हम WhatsApp पर आपका ऑर्डर कन्फर्म करेंगे। उसके बाद कृपया पूरा पेमेंट पहले UPI से कर दीजिए, तभी डिलीवरी निकलेगी। कैश ऑन डिलीवरी (COD) की सुविधा नहीं है।',
   'माफ़ कीजिए, पेमेंट के बाद अगर आप ख़ुद ऑर्डर कैंसिल करते हैं, तो पैसा वापस नहीं हो पाएगा।',
@@ -487,14 +506,21 @@ en:{
  st_pause:'Sorry, online orders are closed today · please call',
  fee_item:'+ {f} extra delivery charge / {u} (home delivery)',fee_cart:'+ {f} delivery / {u}',
  fee_line:'Milk & curd delivery charge',fee_sub:'₹5 per curd pack up to 400 g and per litre of milk, ₹10 per 1 kg curd',
- min_dairy:'✓ Only milk & curd — no minimum, just the delivery charge',min_ok_fee:'✓ ₹499 reached — free delivery (only the milk & curd charge)',
- dairy_fee:'🚚 Home delivery: ₹5 per curd pack up to 400 g and per litre of milk, ₹10 per 1 kg curd · no charge if you pick up · we deliver milk & curd-only orders even below ₹499.',
+ min_ok_fee:'✓ ₹499 reached — free delivery (only the milk & curd charge)',
+ dairy_fee:'🚚 Home delivery: ₹5 per curd pack up to 400 g and per litre of milk, ₹10 per 1 kg curd · no charge if you pick up.',
+ rule_h:'🍬 Please note',
+ rule_l:['Online orders must include <b>sweets or cake</b>.','With sweets or cake you can add milk, curd, paneer, cold drinks and packaged items — we cannot accept orders of only these items. You can buy them at the shop.','We deliver home on orders of ₹499 or more.'],
+ gate_txt:'🍬 Please add a sweet or cake first — these items can be ordered along with it.',gate_btn:'See sweets',
+ gate_toast:'Please add a sweet or cake first 🙏',
+ e_need_main:'Online orders need sweets or cake — please add one. We cannot accept orders of only milk, curd, cold drinks or packaged items.',
+ cart_need_main:'🍬 This order has no sweets or cake. These items can be ordered only along with sweets or cake — please add some.',
+ i_rule:'🍬 Online orders need sweets or cake — milk, curd, cold drinks and packaged items can be added with them.',
  dairy_big:'🥛 Big curd packs (2 kg, 5 kg, 15 kg) — please order via bulk dairy →',
  f1:'Up to 6 km',f1b:'delivery',f2:'₹499+',f2b:'free delivery',f3:'30–60 min',f3b:'9 AM – 5 PM',
  avail:'We confirm delivery only after checking availability.',
  tab_sweets:'Sweets',tab_dairy:'Milk-Dahi-Paneer',tab_cake:'Cakes',tab_pack:'Packaged',tab_bulk:'Weddings & parties',tab_info:'Info',
  sweets_sub:'Minimum 250 g, or by the piece',
- dairy_sub:'Fresh daily — order any time',
+ dairy_sub:'Fresh daily — order along with sweets or cake',
  cake_sub:'100% Eggless',
  custom_head:'Custom cakes — ask price on WhatsApp',
  custom_sub:'Pick a design, tell us the weight & flavour — we will confirm with the price.',
@@ -502,7 +528,7 @@ en:{
  sample_note:'Cake photos are samples only — the actual cake may look a little different.',
  ask_price:'Ask price',ask_added:'✓ Added — edit',
  pack_title:'Cold drinks · Namkeen-mixture · Biscuits · Packaged items',
- pack_sub:'All at MRP. Just write what you need — we will add the price.',
+ pack_sub:'All at MRP — order along with sweets or cake. Just write what you need, we will add the price.',
  pack_ph:'e.g. Cold drink 2 L – 1, Bhujia 400 g – 2, Biscuits – 5 packets',
  pack_add:'Add to order',pack_update:'Save changes',pack_added:'✓ Added to order',pack_remove:'Remove',pack_empty:'Please write what you need first.',
  pack_chips:['Cold drink','Namkeen','Mixture','Biscuits','Chips','Water bottle','Juice'],
@@ -571,8 +597,9 @@ en:{
  ck_add:'Add to order',ck_save:'Save changes',ck_remove:'Remove from order',ck_price:'We will tell you the price on WhatsApp',e_weight:'Please choose a weight.',
  rules_h:'Order rules',
  rules:[
+  'Online orders must include sweets or cake. Along with them you can order milk, curd, paneer, cold drinks and packaged items — we cannot accept orders of only these items; you can buy them at the shop.',
   'We deliver up to 6 km from the shop — free delivery on orders of ₹499 or more (only milk & curd have a small charge, see the next rule).',
-  'Home delivery charge for milk & curd: ₹5 per curd pack up to 400 g and per litre of milk, ₹10 per 1 kg curd. We deliver milk & curd-only orders even below ₹499; with sweets the total must be ₹499.',
+  'Home delivery charge for milk & curd: ₹5 per curd pack up to 400 g and per litre of milk, ₹10 per 1 kg curd — this applies even on orders above ₹499.',
   'We confirm delivery only after checking availability.',
   'We will confirm your order on WhatsApp. Then please pay in full by UPI first — delivery leaves only after payment. Sorry, no cash on delivery (COD).',
   'Sorry, if you cancel after paying, the money cannot be refunded.',
@@ -823,8 +850,26 @@ function pricedTotal(){return r2(cartLines().reduce(function(s,l){return s+l.amt
 /* milk & curd: delivery charge per pack/litre, only for home delivery */
 function feeTotal(){if(st.me.mode!=='d')return 0;return r2(cartLines().reduce(function(s,l){return s+num(l.item.fee)*l.qty;},0));}
 function grandTotal(){return r2(pricedTotal()+feeTotal());}
-/* only milk/curd (paneer may come along) → no ₹499 minimum for home delivery */
-function dairyOnly(){var L=cartLines();return !st.custom.length&&L.length>0&&L.every(function(l){return l.item.cat==='dairy';})&&L.some(function(l){return num(l.item.fee)>0;});}
+/* मालिक का नियम (13 अक्टूबर 2026): ऑनलाइन ऑर्डर में मिठाई या केक ज़रूरी — दूध-दही-पनीर और पैकेट सामान सिर्फ़ उसके साथ */
+function isMainItem(it){return !!it&&(it.cat==='mithai'||it.cat==='cake');}
+function hasMain(){return cartLines().some(function(l){return isMainItem(l.item);})||st.custom.some(function(c){return c.type==='cake';});}
+function hasExtra(){return cartLines().some(function(l){return !isMainItem(l.item);})||st.custom.some(function(c){return c.type==='pack';});}
+function needMain(){return hasExtra()&&!hasMain();}
+function gateHtml(k){return '<div class="gate" id="gate-'+k+'"'+(hasMain()?' hidden':'')+'><span>'+t('gate_txt')+'</span><button class="btn small" data-act="tab" data-t="sweets">'+t('gate_btn')+'</button></div>';}
+function renderGates(){
+  var m=hasMain();
+  ['dairy','pack'].forEach(function(k){
+    var g=document.getElementById('gate-'+k);if(g)g.hidden=m;
+    var sec=document.getElementById('sec-'+k);if(sec)sec.classList.toggle('locked',!m);
+  });
+}
+function blockedExtra(id){   // कार्ट में मिठाई/केक नहीं और ये दूध-दही वगैरह है → मत जोड़ो
+  if(isMainItem(ITEM[id])||hasMain())return false;
+  toast(t('gate_toast'));
+  var g=document.getElementById('gate-dairy');
+  if(g&&!g.hidden){g.classList.remove('flash');void g.offsetWidth;g.classList.add('flash');}
+  return true;
+}
 function cartCount(){return cartLines().length+st.custom.length;}
 function hasFixedCake(){return cartLines().some(function(l){return l.item.cat==='cake';});}
 function hasCake(){return hasFixedCake()||st.custom.some(function(c){return c.type==='cake';});}
@@ -959,6 +1004,7 @@ function renderMenu(){
     '</div></header>'+
     '<div class="wrap">'+
       '<div class="status '+si.cls+'" id="statusBox"><span class="dot"></span><span>'+esc(si.txt)+'</span></div>'+
+      '<div class="rulebox"><b>'+t('rule_h')+'</b><ul>'+t('rule_l').map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
       (notice?'<div class="notice">📢 '+esc(notice)+'</div>':'')+
       installBarHtml()+
       ((st.last&&Date.now()-st.last.ts<3*86400000)?'<button class="btn block" style="margin-top:8px" data-act="go" data-v="done">'+t('my_order')+' · '+esc(st.last.code)+'</button>':'')+
@@ -970,7 +1016,7 @@ function renderMenu(){
     '<main class="wrap">'+
       '<section class="sec" id="sec-sweets"><h2>'+t('tab_sweets')+'</h2><p class="sub">'+t('sweets_sub')+'</p>'+
         MENU().filter(function(c){return c.tab==='sweets';}).map(cardHtml).join('')+'</section>'+
-      '<section class="sec" id="sec-dairy"><h2>'+t('tab_dairy')+'</h2><p class="sub">'+t('dairy_sub')+'</p>'+
+      '<section class="sec" id="sec-dairy"><h2>'+t('tab_dairy')+'</h2><p class="sub">'+t('dairy_sub')+'</p>'+gateHtml('dairy')+
         (Object.keys(ONL).length?'<p class="feenote">'+t('dairy_fee')+'</p>':'')+
         MENU().filter(function(c){return c.tab==='dairy';}).map(cardHtml).join('')+
         (C.bulkDairyUrl?'<a class="bigpack" href="'+esc(C.bulkDairyUrl)+(st.lang==='en'?'?lang=en':'')+'" target="_blank" rel="noopener">'+t('dairy_big')+'</a>':'')+'</section>'+
@@ -979,10 +1025,10 @@ function renderMenu(){
         '<h3 style="margin:16px 0 2px;font-size:1.05rem">'+t('custom_head')+'</h3><p class="sub">'+t('custom_sub')+'</p>'+
         '<div class="grid2">'+CAKES().map(customCardHtml).join('')+'</div>'+
         '<p class="smallnote">'+t('sample_note')+'</p></section>'+
-      '<section class="sec" id="sec-pack"><h2 style="margin-bottom:10px">'+t('tab_pack')+'</h2>'+packHtml()+'</section>'+
+      '<section class="sec" id="sec-pack"><h2 style="margin-bottom:10px">'+t('tab_pack')+'</h2>'+gateHtml('pack')+packHtml()+'</section>'+
       '<section class="sec" id="sec-bulk"><div class="bulkcard"><h3>'+t('bulk_title')+'</h3><p>'+t('bulk_sub')+'</p><button class="btn" data-act="go" data-v="bulk">'+t('bulk_btn')+'</button></div></section>'+
       '<section class="sec" id="sec-info"><h2>'+t('info_title')+'</h2><div class="infobox">'+
-        '<p>'+t('i_hours')+'</p><p>'+t('i_del')+'</p><p>'+t('i_pick')+'</p><p>'+t('i_pay')+'</p><p>📍 '+esc(st.lang==='en'?S.addrEn:S.addrHi)+'</p>'+
+        '<p>'+t('i_rule')+'</p><p>'+t('i_hours')+'</p><p>'+t('i_del')+'</p><p>'+t('i_pick')+'</p><p>'+t('i_pay')+'</p><p>📍 '+esc(st.lang==='en'?S.addrEn:S.addrHi)+'</p>'+
         '<div class="links">'+
           '<a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a>'+
           '<a class="btn" href="'+esc(waUrl(st.lang==='en'?'Hello MB Sweets':'नमस्ते MB Sweets'))+'" target="_blank" rel="noopener">'+t('whatsapp')+'</a>'+
@@ -1003,6 +1049,7 @@ function renderMenu(){
   setupSpy();
 }
 function renderCartBar(){
+  renderGates();
   var bar=$('#cartbar');if(!bar)return;
   var n=cartCount();
   if(!n){bar.innerHTML='';return;}
@@ -1127,9 +1174,9 @@ function renderCart(){
   var fee=feeTotal();
   if(fee>0)items+='<div class="line fee"><div class="ln"><b>🚚 '+t('fee_line')+'</b><small>'+t('fee_sub')+'</small></div><div class="la">'+rupee(fee)+'</div></div>';
   var minHtml='';
-  if(st.me.mode==='d'){
-    if(dairyOnly())minHtml='<div class="minbar ok">'+t('min_dairy')+'</div>';
-    else if(tot>=S.minOrder)minHtml='<div class="minbar ok">'+t(fee>0?'min_ok_fee':'min_ok')+'</div>';
+  if(needMain())minHtml='<div class="minbar no">'+t('cart_need_main')+' <button class="btn small" data-act="needmain">'+t('gate_btn')+'</button></div>';
+  else if(st.me.mode==='d'){
+    if(tot>=S.minOrder)minHtml='<div class="minbar ok">'+t(fee>0?'min_ok_fee':'min_ok')+'</div>';
     else if(st.custom.length)minHtml='<div class="minbar no">'+t('min_unpriced')+'</div>';
     else minHtml='<div class="minbar no">'+t('min_left',{x:r2(S.minOrder-tot)})+'</div>';
   }
@@ -1406,12 +1453,13 @@ function validate(){
   if(C.pause)return t('e_pause');
   var offL=cartLines().filter(function(l){return l.off;});
   if(offL.length)return t('e_offline_items',{x:offL.map(function(l){return lineName(l);}).join(', ')});
+  if(needMain())return t('e_need_main');
   if(String(st.me.name).trim().length<2)return t('e_name');
   if(!phone10(st.me.phone))return t('e_phone');
   if(st.me.mode==='d'){
     if(!String(st.me.village).trim())return t('e_village');
     if(!String(st.me.addr).trim())return t('e_address');
-    if(tot<S.minOrder&&!st.custom.length&&!dairyOnly())return t('e_min',{x:r2(S.minOrder-tot)});
+    if(tot<S.minOrder&&!st.custom.length)return t('e_min',{x:r2(S.minOrder-tot)});
   }
   if(when.type==='asap'&&!asapOpen())return t(isDel()?'e_asap_d':'e_asap');
   if(when.type!=='asap'){
@@ -1934,11 +1982,13 @@ document.addEventListener('click',function(e){
     case 'opt':sel[el.getAttribute('data-card')]=+el.getAttribute('data-i');refreshCard(el.getAttribute('data-card'));break;
     case 'inc':case 'dec':
       if(C.pause||OFF[id])break;
+      if(a==='inc'&&blockedExtra(id))break;
       changeQty(id,a==='inc'?1:-1);
       var card=MENU().filter(function(c){return optsOf(c).some(function(o){return o.id===id;});})[0];
       if(card)refreshCard(card.key);
       break;
-    case 'cinc':case 'cdec':syncForm();if(OFF[id])break;changeQty(id,a==='cinc'?1:-1);renderCart();break;
+    case 'cinc':case 'cdec':syncForm();if(OFF[id])break;if(a==='cinc'&&blockedExtra(id))break;changeQty(id,a==='cinc'?1:-1);renderCart();break;
+    case 'needmain':syncForm();renderMenu();if(navDepth>0){var nd2=navDepth;navDepth=0;history.go(-nd2);}else go('');setTimeout(function(){var b=document.querySelector('.tab[data-t="sweets"]');if(b)b.click();},60);break;
     case 'coff':syncForm();delete st.cart[id];save();renderCart();break;
     case 'crm':syncForm();st.custom.splice(+el.getAttribute('data-i'),1);save();renderCart();break;
     case 'cake-edit':syncForm();var ce=st.custom[+el.getAttribute('data-i')];if(ce)go('cake='+ce.key+','+el.getAttribute('data-i'));break;
@@ -1951,6 +2001,7 @@ document.addEventListener('click',function(e){
     case 'packadd':
       var txt=($('#packText').value||'').trim();
       if(!txt){$('#packErr').textContent=t('pack_empty');break;}
+      if(!hasMain()){$('#packErr').textContent=t('gate_txt');toast(t('gate_toast'));break;}
       var pi=-1;st.custom.forEach(function(c,i){if(c.type==='pack')pi=i;});
       if(pi>=0)st.custom[pi].text=txt;else st.custom.push({type:'pack',text:txt});
       packDraft='';save();$('#packbox').outerHTML=packHtml();renderCartBar();toast(t('pack_added'));
@@ -1996,6 +2047,7 @@ document.addEventListener('change',function(e){
 function autoPack(){
   var ta=$('#packText');if(!ta||C.pause)return;
   var txt=ta.value.trim();if(!txt)return;
+  if(!hasMain())return;          // मिठाई/केक के बिना पैकेट सामान नहीं जुड़ता — लिखा हुआ बॉक्स में ही रहेगा
   var p=st.custom.filter(function(c){return c.type==='pack';})[0];
   if(p){if(p.text===txt)return;p.text=txt;}else st.custom.push({type:'pack',text:txt});
   packDraft='';save();
