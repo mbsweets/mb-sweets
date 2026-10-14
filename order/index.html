@@ -429,7 +429,7 @@ hi:{
  done_s3d:'कन्फर्म होने पर कृपया नीचे दिए UPI से पेमेंट कीजिए और स्क्रीनशॉट उसी चैट में भेज दीजिए।',
  done_s3p:'कन्फर्म होने पर आप तय समय पर दुकान से सामान ले सकते हैं। पेमेंट सामान लेते समय कर दीजिए।',
  done_resend:'💬 WhatsApp फिर से खोलें',done_new:'नया ऑर्डर शुरू करें',done_none:'अभी कोई ऑर्डर नहीं भेजा गया।',
- pay_h:'UPI पेमेंट',pay_amt:'भेजने वाली रकम',pay_after:'⚠️ कृपया हमारा कन्फर्मेशन आने के बाद ही पेमेंट कीजिए।',
+ pay_h:'UPI पेमेंट',pay_amt:'भेजने वाली रकम',pay_after:'⚠️ कृपया हमारा कन्फर्मेशन आने के बाद ही पेमेंट कीजिए।',pay_pre:'कन्फर्म करते समय रकम बदली तो हम आपको नई रकम बताएँगे — तब उसी हिसाब से पेमेंट कीजिए।',
  upi_id:'UPI ID',copy:'कॉपी करें',copied:'कॉपी हो गया ✓',copy_fail:'कॉपी नहीं हुआ — UPI ID खुद लिख लें',
  open_upi:'UPI ऐप में पेमेंट करें',save_qr:'⬇️ QR फोटो सेव करें',
  pay_how:'पेमेंट कैसे करें',
@@ -589,7 +589,7 @@ en:{
  done_s3d:'After confirmation, please pay by the UPI below and send the screenshot in the same chat.',
  done_s3p:'After confirmation, you can pick up at the agreed time and pay at the shop.',
  done_resend:'💬 Open WhatsApp again',done_new:'Start a new order',done_none:'No order sent yet.',
- pay_h:'UPI payment',pay_amt:'Amount to pay',pay_after:'⚠️ Please pay only after we confirm your order.',
+ pay_h:'UPI payment',pay_amt:'Amount to pay',pay_after:'⚠️ Please pay only after we confirm your order.',pay_pre:'If the amount changes when we confirm, we will tell you the new amount — please pay that.',
  upi_id:'UPI ID',copy:'Copy',copied:'Copied ✓',copy_fail:'Could not copy — please note the UPI ID',
  open_upi:'Pay in UPI app',save_qr:'⬇️ Save QR photo',
  pay_how:'How to pay',
@@ -1609,6 +1609,8 @@ function sendPendingViaWhatsApp(){
 
 /* --- done --- */
 var statusTimer=null;
+/* ऑर्डर भेजते ही दिखने वाली रकम — केक/पैक आइटम जिनका दाम दुकान बताएगी, वो हों तो रकम नहीं (सादा QR) */
+function preAmt(L){return (L&&!L.asks&&num(L.total)>0)?r2(num(L.total)):0;}
 function renderDone(){
   var L=st.last;
   clearInterval(statusTimer);lastStatus='';
@@ -1622,7 +1624,7 @@ function renderDone(){
       '<div class="blk"><ol class="steps"><li>'+t('done_app_s1')+'</li><li>'+(isD?t('done_app_s2d'):t('done_app_s2p'))+'</li></ol></div>'+
       (L.photo?'<div class="blk"><p class="hint" style="margin-top:0">'+t('ck_photo')+'</p><a class="btn wa block" href="'+esc(waUrl(t('photo_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('photo_btn')+'</a></div>':'')+
       (isD&&!L.hasLoc?'<div class="blk"><h3>'+t('locsend_h')+'</h3><p class="hint" style="margin-top:0">'+t('locsend_txt')+'</p><a class="btn wa block" href="'+esc(waUrl(t('locsend_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('locsend_btn')+'</a></div>':'')+
-      (isD?'<div id="payWrap">'+payBlock(0,true)+'</div>':'')+
+      (isD?'<div id="payWrap">'+payBlock(preAmt(L),true,L.code)+'</div>':'')+
       '<div class="row" style="margin-top:4px"><button class="btn primary" style="flex:1" data-act="home">'+t('done_new')+'</button><a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a></div>'+
       '<a class="btn block" style="margin-top:8px" href="'+esc(waUrl(t('talk_msg',{c:L.code})))+'" target="_blank" rel="noopener">'+t('talk_btn')+'</a>';
     viewShell(t('done_app_h'),html);
@@ -1634,7 +1636,7 @@ function renderDone(){
     '<div class="blk"><ol class="steps"><li>'+t('done_s1')+'</li><li>'+t('done_s2')+'</li><li>'+(isD?t('done_s3d'):t('done_s3p'))+'</li></ol>'+
     '<a class="btn wa block" href="'+esc(L.url)+'" target="_blank" rel="noopener">'+t('done_resend')+'</a></div>'+
     (isD&&!L.hasLoc?'<div class="blk"><h3>'+t('locsend_h')+'</h3><p class="hint" style="margin-top:0">'+t('locsend_txt')+'</p></div>':'')+
-    (isD?payBlock(0,true):'')+
+    (isD?payBlock(preAmt(L),true,L.code):'')+
     '<div class="row" style="margin-top:4px"><button class="btn primary" style="flex:1" data-act="home">'+t('done_new')+'</button><a class="btn" href="tel:+91'+S.phone+'">'+t('call')+'</a></div>';
   viewShell(t('done_h'),html);
 }
@@ -1868,7 +1870,7 @@ function amountQr(amount,code){
   }catch(e){return '';}
 }
 function payBlock(amount,beforeConfirm,code){
-  var dq=beforeConfirm?'':amountQr(amount,code);
+  var dq=amountQr(amount,code);   // रकम पता है तो QR में भरी हुई (कन्फर्मेशन से पहले भी) — 0 हो तो दुकान वाला सादा QR
   var qrHtml=dq?
       '<img class="qrdyn" src="'+dq+'" alt="UPI QR — '+esc(rupee(amount))+'">'+
       '<p class="autoamt">'+esc(t('pay_auto',{a:rupee(amount)}))+'</p>'+
@@ -1877,7 +1879,7 @@ function payBlock(amount,beforeConfirm,code){
       '<a class="btn primary block" style="margin-top:10px" href="img/upi-card.png" download="MB-Sweets-UPI-QR.png">'+t('save_qr')+'</a>';
   return '<div class="blk"><h3>'+t('pay_h')+'</h3>'+
     (amount>0?'<div class="hint" style="text-align:center">'+t('pay_amt')+'</div><div class="amt">'+rupee(amount)+'</div>':'')+
-    (beforeConfirm?'<div class="paynote" style="margin-top:6px">'+t('pay_after')+'</div>':'')+
+    (beforeConfirm?'<div class="paynote" style="margin-top:6px">'+t('pay_after')+(dq?'<br><small>'+t('pay_pre')+'</small>':'')+'</div>':'')+
     qrHtml+
     '<h3 style="margin:14px 0 6px">'+t('pay_how')+'</h3><ol class="steps"><li>'+t('pay_h1')+'</li><li>'+t(dq?'pay_h2a':'pay_h2')+'</li><li>'+t('pay_h3')+'</li></ol>'+
     (dq?'<details class="oldqr"><summary>'+t('old_qr')+'</summary><img class="qrimg" src="img/upi-card.png" alt="UPI QR — '+esc(S.upi)+'" loading="lazy"></details>':'')+

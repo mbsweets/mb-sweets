@@ -1697,6 +1697,7 @@ function closeSheet(){
   $('#sheetRoot').innerHTML='';
   document.body.classList.remove('noscroll');
   ui.orderDraft=null;ui.editId=null;ui.kDraft=null;ui.lDraft=null;
+  if(online&&online.dirty)setTimeout(function(){if(online.dirty&&!$("#ov"))refreshOnlineViews();},0);
 }
 
 /* ---------- Customer form ---------- */
@@ -2147,6 +2148,7 @@ function onlineSync(manual){
   if(online.syncing)return Promise.resolve();
   online.syncing=true;
   if(manual)refreshOnlineViews();
+  else if(ui.view==='online'){var sb=$('#main [data-act=on-sync]');if(sb)sb.textContent='देख रहे हैं…';}
   return flushQueue().then(function(){return onlineGet({action:'list',key:online.cfg.k,days:10});}).then(function(r){
     online.syncing=false;
     if(!r||!r.ok){online.error=(r&&r.error==='key')?'चाबी गलत है — सेटअप दोबारा करें':'रजिस्टर से जवाब नहीं आया';refreshOnlineViews();return;}
@@ -2172,9 +2174,10 @@ function onlineSync(manual){
 function refreshOnlineViews(){
   renderNav();
   if(!$('#ov')){
+    online.dirty=false;
     if(ui.view==='online')renderOnline();
     renderBanner();
-  }
+  }else online.dirty=true;   // शीट खुली है — बंद होते ही नई लिस्ट दिखाओ
 }
 function beep(){
   try{
@@ -2535,7 +2538,6 @@ function renderOnline(){
   $('#main').innerHTML=html;
 }
 function startOnline(){
-  loadOnlineCache();
   online.cfg=onlineCfg();
   if(!online.cfg)return;
   onlineSync();
@@ -5029,6 +5031,8 @@ window.addEventListener('storage',function(e){
 })();
 var catUpdated=applyCatalog();
 var udMoved=migrateUdharOrders();
+/* ऑनलाइन की पिछली लिस्ट पहली स्क्रीन से पहले — रिफ़्रेश पर गिनती 0 न दिखे, रजिस्टर का जवाब बाद में आता रहे */
+loadOnlineCache();online.cfg=onlineCfg();
 /* पेज रिफ़्रेश हुआ — जिस टैब/पेज पर थे वहीं खोलो (होम पर मत भेजो) */
 (function(){
   if(/^#(o=|online)/.test(location.hash))return;
