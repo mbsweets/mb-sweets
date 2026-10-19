@@ -117,18 +117,19 @@ details summary{cursor:pointer;font-weight:700;margin-top:8px}
 </div>
 
 <div class="step" id="st-milk">
-  <h2><span class="num">7</span>🥛 दूध-दही रिमाइंडर</h2>
-  <p>रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर घंटी: <b>परसों की मिठाई के लिए कितना दूध</b> (1 किलो = 2 लीटर) और <b>कल का दही/दूध/पनीर</b>।</p>
+  <h2><span class="num">7</span>🥛 दूध-दही + 📋 आने वाले ऑर्डर की घंटी</h2>
+  <p>रोज़ दोपहर करीब 2 बजे फोन पर घंटी: <b>आने वाले सारे ऑर्डर</b> (आज 2 बजे के बाद, कल, परसों — किसका, कहाँ का, क्या, कब), <b>परसों की मिठाई के लिए कितना दूध</b> (1 किलो = 2 लीटर) और <b>कल का दही/दूध/पनीर</b>।
+  जब तक घंटी पर क्लिक करके (या ऐप में "✓ देख लिया" दबाकर) देख न लें, तब तक <b>2:40, 3:40, 5:10, 7:10</b> बजे फिर से बजती है।</p>
   <p class="note">नया सेटअप अभी किया है (चरण 1–6)? तो यह पहले से चालू है — बस नीचे "जांचें" दबाएं।<br>
   <b>पहले से चल रहा सेटअप है</b> तो कंप्यूटर पर एक बार कोड अपडेट करना है (5 मिनट):</p>
   <ol>
     <li>वही Google Sheet खोलें (<b class="m">MB Sweets ऑनलाइन ऑर्डर</b>) → <b class="m">Extensions</b> → <b class="m">Apps Script</b></li>
-    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 5"</b> (या उससे नया) लिखा दिखना चाहिए।</li>
+    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 6"</b> लिखा दिखना चाहिए।</li>
     <li>ऊपर <b class="m">▶ Run</b> दबाएं (बगल में <b>setupSheet</b> लिखा हो)। नई अनुमति माँगेगा → <b class="m">Review permissions</b> → अकाउंट चुनें → <b class="m">Advanced</b> → <b class="m">Go to … (unsafe)</b> → <b class="m">Allow</b>। नीचे "Execution completed" दिखे तो ठीक।</li>
     <li>ऊपर <b class="m">Deploy</b> → <b class="m">Manage deployments</b> → ✏️ (पेंसिल) → <b>Version:</b> <b class="m">New version</b> → <b class="m">Deploy</b>। <b>URL वही रहेगा</b> — कहीं कुछ बदलना नहीं है।</li>
   </ol>
   <p class="note">⚠️ क्रम यही रखें — पहले Run (अनुमति), फिर Deploy। "New deployment" मत दबाना, वरना URL बदल जाएगा।</p>
-  <button class="btn primary block" id="checkMilk">✓ जांचें — रिमाइंडर चालू है?</button>
+  <button class="btn primary block" id="checkMilk">✓ जांचें — नया कोड (6) और घंटी चालू है?</button>
   <div id="milkMsg"></div>
 </div>
 
@@ -232,9 +233,11 @@ $('#checkMilk').addEventListener('click',function(){
   var c=load();if(!c||!c.u){msg('#milkMsg','err','पहले चरण 4 पूरा करें।');return;}
   msg('#milkMsg','note','जांच रहे हैं…');
   api(c.u,{action:'ping'}).then(function(r){
-    if(r&&r.ok&&r.v>=4&&r.reminder){
+    if(r&&r.ok&&r.v>=6&&r.reminder){
       try{localStorage.removeItem('mbmb-plan-sent');}catch(e){}
-      msg('#milkMsg','ok','✅ नया कोड और रिमाइंडर चालू है। अब बिलिंग ऐप खोलें → बैकअप → "🔔 इस फ़ोन पर घंटी चालू करो" → फिर "टेस्ट"।');
+      msg('#milkMsg','ok','✅ नया कोड (6) और घंटी चालू है। अब बिलिंग ऐप एक बार खोलें (इंटरनेट चालू रखें) → बैकअप → दूध-दही में "🔔 अभी टेस्ट भेजो" दबाकर देखें।');
+    }else if(r&&r.ok&&r.v>=4&&r.v<6){
+      msg('#milkMsg','err','अभी पुराना कोड (संस्करण '+r.v+') चल रहा है — ऊपर के 4 काम करें (कोड चिपकाकर Save, ▶ Run, फिर Manage deployments → New version → Deploy)।');
     }else if(r&&r.ok&&r.v>=4){
       msg('#milkMsg','err','नया कोड चालू है, पर रोज़ का टाइमर नहीं लगा — Apps Script में ▶ Run (setupSheet) दोबारा करें और Allow दें।');
     }else if(r&&r.ok){

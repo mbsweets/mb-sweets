@@ -1,4 +1,4 @@
-var CACHE_NAME = 'mbmb-billing-v12';
+var CACHE_NAME = 'mbmb-billing-v13';
 var CORE_ASSETS = [
   './',
   './manifest.json',
@@ -83,18 +83,25 @@ self.addEventListener('fetch', function (e) {
 });
 
 // Tapping a notification (e.g. new online order) opens the app on the online orders screen.
+// "#ack=तारीख" वाली घंटी (दोपहर 2 बजे की याद) पर क्लिक = देख लिया → रजिस्टर को बता दो, आज की दोबारा वाली घंटी बंद।
+function sendAck(target) {
+  if (!/#ack=/.test(target)) return Promise.resolve();
+  return readCfg().then(function (c) {
+    if (!c || !c.u || !c.k) return;
+    return fetch(c.u + '?action=ack&key=' + encodeURIComponent(c.k), { redirect: 'follow' }).catch(function () {});
+  }).catch(function () {});
+}
 self.addEventListener('notificationclick', function (e) {
   e.notification.close();
   var target = (e.notification.data && e.notification.data.url) || './';
-  e.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
-      for (var i = 0; i < list.length; i++) {
-        var c = list[i];
-        if ('focus' in c) { try { c.navigate(target); } catch (err) {} return c.focus(); }
-      }
-      return self.clients.openWindow(target);
-    })
-  );
+  var open = self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+    for (var i = 0; i < list.length; i++) {
+      var c = list[i];
+      if ('focus' in c) { try { c.navigate(target); } catch (err) {} return c.focus(); }
+    }
+    return self.clients.openWindow(target);
+  });
+  e.waitUntil(Promise.all([open, sendAck(target)]));   // पहले ऐप खोलो (क्लिक की अनुमति रहते), साथ में "देख लिया"
 });
 
 /* ---------- 🔔 घंटी: नया ऑनलाइन ऑर्डर / दूध-दही रिमाइंडर (रजिस्टर से web push) ----------
@@ -123,6 +130,7 @@ function showItem(d, quiet) {
   var tag = d.g || ('n' + (d.i || Date.now()));
   return self.registration.showNotification(d.t || 'MB Sweets', {
     body: d.b || '', tag: tag, renotify: !quiet && !d.s, silent: !!(quiet || d.s),
+    requireInteraction: !quiet && !d.s,   // ज़रूरी घंटी स्क्रीन पर टिकी रहे (जहाँ फ़ोन/ब्राउज़र मानता है)
     icon: 'icon-192.png', badge: 'badge-96.png', timestamp: Number(d.i) || Date.now(),
     data: { url: d.u || './' }
   });

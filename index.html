@@ -96,6 +96,10 @@ h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
 .sumqty{font-weight:700;color:var(--brand-ink);white-space:nowrap}
 .sumdetail{width:100%;color:var(--muted);font-size:.78rem}
 .hide{display:none!important}
+.rmcard{border-width:2px;background:linear-gradient(180deg,rgba(226,177,74,.16),var(--card) 70px)}
+.rmrow{font-size:.9rem;line-height:1.45;padding:3px 0;border-bottom:1px dashed var(--line)}
+.rmrow:last-of-type{border-bottom:0}
+.rmcard .btn{margin-top:8px}
 .milkcard{border-color:var(--milk);background:linear-gradient(180deg,var(--milk-bg),var(--card) 60px)}
 .milkcard .sumhead{color:var(--milk)}
 .mkhead{font-weight:700;margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
@@ -915,16 +919,68 @@ function dairyDay(live,dateKey){
   return {l:r1(l),kg:Math.round(kg*1000)/1000,lines:lines};
 }
 /* आने वाले 31 दिन — बिलिंग ऐप से रजिस्टर पर जाता है, वहीं से रोज़ दोपहर फ़ोन पर घंटी */
+/* 📋 आने वाले ऑर्डर — रजिस्टर की दोपहर 2 बजे वाली घंटी के लिए (मालिक, 19 अक्टूबर 2026: "कोई भी ऑर्डर रहे तो
+   2–3 बजे तक नोटिफिकेशन — किसका/कहाँ का, कौन सी चीज़")। हर ऑर्डर: t समय, n ग्राहक, p जगह (पते का छोटा हिस्सा),
+   i सामान, k 🚚/🏪 (ऑनलाइन वाले)। फ़ोन नंबर नहीं भेजते। */
+function hiClock(d){
+  var h=d.getHours(),m=d.getMinutes();if(!h&&!m)return '';
+  var part=h<12?'सुबह':(h<16?'दोपहर':(h<20?'शाम':'रात')),h12=h%12===0?12:h%12;
+  return part+' '+h12+(m?':'+(m<10?'0':'')+m:'')+' बजे';
+}
+function cutTxt(v,n){v=String(v==null?'':v).replace(/\s+/g,' ').trim();return v.length>n?v.slice(0,n-1)+'…':v;}
+function planOrders(live,dateKey,fromHour){
+  var out=[];
+  dueGroups(live,dateKey).forEach(function(g){
+    var o=g.order,c=findCustomer(o.customerId),d=new Date(o.date),same=!isNaN(d)&&dayKey(d)===dateKey;
+    if(fromHour!=null&&same&&(d.getHours()||d.getMinutes())&&d.getHours()<fromHour)return;   // आज: सिर्फ़ दोपहर 2 बजे के बाद वाले
+    out.push({t:same?hiClock(d):'',n:cutTxt(c?c.name:'?',32),p:cutTxt(c&&c.address,30),
+      i:cutTxt(g.items.map(function(it){return displayName(it)+' '+fmtQty(it.qty)+' '+it.unit;}).join(', '),110),
+      k:isWebOrder(o)?(o.webMode==='p'?'🏪':'🚚'):''});
+  });
+  return out.slice(0,25);
+}
+/* 🔔 "देख लिया" — दोपहर 2 बजे की याद तब तक (घंटी फिर-फिर + होम पर कार्ड) जब तक मालिक देख न लें (19 अक्टूबर 2026) */
+var ACK_LS='mbmb-ack';
+function ackedToday(){return lsGet(ACK_LS,'')===todayStr();}
+function ackToday(){
+  lsSet(ACK_LS,todayStr());
+  var c=onlineCfg();
+  if(c)fetch(c.u+'?action=ack&key='+encodeURIComponent(c.k),{redirect:'follow'}).catch(function(){});
+}
+function checkAckHash(){
+  var m=/^#ack=(\d{4}-\d\d-\d\d)/.exec(location.hash);if(!m)return false;
+  if(m[1]===todayStr())ackToday();
+  try{history.replaceState(history.state,'',location.pathname+location.search);}catch(e){}
+  if($('#ov'))closeSheet();
+  ui.view='home';renderRoute();window.scrollTo(0,0);
+  return true;
+}
+function remindCardHtml(live){
+  if(ackedToday()||new Date().getHours()<14)return '';
+  var rows=[];
+  [[todayStr(),'आज',14],[addDaysKey(1),'कल',null],[addDaysKey(2),'परसों',null]].forEach(function(x){
+    planOrders(live,x[0],x[2]).forEach(function(e){
+      rows.push('<div class="rmrow"><b>'+esc(x[1])+(e.t?' · '+esc(e.t):'')+'</b> — '+esc(e.k?e.k+' ':'')+esc(e.n)+(e.p?' ('+esc(e.p)+')':'')+': '+esc(e.i)+'</div>');
+    });
+  });
+  var milk=!!(sweetsMilk(live,addDaysKey(2))||dairyDay(live,addDaysKey(1)));
+  if(!rows.length&&!milk)return '';
+  return '<div class="sumcard rmcard"><div class="sumhead">🔔 आज की याद (दोपहर 2 बजे) — '+(rows.length?rows.length+' आने वाले ऑर्डर':'दूध-दही')+'</div>'+
+    rows.join('')+(milk?'<div class="mknote">🥛 दूध-दही का हिसाब नीचे वाले कार्ड में है।</div>':'')+
+    '<button class="btn primary block" data-act="ack-day">✓ देख लिया</button>'+
+    '<div class="mknote">"देख लिया" दबाने तक यह कार्ड रहेगा और घंटी 7 बजे तक फिर-फिर बजेगी।</div></div>';
+}
 function buildPlanDays(){
   var live=state.orders.filter(function(o){return !o.cancelled;});
-  var from=todayStr(),until=addDaysKey(31),keys={};
+  var from=todayStr(),until=addDaysKey(31),keys={},near={};
+  near[from]=14;near[addDaysKey(1)]=null;near[addDaysKey(2)]=null;
   live.forEach(function(o){o.items.forEach(function(it){
     if(it.delivered)return;var k=itemDateKey(o,it);if(k>=from&&k<=until)keys[k]=1;
   });});
   var days={};
   Object.keys(keys).sort().forEach(function(k){
-    var s=sweetsMilk(live,k),d=dairyDay(live,k);
-    if(s||d){days[k]={};if(s)days[k].s=s;if(d)days[k].d=d;}
+    var s=sweetsMilk(live,k),d=dairyDay(live,k),o=hasOwn(near,k)?planOrders(live,k,near[k]):[];
+    if(s||d||o.length){days[k]={};if(s)days[k].s=s;if(d)days[k].d=d;if(o.length)days[k].o=o;}
   });
   return days;
 }
@@ -945,6 +1001,7 @@ function milkCard(live){
   }
   if(s&&s.l&&d&&d.l)h+='<div class="mktotal">कुल दूध: '+r1(s.l+d.l)+' लीटर <span>(मिठाई '+s.l+' + बिक्री '+d.l+')</span></div>';
   var ps=lsGet(PLAN_SENT,{})||{};
+  if(onlineCfg()&&ps.t&&!ps.old&&num(ps.v)<6)h+='<div class="mknote" style="color:var(--red)">📋 दोपहर की घंटी में ऑर्डर की पूरी लिस्ट (किसका, क्या) के लिए रजिस्टर का नया कोड (संस्करण 6) एक बार चिपकाना है — बैकअप → ⚙️ सेटअप, चरण 7</div>';
   if(onlineCfg())h+='<div class="mknote">'+(ps.old?'📲 फ़ोन पर रोज़ का रिमाइंडर अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है (बैकअप → ⚙️ सेटअप, चरण 7)':(pushOn()?'📲 रोज़ दोपहर 2–2:30 बजे यही हिसाब इस फ़ोन पर घंटी से आता है':'📲 रोज़ की घंटी के लिए: बैकअप → 🔔 इस फ़ोन पर घंटी चालू करो'))+'</div>';
   return h+'</div>';
 }
@@ -966,7 +1023,7 @@ function planSync(force){
     .then(function(r){return r.json();})
     .then(function(r){
       planBusy=false;
-      if(r&&r.ok)lsSet(PLAN_SENT,{h:h,t:now});
+      if(r&&r.ok)lsSet(PLAN_SENT,{h:h,t:now,v:num(r.v)});
       else if(r&&r.error==='action')lsSet(PLAN_SENT,{old:now});
       return r;
     },function(){planBusy=false;return null;});
@@ -1024,6 +1081,7 @@ function renderHome(){
       '<p class="hint" style="margin-top:-4px">इनकी तारीख निकल गई पर टिक नहीं लगा। दे दिया हो तो ग्राहक खोलकर टिक लगा दो।</p>'+
       overdueGroups.map(function(g){return miniCard(g.order,g.items,'overdue');}).join('');
   }
+  sections+=remindCardHtml(live);
   sections+=milkCard(live);
   sections+=daySummaryBlock(live,dayAfter,'परसों');
   if(dayAfterGroups.length){
@@ -1282,7 +1340,9 @@ function renderBackup(){
     '<div class="actbar"><a class="btn small" href="online/setup.html">⚙️ '+(onlineCfg()?'सेटअप / नोटिफिकेशन टेस्ट':'सेटअप शुरू करो')+'</a></div>'+
     pushBoxHtml()+
     (onlineCfg()?'<div class="installbox"><p>🥛 <b>दूध-दही रिमाइंडर:</b> रोज़ दोपहर 2–2:30 बजे फ़ोन पर घंटी — परसों की मिठाई के लिए कितना दूध, और कल का दही/दूध/पनीर। 1 किलो मिठाई = 2 लीटर दूध (हर मिठाई का "आइटम" में बदल सकते हो)।</p>'+
-      ((lsGet(PLAN_SENT,{})||{}).old?'<p class="hint" style="color:var(--red);font-weight:700">⚠️ अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है: ⚙️ सेटअप → चरण 7</p>':'')+
+      ((lsGet(PLAN_SENT,{})||{}).old?'<p class="hint" style="color:var(--red);font-weight:700">⚠️ अभी चालू नहीं — कंप्यूटर पर रजिस्टर का कोड अपडेट करना है: ⚙️ सेटअप → चरण 7</p>':
+        (((lsGet(PLAN_SENT,{})||{}).t&&num((lsGet(PLAN_SENT,{})||{}).v)<6)?'<p class="hint" style="color:var(--red);font-weight:700">📋 दोपहर की घंटी में आने वाले ऑर्डर (किसका, कहाँ का, क्या) की लिस्ट के लिए रजिस्टर का नया कोड (संस्करण 6) एक बार चिपकाना है: ⚙️ सेटअप → चरण 7</p>':
+         '<p class="hint" style="color:var(--green);font-weight:700">📋 साथ में आने वाले ऑर्डर (आज 2 बजे के बाद, कल, परसों) की लिस्ट भी आती है ✓</p>'))+
       '<button class="btn small" data-act="test-milk">🔔 अभी टेस्ट भेजो</button></div>':'')+
     '<div class="sechead" style="margin-top:22px"><h2>दुकान की जानकारी</h2></div>'+
     '<label class="fl">दुकान का नाम<input id="s-name" type="text" value="'+esc(s.name)+'"></label>'+
@@ -4351,27 +4411,29 @@ function printOrderBill(o){
 }
 
 /* ---------- In-app reminder notification (best-effort, jab app khule tab hi) ---------- */
+/* ऐप की अपनी "आने वाले ऑर्डर" घंटी — दोपहर 12 बजे के बाद ऐप खुलने/सामने आने पर, दिन में एक बार।
+   कल/परसों कुछ न हो तो दिन बंद नहीं करते (बाद में जुड़ा ऑर्डर भी याद आए — मालिक, 18 अक्टूबर 2026)।
+   रजिस्टर संस्करण 6 + घंटी चालू हो तो 2 बजे वाली घंटी यही बताती है, तब यह चुप रहती है। */
 function checkDueReminders(){
   try{
     if(!('Notification' in window)||Notification.permission!=='granted')return;
-    var todayK=todayStr();
-    var lastKey='mbmb-lastremind';
+    if(new Date().getHours()<12)return;
+    if(ackedToday())return;
+    if(onlineCfg()&&pushOn()&&num((lsGet(PLAN_SENT,{})||{}).v)>=6)return;
+    var todayK=todayStr(),lastKey='mbmb-lastremind';
     if(localStorage.getItem(lastKey)===todayK)return;
-    var live=state.orders.filter(function(o){return !o.cancelled;});
-    var tmrK=(function(){var d=new Date();d.setDate(d.getDate()+1);return dayKey(d);})();
-    var dayAfterK=(function(){var d=new Date();d.setDate(d.getDate()+2);return dayKey(d);})();
-    var tmrItems=dayItemSummary(live,tmrK);
-    var dayAfterItems=dayItemSummary(live,dayAfterK);
-    if(!tmrItems.length&&!dayAfterItems.length){localStorage.setItem(lastKey,todayK);return;}
-    var parts=[];
-    if(tmrItems.length)parts.push('Kal: '+tmrItems.slice(0,4).map(function(i){return i.name+' '+fmtQty(i.qty)+' '+i.unit;}).join(', '));
-    if(dayAfterItems.length)parts.push('Parso: '+dayAfterItems.slice(0,4).map(function(i){return i.name+' '+fmtQty(i.qty)+' '+i.unit;}).join(', '));
-    showLocalNotif('MB Sweets \u2013 aane wala order',parts.join(' | ')).then(function(){localStorage.setItem(lastKey,todayK);},function(){});
+    var live=state.orders.filter(function(o){return !o.cancelled;}),lines=[];
+    [[addDaysKey(1),'कल'],[addDaysKey(2),'परसों']].forEach(function(x){
+      planOrders(live,x[0],null).forEach(function(e){lines.push('• '+x[1]+(e.t?' '+e.t:'')+': '+e.i+' — '+e.n+(e.p?' ('+e.p+')':''));});
+    });
+    if(!lines.length)return;
+    var body=lines.slice(0,6).join('\n')+(lines.length>6?'\n+ '+(lines.length-6)+' और — ऐप में देखें':'');
+    showLocalNotif('📋 आने वाले ऑर्डर ('+lines.length+')',body,'./#ack='+todayK).then(function(){localStorage.setItem(lastKey,todayK);},function(){});
   }catch(e){}
 }
 /* Android Chrome में new Notification() नहीं चलता — service worker से दिखाओ */
-function showLocalNotif(title,body){
-  var opts={body:body,icon:'icon-192.png',badge:'badge-96.png',tag:'mb-due'};
+function showLocalNotif(title,body,url){
+  var opts={body:body,icon:'icon-192.png',badge:'badge-96.png',tag:'mb-due',requireInteraction:true,data:{url:url||'./'}};
   if('serviceWorker' in navigator&&navigator.serviceWorker.getRegistration){
     return navigator.serviceWorker.getRegistration().then(function(r){
       if(r&&r.showNotification)return r.showNotification(title,opts);
@@ -4841,6 +4903,7 @@ document.addEventListener('click',function(e){
 
     case 'edit-item':openItemForm(id);break;
     case 'test-milk':testMilkReminder();break;
+    case 'ack-day':ackToday();renderRoute();toast('✓ ठीक है — आज की याद वाली घंटी अब नहीं बजेगी');break;
     case 'push-on':enablePush();break;
     case 'push-test':testPush();break;
     case 'push-off':disablePush();break;
@@ -5035,7 +5098,7 @@ var udMoved=migrateUdharOrders();
 loadOnlineCache();online.cfg=onlineCfg();
 /* पेज रिफ़्रेश हुआ — जिस टैब/पेज पर थे वहीं खोलो (होम पर मत भेजो) */
 (function(){
-  if(/^#(o=|online)/.test(location.hash))return;
+  if(/^#(o=|online|ack=)/.test(location.hash))return;
   var r=null;try{r=JSON.parse(sessionStorage.getItem(VIEW_KEY)||'null');}catch(e){r=null;}
   if(!r||!r.v)return;
   var nt='';try{var ne=performance.getEntriesByType('navigation')[0];nt=ne?ne.type:'';}catch(e){}
@@ -5050,7 +5113,10 @@ loadOnlineCache();online.cfg=onlineCfg();
 })();
 renderShell();
 renderRoute();
+checkAckHash();
+window.addEventListener('hashchange',checkAckHash);
 checkDueReminders();
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkDueReminders();});
 requestPersist();
 if(catUpdated)toast('दुकान की आइटम लिस्ट/दाम अपडेट हो गए ✓');
 if(udMoved)toast('उधार अब अलग "📒 उधारी" टैब में है ✓');

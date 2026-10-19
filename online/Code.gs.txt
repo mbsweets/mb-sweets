@@ -1,5 +1,5 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 5 (6 अक्टूबर 2026)
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 6 (19 अक्टूबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
@@ -8,13 +8,15 @@
  * दुकान की गुप्त चाबी (key) और ntfy का नाम पहली बार सेटअप में अपने-आप बनते हैं।
  *
  * दूध-दही रिमाइंडर: बिलिंग ऐप आने वाले ऑर्डर का हिसाब "Plan" शीट में रखता है।
- * रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर घंटी — परसों की मिठाई का दूध, कल का दही/दूध/पनीर।
+ * रोज़ दोपहर करीब 2 से 2:30 के बीच फोन पर घंटी — परसों की मिठाई का दूध, कल का दही/दूध/पनीर,
+ * और (संस्करण 6 से) आने वाले सारे ऑर्डर की लिस्ट: आज 2 बजे के बाद, कल, परसों — किसका, कहाँ का, क्या, कब।
+ * जब तक घंटी पर क्लिक करके (या ऐप में "✓ देख लिया") देख न लें, तब तक 2:40, 3:40, 5:10, 7:10 बजे फिर से बजती है।
  *
  * ⭐ माँ भगवती मिठास पॉइंट्स: असली हिसाब मालिक के फ़ोन (बिलिंग ऐप) में है। ऐप हर सदस्य का छोटा सार
  * "Points" शीट में भेजता है ताकि ग्राहक अपने पॉइंट ख़ुद देख सके — WhatsApp वाले लिंक से पूरा हिसाब,
  * सिर्फ़ मोबाइल नंबर से सिर्फ़ पॉइंट (नाम और ख़रीद नहीं)।
  */
-var VERSION = 5;
+var VERSION = 6;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -45,11 +47,13 @@ function setupReminder() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'dailyReminder') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('dailyReminder').timeBased().atHour(14).nearMinute(5).everyDays(1).inTimezone('Asia/Kolkata').create();
-  ScriptApp.newTrigger('dailyReminder').timeBased().atHour(14).nearMinute(40).everyDays(1).inTimezone('Asia/Kolkata').create();
+  // 2:05 पहली घंटी; 2:40, 3:40, 5:10, 7:10 — जब तक "देख लिया" न हो, फिर से (संस्करण 6)
+  [[14, 5], [14, 40], [15, 40], [17, 10], [19, 10]].forEach(function (x) {
+    ScriptApp.newTrigger('dailyReminder').timeBased().atHour(x[0]).nearMinute(x[1]).everyDays(1).inTimezone('Asia/Kolkata').create();
+  });
   props_().setProperty('REMINDER', 'on');
   planSheet_();
-  Logger.log('✅ दूध-दही रिमाइंडर चालू — रोज़ दोपहर करीब 2 से 2:30 के बीच');
+  Logger.log('✅ दूध-दही + आने वाले ऑर्डर की घंटी चालू — रोज़ दोपहर करीब 2 बजे, देखने तक 7 बजे तक दोबारा');
 }
 
 /* रिमाइंडर बंद करना हो तो इसे ▶ Run करें */
@@ -175,7 +179,13 @@ function ntfy_(title, message, priority, click, tags) {
 function doGet(e) {
   var p = (e && e.parameter) || {};
   try {
-    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', vapid: wpVapid_().pub });
+    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', vapid: wpVapid_().pub,
+      seen: props_().getProperty('ACK') === istKey_(0) });
+    if (p.action === 'ack') {                     // घंटी पर क्लिक / ऐप में "✓ देख लिया" — आज की दोबारा वाली घंटी बंद
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      props_().setProperty('ACK', istKey_(0));
+      return out_({ ok: true });
+    }
     if (p.action === 'inbox') {
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
       return out_({ ok: true, items: inbox_() });
@@ -458,7 +468,7 @@ function plan_(b) {
   } finally {
     lock.releaseLock();
   }
-  return { ok: true };
+  return { ok: true, v: VERSION };
 }
 function readPlan_() {
   var sh = ss_().getSheetByName(PLAN_SHEET);
@@ -483,18 +493,62 @@ function pendingOnline_(keys) {
   } catch (e) { return 0; }
 }
 
+/* नए ऑनलाइन ऑर्डर जो अभी स्वीकार नहीं हुए — नाम, गाँव, सामान (संस्करण 6) */
+function pendingOnlineList_(keys) {
+  try {
+    var sh = ss_().getSheetByName(SHEET_NAME);
+    if (!sh) return [];
+    var last = sh.getLastRow();
+    if (last < 2) return [];
+    var from = Math.max(2, last - 299);
+    var rows = sh.getRange(from, 1, last - from + 1, HEAD.length).getValues();
+    var c = function (n) { return HEAD.indexOf(n); }, out = [];
+    rows.forEach(function (r) {
+      var w = String(r[c('when')] || '').replace(/^'/, '');
+      if (String(r[c('status')]) !== 'new' || keys.indexOf(w) < 0) return;
+      out.push({ w: w, n: str_(r[c('name')], 32), p: str_(r[c('village')], 30), i: str_(r[c('summary')], 110), k: String(r[c('mode')]) === 'p' ? '🏪' : '🚚' });
+    });
+    return out;
+  } catch (e) { return []; }
+}
+function orderLine_(e) {
+  var who = str_(e.n, 40) + (e.p ? ' (' + str_(e.p, 40) + ')' : '');
+  return '• ' + (e.k ? str_(e.k, 4) + ' ' : '') + (e.t ? str_(e.t, 30) + ' · ' : '') + who + ' — ' + str_(e.i, 120);
+}
+/* 📋 आने वाले ऑर्डर — आज (2 बजे के बाद), कल, परसों. बिलिंग ऐप वाले (स्वीकार हुए) + नए ऑनलाइन (स्वीकार बाकी) */
+function ordersBlock_(plan) {
+  var T = istKey_(0), D = istKey_(1), S = istKey_(2), lines = [], n = 0, first = null;
+  var pend = pendingOnlineList_([T, D, S]);
+  [[T, 'आज (2 बजे के बाद)'], [D, 'कल'], [S, 'परसों']].forEach(function (x) {
+    var o = (plan && plan.days && plan.days[x[0]] && Array.isArray(plan.days[x[0]].o)) ? plan.days[x[0]].o.slice(0, 25) : [];
+    var p = pend.filter(function (e) { return e.w === x[0]; });
+    if (!o.length && !p.length) return;
+    lines.push((x[0] === T ? '' : '\n') + '📅 ' + x[1] + ' — ' + hiDate_(x[0]) + ':');
+    o.forEach(function (e) { lines.push(orderLine_(e)); n++; if (!first) first = { d: x[1], e: e }; });
+    p.forEach(function (e) { lines.push(orderLine_(e) + ' 🌐 स्वीकार बाकी'); n++; if (!first) first = { d: x[1], e: e }; });
+  });
+  if (lines.length && lines[0].charAt(0) === '\n') lines[0] = lines[0].slice(1);
+  return { n: n, lines: lines, first: first };
+}
+
 /* टाइमर यही चलाता है — दिन में एक बार ही भेजता है */
 function dailyReminder() {
   var pr = props_(), today = istKey_(0);
-  if (pr.getProperty('LAST_REMINDER') === today) return;
-  var r = sendReminder_(false);
-  if (r.ok) pr.setProperty('LAST_REMINDER', today);
+  if (pr.getProperty('LAST_REMINDER') !== today) {
+    var r = sendReminder_(false);
+    if (r.ok) { pr.setProperty('LAST_REMINDER', today); pr.setProperty('REMIND_NEED', r.need ? today : ''); }
+    return;
+  }
+  // पहली घंटी जा चुकी — देखी नहीं (क्लिक / "✓ देख लिया" नहीं हुआ) तो फिर से
+  if (pr.getProperty('REMIND_NEED') !== today || pr.getProperty('ACK') === today) return;
+  sendReminder_(false, true);
 }
 
-function sendReminder_(test) {
+function sendReminder_(test, again) {
   var S = istKey_(2), D = istKey_(1);      // S = परसों (मिठाई का दूध), D = कल (दही/दूध)
-  var pre = test ? '🧪 टेस्ट · ' : '';
-  var home = BILLING_URL;
+  var pre = test ? '🧪 टेस्ट · ' : (again ? '🔁 फिर से याद · ' : '');
+  var lateMilk = again && istDate_().getUTCHours() >= 15;   // 3 बजे के बाद दूध वाली घंटी दोबारा नहीं (ऑर्डर का समय निकल गया)
+  var home = test ? BILLING_URL : BILLING_URL + '#ack=' + istKey_(0);   // क्लिक = देख लिया (टेस्ट वाली नहीं)
   var plan = readPlan_();
   if (!plan) {
     var ok0 = notify_(pre + '⚠️ दूध-दही का हिसाब नहीं मिला',
@@ -514,7 +568,15 @@ function sendReminder_(test) {
   if (age > 36 * 3600000) foot.push('⚠️ बिलिंग ऐप ' + Math.max(1, Math.floor(age / 86400000)) + ' दिन से इंटरनेट के साथ नहीं खुला — उसके बाद लिखे ऑर्डर इसमें नहीं');
 
   var tried = 0, sent = 0;
-  if (sL > 0 || sUnk.length) {
+  // 📋 आने वाले ऑर्डर (संस्करण 6) — दूध-दही वाली घंटी से पहले, अलग घंटी
+  var ob = ordersBlock_(plan);
+  if (ob.n) {
+    var t0 = ob.n === 1 ? '📋 ' + ob.first.d + ': ' + str_(ob.first.e.i, 60) + ' — ' + str_(ob.first.e.n, 30)
+                        : '📋 आने वाले ' + ob.n + ' ऑर्डर — किसका, क्या, कब';
+    tried++;
+    if (notify_(pre + t0, clip_(ob.lines.concat(['— हिसाब: बिलिंग ऐप से, ' + whenIst_(num_(plan.got))]).join('\n')), 5, home, [], 'orders-upcoming')) sent++;
+  }
+  if ((sL > 0 || sUnk.length) && !lateMilk) {
     var b = ['परसों ' + hiDate_(S) + ' की डिलीवरी'];
     sLines.forEach(function (x) { b.push('• ' + x); });
     sUnk.forEach(function (x) { b.push('• ' + x + ' (सिर्फ गिनती)'); });
@@ -524,20 +586,22 @@ function sendReminder_(test) {
     tried++;
     if (notify_(pre + t1, clip_(b.concat(foot).join('\n')), 5, home, [], 'milk-sweets')) sent++;
   }
-  if (dLines.length) {
+  if (dLines.length && !lateMilk) {
     var b2 = ['कल ' + hiDate_(D) + ' की डिलीवरी'];
     dLines.forEach(function (x) { b2.push('• ' + x); });
     if (sL > 0 && dL > 0) b2.push('कुल दूध (मिठाई ' + sL + ' + बिक्री ' + dL + '): ' + r1_(sL + dL) + ' लीटर');
     tried++;
     if (notify_(pre + '🥛 कल का दही-दूध — आज 3 बजे तक ऑर्डर करें', clip_(b2.concat(foot).join('\n')), 5, home, [], 'milk-dairy')) sent++;
   }
-  if (!tried) {
+  var need = ob.n > 0 || sL > 0 || sUnk.length > 0 || dLines.length > 0;   // देखने तक दोबारा बजाने लायक
+  if (!need && !again) {
     var b3 = ['परसों ' + hiDate_(S) + ' की मिठाई के लिए दूध नहीं चाहिए, और कल ' + hiDate_(D) + ' का दही-दूध भी बुक नहीं।'];
+    if (!ob.n) b3.push('आज (2 बजे के बाद), कल और परसों का कोई ऑर्डर भी नहीं है।');
     if (sNone.length) b3.push('परसों बिना दूध वाली: ' + sNone.join(', '));
     tried++;
     if (notify_(pre + '✅ आज दूध-दही का कोई ऑर्डर नहीं', clip_(b3.concat(foot).join('\n')), 2, home, [], 'milk-none')) sent++;
   }
-  return { ok: sent === tried, sent: sent, tried: tried, detail: LAST_DELIVERY_ ? LAST_DELIVERY_.detail : [] };
+  return { ok: sent === tried, sent: sent, tried: tried, need: need, detail: LAST_DELIVERY_ ? LAST_DELIVERY_.detail : [] };
 }
 
 /* ---------- 🔔 बिलिंग ऐप की घंटी: फ़ोन जोड़ना, भेजना ---------- */
