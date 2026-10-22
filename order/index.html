@@ -396,6 +396,7 @@ hi:{
  min_left:'घर पर डिलीवरी के लिए बस ₹{x} का और सामान जोड़ दीजिए (कम से कम ₹499)',
  min_ok:'✓ ₹499 पूरा — डिलीवरी फ्री',
  min_unpriced:'पैकेट सामान / कस्टम केक का दाम जुड़कर कुल ₹499 होना चाहिए — हम बता देंगे।',
+ st_closed:'🔒 आज दुकान बंद है · {d} या उसके बाद के ऑर्डर अभी दे सकते हैं',e_closed:'माफ़ कीजिए, {d} को दुकान बंद है — कृपया दूसरी तारीख चुनिए।',
  st_deloff:'🏪 दुकान से ले जाने के ऑर्डर चालू हैं · 🚚 घर पर डिलीवरी {d} से फिर शुरू',st_deloff_later:'अभी आप आगे के समय का ऑर्डर दे सकते हैं · 🚚 घर पर डिलीवरी {d} से फिर शुरू',
  m_del_off:'{d} से फिर शुरू',del_off_note:'🚚 {r} घर पर डिलीवरी बंद है। कृपया {d} या उसके बाद की तारीख चुनिए, या "दुकान से लूंगा" चुनिए।',
  e_deloff:'माफ़ कीजिए, {r} घर पर डिलीवरी बंद है — कृपया {d} या उसके बाद की तारीख चुनिए, या "दुकान से लूंगा" चुनिए।',
@@ -559,6 +560,7 @@ en:{
  min_left:'Just add ₹{x} more for home delivery (minimum ₹499)',
  min_ok:'✓ ₹499 reached — free delivery',
  min_unpriced:'With packaged items / custom cake the total should reach ₹499 — we will confirm.',
+ st_closed:'🔒 Shop closed today · you can order for {d} or later now',e_closed:'Sorry, the shop is closed on {d} — please choose another date.',
  st_deloff:'🏪 Pickup orders open · 🚚 home delivery restarts {d}',st_deloff_later:'You can order for later now · 🚚 home delivery restarts {d}',
  m_del_off:'restarts {d}',del_off_note:'🚚 Home delivery is closed {r}. Please choose {d} or later, or choose "I\'ll pick up".',
  e_deloff:'Sorry, home delivery is closed {r} — please choose {d} or later, or "I\'ll pick up".',
@@ -728,6 +730,15 @@ function dOffNow(){return dOff(dkey(nowIST()));}
 function dOffDm(k){var d=keyToDate(k);return d.getDate()+' '+t('mo')[d.getMonth()];}
 function dOffResume(){var d=keyToDate(C.deliveryOff.to);d.setDate(d.getDate()+1);return dOffDm(dkey(d));}
 function dOffRange(){var o=C.deliveryOff,a=keyToDate(o.from),b=keyToDate(o.to);return a.getMonth()===b.getMonth()?a.getDate()+'–'+dOffDm(o.to):dOffDm(o.from)+' – '+dOffDm(o.to);}
+/* दुकान पूरे दिन बंद (catalog.js closed.days) — उन तारीख़ों पर न दुकान से लेना, न डिलीवरी; सूचना 2 दिन पहले से */
+function shopClosed(k){var c=C.closed;return !!(c&&Array.isArray(c.days)&&c.days.indexOf(k)>=0);}
+function closedNotice(){
+  var c=C.closed;if(!c||!Array.isArray(c.days)||!c.days.length)return '';
+  var ds=c.days.slice().sort(),d=keyToDate(ds[0]);d.setDate(d.getDate()-2);
+  var k=dkey(nowIST());if(k<dkey(d)||k>ds[ds.length-1])return '';
+  return (st.lang==='en'&&c.en)||c.hi||'';
+}
+function nextOpenDm(){var d=nowIST();for(var j=0;j<40;j++){d.setDate(d.getDate()+1);if(!shopClosed(dkey(d)))return d.getDate()+' '+t('mo')[d.getMonth()];}return '';}
 function dOffNotice(){return dOffNow()?((st.lang==='en'&&C.deliveryOff.en)||C.deliveryOff.hi||''):'';}
 function hrStart(mode){return isDel(mode)?(S.deliveryStartHour||S.orderStartHour):S.orderStartHour;}
 function hrEnd(mode){return isDel(mode)?(S.deliveryEndHour||S.orderEndHour):S.orderEndHour;}
@@ -739,10 +750,11 @@ function slotLabel(i,L,mode){
   if(!d&&i===SLOTS.length-1&&S.closeHour){var e=S.closeHour-12;return L==='en'?'5–'+e+' PM':'शाम 5–'+e;}
   return L==='en'?SLOTS[i][3]:SLOTS[i][2];
 }
-function asapOpen(mode){var m=nowMin();return !C.pause&&!(isDel(mode)&&dOffNow())&&m>=hrStart(mode)*60&&m<hrEnd(mode)*60;}
+function asapOpen(mode){var m=nowMin();return !C.pause&&!shopClosed(dkey(nowIST()))&&!(isDel(mode)&&dOffNow())&&m>=hrStart(mode)*60&&m<hrEnd(mode)*60;}
 function slotOk(dateKey,i,mode){
   if(!(i>=0&&i<SLOTS.length)||!slotAllowed(i,mode))return false;
   if(isDel(mode)&&dOff(dateKey))return false;
+  if(shopClosed(dateKey))return false;
   var today=dkey(nowIST());
   if(dateKey<today)return false;
   if(dateKey>today)return true;
@@ -752,8 +764,15 @@ function slotOk(dateKey,i,mode){
 function anySlot(dateKey){for(var i=0;i<SLOTS.length;i++)if(slotOk(dateKey,i))return true;return false;}
 function firstDate(){var d=nowIST();for(var j=0;j<40;j++){var k=dkey(d);if(anySlot(k))return k;d.setDate(d.getDate()+1);}d=nowIST();d.setDate(d.getDate()+1);return dkey(d);}
 function maxDate(){var d=nowIST();d.setDate(d.getDate()+30);return dkey(d);}
+/* कल दुकान बंद हो तो "कल के लिए…" की जगह अगला खुला दिन लिखो */
 function statusInfo(){
+  var r=statusInfo0(),d=nowIST();d.setDate(d.getDate()+1);
+  if(shopClosed(dkey(d))&&!shopClosed(dkey(nowIST()))){var n=nextOpenDm();r={cls:r.cls,txt:String(r.txt).replace(/कल के लिए/g,n+' के लिए').replace(/for tomorrow/gi,'for '+n)};}
+  return r;
+}
+function statusInfo0(){
   if(C.pause)return {cls:'pause',txt:t('st_pause')};
+  if(shopClosed(dkey(nowIST())))return {cls:'pause',txt:t('st_closed',{d:nextOpenDm()})};
   if(dOffNow())return {cls:'later',txt:t(asapOpen('p')?'st_deloff':'st_deloff_later',{d:dOffResume()})};
   if(asapOpen('d'))return {cls:'open',txt:t('st_open')};
   if(asapOpen('p'))return {cls:'later',txt:nowMin()<hrStart('d')*60?t('st_del_early'):t('st_del_late')};
@@ -1030,6 +1049,7 @@ function renderMenu(){
     '<div class="wrap">'+
       '<div class="status '+si.cls+'" id="statusBox"><span class="dot"></span><span>'+esc(si.txt)+'</span></div>'+
       '<div class="rulebox"><b>'+t('rule_h')+'</b><ul>'+t('rule_l').map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
+      (closedNotice()?'<div class="notice">📢 '+esc(closedNotice())+'</div>':'')+
       (dOffNotice()?'<div class="notice">📢 '+esc(dOffNotice())+'</div>':'')+
       (notice?'<div class="notice">📢 '+esc(notice)+'</div>':'')+
       installBarHtml()+
@@ -1243,7 +1263,7 @@ function renderCart(){
     slotHtml='<label class="fl">'+t('f_date')+'<input type="date" id="f-date" min="'+firstDate()+'" max="'+maxDate()+'" value="'+esc(when.date)+'"></label>'+
       '<div class="fl" style="margin-top:10px;font-weight:600;font-size:.9rem">'+t('f_slot')+'</div>'+
       '<div class="slots">'+SLOTS.map(function(s,i){if(!slotAllowed(i))return '';var ok=slotOk(when.date,i);return '<button data-act="slot" data-i="'+i+'"'+(ok?'':' disabled')+' class="'+(when.slot===i&&ok?'on':'')+'">'+esc(slotLabel(i,st.lang))+'</button>';}).join('')+'</div>'+
-      (any?'':'<p class="hint" style="color:var(--red)">'+t('slot_none')+'</p>');
+      (shopClosed(when.date)?'<p class="hint" style="color:var(--red)">🔒 '+esc(t('e_closed',{d:dateText(when.date)}))+'</p>':(any?'':'<p class="hint" style="color:var(--red)">'+t('slot_none')+'</p>'));
   }
   var html=pauseHtml+
     '<div class="blk"><h3>'+t('co_title')+'</h3>'+items+
@@ -1490,6 +1510,7 @@ function validate(){
     if(!String(st.me.addr).trim())return t('e_address');
     if(tot<S.minOrder&&!st.custom.length)return t('e_min',{x:r2(S.minOrder-tot)});
   }
+  if(shopClosed(when.type==='asap'?dkey(nowIST()):when.date))return t('e_closed',{d:dateText(when.type==='asap'?dkey(nowIST()):when.date)});
   if(isDel()&&C.deliveryOff&&dOff(when.type==='asap'?dkey(nowIST()):when.date))return t('e_deloff',{r:dOffRange(),d:dOffResume()});
   if(when.type==='asap'&&!asapOpen())return t(isDel()?'e_asap_d':'e_asap');
   if(when.type!=='asap'){

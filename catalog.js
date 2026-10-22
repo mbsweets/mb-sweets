@@ -55,11 +55,14 @@ window.MB_CATALOG = {
   noticeHi: '',
   noticeEn: '',
   /* घर पर डिलीवरी कुछ दिन बंद (from–to दोनों दिन शामिल): उन तारीख़ों की डिलीवरी नहीं होगी, दुकान से ले जाना चालू रहेगा।
-     to के अगले दिन से अपने-आप चालू — कुछ बदलना नहीं पड़ता। hi/en = उन्हीं दिनों मेन्यू और वेबसाइट पर दिखने वाली सूचना।
-     पहले ही चालू करनी हो तो पूरी लाइन की जगह: deliveryOff: null, */
-  deliveryOff: { from: '2026-10-16', to: '2026-10-22',
-    hi: '16–21 अक्टूबर हम पिंडारुछ दुर्गा पूजा मेले में हैं 🎪 — हमारे स्टॉल पर मिठाइयों के साथ चाट, छोला-भटूरा, गरमा-गरम जलेबी और नाश्ते का उत्तम प्रबंध है, ज़रूर पधारिए। 🚚 इस कारण 16–22 अक्टूबर घर पर डिलीवरी बंद है, 23 अक्टूबर से फिर शुरू होगी। 🏪 ननौरा वाली दुकान खुली है — दुकान से ले जाने वाले ऑर्डर चालू हैं।',
-    en: 'From 16–21 Oct we are at the Pindaruch Durga Puja fair 🎪 — sweets, chaat, chhole-bhature, hot jalebi and snacks at our stall, do visit! 🚚 So home delivery is closed 16–22 Oct and restarts on 23 Oct. 🏪 Our Nanaura shop is open — pickup orders are on.' },
+     to के अगले दिन से अपने-आप चालू। hi/en = उन्हीं दिनों मेन्यू और वेबसाइट पर दिखने वाली सूचना।
+     उदाहरण: deliveryOff: { from: '2026-10-16', to: '2026-10-22', hi: '…', en: '…' },   (16–22 अक्टूबर 2026 मेले में यही था) */
+  deliveryOff: null,
+  /* दुकान पूरे दिन बंद (छुट्टी): इन तारीख़ों के लिए न दुकान से लेने का, न डिलीवरी का कोई ऑर्डर। सूचना 2 दिन पहले से
+     आख़िरी बंद दिन तक दिखती है, फिर अपने-आप हट जाती है। कोई छुट्टी न हो तो: closed: null, */
+  closed: { days: ['2026-10-23'],
+    hi: '🔒 23 अक्टूबर (शुक्रवार) को दुकान बंद रहेगी — उस दिन के ऑर्डर नहीं हो पाएँगे। 24 अक्टूबर (शनिवार) से दुकान और घर पर डिलीवरी फिर चालू 🙏 मेले में आने के लिए आप सबका धन्यवाद! 🌺',
+    en: '🔒 Our shop is closed on Friday 23 Oct — no orders for that day. From Saturday 24 Oct the shop and home delivery are open again 🙏 Thank you all for visiting our stall at the fair! 🌺' },
   off: [],
 
   /* [id, बिलिंग वाला नाम, category, unit, दाम, v] */
