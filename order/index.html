@@ -231,6 +231,22 @@ label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
 .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
 .lpbar{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;background:var(--goldsoft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;text-align:left;color:var(--ink);font:inherit;cursor:pointer}
 .lpbar .st{font-size:1.5rem;line-height:1}
+.cpbar{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;background:linear-gradient(135deg,#5C1620,#7A2330);color:#FBEEDD;border:1.5px solid #E7B84A;border-radius:12px;padding:9px 12px;text-align:left;font:inherit;cursor:pointer}
+.cpbar .st{font-size:1.5rem;line-height:1}
+.cpbar b{display:block;font-size:.95rem;color:#F7DC8C}
+.cpbar small{display:block;font-size:.8rem;line-height:1.3;color:#FBEEDD;opacity:.92}
+.cpbar .go{margin-left:auto;font-weight:700;color:#F7DC8C;white-space:nowrap}
+.scwrap{position:relative;width:100%;max-width:340px;aspect-ratio:17/10;margin:8px auto 14px;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(0,0,0,.25);touch-action:none;user-select:none;-webkit-user-select:none}
+.scprize{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 35%,#FFF4DC,#F7DC8C);color:#4A0C10;border:3px solid #E2B14A;border-radius:18px;padding:10px}
+.scprize .big{font-size:3rem;font-weight:800;line-height:1.05;color:#6E1616}
+.scprize .sm{font-size:1rem;font-weight:700}
+.scwrap canvas{position:absolute;inset:0;width:100%;height:100%;cursor:pointer;transition:opacity .6s}
+.scwrap.done canvas{opacity:0;pointer-events:none}
+.scconf{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.scconf i{position:absolute;top:-12%;font-style:normal;font-size:1.3rem;animation:scf 1.7s ease-in forwards}
+@keyframes scf{to{transform:translateY(140%) rotate(330deg);opacity:0}}
+.scinfo{text-align:center;font-size:.95rem;line-height:1.5;margin:6px 0 10px}
+.scskip{display:block;margin:-4px auto 10px;background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:.85rem;cursor:pointer}
 .lpbar b{display:block;font-size:.95rem}
 .lpbar small{display:block;color:var(--muted);font-size:.8rem;line-height:1.3}
 .lpbar .go{margin-left:auto;font-weight:700;color:var(--brand);white-space:nowrap}
@@ -320,6 +336,13 @@ hi:{
  os_total:'कुल',os_pay_now:'कृपया नीचे से पेमेंट कर दीजिए।',os_paid:'💰 पेमेंट मिल गया — धन्यवाद! आपका ऑर्डर तैयार हो रहा है।',os_paid_part:'💰 {p} मिल गया — बाकी {r}',tr_new:'ऑर्डर मिला',tr_acc:'कन्फर्म',tr_paid:'पेमेंट मिला',tr_out:'रास्ते में',tr_del:'डिलीवर',tr_pick:'सामान मिल गया',pay_done_h:'पेमेंट मिल गया ✅',otp_h:'🔐 आपका डिलीवरी कोड',otp_txt:'सामान लेते समय डिलीवरी वाले को यह कोड बताइए — पहले किसी को मत बताइए।',pay_done_txt:'{a} का पेमेंट हमें मिल गया है। धन्यवाद! 🙏',
  locsend_h:'📍 घर की लोकेशन भेजें',locsend_txt:'लोकेशन नहीं मिल पाई थी। डिलीवरी वाले को घर ढूँढने में आसानी हो, इसलिए कृपया WhatsApp पर लोकेशन भेज दीजिए: नीचे बटन दबाइए → WhatsApp में 📎 → "Location" → "अभी की लोकेशन भेजें"।',locsend_btn:'💬 WhatsApp पर लोकेशन भेजें',locsend_msg:'नमस्ते, मेरे ऑर्डर {c} के लिए घर की लोकेशन भेज रहा/रही हूँ 👇',
  talk_btn:'💬 WhatsApp पर बात करें',talk_msg:'नमस्ते, मेरा ऑर्डर कोड {c} है।',my_order:'📦 मेरा ऑर्डर देखें',
+ sc_h:'🎁 स्क्रैच कार्ड',sc_top:'उँगली से सुनहरी परत खुरचिए 👇',sc_top_done:'🎉 बधाई हो! यह छूट आपकी है',sc_scratch:'यहाँ खुरचें 👆',sc_won:'आपको मिली',sc_off:'की छूट 🎉',
+ sc_info:'आपके अगले ऑनलाइन ऑर्डर पर · {d} तक · इसी मोबाइल नंबर से ऑर्डर कीजिए',sc_order:'🛒 अभी ऑर्डर करें',sc_skip:'खुरच नहीं पा रहे? यहाँ दबाइए',sc_shop:'मेन्यू देखें',
+ sc_rules_h:'कूपन के नियम',sc_rules:['छूट अगले ऑनलाइन ऑर्डर पर, ऑर्डर पक्का होते समय बिल में घटेगी।','उसी मोबाइल नंबर से ऑर्डर कीजिए जिस पर यह कार्ड आया है।','एक ऑर्डर पर एक कूपन · नकद में नहीं बदलेगा।','तारीख़ निकलने के बाद कूपन नहीं चलेगा।'],
+ sc_bad:'इस कार्ड का लिंक सही नहीं है। कृपया WhatsApp वाला पूरा लिंक दोबारा खोलिए।',sc_none:'अभी आपके पास कोई स्क्रैच कार्ड नहीं है। ₹1000 या ज़्यादा के ऑनलाइन ऑर्डर पर हम आपको स्क्रैच कार्ड भेजेंगे 🎁',
+ sc_expired:'यह कार्ड {d} तक ही था, अब इसकी तारीख़ निकल गई। ₹1000 या ज़्यादा के अगले ऑनलाइन ऑर्डर पर हम नया कार्ड भेजेंगे 🎁',
+ cp_bar_new:'आपका स्क्रैच कार्ड आया है!',cp_bar_new_s:'खुरचकर देखिए कितनी छूट मिली · {d} तक',cp_bar_t:'₹{a} का कूपन चालू है',cp_bar_s:'अगले ऑनलाइन ऑर्डर पर बिल में घटेगा · {d} तक',
+ cp_cart:'🎁 आपका ₹{a} का कूपन ({c}) ऑर्डर पक्का होते समय बिल में घटेगा।',cp_cart_new:'🎁 आपका स्क्रैच कूपन ({c}) इस ऑर्डर के साथ भेजा जाएगा।',cp_line:'स्क्रैच कूपन',
  lp_bar_t:'माँ भगवती मिठास पॉइंट्स',lp_bar_s:'हर ₹50 की मिठाई पर 1 पॉइंट · अपने पॉइंट देखें',lp_go:'देखें ›',lp_info_btn:'⭐ मेरे पॉइंट',
  lp_h:'⭐ मेरे मिठास पॉइंट',lp_hello:'नमस्ते {n} जी 🙏',lp_pts:'मिठास पॉइंट',lp_member_since:'सदस्य {d} से',lp_for:'नंबर {p} के पॉइंट',
  lp_rw_h:'इनाम (एक बिल पर एक)',lp_rw_row:'{p} पॉइंट = {o} छूट',lp_rw_ok:'✓ अभी ले सकते हैं<br>{m}+ के बिल पर',lp_rw_need:'{k} पॉइंट और<br>{m}+ के बिल पर',
@@ -484,6 +507,13 @@ en:{
  os_total:'Total',os_pay_now:'Please pay below.',os_paid:'💰 Payment received — thank you! Your order is being prepared.',os_paid_part:'💰 {p} received — {r} remaining',tr_new:'Order received',tr_acc:'Confirmed',tr_paid:'Payment received',tr_out:'On the way',tr_del:'Delivered',tr_pick:'Picked up',pay_done_h:'Payment received ✅',otp_h:'🔐 Your delivery code',otp_txt:'Tell this code to the delivery person only when you receive your order — please do not share it before.',pay_done_txt:'We have received your payment of {a}. Thank you! 🙏',
  locsend_h:'📍 Send your home location',locsend_txt:'We did not get your location. To help the delivery reach you, please send it on WhatsApp: tap below → in WhatsApp tap 📎 → "Location" → "Send your current location".',locsend_btn:'💬 Send location on WhatsApp',locsend_msg:'Hello, sending my home location for order {c} 👇',
  talk_btn:'💬 Chat on WhatsApp',talk_msg:'Hello, my order code is {c}.',my_order:'📦 View my order',
+ sc_h:'🎁 Scratch card',sc_top:'Scratch the golden layer with your finger 👇',sc_top_done:'🎉 Congratulations! This discount is yours',sc_scratch:'Scratch here 👆',sc_won:'You got',sc_off:'off 🎉',
+ sc_info:'On your next online order · till {d} · order from this same mobile number',sc_order:'🛒 Order now',sc_skip:'Can\'t scratch? Tap here',sc_shop:'See the menu',
+ sc_rules_h:'Coupon rules',sc_rules:['The discount comes off the bill of your next online order when we confirm it.','Order from the same mobile number this card was sent to.','One coupon per order · cannot be exchanged for cash.','The coupon does not work after its date.'],
+ sc_bad:'This card link is not correct. Please open the full link from WhatsApp again.',sc_none:'You have no scratch card right now. We send one on online orders of ₹1000 or more 🎁',
+ sc_expired:'This card was valid till {d} and has now expired. We will send a new card on your next online order of ₹1000 or more 🎁',
+ cp_bar_new:'Your scratch card is here!',cp_bar_new_s:'Scratch to see your discount · till {d}',cp_bar_t:'₹{a} coupon is active',cp_bar_s:'Comes off the bill of your next online order · till {d}',
+ cp_cart:'🎁 Your ₹{a} coupon ({c}) will come off the bill when we confirm the order.',cp_cart_new:'🎁 Your scratch coupon ({c}) will be sent with this order.',cp_line:'Scratch coupon',
  lp_bar_t:'Maa Bhagwati Mithas Points',lp_bar_s:'1 point on every ₹50 of sweets · check your points',lp_go:'View ›',lp_info_btn:'⭐ My points',
  lp_h:'⭐ My Mithas Points',lp_hello:'Hello {n} 🙏',lp_pts:'Mithas points',lp_member_since:'Member since {d}',lp_for:'Points for {p}',
  lp_rw_h:'Rewards (one per bill)',lp_rw_row:'{p} points = {o} off',lp_rw_ok:'✓ Available now<br>on bills of {m}+',lp_rw_need:'{k} more points<br>on bills of {m}+',
@@ -1055,6 +1085,7 @@ function renderMenu(){
       installBarHtml()+
       ((st.last&&Date.now()-st.last.ts<3*86400000)?'<button class="btn block" style="margin-top:8px" data-act="go" data-v="done">'+t('my_order')+' · '+esc(st.last.code)+'</button>':'')+
       '<button class="lpbar" data-act="go" data-v="points"><span class="st">⭐</span><span><b>'+t('lp_bar_t')+'</b><small>'+t('lp_bar_s')+'</small></span><span class="go">'+t('lp_go')+'</span></button>'+
+      cpBarHtml()+
       '<div class="facts"><div><b>'+t('f1')+'</b><span>'+t('f1b')+'</span></div><div><b>'+t('f2')+'</b><span>'+t('f2b')+'</span></div><div><b>'+t('f3')+'</b><span>'+t('f3b')+'</span></div></div>'+
       '<p class="avail">'+t('avail')+'</p>'+
     '</div>'+
@@ -1136,6 +1167,7 @@ function route(){
   else if(h==='#rules')v='rules';
   else if(h==='#install')v='install';
   else if(h==='#points')v='points';
+  else if(h==='#scratch')v='scratch';
   else if((m=h.match(/^#pay(?:=([0-9.]+))?(?:,([A-Za-z0-9-]{3,20}))?/)))v='pay';
   else if((m=h.match(/^#cake=([a-z0-9-]+)(?:,(\d+))?/)))v='cake';
   else if((m=h.match(/^#(item|tab)=([a-z0-9-]+)/))){
@@ -1154,6 +1186,7 @@ function route(){
   else if(v==='rules')renderRules();
   else if(v==='install')renderInstall();
   else if(v==='points')renderPoints();
+  else if(v==='scratch')renderScratch();
   else if(v==='pay')renderPay(m&&m[1]?num(m[1]):0,m&&m[2]?m[2]:'');
   else if(v==='cake')renderCake(m[1],m[2]!=null?+m[2]:-1);
   var sc=$('#view .view');if(sc)sc.scrollTop=0;
@@ -1267,7 +1300,7 @@ function renderCart(){
   }
   var html=pauseHtml+
     '<div class="blk"><h3>'+t('co_title')+'</h3>'+items+
-      '<div class="tot"><span>'+t('co_total')+'</span><span>'+rupee(r2(tot+fee))+'</span></div>'+minHtml+'</div>'+
+      '<div class="tot"><span>'+t('co_total')+'</span><span>'+rupee(r2(tot+fee))+'</span></div>'+minHtml+cpCartHtml()+'</div>'+
     '<div class="blk"><h3>'+t('how')+'</h3><div class="seg">'+
       '<button data-act="mode" data-v="d" class="'+(isD?'on':'')+'"><b>'+t('m_del')+'</b><small>'+(dOffNow()?t('m_del_off',{d:dOffResume()}):t('m_del_sub'))+'</small></button>'+
       '<button data-act="mode" data-v="p" class="'+(!isD?'on':'')+'"><b>'+t('m_pick')+'</b><small>'+t('m_pick_sub')+'</small></button>'+
@@ -1535,6 +1568,7 @@ function orderText(code,L){
   st.custom.forEach(function(c){M.push('• '+(c.type==='cake'?X.msg_cake:X.msg_pack)+': '+c.text+' — '+X.msg_ask);});
   if(fee>0)M.push('• 🚚 '+X.fee_line+' — '+rupee(fee));
   M.push('*'+X.m_total+': '+rupee(tot)+'*'+(st.custom.length?' '+X.m_plus:''));
+  var cpo=cpLive();if(cpo)M.push('🎁 '+X.cp_line+': '+cpo.c+(cpo.s?' (−₹'+cpo.a+')':''));
   if(hasFixedCake()&&st.cakeMsg.trim())M.push(X.msg_cakemsg+': "'+st.cakeMsg.trim()+'"');
   if(st.note.trim())M.push(X.msg_note+': '+st.note.trim());
   M.push('');
@@ -1566,6 +1600,7 @@ function buildOrder(){
   }
   if(hasFixedCake()&&st.cakeMsg.trim())payload.cm=st.cakeMsg.trim();
   if(st.note.trim())payload.nt=st.note.trim();
+  var cpn=cpLive();if(cpn)payload.nt=((payload.nt?payload.nt+' · ':'')+'🎁 कूपन '+cpn.c).slice(-300);
   var sigObj=JSON.parse(JSON.stringify(payload));delete sigObj.c;
   var photo=st.custom.some(function(c){if(c.type!=='cake')return false;var cc=CAKES().filter(function(x){return x.key===c.key;})[0];return !!(cc&&cc.photo);});
   return {code:code,text:orderText(code,st.lang),payload:payload,sig:JSON.stringify(sigObj),mode:st.me.mode,total:tot,asks:st.custom.length,p4:phone10(st.me.phone).slice(-4),hasLoc:!!loc,photo:photo,posted:0,used:[code]};
@@ -1588,6 +1623,7 @@ function finishOrder(o,via){
   var url=waUrl(o.text);
   st.last={code:o.code,via:via,url:url,mode:o.mode,total:o.total,asks:o.asks,p4:o.p4,hasLoc:o.hasLoc,photo:!!o.photo,ts:Date.now()};
   st.cart={};st.custom=[];st.cakeMsg='';st.note='';st.agree=false;
+  if(cpLive())cpSet(null);   // कोड इस ऑर्डर के साथ दुकान को चला गया — दुकान का ऐप नंबर से भी पहचानता है
   when={type:'',date:'',slot:-1};
   pendingOrder=null;
   save();
@@ -1741,6 +1777,92 @@ function lpFromLink(){
   if(!m)return;
   lpTokSet(m[1]);
   try{history.replaceState(null,'',location.pathname+'#points');}catch(e){location.hash='points';}
+}
+/* --- 🎁 स्क्रैच कूपन: ₹1000+ के ऑनलाइन ऑर्डर के बाद WhatsApp से आया कार्ड (?sc=कोड-रकम-तारीख-जाँच) ---
+   असली हिसाब दुकान के बिलिंग ऐप में है; यहाँ सिर्फ़ कार्ड खुरचना, याद रखना और अगले ऑर्डर के नोट में कोड भेजना। */
+var CP_KEY='mbo-cpn',cpBad=false;
+function cpChk(code,amt,exp){var s='mb|'+code+'|'+amt+'|'+exp,h=7;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%1679616;return h.toString(36).toUpperCase();}
+function cpGet(){try{var c=JSON.parse(localStorage.getItem(CP_KEY)||'null');return (c&&c.c&&c.a&&c.e)?c:null;}catch(e){return null;}}
+function cpSet(c){try{if(c)localStorage.setItem(CP_KEY,JSON.stringify(c));else localStorage.removeItem(CP_KEY);}catch(e){}}
+function cpLive(){var c=cpGet();return (c&&c.e>=dkey(nowIST()))?c:null;}
+function cpDate(k){var d=keyToDate(k);return d.getDate()+' '+T[st.lang].mo[d.getMonth()];}
+function cpFromLink(){
+  if(!/[?&]sc=/.test(location.search))return;
+  var m=location.search.match(/[?&]sc=([A-Za-z0-9]{6})-(\d{1,4})-(\d{8})-([0-9A-Za-z]{1,4})(?:&|$)/);
+  cpBad=true;
+  if(m){
+    var code=m[1].toUpperCase(),a=+m[2],e8=m[3];
+    if(a>0&&a<=500&&cpChk(code,a,e8)===m[4].toUpperCase()){
+      var old=cpGet();cpSet({c:code,a:a,e:e8.slice(0,4)+'-'+e8.slice(4,6)+'-'+e8.slice(6),s:(old&&old.c===code)?old.s:0});cpBad=false;
+    }
+  }
+  var rest=location.search.replace(/[?&]sc=[^&]*/,'').replace(/^&/,'?');
+  try{history.replaceState(null,'',location.pathname+rest+'#scratch');}catch(e){location.hash='scratch';}
+}
+function cpBarHtml(){
+  var c=cpLive();if(!c)return '';
+  return '<button class="cpbar" data-act="go" data-v="scratch"><span class="st">🎁</span><span><b>'+(c.s?t('cp_bar_t',{a:c.a}):t('cp_bar_new'))+'</b><small>'+
+    esc(c.s?t('cp_bar_s',{d:cpDate(c.e)}):t('cp_bar_new_s',{d:cpDate(c.e)}))+'</small></span><span class="go">'+t('lp_go')+'</span></button>';
+}
+function cpCartHtml(){
+  var c=cpLive();if(!c)return '';
+  return '<div class="minbar ok">'+esc(c.s?t('cp_cart',{a:c.a,c:c.c}):t('cp_cart_new',{c:c.c}))+'</div>';
+}
+function renderScratch(){
+  var c=cpGet(),today=dkey(nowIST());
+  if(cpBad||!c){viewShell(t('sc_h'),'<div class="blk" style="text-align:center"><p>'+esc(t(cpBad?'sc_bad':'sc_none'))+'</p><button class="btn primary" data-act="home">'+t('sc_shop')+'</button></div>');return;}
+  if(c.e<today){viewShell(t('sc_h'),'<div class="blk" style="text-align:center"><p>'+esc(t('sc_expired',{d:cpDate(c.e)}))+'</p><button class="btn primary" data-act="home">'+t('sc_shop')+'</button></div>');return;}
+  var prize='<div class="scprize"><div class="sm">'+t('sc_won')+'</div><div class="big">₹'+c.a+'</div><div class="sm">'+t('sc_off')+'</div></div>';
+  viewShell(t('sc_h'),'<div class="blk"><p class="scinfo" id="sc-top"><b>'+t(c.s?'sc_top_done':'sc_top')+'</b></p>'+
+    '<div class="scwrap'+(c.s?' done':'')+'" id="scw">'+prize+(c.s?'':'<canvas id="scc" aria-label="'+esc(t('sc_scratch'))+'"></canvas>')+'<div class="scconf" id="scf"></div></div>'+
+    (c.s?'':'<button class="scskip" data-act="sc-reveal">'+t('sc_skip')+'</button>')+
+    '<p class="scinfo">'+esc(t('sc_info',{d:cpDate(c.e)}))+'</p>'+
+    '<button class="btn primary block" data-act="home">'+t('sc_order')+'</button></div>'+
+    '<div class="blk"><h3>'+t('sc_rules_h')+'</h3><ul class="lprules">'+t('sc_rules').map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>');
+  if(!c.s)setTimeout(scInit,30);
+}
+function scReveal(){
+  var c=cpGet();if(!c)return;
+  c.s=1;cpSet(c);
+  var w=$('#scw');if(w)w.classList.add('done');
+  var sk=$('.scskip');if(sk)sk.remove();
+  var top=$('#sc-top');if(top)top.innerHTML='<b>'+t('sc_top_done')+'</b>';
+  var f=$('#scf');
+  if(f){var em=['🎉','✨','🪔','🎊','💛'],h='';for(var i=0;i<18;i++)h+='<i style="left:'+(Math.random()*95).toFixed(1)+'%;animation-delay:'+(Math.random()*.5).toFixed(2)+'s">'+em[i%em.length]+'</i>';f.innerHTML=h;}
+}
+function scInit(){
+  var w=$('#scw'),cv=$('#scc');if(!w||!cv)return;
+  var r=w.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1),W=r.width,H=r.height;
+  if(!(W>0&&H>0))return;
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  var x=cv.getContext('2d');x.scale(dpr,dpr);
+  var g=x.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#B8862B');g.addColorStop(.35,'#F7DC8C');g.addColorStop(.6,'#E2B14A');g.addColorStop(1,'#9C6B00');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.fillStyle='rgba(255,255,255,.35)';
+  for(var i=0;i<70;i++){x.beginPath();x.arc(Math.random()*W,Math.random()*H,Math.random()*1.6+.4,0,6.3);x.fill();}
+  x.fillStyle='#4A0C10';x.textAlign='center';
+  x.font='800 '+Math.round(W/13)+'px "Baloo 2","Noto Sans Devanagari",sans-serif';x.fillText(t('sc_scratch'),W/2,H/2+6);
+  x.font='700 '+Math.round(W/26)+'px "Baloo 2",sans-serif';x.fillText('MB Sweets',W/2,H/2+Math.round(W/13)+4);
+  x.globalCompositeOperation='destination-out';x.lineCap='round';x.lineJoin='round';x.lineWidth=Math.max(34,W/8);
+  var down=false,last=null,moves=0,done=false;
+  function pos(e){var b=cv.getBoundingClientRect();return {x:e.clientX-b.left,y:e.clientY-b.top};}
+  function check(){
+    if(done)return;
+    var d=x.getImageData(0,0,cv.width,cv.height).data,n=0,clr=0;
+    for(var i=3;i<d.length;i+=4*9){n++;if(d[i]<60)clr++;}
+    if(n&&clr/n>0.45){done=true;scReveal();}
+  }
+  function draw(p){
+    x.beginPath();
+    if(last){x.moveTo(last.x,last.y);x.lineTo(p.x,p.y);x.stroke();}
+    else{x.arc(p.x,p.y,x.lineWidth/2,0,6.3);x.fill();}
+    last=p;if(++moves%6===0)check();
+  }
+  cv.addEventListener('pointerdown',function(e){down=true;last=null;try{cv.setPointerCapture(e.pointerId);}catch(er){}draw(pos(e));e.preventDefault();});
+  cv.addEventListener('pointermove',function(e){if(down){draw(pos(e));e.preventDefault();}});
+  function up(){if(down){down=false;last=null;check();}}
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('pointerleave',up);
 }
 /* Google Sheet कभी-कभी पहली बार देर से जवाब देता है — अपने-आप 3 बार तक कोशिश */
 function lpFetch(url,tries){
@@ -2070,6 +2192,7 @@ document.addEventListener('click',function(e){
     case 'cake-edit':syncForm();var ce=st.custom[+el.getAttribute('data-i')];if(ce)go('cake='+ce.key+','+el.getAttribute('data-i'));break;
     case 'go':syncForm();if(el.getAttribute('data-v')==='cart')autoPack();go(el.getAttribute('data-v'));break;
     case 'back':syncForm();syncBulk();ckDraft=null;back();break;
+    case 'sc-reveal':scReveal();break;
     case 'home':renderMenu();if(navDepth>0){var nd=navDepth;navDepth=0;history.go(-nd);}else go('');window.scrollTo(0,0);break;
     case 'packchip':
       var ta=$('#packText');if(ta){var v=ta.value.trim();ta.value=(v?v+', ':'')+el.getAttribute('data-v')+' ';ta.focus();}
@@ -2146,6 +2269,7 @@ setInterval(function(){
 load();
 takeHandoff();
 lpFromLink();
+cpFromLink();
 (function(){var q=location.search.match(/[?&]lang=(en|hi)\b/);if(q&&st.lang!==q[1]){st.lang=q[1];save();}})();
 renderMenu();
 route();

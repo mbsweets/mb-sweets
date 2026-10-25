@@ -207,6 +207,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .citem{flex:1;overflow-wrap:anywhere}
 .camt{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.9rem}
 .checklist li.ro{opacity:.7}
+.checklist li.cpnli{opacity:1}
+.checklist li.cpnli .chk{border:0;background:none;color:inherit;font-size:1.05rem}
 .checklist li button{background:none;border:0;text-align:left;display:flex;align-items:center;gap:10px;width:100%;padding:0;min-height:32px}
 
 .paylog{margin-top:8px;font-size:.85rem;color:var(--muted)}
@@ -296,6 +298,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .webtag{display:inline-block;font-size:.72rem;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
 .onpaid{color:var(--green);font-weight:700;font-size:.88rem}
 .onwait{color:var(--amber);font-weight:700;font-size:.88rem}
+.oncpn{color:var(--green);font-weight:700;font-size:.88rem;margin-top:2px}
+.oncpn .lnk{font-size:.85rem;padding:0 4px}
 .st-new{color:var(--red)} .st-accepted{color:var(--gold)} .st-out{color:var(--amber)} .st-rejected{color:var(--muted);text-decoration:line-through}
 .onsum{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
 .onsum>div{padding:10px 6px;text-align:center;border-left:1px solid var(--line)}
@@ -513,6 +517,7 @@ function load(){
       if(Array.isArray(state.khata.entries))state.khata.entries=objs(state.khata.entries);
       state.loyal=(d.loyal&&typeof d.loyal==='object')?d.loyal:{m:[],b:[]};
       state.loyal.m=objs(state.loyal.m);state.loyal.b=objs(state.loyal.b);
+      state.cpn=objs(d.cpn);
       normalizeState();
       var mx=0;state.orders.forEach(function(o){if(o.no>mx)mx=o.no;});
       state.nextOrderNo=Math.max(d.nextOrderNo||1,mx+1);
@@ -551,7 +556,7 @@ function normalizeState(){
     o.payments.forEach(function(p){if(!p.id)p.id=uid();});
     o.items.forEach(function(it){if(!it.lid)it.lid=uid();});
   });
-  KH();LY();LP_BIDX=null;
+  KH();LY();CPNS();LP_BIDX=null;
   LY().m.forEach(function(m){if(!m.tk){m.tk=lpTok();ui.lpTokNew=true;}});
 }
 
@@ -634,7 +639,9 @@ function customerOrders(cid){
   return (ORD_IDX.m[cid]||[]).slice();
 }
 function lineAmt(i){return round2(num(i.qty)*num(i.rate));}
-function orderTotal(o){return round2(o.items.reduce(function(s,i){return s+lineAmt(i);},0));}
+function orderGross(o){return round2(o.items.reduce(function(s,i){return s+lineAmt(i);},0));}
+/* कुल = आइटम − स्क्रैच कूपन (अगर लगा हो) */
+function orderTotal(o){return round2(Math.max(0,orderGross(o)-(o.cpn?num(o.cpn.amt):0)));}
 function orderPaid(o){return o.payments.reduce(function(s,p){return s+num(p.amount);},0);}
 function orderDue(o){return round2(Math.max(0,orderTotal(o)-orderPaid(o)));}
 function orderStatus(o){
@@ -1286,7 +1293,7 @@ function orderCardFull(o){
     '<span class="stamp st-'+st+'">'+STAMP[st]+'</span></div>'+
     (isWebOrder(o)&&!o.cancelled&&st!=='delivered'?'<div class="hint" style="margin-top:0">ऑनलाइन ऑर्डर — पेमेंट और डिलीवरी 🌐 ऑनलाइन टैब से; डिलीवर होने तक "कुल बाकी" में नहीं गिना जाता।</div>':'')+
     (o.notes?'<div class="hint">'+esc(o.notes)+'</div>':'')+
-    '<ul class="checklist">'+items+'</ul>'+
+    '<ul class="checklist">'+items+(o.cpn?'<li class="ro cpnli"><span class="chk">🎁</span><span class="citem">स्क्रैच कूपन ('+esc(o.cpn.code)+')</span><span class="camt" style="color:var(--green)">−'+rupee(o.cpn.amt)+'</span></li>':'')+'</ul>'+
     pays+
     '<div class="money"><div><span>टोटल</span><b>'+rupee(tot)+'</b></div><div><span>जमा</span><b>'+rupee(paid)+'</b></div>'+
     (due>0?'<div class="due"><span>बाकी</span><b>'+rupee(due)+'</b></div>':(paid>tot+0.001?'<div class="paidall">'+rupee(paid-tot)+' ज़्यादा जमा</div>':'<div class="paidall">पूरा जमा</div>'))+'</div>'+
@@ -1950,7 +1957,8 @@ function saveOrderFromDraft(){
     var o2={id:uid(),no:state.nextOrderNo++,customerId:d.customerId,date:dateVal,items:items,payments:adv>0?[{id:uid(),amount:adv,date:todayStr(),note:'Advance'}]:[],cancelled:false,notes:notes,createdAt:Date.now()};
     if(d.webCode){o2.webCode=d.webCode;o2.webMode=d.webMode||'d';}
     if(d.webCode&&ui.onlineAccept===d.webCode){
-      var acc=findCustomer(d.customerId);
+      var acc=findCustomer(d.customerId),ono=findOnline(d.webCode),cc2=ono?cpnForOnline(ono):null;
+      if(cc2)cpnApply(o2,cc2);
       ui.onlineAccept=null;
       if(acc)openWa(acc.phone,webConfirmMessage(o2));
       queueStatus(d.webCode,'accepted',{total:round2(orderTotal(o2))});
@@ -2130,6 +2138,7 @@ function webConfirmMessage(o){
     if(it.name===WEB_FEE_NAME&&!it.iid){L.push('• '+it.name+' = '+rupee(num(it.qty)*num(it.rate)));return;}
     L.push('• '+displayName(it)+' — '+fmtQty(it.qty)+' '+it.unit+(num(it.rate)>0?' = '+rupee(num(it.qty)*num(it.rate)):''));
   });
+  if(o.cpn)L.push('• 🎁 स्क्रैच कूपन ('+o.cpn.code+') = −'+rupee(o.cpn.amt));
   L.push('');
   L.push('कुल: '+rupee(tot));
   L.push((o.webMode==='p'?'🏪 दुकान से लेने का समय: ':'🚚 डिलीवरी: ')+fmtDT(o.date));
@@ -2327,6 +2336,7 @@ function acceptOnline(code){
     return;
   }
   var bo=createBillingOrderFromOnline(p);
+  var cc=cpnForOnline(o);if(cc&&cpnApply(bo,cc))save();
   openWa(o.phone,webConfirmMessage(bo));
   queueStatus(code,'accepted',{total:orderTotal(bo)});
   toast('ऑर्डर #'+bo.no+' बन गया ✓ ग्राहक को कन्फर्म मैसेज भेजो');
@@ -2386,13 +2396,87 @@ function paidMessage(o,bo,amt,rest){
     (o.status==='out'?'आपका ऑर्डर '+(bo?'#'+bo.no+' ':'')+'('+o.code+') रास्ते में है 🚚':('आपका ऑर्डर '+(bo?'#'+bo.no+' ':'')+'('+o.code+') '+(isD?'तैयार हो रहा है — हम जल्द भेजेंगे 🚚':'दुकान पर आपके लिए तैयार रहेगा 🏪'))),
     '— '+state.shop.name].filter(Boolean).join('\n');
 }
-function deliveredMessage(o){
+function deliveredMessage(o,cp){
   var link=(CATALOG&&CATALOG.shop&&CATALOG.shop.review)||'';
   var isD=o.mode!=='p';
   return ['नमस्ते '+o.name+' जी 🙏',
     (isD?'आपका ऑर्डर ('+o.code+') पहुँच गया 🎉':'आपका ऑर्डर ('+o.code+') आपको मिल गया 🎉')+' '+state.shop.name+' से ख़रीदारी के लिए धन्यवाद!',
     link?('अच्छा लगा हो तो Google पर 1 मिनट में रिव्यू दे दीजिए, इससे हमें बहुत मदद मिलती है:\n'+link):'',
+    cp?cpnMsgLines(cp).join('\n'):'',
     '— '+state.shop.name].filter(Boolean).join('\n');
+}
+
+/* ---------- 🎁 स्क्रैच कूपन (मालिक, 25 अक्टूबर 2026) ----------
+   सिर्फ़ ऑनलाइन ऑर्डर ₹1000+ (आइटम का कुल) पर, "डिलीवर हो गया / ग्राहक ले गया" दबाने पर बनता है।
+   ₹10 / ₹20 / ₹50 (10 में 6 / 3 / 1 बार) · 15 दिन · अगले ऑनलाइन ऑर्डर पर (उसी नंबर से) "स्वीकार करो" पर बिल में घटता है ·
+   एक ऑर्डर पर एक कूपन · ऑर्डर कैंसल = कूपन फिर चालू · उस बिल पर मिठास पॉइंट वाला इनाम नहीं।
+   असली हिसाब इसी फ़ोन में (state.cpn); ग्राहक का लिंक सिर्फ़ खुरचने वाला कार्ड दिखाता है — लिंक बदलने से छूट नहीं बदलती।
+   रजिस्टर नहीं बदला: ग्राहक का ऑर्डर पेज कूपन कोड नोट में "🎁 कूपन ABC123" लिखकर भेजता है, बाकी नंबर से पहचान। */
+var CPN={min:1000,days:15,vals:[[10,6],[20,3],[50,1]]};
+function CPNS(){if(!Array.isArray(state.cpn))state.cpn=[];return state.cpn;}
+function p10(p){return String(p||'').replace(/\D/g,'').slice(-10);}
+function cpnRand(n){var a=new Uint32Array(1);try{crypto.getRandomValues(a);}catch(e){a[0]=Math.floor(Math.random()*4294967295);}return a[0]%n;}
+function cpnPickAmt(){
+  var tot=CPN.vals.reduce(function(s,v){return s+v[1];},0),r=cpnRand(tot);
+  for(var i=0;i<CPN.vals.length;i++){if(r<CPN.vals[i][1])return CPN.vals[i][0];r-=CPN.vals[i][1];}
+  return CPN.vals[0][0];
+}
+function cpnByCode(code){code=String(code||'').toUpperCase();return CPNS().filter(function(c){return c.code===code;})[0]||null;}
+function cpnNewCode(){
+  var abc='ABCDEFGHJKMNPQRSTUVWXYZ23456789',s;
+  do{s='';for(var i=0;i<6;i++)s+=abc.charAt(cpnRand(abc.length));}while(cpnByCode(s));
+  return s;
+}
+function cpnUsedBy(code){return state.orders.filter(function(o){return !o.cancelled&&o.cpn&&o.cpn.code===code;})[0]||null;}
+function cpnLive(c){return !!c&&!c.x&&c.exp>=todayStr()&&!cpnUsedBy(c.code);}
+function cpnForPhone(phone){
+  var p=p10(phone);if(p.length<10)return null;
+  return CPNS().filter(function(c){return c.ph===p&&cpnLive(c);}).sort(function(a,b){return a.exp<b.exp?-1:(a.exp>b.exp?1:0);})[0]||null;
+}
+function cpnTagCode(text){var m=/\uD83C\uDF81\s*(?:कूपन|coupon)\s*([A-Za-z0-9]{6})/i.exec(String(text||''));return m?m[1].toUpperCase():'';}
+/* नए ऑनलाइन ऑर्डर पर कौन-सा कूपन लगेगा: नोट में लिखा कोड (उसी नंबर का) या उस नंबर का सबसे पहले ख़त्म होने वाला चालू कूपन */
+function cpnForOnline(o){
+  var tag=cpnTagCode(o.note),c=tag?cpnByCode(tag):null;
+  if(c&&cpnLive(c)&&c.ph===p10(o.phone))return c;
+  return cpnForPhone(o.phone);
+}
+/* नोट में कोड है पर लग नहीं सकता — वजह */
+function cpnTagProblem(o){
+  var tag=cpnTagCode(o.note);if(!tag)return '';
+  var c=cpnByCode(tag),bo=billingOrderFor(o.code);
+  if(bo&&bo.cpn&&bo.cpn.code===tag)return '';
+  if(!c)return 'यह कोड हमारे रिकॉर्ड में नहीं है';
+  var u=cpnUsedBy(tag);if(u&&(!bo||u.id!==bo.id))return 'यह पहले ऑर्डर #'+u.no+' में इस्तेमाल हो चुका है';
+  if(c.exp<todayStr())return 'इसकी तारीख़ ('+fmtDshort(keyToDate(c.exp))+') निकल गई';
+  if(c.ph!==p10(o.phone))return 'यह दूसरे नंबर ('+c.ph.slice(0,2)+'xxxxxx'+c.ph.slice(8)+') का कूपन है';
+  return '';
+}
+function cpnChk(code,amt,exp){var s='mb|'+code+'|'+amt+'|'+exp,h=7;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%1679616;return h.toString(36).toUpperCase();}
+function cpnLink(c){var e=String(c.exp).replace(/-/g,'');return orderPageUrl()+'?sc='+c.code+'-'+c.amt+'-'+e+'-'+cpnChk(c.code,c.amt,e);}
+function cpnMsgLines(c){
+  return ['','🎁 आपके लिए एक *स्क्रैच कार्ड* — खुरचकर देखिए आपको कितनी छूट मिली:',cpnLink(c),
+    '(छूट अगले ऑनलाइन ऑर्डर पर, '+fmtDshort(keyToDate(c.exp))+' तक — इसी नंबर से ऑर्डर कीजिए)'];
+}
+function cpnResendMessage(o,c){return ['नमस्ते '+o.name+' जी 🙏'].concat(cpnMsgLines(c)).concat(['','— '+state.shop.name]).join('\n');}
+function cpnOfOrder(code){return CPNS().filter(function(c){return c.src===code;})[0]||null;}
+/* डिलीवर होने पर: ₹1000+ वाले ऑनलाइन ऑर्डर का कूपन (एक ऑर्डर पर एक ही बार) */
+function cpnIssue(o){
+  var ex=cpnOfOrder(o.code);if(ex)return ex;
+  var bo=billingOrderFor(o.code),gross=bo?orderGross(bo):(num(o.confirmedTotal)||num(o.total));
+  if(!(gross>=CPN.min))return null;
+  var c={id:uid(),code:cpnNewCode(),amt:cpnPickAmt(),ph:p10(o.phone),name:String(o.name||''),src:o.code,bill:bo?bo.no:'',d:todayStr(),exp:addDaysKey(CPN.days)};
+  CPNS().push(c);save();
+  return c;
+}
+function cpnApply(bo,c){
+  if(!bo||!c||!cpnLive(c))return false;
+  bo.cpn={code:c.code,amt:Math.min(num(c.amt),orderGross(bo))};
+  return true;
+}
+function cpnStats(){
+  var used=0,off=0,live=0;
+  CPNS().forEach(function(c){var u=cpnUsedBy(c.code);if(u){used++;off+=num(u.cpn.amt);}else if(cpnLive(c))live++;});
+  return {n:CPNS().length,used:used,off:round2(off),live:live};
 }
 function openPaidSheet(code){
   var o=findOnline(code);if(!o)return;
@@ -2508,7 +2592,8 @@ function finishDelivery(code,flag){
     var bo=billingOrderFor(code);
     if(bo){bo.notes=(bo.notes?bo.notes+'\n':'')+'⚠️ बिना कोड डिलीवर ('+fmtDT(new Date().toISOString())+')';save();}
   }
-  openWa(o.phone,deliveredMessage(o));
+  var cp=cpnIssue(o);
+  openWa(o.phone,deliveredMessage(o,cp));
   reconcileBill(o);
   var pp=paidPartNow(o);
   deliverOnline(code,flag==='NOCODE'?buildNote(pp,onlineOtp(o),'NOCODE'):(pp!==notePaidPart(o)?buildNote(pp,onlineOtp(o)):undefined));
@@ -2527,7 +2612,21 @@ function onlineCard(o){
   var mapUrl=(o.lat!==''&&o.lat!=null&&isFinite(o.lat)&&o.lng!==''&&isFinite(o.lng))?('https://maps.google.com/?q='+Number(o.lat).toFixed(5)+','+Number(o.lng).toFixed(5)):'';
   var addr=[o.village,o.address].filter(Boolean).join(', ');
   var created=o.created?fmtDT(o.created):'';
-  var acts='';
+  var acts='',cpInfo='';
+  var tagBad=cpnTagProblem(o);
+  if(o.status==='new'){
+    var cpNew=cpnForOnline(o);
+    if(cpNew)cpInfo='<div class="oncpn">🎁 इस ग्राहक का '+rupee(cpNew.amt)+' का स्क्रैच कूपन है ('+esc(cpNew.code)+', '+esc(fmtDshort(keyToDate(cpNew.exp)))+' तक) — "स्वीकार करो" दबाते ही बिल में घटेगा</div>';
+  }else if((o.status==='accepted'||o.status==='out')&&bo){
+    var cpAv=bo.cpn?null:cpnForOnline(o);
+    if(bo.cpn)cpInfo='<div class="oncpn">🎁 स्क्रैच कूपन −'+rupee(bo.cpn.amt)+' लगा ('+esc(bo.cpn.code)+') · इस बिल पर मिठास पॉइंट वाला इनाम नहीं <button class="lnk" data-act="on-cpn-off" data-code="'+esc(o.code)+'">हटाओ</button></div>';
+    else if(cpAv)cpInfo='<div class="oncpn">🎁 इस ग्राहक का '+rupee(cpAv.amt)+' का कूपन है <button class="lnk" data-act="on-cpn-on" data-code="'+esc(o.code)+'">बिल में लगाओ</button></div>';
+  }else if(o.status==='delivered'){
+    var cpGiven=cpnOfOrder(o.code),cpU=cpGiven?cpnUsedBy(cpGiven.code):null;
+    if(cpGiven)cpInfo='<div class="oncpn">🎁 '+rupee(cpGiven.amt)+' का स्क्रैच कूपन दिया ('+esc(cpGiven.code)+') · '+(cpU?'ऑर्डर #'+cpU.no+' में इस्तेमाल हुआ':(cpnLive(cpGiven)?esc(fmtDshort(keyToDate(cpGiven.exp)))+' तक':'इस्तेमाल नहीं हुआ, तारीख़ निकल गई'))+'</div>';
+    if(bo&&bo.cpn)cpInfo+='<div class="oncpn">🎁 इस बिल में कूपन −'+rupee(bo.cpn.amt)+' लगा था ('+esc(bo.cpn.code)+')</div>';
+  }
+  if(tagBad&&o.status!=='rejected')cpInfo+='<div class="onwait">🎁 ग्राहक ने कूपन '+esc(cpnTagCode(o.note))+' लिखा है — '+esc(tagBad)+'</div>';
   if(o.status==='new'){
     acts='<button class="btn primary small" data-act="on-accept" data-code="'+esc(o.code)+'">✅ स्वीकार करो</button>'+
       '<button class="btn small" data-act="on-reject" data-code="'+esc(o.code)+'">❌ मना</button>'+
@@ -2544,6 +2643,7 @@ function onlineCard(o){
   }else if(o.status==='delivered'){
     acts='<button class="btn small" data-act="on-review" data-code="'+esc(o.code)+'">⭐ रिव्यू माँगो</button>'+
       '<a class="btn small" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>'+
+      ((cpnOfOrder(o.code)&&cpnLive(cpnOfOrder(o.code)))?'<button class="lnk" data-act="on-cpn-send" data-code="'+esc(o.code)+'">🎁 कूपन मैसेज दोबारा</button>':'')+
       (bo?'<button class="lnk" data-act="on-open-bill" data-code="'+esc(o.code)+'">बिल #'+bo.no+' देखो</button>':'');
   }else if(o.status==='rejected'){
     acts=(o.statusNote?'<span class="onmeta">वजह: '+esc(o.statusNote)+'</span>':'')+
@@ -2557,6 +2657,7 @@ function onlineCard(o){
     ((o.status==='accepted'||o.status==='out'||o.status==='delivered')?(onlineIsPaid(o)?'<div class="onpaid">💰 पेमेंट मिला'+(onlinePaidAmt(o)>0?' '+rupee(onlinePaidAmt(o)):'')+' ✓</div>':
       (onlinePaidAmt(o)>0?'<div class="onwait">💰 '+rupee(onlinePaidAmt(o))+' जमा — बाकी '+rupee(Math.max(0,round2(onlineTotal(o)-onlinePaidAmt(o))))+'</div>':
       ((o.status!=='delivered'&&isD)?'<div class="onwait">⏳ पेमेंट का इंतज़ार</div>':''))):'')+
+    cpInfo+
     '<ul class="onitems">'+lines.map(function(l){if(l.name===WEB_FEE_NAME)return '<li><span>'+esc(l.name)+'</span><b>'+rupee(l.amt)+'</b></li>';return '<li><span>'+esc(displayName(l))+' — '+esc((l.unit==='किलो'&&l.qty<1)?Math.round(l.qty*1000)+' ग्राम':fmtQty(l.qty)+' '+l.unit)+'</span><b>'+rupee(l.amt)+'</b></li>';}).join('')+
       custom.map(function(c){return '<li class="ask"><span>'+(c[0]==='cake'?'🎂 कस्टम केक: ':'📦 पैकेट सामान (MRP): ')+esc(c[1])+'</span><b>दाम तय करो</b></li>';}).join('')+'</ul>'+
     '<div class="ftotal"><span>कुल'+(custom.length?' (तय दाम वाला)':'')+'</span><b>'+rupee(o.confirmedTotal||tot)+'</b></div>'+
@@ -2588,6 +2689,7 @@ function renderOnline(){
   var rejected=online.orders.filter(function(o){return o.status==='rejected';}).sort(byLatest);
   var of=ui.onFilter||'live';
   html+='<div class="onsum"><div><b style="color:var(--red)">'+fresh.length+'</b><span>नए</span></div><div><b>'+running.length+'</b><span>चल रहे</span></div><div><b>'+rupee(todayAmt)+'</b><span>आज ('+todays.length+' ऑर्डर)</span></div></div>';
+  if(CPNS().length){var cs=cpnStats();html+='<p class="hint" style="margin-top:-4px">🎁 स्क्रैच कूपन: '+cs.n+' दिए · '+cs.used+' इस्तेमाल · कुल छूट '+rupee(cs.off)+' · '+cs.live+' चालू</p>';}
   if(online.lastSync)html+='<p class="hint" style="margin-top:-4px">आखिरी बार देखा: '+esc(fmtDT(online.lastSync))+' · खुला रहने पर हर 30 सेकंड में खुद देखता है</p>';
   html+='<div class="onchips">'+[['live','🆕 नए + चल रहे',fresh.length+running.length],['done','✅ पूरे हुए',done.length],['rej','❌ मना किए',rejected.length]].map(function(f){
     return '<button class="onchip'+(of===f[0]?' on':'')+'" data-act="on-filter" data-f="'+f[0]+'">'+f[1]+'<b>'+f[2]+'</b></button>';
@@ -3911,6 +4013,7 @@ function billLineItems(L, o){
     }
     if(idx<o.items.length-1)L.push('');
   });
+  if(o.cpn){L.push('');L.push('🎁 स्क्रैच कूपन ('+o.cpn.code+'): −'+rupee(o.cpn.amt));}
 }
 function billMessage(o){
   var c=findCustomer(o.customerId);
@@ -4155,6 +4258,14 @@ function biItemRow(ctx,y,o,it,idx){
   ctx.fillStyle=BI.line;ctx.fillRect(P,bottom,W-2*P,2);
   return bottom+2;
 }
+function biCpnRow(ctx,y,o){
+  if(!o.cpn)return y;
+  var W=BI.W,P=BI.P,IS=34,NX=P+IS+14,fy=y+50;
+  biFont(ctx,600,32);biText(ctx,'स्क्रैच कूपन ('+o.cpn.code+')',NX,fy,'left',BI.green);
+  biFont(ctx,700,31);biText(ctx,'−'+rupee(o.cpn.amt),W-P,fy,'right',BI.green);
+  ctx.fillStyle=BI.line;ctx.fillRect(P,fy+24,W-2*P,2);
+  return fy+26;
+}
 function biOrderBar(ctx,y,o){
   var W=BI.W,P=BI.P;
   y+=22;
@@ -4238,7 +4349,7 @@ function renderBillImage(kind,ref){
     var orders=kind==='order'?[o]:customerOrders(c.id).filter(function(x){return !x.cancelled;}).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
     var mc=document.createElement('canvas').getContext('2d'),nameW=BI.QX-176-(BI.P+34+14);
     biFont(mc,600,32);
-    var oh=function(x){var h=190+x.items.length*170+x.payments.length*40;x.items.forEach(function(it,i){h+=Math.max(0,biWrap(mc,(i+1)+'. '+displayName(it),nameW).length-1)*42+36;});return h;};
+    var oh=function(x){var h=190+x.items.length*170+x.payments.length*40+(x.cpn?80:0);x.items.forEach(function(it,i){h+=Math.max(0,biWrap(mc,(i+1)+'. '+displayName(it),nameW).length-1)*42+36;});return h;};
     var est=function(list,carry){return Math.ceil(1840+(carry?130:0)+String(state.shop.terms||'').length*2+list.reduce(function(s,x){return s+oh(x);},0));};
     // लंबे हिसाब में: बाकी वाले ऑर्डर पूरे दिखें, बाकी सब एक "पहले के ऑर्डर" लाइन में (फोटो 15000px से ऊँची नहीं बनती)
     var shown=orders,older=[];
@@ -4257,6 +4368,7 @@ function renderBillImage(kind,ref){
       y=biCustomer(ctx,y,c,'डिलीवरी: '+fmtDT(o.date));
       y=biTableHead(ctx,y);
       o.items.forEach(function(it,i){y=biItemRow(ctx,y,o,it,i);});
+      y=biCpnRow(ctx,y,o);
       y=biTotals(ctx,y,orderTotal(o),orderPaid(o),o.payments);
     }else{
       y=biTitle(ctx,y,'पूरा हिसाब',orders.length+' ऑर्डर','तारीख: '+fmtDonly(new Date()));
@@ -4268,6 +4380,7 @@ function renderBillImage(kind,ref){
       shown.forEach(function(ox){
         y=biOrderBar(ctx,y,ox);
         ox.items.forEach(function(it,i){y=biItemRow(ctx,y,ox,it,i);});
+        y=biCpnRow(ctx,y,ox);
         y=biOrderSub(ctx,y,ox);
       });
       y=biTotals(ctx,y,gt,gp,null);
@@ -4401,7 +4514,7 @@ function printOrderBill(o){
     '</div>'+
     '<table>'+
       '<thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>'+
-      '<tbody>'+rows+'</tbody>'+
+      '<tbody>'+rows+(o.cpn?'<tr><td></td><td>स्क्रैच कूपन ('+esc(o.cpn.code)+')</td><td></td><td></td><td>−'+rupee(o.cpn.amt)+'</td></tr>':'')+'</tbody>'+
     '</table>'+
     '<div style="margin-top:14px;text-align:right">'+
       '<div>Total Bill: <b>'+rupee(orderTotal(o))+'</b></div>'+
@@ -4523,6 +4636,18 @@ document.addEventListener('click',function(e){
     case 'on-otp-resend':
       var oro=findOnline(t.getAttribute('data-code'));
       if(oro)openWa(oro.phone,outMessage(oro,billingOrderFor(oro.code),onlineOtp(oro)));
+      break;
+    case 'on-cpn-send':
+      var cso=findOnline(t.getAttribute('data-code')),csc=cso?cpnOfOrder(cso.code):null;
+      if(cso&&csc)openWa(cso.phone,cpnResendMessage(cso,csc));
+      break;
+    case 'on-cpn-on':case 'on-cpn-off':
+      var cpo=findOnline(t.getAttribute('data-code')),cpb=cpo?billingOrderFor(cpo.code):null;
+      if(cpo&&cpb){
+        if(act==='on-cpn-off'){delete cpb.cpn;save();toast('कूपन हटाया — बिल '+rupee(orderTotal(cpb)));}
+        else{var cpx=cpnForOnline(cpo);if(cpx&&cpnApply(cpb,cpx)){save();toast('🎁 कूपन लगा — बिल '+rupee(orderTotal(cpb)));}else toast('इस ग्राहक का कोई चालू कूपन नहीं');}
+        queueStatus(cpo.code,cpo.status,{total:orderTotal(cpb)});
+      }
       break;
     case 'on-review':
       var rvo=findOnline(t.getAttribute('data-code'));
@@ -4655,6 +4780,7 @@ document.addEventListener('click',function(e){
         state.catalogApplied=num(rd2.catalogApplied)||0;
         if(rd2.khata&&typeof rd2.khata==='object')state.khata=rd2.khata;
         if(rd2.loyal&&typeof rd2.loyal==='object')state.loyal=rd2.loyal;
+        if(Array.isArray(rd2.cpn))state.cpn=rd2.cpn.filter(function(x){return x&&typeof x==='object';});
         normalizeState();applyCatalog();migrateUdharOrders();
         var mx2=0;state.orders.forEach(function(o){if(o.no>mx2)mx2=o.no;});
         state.nextOrderNo=Math.max(rd2.nextOrderNo||1,mx2+1);
