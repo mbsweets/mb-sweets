@@ -156,6 +156,7 @@ h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
 .actbar{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}
 .btn{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:transparent;font-weight:700;color:var(--ink)}
 a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.callbtn{border-color:var(--green);color:var(--green)}
 .btn.primary{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
 .btn.warn{background:var(--warn-bg);border-color:var(--warn-bg);color:#fff}
 .btn.small{min-height:40px;padding:0 12px;font-size:.92rem}
@@ -611,6 +612,8 @@ function phoneNorm(p){
   if(p.length===10)p='91'+p;
   return p;
 }
+/* 📞 बड़ा कॉल बटन (मैसेज वाले बटन के बगल में) */
+function callBtn(phone,cls){var p=phoneNorm(phone);if(p.length<12)return '';return '<a class="btn '+(cls||'small')+' callbtn" href="tel:+'+p+'">📞 कॉल करें</a>';}
 var toastTimer;
 function toast(msg){
   var t=$('#toast');t.textContent=msg;t.classList.add('show');
@@ -1234,6 +1237,7 @@ function renderCustomer(){
     '<button class="btn primary small" data-act="new-order-for" data-id="'+c.id+'">+ नया ऑर्डर</button>'+
     (t.due>0?'<button class="btn small" data-act="customer-payment" data-id="'+c.id+'">पेमेंट लो</button>':'')+
     (os.filter(function(o){return !o.cancelled;}).length?summaryButton(c):'')+
+    callBtn(c.phone)+
     '</div>';
 
   if(!os.length){
@@ -2539,9 +2543,11 @@ function onlineCard(o){
       '<a class="lnk" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>';
   }else if(o.status==='delivered'){
     acts='<button class="btn small" data-act="on-review" data-code="'+esc(o.code)+'">⭐ रिव्यू माँगो</button>'+
+      '<a class="btn small" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>'+
       (bo?'<button class="lnk" data-act="on-open-bill" data-code="'+esc(o.code)+'">बिल #'+bo.no+' देखो</button>':'');
   }else if(o.status==='rejected'){
-    acts=o.statusNote?'<span class="onmeta">वजह: '+esc(o.statusNote)+'</span>':'';
+    acts=(o.statusNote?'<span class="onmeta">वजह: '+esc(o.statusNote)+'</span>':'')+
+      '<a class="lnk" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>';
   }
   return '<article class="order oncard st-'+esc(o.status)+'">'+
     '<div class="otop"><div class="when">⏰ '+esc(onlineWhen(o))+'</div><span class="obadge">'+esc(o.code)+'</span><span class="stamp st-'+esc(o.status)+'">'+(ON_LABEL[o.status]||esc(o.status))+'</span></div>'+
@@ -3029,6 +3035,7 @@ function renderParty(){
       '<button class="btn primary small" data-act="k-new" data-type="j" data-id="'+p.id+'">💰 जमा</button>'+
       (t.bal>0?kWaButton('remind',p.id,p,'💬 याद दिलाओ','small'):'')+
       (es.length?kWaButton('hisaab',p.id,p,'📲 हिसाब भेजो','small'):'')+
+      callBtn(p.phone)+
     '</div>';
   if(t.bal>0){
     var rm=partyNeedsReminder(p)?'<b style="color:var(--gold)">🔔 बकाया '+partyDueDays(p.id)+' दिन पुराना है — याद दिलाने का समय है</b>':esc(remindedText(p));
@@ -3532,6 +3539,7 @@ function renderLMember(){
       '<button class="btn primary small" data-act="lp-buy" data-id="'+m.id+'">🛍️ ख़रीद जोड़ो</button>'+
       '<button class="btn small" data-act="lp-card" data-id="'+m.id+'">📇 कार्ड भेजो</button>'+
       (s.soon?lpWaBtn(m,lpRemindMsg(m),'💬 याद दिलाओ','small','remind'):'')+
+      callBtn(m.phone)+
     '</div>'+
     '<div class="band"><div><b style="color:var(--green)">'+s.earned+'</b><span>कुल मिले</span></div>'+
       '<div class="tom"><b>'+s.used+'</b><span>इस्तेमाल ('+s.rewards+' इनाम'+(s.saved?' · '+rupee(s.saved):'')+')</span></div>'+
