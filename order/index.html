@@ -1083,7 +1083,7 @@ function cardHtml(card){
   var ftag=isFest?'<span class="festtag">'+esc((st.lang==='en'?C.fest.tagEn:C.fest.tagHi)||'')+'</span>':'';
   var desc=(card.descHi||card.descEn)?'<p class="desc">'+esc(st.lang==='en'?(card.descEn||card.descHi):card.descHi)+'</p>':'';
   return '<article class="card'+(allOff?' dim':'')+(isFest?' fest':'')+'" id="card-'+card.key+'">'+
-    '<div class="pic">'+picHtml(card,card.sample?t('sample'):'')+'</div>'+
+    '<div class="pic">'+picHtml(card,card.sample?t('sample'):((st.lang==='en'?card.picTagEn:card.picTagHi)||''))+'</div>'+
     '<div class="body">'+ftag+'<h3>'+esc(nm(card))+'<small>'+esc(nm2(card))+'</small></h3>'+desc+brand+priceLine+chips+
     '<div class="qtyrow">'+ctl+'</div></div></article>';
 }
