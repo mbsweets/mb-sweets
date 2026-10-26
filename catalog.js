@@ -17,8 +17,8 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 9,
-  updated: '2026-10-25',
+  version: 10,
+  updated: '2026-10-26',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
@@ -64,6 +64,14 @@ window.MB_CATALOG = {
     hi: '🔒 23 अक्टूबर (शुक्रवार) को दुकान बंद रहेगी — उस दिन के ऑर्डर नहीं हो पाएँगे। 24 अक्टूबर (शनिवार) से दुकान और घर पर डिलीवरी फिर चालू 🙏 मेले में आने के लिए आप सबका धन्यवाद! 🌺',
     en: '🔒 Our shop is closed on Friday 23 Oct — no orders for that day. From Saturday 24 Oct the shop and home delivery are open again 🙏 Thank you all for visiting our stall at the fair! 🌺' },
   off: [],
+  /* त्योहार की पट्टी: from–to (दोनों दिन शामिल) मेन्यू और वेबसाइट पर सबसे ऊपर दिखती है, फिर अपने-आप हट जाती है।
+     card = बटन दबाने पर मेन्यू का कौन-सा कार्ड खुले (उस कार्ड के दाम पट्टी में अपने-आप)। कोई त्योहार न हो तो: fest: null, */
+  fest: { from: '2026-10-26', to: '2026-10-29', card: 'dibba',
+    hi: '🪔 करवा चौथ स्पेशल (29 अक्टूबर) — 5 मिठाई का डिब्बा',
+    en: '🪔 Karwa Chauth special (29 Oct) — 5-sweet box',
+    subHi: 'बालूशाही, चमचम, मिल्क केक, पेड़ा, गुलाब जामुन',
+    subEn: 'Balushahi, Cham Cham, Milk Cake, Peda, Gulab Jamun',
+    tagHi: '🪔 करवा चौथ स्पेशल', tagEn: '🪔 Karwa Chauth special' },
 
   /* [id, बिलिंग वाला नाम, category, unit, दाम, v] */
   items: [
@@ -98,7 +106,9 @@ window.MB_CATALOG = {
     ['i29', 'चॉकलेट केक (½ किलो)', 'cake', 'पीस', 380, 3],
     ['i30', 'दही अमृत (200 ग्राम)', 'dairy', 'पैक', 35, 4],
     ['i31', 'दही अमृत (400 ग्राम)', 'dairy', 'पैक', 60, 4],
-    ['i32', 'दही अमृत (1 किलो पैक)', 'dairy', 'पैक', 130, 4]
+    ['i32', 'दही अमृत (1 किलो पैक)', 'dairy', 'पैक', 130, 4],
+    ['i33', 'मिठाई डिब्बा 5 तरह (½ किलो)', 'mithai', 'डिब्बा', 175, 10],
+    ['i34', 'मिठाई डिब्बा 5 तरह (1 किलो)', 'mithai', 'डिब्बा', 350, 10]
   ],
 
   /* ऑनलाइन दाम (सिर्फ़ ऑर्डर मेन्यू और वेबसाइट) — id: [ऑनलाइन दाम, घर पर डिलीवरी चार्ज हर पैक/लीटर पर]
@@ -116,6 +126,9 @@ window.MB_CATALOG = {
   /* ग्राहक वाले मेन्यू के कार्ड। opts = कौन-कौन से आइटम इस कार्ड में चुन सकते हैं
      lineHi/lineEn = ऑर्डर की लाइन में दिखने वाला नाम (जैसे दो कंपनी का दही अलग दिखे) */
   menu: [
+    { tab: 'sweets', key: 'dibba', hi: '5 मिठाई का डिब्बा', en: '5-Sweet Box', art: 'dibba',
+      descHi: 'बालूशाही, चमचम, मिल्क केक, पेड़ा, गुलाब जामुन', descEn: 'Balushahi, Cham Cham, Milk Cake, Peda, Gulab Jamun',
+      opts: [{ id: 'i33', hi: '½ किलो', en: '½ kg' }, { id: 'i34', hi: '1 किलो', en: '1 kg' }] },
     { tab: 'sweets', key: 'rasgulla', hi: 'रसगुल्ला', en: 'Rasgulla', img: 'rasgulla', opts: ['i1', 'i2'] },
     { tab: 'sweets', key: 'gulabjamun', hi: 'गुलाब जामुन', en: 'Gulab Jamun', img: 'gulabjamun', opts: ['i5', 'i6'] },
     { tab: 'sweets', key: 'chamcham', hi: 'चमचम', en: 'Cham Cham', img: 'chamcham', opts: ['i7', 'i8'] },
@@ -150,7 +163,8 @@ window.MB_CATALOG = {
   milk: {
     i1: 2, i5: 2, i7: 2, i9: 2, i10: 2,     // रसगुल्ला, गुलाब जामुन, चमचम, पेड़ा, मिल्क केक — 1 किलो = 2 लीटर
     i2: 0.1, i6: 0.1, i8: 0.1,              // पीस वाले — 20 पीस ≈ 1 किलो मानकर
-    i3: 0, i4: 0, i11: 0, i12: 0, i13: 0    // बालूशाही, लड्डू, जलेबी, बूंदी — दूध नहीं
+    i3: 0, i4: 0, i11: 0, i12: 0, i13: 0,   // बालूशाही, लड्डू, जलेबी, बूंदी — दूध नहीं
+    i33: 0.8, i34: 1.6                      // 5 मिठाई डिब्बा: 5 में से 4 दूध वाली (बालूशाही नहीं) — 1 किलो ≈ 1.6 लीटर
     // रसमलाई (i22) जानबूझकर नहीं — उसकी सिर्फ गिनती आती है (कितनी प्लेट)
   },
 

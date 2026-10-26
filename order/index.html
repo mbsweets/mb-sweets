@@ -231,6 +231,16 @@ label.fl input,label.fl textarea{margin-top:4px;font-weight:400}
 .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
 .lpbar{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;background:var(--goldsoft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;text-align:left;color:var(--ink);font:inherit;cursor:pointer}
 .lpbar .st{font-size:1.5rem;line-height:1}
+.festbar{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;background:linear-gradient(135deg,#7A2330,#A8322E 55%,#C2571F);color:#FFF4DC;border:1.5px solid #E7B84A;border-radius:14px;padding:10px 12px;text-align:left;font:inherit;cursor:pointer;box-shadow:0 6px 16px rgba(92,22,32,.22)}
+.festbar .fx{font-size:1.9rem;line-height:1}
+.festbar b{display:block;font-size:1rem;line-height:1.3;color:#F7DC8C}
+.festbar small{display:block;font-size:.82rem;line-height:1.35;color:#FFF4DC}
+.festbar .pr{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.festbar .pr span{background:rgba(255,244,220,.16);border:1px solid rgba(247,220,140,.55);border-radius:999px;padding:1px 9px;font-size:.82rem;font-weight:700;color:#FFF4DC;white-space:nowrap}
+.festbar .go{margin-left:auto;font-weight:700;color:#F7DC8C;white-space:nowrap;align-self:center}
+.card .desc{margin:2px 0 4px;font-size:.84rem;line-height:1.35;color:var(--muted)}
+.card .festtag{display:inline-block;margin:2px 0 3px;background:#A8322E;color:#FFF4DC;border-radius:999px;padding:1px 9px;font-size:.75rem;font-weight:700}
+.card.fest{border-color:#E7B84A;box-shadow:0 0 0 2px rgba(231,184,74,.35)}
 .cpbar{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;background:linear-gradient(135deg,#5C1620,#7A2330);color:#FBEEDD;border:1.5px solid #E7B84A;border-radius:12px;padding:9px 12px;text-align:left;font:inherit;cursor:pointer}
 .cpbar .st{font-size:1.5rem;line-height:1}
 .cpbar b{display:block;font-size:.95rem;color:#F7DC8C}
@@ -343,6 +353,7 @@ hi:{
  sc_expired:'यह कार्ड {d} तक ही था, अब इसकी तारीख़ निकल गई। ₹1000 या ज़्यादा के अगले ऑनलाइन ऑर्डर पर हम नया कार्ड भेजेंगे 🎁',
  cp_bar_new:'आपका स्क्रैच कार्ड आया है!',cp_bar_new_s:'खुरचकर देखिए कितनी छूट मिली · {d} तक',cp_bar_t:'₹{a} का कूपन चालू है',cp_bar_s:'अगले ऑनलाइन ऑर्डर पर बिल में घटेगा · {d} तक',
  cp_cart:'🎁 आपका ₹{a} का कूपन ({c}) ऑर्डर पक्का होते समय बिल में घटेगा।',cp_cart_new:'🎁 आपका स्क्रैच कूपन ({c}) इस ऑर्डर के साथ भेजा जाएगा।',cp_line:'स्क्रैच कूपन',
+ fest_go:'ऑर्डर करें ›',
  lp_bar_t:'माँ भगवती मिठास पॉइंट्स',lp_bar_s:'हर ₹50 की मिठाई पर 1 पॉइंट · अपने पॉइंट देखें',lp_go:'देखें ›',lp_info_btn:'⭐ मेरे पॉइंट',
  lp_h:'⭐ मेरे मिठास पॉइंट',lp_hello:'नमस्ते {n} जी 🙏',lp_pts:'मिठास पॉइंट',lp_member_since:'सदस्य {d} से',lp_for:'नंबर {p} के पॉइंट',
  lp_rw_h:'इनाम (एक बिल पर एक)',lp_rw_row:'{p} पॉइंट = {o} छूट',lp_rw_ok:'✓ अभी ले सकते हैं<br>{m}+ के बिल पर',lp_rw_need:'{k} पॉइंट और<br>{m}+ के बिल पर',
@@ -487,7 +498,7 @@ hi:{
   'केक 100% अंडा-रहित हैं। केक की फोटो सिर्फ नमूने के लिए — असली केक थोड़ा अलग दिख सकता है। कस्टम केक का दाम हम WhatsApp पर बता देंगे।',
   'दुकान से ख़ुद ले जाने (पिकअप) पर कोई न्यूनतम रकम नहीं; पेमेंट आप सामान लेते समय कर सकते हैं।'
  ],
- u:{'किलो':'किलो','पीस':'पीस','लीटर':'लीटर','पैक':'पैक','पैकेट':'पैकेट','प्लेट':'प्लेट','ग्राम':'ग्राम'},
+ u:{'किलो':'किलो','पीस':'पीस','लीटर':'लीटर','पैक':'पैक','पैकेट':'पैकेट','प्लेट':'प्लेट','ग्राम':'ग्राम','डिब्बा':'डिब्बा'},
  msg_new:'🛍️ *नया ऑर्डर — MB Sweets*',msg_code:'कोड',msg_loc:'📍 लोकेशन',msg_noloc:'📍 लोकेशन नहीं दी',msg_items:'*सामान:*',msg_total:'💰 कुल (तय दाम)',msg_ask:'दाम बताएं',
  msg_cake:'🎂 कस्टम केक',msg_pack:'📦 पैकेट सामान (MRP)',msg_cakemsg:'🎂 केक पर लिखना',msg_note:'📝 नोट',msg_village:'गाँव/मोहल्ला',msg_addr:'पता',msg_land:'पहचान',
  msg_pay_d:'ऑर्डर कन्फर्म होने के बाद UPI से पेमेंट करूँगा/करूँगी।',msg_pay_p:'पेमेंट दुकान पर सामान लेते समय।',msg_import:'📥 दुकान के बिलिंग ऐप के लिए:',
@@ -514,6 +525,7 @@ en:{
  sc_expired:'This card was valid till {d} and has now expired. We will send a new card on your next online order of ₹1000 or more 🎁',
  cp_bar_new:'Your scratch card is here!',cp_bar_new_s:'Scratch to see your discount · till {d}',cp_bar_t:'₹{a} coupon is active',cp_bar_s:'Comes off the bill of your next online order · till {d}',
  cp_cart:'🎁 Your ₹{a} coupon ({c}) will come off the bill when we confirm the order.',cp_cart_new:'🎁 Your scratch coupon ({c}) will be sent with this order.',cp_line:'Scratch coupon',
+ fest_go:'Order ›',
  lp_bar_t:'Maa Bhagwati Mithas Points',lp_bar_s:'1 point on every ₹50 of sweets · check your points',lp_go:'View ›',lp_info_btn:'⭐ My points',
  lp_h:'⭐ My Mithas Points',lp_hello:'Hello {n} 🙏',lp_pts:'Mithas points',lp_member_since:'Member since {d}',lp_for:'Points for {p}',
  lp_rw_h:'Rewards (one per bill)',lp_rw_row:'{p} points = {o} off',lp_rw_ok:'✓ Available now<br>on bills of {m}+',lp_rw_need:'{k} more points<br>on bills of {m}+',
@@ -658,7 +670,7 @@ en:{
   'Cakes are 100% eggless. Cake photos are samples — the actual cake may look a little different. We will tell you the custom cake price on WhatsApp.',
   'Pick-up from the shop has no minimum; you can pay when you pick up.'
  ],
- u:{'किलो':'kg','पीस':'pc','लीटर':'L','पैक':'pack','पैकेट':'packet','प्लेट':'plate','ग्राम':'g'},
+ u:{'किलो':'kg','पीस':'pc','लीटर':'L','पैक':'pack','पैकेट':'packet','प्लेट':'plate','ग्राम':'g','डिब्बा':'box'},
  msg_new:'🛍️ *New order — MB Sweets*',msg_code:'Code',msg_loc:'📍 Location',msg_noloc:'📍 Location not shared',msg_items:'*Items:*',msg_total:'💰 Total (fixed price)',msg_ask:'please tell price',
  msg_cake:'🎂 Custom cake',msg_pack:'📦 Packaged items (MRP)',msg_cakemsg:'🎂 On the cake',msg_note:'📝 Note',msg_village:'Village/locality',msg_addr:'Address',msg_land:'Landmark',
  msg_pay_d:'I will pay by UPI after the order is confirmed.',msg_pay_p:'Payment at the shop on pick-up.',msg_import:'📥 For the shop billing app:',
@@ -762,6 +774,16 @@ function dOffResume(){var d=keyToDate(C.deliveryOff.to);d.setDate(d.getDate()+1)
 function dOffRange(){var o=C.deliveryOff,a=keyToDate(o.from),b=keyToDate(o.to);return a.getMonth()===b.getMonth()?a.getDate()+'–'+dOffDm(o.to):dOffDm(o.from)+' – '+dOffDm(o.to);}
 /* दुकान पूरे दिन बंद (catalog.js closed.days) — उन तारीख़ों पर न दुकान से लेना, न डिलीवरी; सूचना 2 दिन पहले से */
 function shopClosed(k){var c=C.closed;return !!(c&&Array.isArray(c.days)&&c.days.indexOf(k)>=0);}
+/* त्योहार की पट्टी (catalog.js fest): from–to दोनों दिन शामिल, फिर अपने-आप गायब */
+function festOn(){var f=C.fest,k=dkey(nowIST());return !!(f&&f.from&&f.to&&f.card&&k>=f.from&&k<=f.to&&MENU().some(function(c){return c.key===f.card;}));}
+function festBarHtml(){
+  if(!festOn())return '';
+  var f=C.fest,card=MENU().filter(function(c){return c.key===f.card;})[0];
+  var pr=optsOf(card).filter(function(o){return !OFF[o.id];}).map(function(o){return '<span>'+esc(optLabel(card,o))+' '+rupee(ITEM[o.id].price)+'</span>';}).join('');
+  var en=st.lang==='en';
+  return '<button class="festbar" data-act="festgo"><span class="fx">🪔</span><span><b>'+esc(((en&&f.en)||f.hi||'').replace(/^🪔\s*/,''))+'</b>'+
+    ((en?f.subEn:f.subHi)?'<small>'+esc(en?f.subEn:f.subHi)+'</small>':'')+(pr?'<span class="pr">'+pr+'</span>':'')+'</span><span class="go">'+t('fest_go')+'</span></button>';
+}
 function closedNotice(){
   var c=C.closed;if(!c||!Array.isArray(c.days)||!c.days.length)return '';
   var ds=c.days.slice().sort(),d=keyToDate(ds[0]);d.setDate(d.getDate()-2);
@@ -818,6 +840,24 @@ function spiral(cx,cy,r0,r1,turns,sq){
 }
 function plate(y){return '<ellipse cx="60" cy="'+(y+4)+'" rx="50" ry="13" fill="#000" opacity=".12"/><ellipse cx="60" cy="'+y+'" rx="50" ry="13" fill="#C9A25C"/><ellipse cx="60" cy="'+(y-1)+'" rx="41" ry="9.5" fill="#E7C987"/>';}
 var ART={
+ /* 5 मिठाई का डिब्बा — ऊपर से खुला डिब्बा, 5 ख़ाने (चित्र, फोटो नहीं) */
+ dibba:function(){
+   var s='<svg viewBox="0 0 120 120"><ellipse cx="60" cy="106" rx="50" ry="7" fill="#000" opacity=".13"/>'+
+     '<rect x="10" y="22" width="100" height="80" rx="9" fill="#7A2330"/><rect x="14" y="26" width="92" height="72" rx="6" fill="#E7B84A"/>'+
+     '<rect x="17" y="29" width="86" height="66" rx="4" fill="#FFF4DC"/>'+
+     '<path d="M17 62 h86 M46 29 v33 M74 29 v33 M60 62 v33" stroke="#D9B26A" stroke-width="2"/>';
+   // बालूशाही (सुनहरी, ऊपर बाएँ)
+   s+='<ellipse cx="31" cy="47" rx="11" ry="8" fill="#C77A1E"/><ellipse cx="31" cy="45" rx="9" ry="5.5" fill="#E9A23B"/><path d="M25 45 q6 -4 12 0" stroke="#FFD27A" stroke-width="1.6" fill="none"/>';
+   // चमचम (गुलाबी, बीच ऊपर)
+   s+='<rect x="50" y="38" width="20" height="17" rx="8" fill="#F28DA6"/><rect x="52" y="40" width="16" height="6" rx="3" fill="#F9C0CF"/><circle cx="56" cy="50" r="1" fill="#fff"/><circle cx="63" cy="49" r="1" fill="#fff"/>';
+   // पेड़ा (ऊपर दाएँ)
+   s+='<circle cx="89" cy="46" r="10" fill="#B9773A"/><circle cx="89" cy="46" r="7" fill="#CF8E4C"/><circle cx="89" cy="46" r="2" fill="#8A5422"/>';
+   // मिल्क केक (नीचे बाएँ)
+   s+='<rect x="25" y="70" width="26" height="18" rx="2" fill="#C48A45"/><rect x="25" y="70" width="26" height="7" rx="2" fill="#E6BE7C"/><circle cx="31" cy="82" r=".9" fill="#8C5A22"/><circle cx="41" cy="84" r=".9" fill="#8C5A22"/><circle cx="46" cy="80" r=".9" fill="#8C5A22"/>';
+   // गुलाब जामुन (नीचे दाएँ)
+   s+='<circle cx="75" cy="79" r="8.5" fill="#5A2410"/><circle cx="90" cy="80" r="8" fill="#6B2C14"/><circle cx="73" cy="76" r="2.2" fill="#9A4A26" opacity=".8"/><circle cx="88" cy="77" r="2" fill="#9A4A26" opacity=".8"/>';
+   return s+'</svg>';
+ },
  jalebi:function(){
    var s='<svg viewBox="0 0 120 120">'+plate(88);
    [[42,64],[76,62],[59,78]].forEach(function(p,i){
@@ -1039,9 +1079,12 @@ function cardHtml(card){
   else if(OFF[o.id])ctl='<span class="offtag">'+t('off')+'</span>';
   else if(q>0)ctl='<div class="stepper"><button data-act="dec" data-id="'+o.id+'" aria-label="कम करें">−</button><b>'+esc(qtyTxt(it.unit,q))+'</b><button data-act="inc" data-id="'+o.id+'" aria-label="बढ़ाएं">+</button></div>';
   else ctl='<button class="addbtn" data-act="inc" data-id="'+o.id+'">'+t('add')+'</button>';
-  return '<article class="card'+(allOff?' dim':'')+'" id="card-'+card.key+'">'+
+  var isFest=festOn()&&C.fest.card===card.key;
+  var ftag=isFest?'<span class="festtag">'+esc((st.lang==='en'?C.fest.tagEn:C.fest.tagHi)||'')+'</span>':'';
+  var desc=(card.descHi||card.descEn)?'<p class="desc">'+esc(st.lang==='en'?(card.descEn||card.descHi):card.descHi)+'</p>':'';
+  return '<article class="card'+(allOff?' dim':'')+(isFest?' fest':'')+'" id="card-'+card.key+'">'+
     '<div class="pic">'+picHtml(card,card.sample?t('sample'):'')+'</div>'+
-    '<div class="body"><h3>'+esc(nm(card))+'<small>'+esc(nm2(card))+'</small></h3>'+brand+priceLine+chips+
+    '<div class="body">'+ftag+'<h3>'+esc(nm(card))+'<small>'+esc(nm2(card))+'</small></h3>'+desc+brand+priceLine+chips+
     '<div class="qtyrow">'+ctl+'</div></div></article>';
 }
 function refreshCard(key){
@@ -1078,6 +1121,7 @@ function renderMenu(){
     '</div></header>'+
     '<div class="wrap">'+
       '<div class="status '+si.cls+'" id="statusBox"><span class="dot"></span><span>'+esc(si.txt)+'</span></div>'+
+      festBarHtml()+
       '<div class="rulebox"><b>'+t('rule_h')+'</b><ul>'+t('rule_l').map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'+
       (closedNotice()?'<div class="notice">📢 '+esc(closedNotice())+'</div>':'')+
       (dOffNotice()?'<div class="notice">📢 '+esc(dOffNotice())+'</div>':'')+
@@ -2167,6 +2211,7 @@ document.addEventListener('click',function(e){
   var id=el.getAttribute('data-id');
   switch(a){
     case 'lang':st.lang=st.lang==='en'?'hi':'en';save();renderMenu();route();break;
+    case 'festgo':if(C.fest&&C.fest.card)jumpTo('item',C.fest.card);break;
     case 'tab':
       var tk=el.getAttribute('data-t');
       var sec=document.getElementById('sec-'+tk);
