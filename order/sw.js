@@ -1,6 +1,6 @@
 // Customer order page: always try the network first (prices and stock change),
 // fall back to the saved copy when offline.
-var CACHE_NAME = 'mbo-order-v3';
+var CACHE_NAME = 'mbo-order-v4';
 var CORE = ['./', './manifest.json', '../catalog.js', '../logo-header.png',
   '../fonts/Mukta-400.woff', '../fonts/Mukta-600.woff', '../fonts/Mukta-700.woff', '../fonts/Baloo2-700.woff',
   './img/upi-card.png', './qrcode.js'];
