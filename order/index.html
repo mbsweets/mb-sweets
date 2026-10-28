@@ -49,7 +49,8 @@ a{color:inherit}
 .hero{background:var(--brand);color:var(--on-brand);padding:calc(14px + env(safe-area-inset-top,0px)) 0 16px}
 .hero .wrap{display:flex;gap:12px;align-items:center}
 .hero img{width:64px;height:64px;border-radius:14px;background:#fff;flex:0 0 auto;object-fit:contain}
-.hero h1{font-family:'Baloo 2','Mukta',sans-serif;font-size:1.35rem;line-height:1.1;margin:0}
+.hero h1{font-family:'Baloo 2','Mukta',sans-serif;font-size:clamp(1.05rem,5vw,1.35rem);line-height:1.15;margin:0;text-wrap:balance}
+.hero h1.en{font-size:clamp(.98rem,4.2vw,1.25rem)}
 .hero .tag{font-size:.84rem;opacity:.9;margin-top:2px}
 .hero .addr{font-size:.78rem;opacity:.8;margin-top:2px}
 .langbtn{margin-left:auto;align-self:flex-start;background:transparent;border:1px solid rgba(251,238,221,.5);color:var(--on-brand);border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:600;min-height:32px}
@@ -1115,8 +1116,8 @@ function renderMenu(){
   var notice=(st.lang==='en'&&C.noticeEn)||C.noticeHi;
   var tabs=[['sweets',t('tab_sweets')],['dairy',t('tab_dairy')],['cake',t('tab_cake')],['pack',t('tab_pack')],['bulk',t('tab_bulk')],['info',t('tab_info')]];
   var html='<header class="hero"><div class="wrap">'+
-      '<img src="../logo-header.png" alt="MB Sweets">'+
-      '<div><h1>'+esc(S.brand)+'</h1><div class="tag">'+esc(S.name)+'</div><div class="addr">'+esc(st.lang==='en'?S.addrEn:S.addrHi)+'</div></div>'+
+      '<img src="../logo-header.png" alt="माँ भगवती मिष्ठान भंडार (MB Sweets)">'+
+      '<div><h1'+(st.lang==='en'?' class="en"':'')+'>'+esc(st.lang==='en'?S.name:'माँ भगवती मिष्ठान भंडार')+'</h1><div class="tag">('+esc(S.brand)+')</div><div class="addr">'+esc(st.lang==='en'?S.addrEn:S.addrHi)+'</div></div>'+
       '<button class="langbtn" data-act="lang">'+t('lang_btn')+'</button>'+
     '</div></header>'+
     '<div class="wrap">'+
