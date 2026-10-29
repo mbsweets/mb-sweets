@@ -869,6 +869,18 @@ var ART={
    });
    return s+'</svg>';
  },
+ /* बेसन लड्डू — थाली में 5 सुनहरे-पीले गोल लड्डू (चित्र, फोटो नहीं) */
+ besan:function(){
+   var s='<svg viewBox="0 0 120 120">'+plate(90);
+   [[40,70],[80,70],[60,80],[50,55],[72,55]].forEach(function(p){
+     s+='<circle cx="'+p[0]+'" cy="'+(p[1]+2)+'" r="15" fill="#9A5A10" opacity=".35"/>'+
+        '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="14.5" fill="#E0A23A"/>'+
+        '<circle cx="'+(p[0]-1)+'" cy="'+(p[1]-1)+'" r="12.5" fill="#EDB64C"/>'+
+        '<ellipse cx="'+(p[0]-5)+'" cy="'+(p[1]-6)+'" rx="5" ry="3" fill="#FFE29A" opacity=".75"/>';
+     [[-6,3],[4,-4],[6,5],[-2,-8],[1,8],[-8,-3]].forEach(function(q){s+='<circle cx="'+(p[0]+q[0])+'" cy="'+(p[1]+q[1])+'" r="1.1" fill="#B9771F" opacity=".7"/>';});
+   });
+   return s+'</svg>';
+ },
  milkcake:function(){
    var s='<svg viewBox="0 0 120 120">'+plate(90);
    function block(x,y,w,h,dx){

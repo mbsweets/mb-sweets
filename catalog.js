@@ -17,8 +17,8 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 11,
-  updated: '2026-10-26',
+  version: 12,
+  updated: '2026-10-29',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
@@ -108,7 +108,8 @@ window.MB_CATALOG = {
     ['i31', 'दही अमृत (400 ग्राम)', 'dairy', 'पैक', 60, 4],
     ['i32', 'दही अमृत (1 किलो पैक)', 'dairy', 'पैक', 130, 4],
     ['i33', 'पाँच मिठाई डिब्बा (½ किलो)', 'mithai', 'डिब्बा', 175, 10],
-    ['i34', 'पाँच मिठाई डिब्बा (1 किलो)', 'mithai', 'डिब्बा', 350, 10]
+    ['i34', 'पाँच मिठाई डिब्बा (1 किलो)', 'mithai', 'डिब्बा', 350, 10],
+    ['i35', 'बेसन लड्डू', 'mithai', 'किलो', 220, 12]
   ],
 
   /* ऑनलाइन दाम (सिर्फ़ ऑर्डर मेन्यू और वेबसाइट) — id: [ऑनलाइन दाम, घर पर डिलीवरी चार्ज हर पैक/लीटर पर]
@@ -136,6 +137,7 @@ window.MB_CATALOG = {
     { tab: 'sweets', key: 'rasmalai', hi: 'रसमलाई', en: 'Rasmalai', img: 'rasmalai-real', opts: [{ id: 'i22', hi: 'प्लेट (1 बड़ा पीस)', en: 'plate (1 big piece)' }] },
     { tab: 'sweets', key: 'peda', hi: 'पेड़ा', en: 'Peda', img: 'peda', opts: ['i9'] },
     { tab: 'sweets', key: 'laddoo', hi: 'लड्डू', en: 'Laddoo', img: 'laddoo', opts: ['i11'] },
+    { tab: 'sweets', key: 'besanladdoo', hi: 'बेसन लड्डू', en: 'Besan Laddoo', art: 'besan', opts: ['i35'] },
     { tab: 'sweets', key: 'milkcake', hi: 'मिल्क केक', en: 'Milk Cake', img: 'milkcake', art: 'milkcake', opts: ['i10'] },
     { tab: 'sweets', key: 'jalebi', hi: 'जलेबी', en: 'Jalebi', art: 'jalebi', opts: ['i12'] },
     { tab: 'sweets', key: 'boondi', hi: 'बूंदी', en: 'Boondi', img: 'boondi', art: 'boondi', opts: ['i13'] },
@@ -163,7 +165,7 @@ window.MB_CATALOG = {
   milk: {
     i1: 2, i5: 2, i7: 2, i9: 2, i10: 2,     // रसगुल्ला, गुलाब जामुन, चमचम, पेड़ा, मिल्क केक — 1 किलो = 2 लीटर
     i2: 0.1, i6: 0.1, i8: 0.1,              // पीस वाले — 20 पीस ≈ 1 किलो मानकर
-    i3: 0, i4: 0, i11: 0, i12: 0, i13: 0,   // बालूशाही, लड्डू, जलेबी, बूंदी — दूध नहीं
+    i3: 0, i4: 0, i11: 0, i12: 0, i13: 0, i35: 0,   // बालूशाही, लड्डू, जलेबी, बूंदी, बेसन लड्डू — दूध नहीं
     i33: 0.8, i34: 1.6                      // पाँच मिठाई डिब्बा: 5 में से 4 दूध वाली (बालूशाही नहीं) — 1 किलो ≈ 1.6 लीटर
     // रसमलाई (i22) जानबूझकर नहीं — उसकी सिर्फ गिनती आती है (कितनी प्लेट)
   },
