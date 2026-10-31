@@ -157,6 +157,7 @@ input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
 .links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .links .btn{min-height:44px;font-size:.9rem}
 footer{color:var(--muted);font-size:.78rem;text-align:center;padding:18px 0 110px}
+footer.wrap{padding-bottom:110px} footer .fss{margin-top:8px;line-height:1.5} footer .fss b{color:var(--ink,#3A1510);letter-spacing:.3px} footer .fss a{color:inherit;text-decoration:underline}
 .cartbar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--paper) 30%);pointer-events:none}
 .cartbar button{pointer-events:auto;max-width:528px;margin:0 auto;display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;background:var(--brand);color:var(--on-brand);border:0;border-radius:14px;min-height:56px;padding:0 16px;box-shadow:0 6px 18px rgba(0,0,0,.18);font-weight:700}
 .cartbar small{display:block;font-weight:400;font-size:.78rem;opacity:.9}
@@ -424,6 +425,7 @@ hi:{
  call:'📞 कॉल करें',whatsapp:'💬 WhatsApp',directions:'🗺️ रास्ता देखें',insta:'📷 Instagram',review:'⭐ Google पर रिव्यू दें',pay_link:'💳 UPI पेमेंट / QR',
  rules_link:'📜 ऑर्डर के नियम पढ़ें',
  foot_photo:'मिठाई की फोटो हमारी दुकान की हैं। केक और जिन पर चित्र बना है, वे नमूने के लिए हैं।',
+ foot_fssai:'FSSAI पंजीकरण सं.', foot_fsc:'शिकायत/जानकारी — FSSAI का Food Safety Connect ऐप:',
  items_n:'{n} आइटम',ask_n:'+ {n} दाम पूछने वाले',cart_next:'आगे बढ़ें →',
  back:'← वापस',
  co_title:'आपका ऑर्डर',co_empty:'अभी कुछ नहीं जोड़ा।',co_browse:'मेन्यू देखें',
@@ -596,6 +598,7 @@ en:{
  call:'📞 Call',whatsapp:'💬 WhatsApp',directions:'🗺️ Directions',insta:'📷 Instagram',review:'⭐ Review on Google',pay_link:'💳 UPI payment / QR',
  rules_link:'📜 Read order rules',
  foot_photo:'Sweet photos are from our shop. Cake photos and drawings are samples.',
+ foot_fssai:'FSSAI Reg. No.', foot_fsc:'Complaints/info — FSSAI Food Safety Connect app:',
  items_n:'{n} items',ask_n:'+ {n} price on request',cart_next:'Next →',
  back:'← Back',
  co_title:'Your order',co_empty:'Nothing added yet.',co_browse:'See menu',
@@ -1175,7 +1178,9 @@ function renderMenu(){
         '<div style="margin-top:8px"><button class="btn block" data-act="go" data-v="points">'+t('lp_info_btn')+'</button></div>'+
       '</div></section>'+
     '</main>'+
-    '<footer class="wrap">© '+esc(S.name)+' · Nanaura, Darbhanga<br>'+t('foot_photo')+'</footer>'+
+    '<footer class="wrap">© '+esc(S.name)+' · Nanaura, Darbhanga<br>'+t('foot_photo')+
+      (S.fssai?'<div class="fss">'+t('foot_fssai')+' <b>'+esc(S.fssai)+'</b><br>'+t('foot_fsc')+' <a href="https://play.google.com/store/apps/details?id=safety.connect.food" target="_blank" rel="noopener">Android</a> · <a href="https://apps.apple.com/in/app/food-safety-connect/id6446887958" target="_blank" rel="noopener">iPhone</a></div>':'')+
+    '</footer>'+
     '<div class="cartbar" id="cartbar"></div>';
   $('#app').innerHTML=html;
   document.documentElement.lang=st.lang==='en'?'en':'hi';

@@ -114,6 +114,8 @@ h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
 .sechead{display:flex;align-items:baseline;gap:8px;margin:18px 0 8px}
 .sechead h2{font-size:1.05rem}
 .sechead .cnt{color:var(--muted);font-size:.85rem}
+.ogh{font-weight:700;font-size:.9rem;color:var(--brand-ink);margin:14px 2px 6px;display:flex;align-items:center;gap:6px}
+.ogh span{font-weight:600;font-size:.78rem;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 7px}
 
 .mini{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .mini.tomorrow{border-color:var(--gold);border-width:1.5px}
@@ -509,6 +511,8 @@ var DEFAULT_ITEMS=[
  ['i21','नमकीन','namkeen','किलो',200]
 ].map(function(r){return {id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
 var CATALOG=(window.MB_CATALOG&&Array.isArray(window.MB_CATALOG.items))?window.MB_CATALOG:null;
+/* FSSAI पंजीकरण नंबर — हर बिल पर छापना ज़रूरी (FSSAI आदेश, 2022 से) */
+var FSSAI=(CATALOG&&CATALOG.shop&&CATALOG.shop.fssai)||'20426312000140';
 if(CATALOG)DEFAULT_ITEMS=CATALOG.items.map(function(r){return {id:r[0],name:r[1],cat:r[2],unit:r[3],price:r[4]};});
 var WEB_SLOTS=[[8,11,'सुबह 8–11'],[11,14,'दोपहर 11–2'],[14,17,'दोपहर 2–5'],[17,20,'शाम 5–8']];
 /* समय के नंबर 0–3 वही (रजिस्टर में), घंटे मोड के हिसाब से (catalog.js):
@@ -1210,21 +1214,38 @@ function renderOrders(){
     if(filter==='cancelled')return s==='cancelled';
     return true;
   });
-  if(filter==='delivered'||filter==='cancelled'){
-    list.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-  }else{
-    list.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
-  }
+  list.sort(orderListCmp);
 
   var rows;
   if(!list.length){
     rows='<div class="empty"><b>यहाँ कोई ऑर्डर नहीं</b>दूसरा फ़िल्टर चुन कर देखो।</div>';
+  }else if(filter==='all'){
+    // सभी: ऊपर पेंडिंग, फिर पूरा हुआ, सबसे नीचे कैंसल — हर हिस्से के ऊपर छोटा नाम
+    var G=[['p','⏳ पेंडिंग'],['d','✅ पूरा हुआ'],['c','✕ कैंसल']];
+    rows=G.map(function(g){
+      var part=list.filter(function(o){return orderGroup(o)===g[0];});
+      return part.length?('<div class="ogh">'+g[1]+' <span>'+part.length+'</span></div>'+part.map(orderOverviewRow).join('')):'';
+    }).join('');
   }else{
     rows=list.map(orderOverviewRow).join('');
   }
 
   paint($('#main'),'<div class="sechead"><h2>सारे ऑर्डर</h2></div>'+(online.cfg?'<p class="hint" style="margin-top:-4px">ऑनलाइन ऑर्डर अलग <button class="lnk" data-act="nav" data-v="online">🌐 ऑनलाइन</button> टैब में हैं।</p>':'')+band+
     '<input id="ordersSearch" type="search" placeholder="नाम, फोन या ऑर्डर नंबर से खोजो" autocomplete="off" value="'+esc(ui.ordersSearch||'')+'">'+tabsHtml+'<div style="margin-top:12px">'+rows+'</div>');
+}
+/* ऑर्डर लिस्ट का क्रम: पेंडिंग/आंशिक सबसे ऊपर (जिसकी डिलीवरी सबसे पहले की — पुराना रुका हुआ सबसे ऊपर),
+   फिर पूरा हुआ (नया ऊपर), सबसे नीचे कैंसल (नया ऊपर) */
+function orderGroup(o){var s=orderStatus(o);return s==='cancelled'?'c':(s==='delivered'?'d':'p');}
+function orderNextDue(o){
+  var d=dayKey(o.date),best='';
+  o.items.forEach(function(it){if(!it.delivered){var k=it.date||d;if(!best||k<best)best=k;}});
+  return best||d;
+}
+function orderListCmp(a,b){
+  var ga=orderGroup(a),gb=orderGroup(b),R={p:0,d:1,c:2};
+  if(ga!==gb)return R[ga]-R[gb];
+  if(ga==='p'){var ka=orderNextDue(a),kb=orderNextDue(b);if(ka!==kb)return ka<kb?-1:1;return new Date(a.date)-new Date(b.date);}
+  return new Date(b.date)-new Date(a.date);
 }
 function orderOverviewRow(o){
   var c=findCustomer(o.customerId);
@@ -4146,6 +4167,7 @@ function billMessage(o){
   L.push('*'+state.shop.name+'*');
   L.push(state.shop.addr);
   L.push('Ph: '+state.shop.phone);
+  if(FSSAI)L.push('FSSAI पंजीकरण सं.: '+FSSAI);
   L.push('===================');
   L.push('BILL');
   L.push('Bill No: '+o.no);
@@ -4174,6 +4196,7 @@ function summaryMessage(c){
   L.push('*'+state.shop.name+'*');
   L.push(state.shop.addr);
   L.push('Ph: '+state.shop.phone);
+  if(FSSAI)L.push('FSSAI पंजीकरण सं.: '+FSSAI);
   L.push('===================');
   L.push('Poora Hisaab: '+c.name);
   L.push('✅ = दिया गया    ⏳ = बाकी');
@@ -4224,7 +4247,7 @@ function orderPromo(L){
 function orderPageShort(){return orderPageUrl().replace(/^https?:\/\//,'').replace(/\/$/,'');}
 function shortBillMessage(o){
   var c=findCustomer(o.customerId),L=[];
-  L.push('*'+state.shop.name+'*');
+  L.push('*'+state.shop.name+'*'+(FSSAI?' · FSSAI '+FSSAI:''));
   L.push('नमस्ते '+(c?c.name:'')+' जी,');
   L.push('आपका बिल (ऑर्डर #'+o.no+', डिलीवरी '+fmtDT(o.date)+')');
   L.push('कुल: '+rupee(orderTotal(o)));
@@ -4240,7 +4263,7 @@ function shortSummaryMessage(c){
   var os=customerOrders(c.id).filter(function(o){return !o.cancelled;});
   var t=0,p=0;os.forEach(function(o){t+=orderTotal(o);p+=orderPaid(o);});
   var L=[];
-  L.push('*'+state.shop.name+'*');
+  L.push('*'+state.shop.name+'*'+(FSSAI?' · FSSAI '+FSSAI:''));
   L.push('नमस्ते '+c.name+' जी,');
   L.push('आपका पूरा हिसाब ('+os.length+' ऑर्डर)');
   L.push('कुल: '+rupee(t));
@@ -4302,7 +4325,7 @@ function biHeader(ctx,logo){
   var W=BI.W,P=BI.P,tx=logo?P+178:P,tw=W-tx-P;
   biFont(ctx,700,50,true);var nameL=biWrap(ctx,state.shop.name,tw);
   biFont(ctx,400,29);var addrL=biWrap(ctx,state.shop.addr,tw);
-  var blockH=nameL.length*58+addrL.length*40+40;
+  var blockH=nameL.length*58+addrL.length*40+40+(FSSAI?38:0);
   var H=Math.max(logo?240:0,blockH+70);
   ctx.fillStyle=BI.maroon;ctx.fillRect(0,0,W,H);
   if(logo){var ls=156;ctx.drawImage(logo,P,Math.round((H-ls)/2),ls,ls);}
@@ -4312,7 +4335,8 @@ function biHeader(ctx,logo){
   y-=14;
   biFont(ctx,400,29);
   addrL.forEach(function(l){biText(ctx,l,tx,y,'left',BI.cream);y+=40;});
-  if(state.shop.phone)biText(ctx,'फ़ोन: '+state.shop.phone,tx,y,'left',BI.cream);
+  if(state.shop.phone){biText(ctx,'फ़ोन: '+state.shop.phone,tx,y,'left',BI.cream);y+=38;}
+  if(FSSAI){biFont(ctx,400,26);biText(ctx,'FSSAI पंजीकरण सं.: '+FSSAI,tx,y,'left',BI.cream);}
   return H;
 }
 function biTitle(ctx,y,title,rTop,rBottom){
@@ -4631,6 +4655,7 @@ function printOrderBill(o){
       '<h2 style="margin:0">'+esc(state.shop.name)+'</h2>'+
       '<div>'+esc(state.shop.addr)+'</div>'+
       '<div>Ph: '+esc(state.shop.phone)+'</div>'+
+      (FSSAI?'<div>FSSAI Reg. No.: '+esc(FSSAI)+'</div>':'')+
     '</div>'+
     '<hr>'+
     '<div style="display:flex;justify-content:space-between;margin:10px 0">'+

@@ -18,11 +18,12 @@
 */
 window.MB_CATALOG = {
   version: 12,
-  updated: '2026-10-29',
+  updated: '2026-10-31',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
     brand: 'MB Sweets',
+    fssai: '20426312000140',   // FSSAI पंजीकरण सं. (30-10-2026 से; फीस 29-10-2031 तक) — बिल, ऑर्डर पेज, वेबसाइट पर दिखता है
     phone: '8002010218',
     wa: '918002010218',
     upi: 'paytmqr71dbbc@ptys',
