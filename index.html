@@ -490,7 +490,7 @@ var CATS=[['mithai','मिठाई'],['dairy','डेयरी (दूध-द�
 var UNIT_OPTS=['किलो','पीस','लीटर','पैकेट','पैक','प्लेट','ग्राम','डिब्बा'];
 var STAMP={pending:'पेंडिंग',partial:'आंशिक',delivered:'डिलीवर',cancelled:'कैंसल'};
 
-var DEFAULT_SHOP={name:'Maa Bhagwati Misthan Bhandar',addr:'Nanaura, Darbhanga, Bihar - 846005',phone:'8002010218',owner:'Pankaj Gupta',terms:'सामान ले जाने से पहले पूरा पेमेंट करना होगा।'};
+var DEFAULT_SHOP={name:'Maa Bhagwati Misthan Bhandar',addr:'Nanaura, Darbhanga, Bihar - 846005',phone:'8002010218',phone2:'8051667424',owner:'Pankaj Gupta',terms:'सामान ले जाने से पहले पूरा पेमेंट करना होगा।'};
 var DEFAULT_ITEMS=[
  ['i1','रसगुल्ला (किलो)','mithai','किलो',300],
  ['i2','रसगुल्ला (पीस)','mithai','पीस',15],
@@ -646,6 +646,8 @@ function phoneProblem(ph,exceptId){
   return '';
 }
 function catLabel(c){for(var i=0;i<CATS.length;i++)if(CATS[i][0]===c)return CATS[i][1];return c;}
+/* सिर्फ़ बिल पर (फोटो, प्रिंट, WhatsApp बिल/पूरा हिसाब) दोनों नंबर: 8002010218, 8051667424 — बाकी हर जगह (SMS, उधारी मैसेज, कार्ड, हेडर) सिर्फ़ मुख्य नंबर। मालिक का कहना (1 नवंबर 2026) */
+function shopPhones(){return [state.shop.phone,state.shop.phone2].map(function(x){return String(x||'').trim();}).filter(function(x){return x;}).join(', ');}
 function phoneNorm(p){
   p=String(p||'').replace(/\D/g,'');
   if(!p)return '';
@@ -1411,7 +1413,8 @@ function renderBackup(){
     '<div class="sechead" style="margin-top:22px"><h2>दुकान की जानकारी</h2></div>'+
     '<label class="fl">दुकान का नाम<input id="s-name" type="text" value="'+esc(s.name)+'"></label>'+
     '<label class="fl">पता<input id="s-addr" type="text" value="'+esc(s.addr)+'"></label>'+
-    '<label class="fl">फोन नंबर<input id="s-phone" type="tel" value="'+esc(s.phone)+'"></label>'+
+    '<label class="fl">फोन नंबर (मुख्य — WhatsApp वाला)<input id="s-phone" type="tel" value="'+esc(s.phone)+'"></label>'+
+    '<label class="fl">दूसरा फोन नंबर (सिर्फ़ बिल पर साथ में छपेगा)<input id="s-phone2" type="tel" value="'+esc(s.phone2||'')+'"></label>'+
     '<label class="fl">मालिक का नाम<input id="s-owner" type="text" value="'+esc(s.owner)+'"></label>'+
     '<label class="fl">नियम व शर्तें (बिल के नीचे दिखेंगी, हर लाइन एक नियम)<textarea id="s-terms" rows="3">'+esc(s.terms||'')+'</textarea></label>'+
     '<div class="err" id="s-err"></div>'+
@@ -4222,7 +4225,7 @@ function billMessage(o){
   var L=[];
   L.push('*'+state.shop.name+'*');
   L.push(state.shop.addr);
-  L.push('Ph: '+state.shop.phone);
+  L.push('Ph: '+shopPhones());
   if(FSSAI)L.push('FSSAI पंजीकरण सं.: '+FSSAI);
   L.push('===================');
   L.push('BILL');
@@ -4251,7 +4254,7 @@ function summaryMessage(c){
   var L=[];
   L.push('*'+state.shop.name+'*');
   L.push(state.shop.addr);
-  L.push('Ph: '+state.shop.phone);
+  L.push('Ph: '+shopPhones());
   if(FSSAI)L.push('FSSAI पंजीकरण सं.: '+FSSAI);
   L.push('===================');
   L.push('Poora Hisaab: '+c.name);
@@ -4391,7 +4394,7 @@ function biHeader(ctx,logo){
   y-=14;
   biFont(ctx,400,29);
   addrL.forEach(function(l){biText(ctx,l,tx,y,'left',BI.cream);y+=40;});
-  if(state.shop.phone){biText(ctx,'फ़ोन: '+state.shop.phone,tx,y,'left',BI.cream);y+=38;}
+  if(shopPhones()){biText(ctx,'फ़ोन: '+shopPhones(),tx,y,'left',BI.cream);y+=38;}
   if(FSSAI){biFont(ctx,400,26);biText(ctx,'FSSAI पंजीकरण सं.: '+FSSAI,tx,y,'left',BI.cream);}
   return H;
 }
@@ -4717,7 +4720,7 @@ function printOrderBill(o){
     '<div style="text-align:center;margin-bottom:14px">'+
       '<h2 style="margin:0">'+esc(state.shop.name)+'</h2>'+
       '<div>'+esc(state.shop.addr)+'</div>'+
-      '<div>Ph: '+esc(state.shop.phone)+'</div>'+
+      '<div>Ph: '+esc(shopPhones())+'</div>'+
       (FSSAI?'<div>FSSAI Reg. No.: '+esc(FSSAI)+'</div>':'')+
     '</div>'+
     '<hr>'+
@@ -5344,7 +5347,7 @@ document.addEventListener('click',function(e){
     case 'save-shopinfo':
       var sn=$('#s-name').value.trim();
       if(!sn){$('#s-err').textContent='दुकान का नाम लिखो।';break;}
-      state.shop={name:sn,addr:$('#s-addr').value.trim(),phone:$('#s-phone').value.trim(),owner:$('#s-owner').value.trim(),terms:$('#s-terms').value.trim()};
+      state.shop={name:sn,addr:$('#s-addr').value.trim(),phone:$('#s-phone').value.trim(),phone2:$('#s-phone2').value.trim(),owner:$('#s-owner').value.trim(),terms:$('#s-terms').value.trim()};
       save();renderShell();toast('जानकारी save हो गई');
       break;
     case 'copy-backup':
