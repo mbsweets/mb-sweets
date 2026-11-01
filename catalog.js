@@ -17,8 +17,8 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 13,
-  updated: '2026-10-31',
+  version: 14,
+  updated: '2026-11-01',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
@@ -112,7 +112,9 @@ window.MB_CATALOG = {
     ['i34', 'पाँच मिठाई डिब्बा (1 किलो)', 'mithai', 'डिब्बा', 350, 10],
     ['i35', 'बेसन लड्डू', 'mithai', 'किलो', 220, 12],
     ['i36', 'समोसा', 'namkeen', 'पीस', 10, 13],
-    ['i37', 'लिट्टी', 'namkeen', 'पीस', 10, 13]
+    ['i37', 'लिट्टी', 'namkeen', 'पीस', 10, 13],
+    ['i38', 'कलाकंद (किलो)', 'mithai', 'किलो', 600, 14],
+    ['i39', 'कलाकंद (पीस)', 'mithai', 'पीस', 20, 14]
   ],
 
   /* ऑनलाइन दाम (सिर्फ़ ऑर्डर मेन्यू और वेबसाइट) — id: [ऑनलाइन दाम, घर पर डिलीवरी चार्ज हर पैक/लीटर पर]
@@ -142,6 +144,7 @@ window.MB_CATALOG = {
     { tab: 'sweets', key: 'laddoo', hi: 'मोतीचूर लड्डू', en: 'Motichoor Laddoo', img: 'laddoo', opts: ['i11'] },
     { tab: 'sweets', key: 'besanladdoo', hi: 'बेसन लड्डू', en: 'Besan Laddoo', img: 'besanladdoo', art: 'besan', opts: ['i35'] },
     { tab: 'sweets', key: 'milkcake', hi: 'मिल्क केक', en: 'Milk Cake', img: 'milkcake', art: 'milkcake', opts: ['i10'] },
+    { tab: 'sweets', key: 'kalakand', hi: 'कलाकंद', en: 'Kalakand', img: 'kalakand', art: 'milkcake', opts: ['i38', 'i39'] },
     { tab: 'sweets', key: 'jalebi', hi: 'जलेबी', en: 'Jalebi', art: 'jalebi', opts: ['i12'] },
     { tab: 'sweets', key: 'boondi', hi: 'बूंदी', en: 'Boondi', img: 'boondi', art: 'boondi', opts: ['i13'] },
 
@@ -170,7 +173,7 @@ window.MB_CATALOG = {
     i2: 0.1, i6: 0.1, i8: 0.1,              // पीस वाले — 20 पीस ≈ 1 किलो मानकर
     i3: 0, i4: 0, i11: 0, i12: 0, i13: 0, i35: 0,   // बालूशाही, मोतीचूर लड्डू, जलेबी, बूंदी, बेसन लड्डू — दूध नहीं
     i33: 0.8, i34: 1.6                      // पाँच मिठाई डिब्बा: 5 में से 4 दूध वाली (बालूशाही नहीं) — 1 किलो ≈ 1.6 लीटर
-    // रसमलाई (i22) जानबूझकर नहीं — उसकी सिर्फ गिनती आती है (कितनी प्लेट)
+    // रसमलाई (i22) और कलाकंद (i38, i39) जानबूझकर नहीं — उनकी सिर्फ गिनती आती है (दूध का पक्का हिसाब मालिक से मिलने पर)
   },
 
   /* कस्टम केक — दाम WhatsApp पर बताया जाता है */
