@@ -159,6 +159,10 @@ h1,h2,h3{font-family:'Baloo 2','Mukta',system-ui,sans-serif;margin:0}
 .btn{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:transparent;font-weight:700;color:var(--ink)}
 a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .callbtn{border-color:var(--green);color:var(--green)}
+.smsbtn{border-color:#1F6FB2;color:#1F6FB2}
+.smsbadge{display:inline-block;font-size:.72rem;font-weight:700;color:#1F6FB2;border:1px solid #1F6FB2;border-radius:10px;padding:0 7px;margin-left:6px;vertical-align:1px}
+.smschk{display:flex;align-items:center;gap:8px;font-size:.92rem;margin:-2px 0 12px;color:var(--ink,#3A1510)}
+.smschk input{width:20px;height:20px;flex:none;accent-color:#1F6FB2}
 .btn.primary{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
 .btn.warn{background:var(--warn-bg);border-color:var(--warn-bg);color:#fff}
 .btn.small{min-height:40px;padding:0 12px;font-size:.92rem}
@@ -1278,7 +1282,7 @@ function renderCustomer(){
   var backTarget=ui.cameFrom==='dues'?'dues':ui.cameFrom;
   var html='<button class="backbtn" data-act="nav" data-v="'+backTarget+'">\u2190 '+backLabel+'</button>'+
     '<div class="cphead"><div><h2>'+esc(c.name)+'</h2>'+
-    (c.phone?'<div class="ph"><a href="tel:+'+phoneNorm(c.phone)+'">'+esc(c.phone)+'</a></div>':'')+
+    (c.phone?'<div class="ph"><a href="tel:+'+phoneNorm(c.phone)+'">'+esc(c.phone)+'</a>'+(c.sms?' <span class="smsbadge">📩 SMS वाले</span>':'')+'</div>':'')+
     (c.address?'<div class="addr">'+esc(c.address)+'</div>':'')+
     '</div></div>'+
     '<div class="cpacts"><button class="lnk" data-act="edit-customer" data-id="'+c.id+'">बदलो</button><button class="lnk danger" data-act="del-customer" data-id="'+c.id+'">डिलीट</button></div>'+
@@ -1827,7 +1831,8 @@ function openCustomerForm(id){
   openSheet(
     '<div class="sh-head"><h2>'+(c?'ग्राहक बदलो':'नया ग्राहक')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<label class="fl">नाम<input id="c-name" type="text" value="'+esc(c?c.name:'')+'"></label>'+
-    '<label class="fl">फोन नंबर (WhatsApp वाला)<input id="c-phone" type="tel" value="'+esc(c?c.phone:'')+'"></label>'+
+    '<label class="fl">फोन नंबर (WhatsApp / मोबाइल)<input id="c-phone" type="tel" value="'+esc(c?c.phone:'')+'"></label>'+
+    '<label class="smschk"><input id="c-sms" type="checkbox"'+(c&&c.sms?' checked':'')+'> 📩 WhatsApp नहीं चलाते — बिल SMS से भेजेंगे</label>'+
     '<label class="fl">पता<input id="c-addr" type="text" value="'+esc(c?c.address:'')+'"></label>'+
     '<div class="err" id="c-err"></div>'+
     '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-customer" data-id="'+(c?c.id:'')+'">Save करो</button></div>'
@@ -1840,9 +1845,11 @@ function saveCustomerFrom(id){
   var phErr=phoneProblem($('#c-phone').value.trim(),id||null);
   if(phErr){$('#c-err').textContent=phErr;return null;}
   var c=id?findCustomer(id):null;
-  if(c){c.name=name;c.phone=$('#c-phone').value.trim();c.address=$('#c-addr').value.trim();}
+  var smsOn=!!($('#c-sms')&&$('#c-sms').checked);
+  if(c){c.name=name;c.phone=$('#c-phone').value.trim();c.address=$('#c-addr').value.trim();if(smsOn)c.sms=true;else delete c.sms;}
   else{
     c={id:uid(),name:name,phone:$('#c-phone').value.trim(),address:$('#c-addr').value.trim(),createdAt:Date.now()};
+    if(smsOn)c.sms=true;
     state.customers.push(c);
   }
   save();
@@ -3215,6 +3222,12 @@ function kWaButton(kind,ref,p,label,cls){
   if(href)return '<a class="btn '+cls+'" href="'+esc(href)+'" target="_blank" rel="noopener" data-act="k-wa-go"'+extra+'>'+label+'</a>';
   return '<button class="btn '+cls+'" data-act="k-wa-need-phone"'+extra+'>'+label+'</button>';
 }
+/* SMS बटन — नंबर हो तभी (नंबर नहीं है तो WhatsApp वाला बटन नंबर जुड़वाता है) */
+function kSmsButton(kind,ref,p,cls,label){
+  var href=p&&p.phone?smsLink(p.phone,smsK(kind,ref)):'';
+  if(!href)return '';
+  return '<a class="btn smsbtn '+cls+'" href="'+esc(href)+'" data-act="k-sms-go" data-kind="'+kind+'" data-ref="'+ref+'" data-pid="'+p.id+'">'+label+'</a>';
+}
 function openKPhoneSheet(kind,ref,pid){
   var p=findParty(pid);if(!p)return;
   openSheet('<div class="sh-head"><h2>WhatsApp नंबर जोड़ो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
@@ -3281,8 +3294,8 @@ function renderParty(){
     '<div class="actbar">'+
       '<button class="btn primary small" data-act="k-new" data-type="u" data-id="'+p.id+'">📒 उधार</button>'+
       '<button class="btn primary small" data-act="k-new" data-type="j" data-id="'+p.id+'">💰 जमा</button>'+
-      (t.bal>0?kWaButton('remind',p.id,p,'💬 याद दिलाओ','small'):'')+
-      (es.length?kWaButton('hisaab',p.id,p,'📲 हिसाब भेजो','small'):'')+
+      (t.bal>0?kWaButton('remind',p.id,p,'💬 याद दिलाओ','small')+kSmsButton('remind',p.id,p,'small','📩 SMS से याद'):'')+
+      (es.length?kWaButton('hisaab',p.id,p,'📲 हिसाब भेजो','small')+kSmsButton('hisaab',p.id,p,'small','📩 SMS से हिसाब'):'')+
       callBtn(p.phone)+
     '</div>';
   if(t.bal>0){
@@ -3427,6 +3440,7 @@ function openKDone(e){
     '<div class="udsum"><div><span>'+(isU?'अभी का उधार':'अभी जमा')+'</span><b'+(isU?'':' style="color:var(--green)"')+'>'+rupee(e.amount)+'</b></div>'+right+'</div>'+
     '<p class="hint">'+(isU?'ग्राहक को WhatsApp पर बता दो':'ग्राहक को धन्यवाद और बचा हुआ हिसाब भेज दो')+' — मैसेज तैयार है, वहाँ सिर्फ Send दबाना है।</p>'+
     '<div class="billacts">'+kWaButton(isU?'udhar':'jama',e.id,p,isU?'💬 WhatsApp पर बताओ':'💬 WhatsApp पर धन्यवाद भेजो','primary')+
+    kSmsButton(isU?'udhar':'jama',e.id,p,'',isU?'📩 SMS से बताओ':'📩 SMS से धन्यवाद भेजो')+
     '<button class="btn" data-act="close">बाद में</button></div>');
 }
 function openKEntryActions(id){
@@ -3434,7 +3448,7 @@ function openKEntryActions(id){
   var p=findParty(e.partyId);
   openSheet('<div class="sh-head"><h2>'+(e.type==='u'?'उधार':'जमा')+' — '+rupee(e.amount)+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<p class="hint">'+(p?esc(p.name)+' · ':'')+hiShort(e.date)+(e.note?' · '+esc(e.note):'')+'</p>'+
-    '<div class="billacts">'+(p?kWaButton(e.type==='u'?'udhar':'jama',e.id,p,'💬 इसका मैसेज WhatsApp पर भेजो',''):'')+
+    '<div class="billacts">'+(p?kWaButton(e.type==='u'?'udhar':'jama',e.id,p,'💬 इसका मैसेज WhatsApp पर भेजो','')+kSmsButton(e.type==='u'?'udhar':'jama',e.id,p,'','📩 इसका मैसेज SMS पर भेजो'):'')+
     '<button class="btn" data-act="k-edit" data-id="'+e.id+'">✏️ बदलो</button>'+
     '<button class="btn warn" data-act="k-del" data-id="'+e.id+'">🗑️ हटाओ</button></div>');
 }
@@ -4138,6 +4152,48 @@ function waLink(phone,text){
   var p=phoneNorm(phone);if(!p)return '';
   return 'https://api.whatsapp.com/send?phone='+p+'&text='+encodeURIComponent(text);
 }
+/* ---------- SMS (जो ग्राहक WhatsApp नहीं चलाते) — फ़ोन का Messages ऐप नंबर और मैसेज भरकर खुलता है, बस Send दबाना है।
+   SMS दुकान के फ़ोन के प्लान से जाता है। हिंदी SMS में एक SMS = 70 अक्षर, इसलिए मैसेज छोटे रखे हैं (बिल की फोटो SMS से नहीं जाती)। ---------- */
+var SMS_SHOP='माँ भगवती मिष्ठान भंडार';
+function smsLink(phone,text){
+  var p=phoneNorm(phone);if(p.length<12)return '';
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent||'');
+  return 'sms:+'+p+(ios?'&':'?')+'body='+encodeURIComponent(text);
+}
+function smsSign(L){L.push('धन्यवाद! '+(state.shop.phone||''));}
+function smsBill(o){
+  var c=findCustomer(o.customerId),tot=round2(orderTotal(o)),due=round2(orderDue(o)),L=[SMS_SHOP];
+  L.push('नमस्ते '+(c?c.name:'')+' जी, ऑर्डर #'+o.no+' ('+fmtDT(o.date)+')');
+  L.push(due>0?('कुल '+rupee(tot)+', जमा '+rupee(orderPaid(o))+', बाकी '+rupee(due)):('कुल '+rupee(tot)+' — पूरा पेमेंट मिल गया'));
+  if(due>0)L.push('पेमेंट: '+orderPageUrl()+'#pay='+due+(o.webCode?','+o.webCode:''));
+  smsSign(L);
+  return L.join('\n');
+}
+function smsSummary(c){
+  var os=customerOrders(c.id).filter(function(o){return !o.cancelled;});
+  var t=0,p=0;os.forEach(function(o){t+=orderTotal(o);p+=orderPaid(o);});
+  var due=round2(Math.max(0,t-p)),L=[SMS_SHOP];
+  L.push('नमस्ते '+c.name+' जी, आपका पूरा हिसाब ('+os.length+' ऑर्डर)');
+  L.push(due>0?('कुल '+rupee(t)+', जमा '+rupee(p)+', बाकी '+rupee(due)):('कुल '+rupee(t)+' — पूरा पेमेंट मिल गया'));
+  if(due>0)L.push('पेमेंट: '+orderPageUrl()+'#pay='+due);
+  smsSign(L);
+  return L.join('\n');
+}
+/* उधारी (खाता) के छोटे SMS — kind: udhar / jama / remind / hisaab */
+function smsK(kind,ref){
+  var e=null,p=null;
+  if(kind==='udhar'||kind==='jama'){e=findKEntry(ref);if(!e)return '';p=findParty(e.partyId);}else p=findParty(ref);
+  if(!p)return '';
+  var bal=round2(partyTotals(p.id).bal),L=[SMS_SHOP,'नमस्ते '+p.name+' जी,'];
+  var balTxt=bal>0?('कुल बाकी '+rupee(bal)):(bal<0?(rupee(-bal)+' एडवांस जमा है'):'आपका हिसाब साफ़ है');
+  if(kind==='udhar')L.push((e.date===todayStr()?'आज ':hiShort(e.date)+' को ')+rupee(e.amount)+' का उधार लिखा गया। '+balTxt+'।');
+  else if(kind==='jama')L.push(rupee(e.amount)+' जमा हो गए। '+(bal>0?'अब बाकी '+rupee(bal):balTxt)+'।');
+  else if(kind==='remind'){var od=partyOldestDueKey(p.id);L.push('आपका '+rupee(bal)+' बकाया है'+(od&&od<todayStr()?' ('+hiShort(od)+' से)':'')+'। सुविधा से जमा कर दीजिए।');}
+  else L.push(balTxt+'। पूरा हिसाब दुकान पर या इसी नंबर पर पूछ लीजिए।');
+  if(bal>0)L.push('पेमेंट: '+orderPageUrl()+'#pay='+bal);
+  smsSign(L);
+  return L.join('\n');
+}
 function appendTerms(L){
   var terms=(state.shop.terms||'').trim();
   if(!terms)return;
@@ -4553,12 +4609,18 @@ function openBillSheet(kind,refId){
   ui.billShare={kind:kind,ref:refId,file:null,url:null};
   var chatHref=waLink(c.phone,kind==='order'?shortBillMessage(o):shortSummaryMessage(c));
   var textHref=waLink(c.phone,kind==='order'?billMessage(o):summaryMessage(c));
+  var smsHref=smsLink(c.phone,kind==='order'?smsBill(o):smsSummary(c));
+  var smsFirst=!!c.sms;   // ग्राहक पर "WhatsApp नहीं चलाते" का निशान है तो SMS बटन सबसे ऊपर
+  var smsBtn=smsHref?'<a class="btn '+(smsFirst?'primary':'smsbtn')+'" href="'+esc(smsHref)+'">📩 SMS में भेजो</a>':
+    '<button class="btn '+(smsFirst?'primary':'smsbtn')+'" data-act="need-phone" data-via="sms" data-kind="'+kind+'" data-ref="'+refId+'">📩 नंबर जोड़ो और SMS भेजो</button>';
   openSheet('<div class="sh-head"><h2>'+(kind==='order'?'बिल भेजो — ऑर्डर #'+o.no:'पूरा हिसाब भेजो')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<div id="bill-prev" class="billprev"><p class="hint">बिल की फोटो बन रही है…</p></div>'+
     '<div class="billacts">'+
-      '<button class="btn primary" data-act="bill-share" disabled>📤 फोटो WhatsApp पर भेजो</button>'+
+      (smsFirst?smsBtn+'<p class="hint" style="margin:-2px 0 2px;text-align:center">📩 यह ग्राहक WhatsApp नहीं चलाता — SMS में छोटा बिल जाएगा</p>':'')+
+      '<button class="btn'+(smsFirst?'':' primary')+'" data-act="bill-share" disabled>📤 फोटो WhatsApp पर भेजो</button>'+
       (chatHref?'<a class="btn" href="'+esc(chatHref)+'" target="_blank" rel="noopener">💬 '+esc(c.name)+' की WhatsApp चैट खोलो</a>':
         '<button class="btn" data-act="need-phone" data-kind="'+kind+'" data-ref="'+refId+'">💬 नंबर जोड़ो और चैट खोलो</button>')+
+      (smsFirst?'':smsBtn)+
       '<button class="btn" data-act="bill-save" disabled>⬇️ फोटो फ़ोन में सेव करो</button>'+
       (textHref?'<a class="lnk muted" style="text-align:center;display:block;padding:8px" href="'+esc(textHref)+'" target="_blank" rel="noopener">फोटो नहीं, सिर्फ टेक्स्ट में भेजो</a>':'')+
     '</div>'+
@@ -4574,16 +4636,17 @@ function openBillSheet(kind,refId){
     var pv=$('#bill-prev');if(pv)pv.innerHTML='<p class="err" style="padding:16px">फोटो नहीं बन पाई — नीचे "सिर्फ टेक्स्ट में भेजो" दबाओ।</p>';
   });
 }
-function openQuickPhoneSheet(kind,refId){
+function openQuickPhoneSheet(kind,refId,via){
   var c=kind==='order'?findCustomer(findOrder(refId).customerId):findCustomer(refId);
   if(!c)return;
+  var sms=via==='sms',nm=sms?'मोबाइल नंबर':'व्हाट्सएप नंबर';
   openSheet(
-    '<div class="sh-head"><h2>व्हाट्सएप नंबर जोड़ो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
-    '<p class="hint">'+esc(c.name)+' का व्हाट्सएप नंबर अभी सेव नहीं है। नंबर डालो, बिल उसी नंबर पर चला जाएगा।</p>'+
-    '<label class="fl">व्हाट्सएप नंबर<input id="qp-phone" type="tel" inputmode="tel" placeholder="10 अंकों का मोबाइल नंबर" value="'+esc(c.phone||'')+'"></label>'+
+    '<div class="sh-head"><h2>'+nm+' जोड़ो</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">'+esc(c.name)+' का '+nm+' अभी सेव नहीं है। नंबर डालो, बिल उसी नंबर पर '+(sms?'SMS से ':'')+'चला जाएगा।</p>'+
+    '<label class="fl">'+nm+'<input id="qp-phone" type="tel" inputmode="tel" placeholder="10 अंकों का मोबाइल नंबर" value="'+esc(c.phone||'')+'"></label>'+
     '<div class="err" id="qp-err"></div>'+
     '<div class="sh-actions"><button class="btn" data-act="close">बाद में</button>'+
-    '<a class="btn primary" href="#" target="_blank" rel="noopener" data-act="save-quick-phone" data-kind="'+kind+'" data-ref="'+refId+'">Save और भेजो</a>'+
+    '<a class="btn primary" href="#"'+(sms?'':' target="_blank" rel="noopener"')+' data-act="save-quick-phone" data-via="'+(sms?'sms':'wa')+'" data-kind="'+kind+'" data-ref="'+refId+'">Save और भेजो</a>'+
     '</div>'
   );
   setTimeout(function(){var f=$('#qp-phone');if(f)f.focus();},60);
@@ -4985,19 +5048,20 @@ document.addEventListener('click',function(e){
       if(ui.billShare&&ui.billShare.url){saveBlobUrl(ui.billShare.url,ui.billShare.file.name);toast('फोटो सेव हो गई');}
       break;
     case 'need-phone':
-      openQuickPhoneSheet(t.getAttribute('data-kind'),t.getAttribute('data-ref'));
+      openQuickPhoneSheet(t.getAttribute('data-kind'),t.getAttribute('data-ref'),t.getAttribute('data-via'));
       break;
     case 'save-quick-phone':
       var qkind=t.getAttribute('data-kind'),qref=t.getAttribute('data-ref');
       var qphoneRaw=$('#qp-phone').value.trim();
       var qc=qkind==='order'?findCustomer(findOrder(qref).customerId):findCustomer(qref);
-      var qmsg=qc&&qkind==='order'?shortBillMessage(findOrder(qref)):(qc?shortSummaryMessage(qc):'');
+      var qsms=t.getAttribute('data-via')==='sms';
+      var qmsg=qc&&qkind==='order'?(qsms?smsBill(findOrder(qref)):shortBillMessage(findOrder(qref))):(qc?(qsms?smsSummary(qc):shortSummaryMessage(qc)):'');
       var qprob=qphoneRaw?phoneProblem(qphoneRaw,qc?qc.id:null):'मोबाइल नंबर लिखो।';
-      var qlink=(qc&&!qprob)?waLink(qphoneRaw,qmsg):'';
+      var qlink=(qc&&!qprob)?(qsms?smsLink(qphoneRaw,qmsg):waLink(qphoneRaw,qmsg)):'';
       if(!qlink){e.preventDefault();$('#qp-err').textContent=qprob||'सही मोबाइल नंबर लिखो (10 अंकों का)।';break;}
       qc.phone=qphoneRaw;save();
       t.setAttribute('href',qlink);
-      setTimeout(function(){closeSheet();renderRoute();toast('नंबर जुड़ गया, WhatsApp खुल रहा है');},80);
+      setTimeout(function(){closeSheet();renderRoute();toast(qsms?'नंबर जुड़ गया, SMS खुल रहा है':'नंबर जुड़ गया, WhatsApp खुल रहा है');},80);
       break;
 
     case 'of-change-cust':ui.orderDraft.customerId=null;ui.orderDraft.custSearch='';renderOrderSheet();break;
@@ -5191,6 +5255,7 @@ document.addEventListener('click',function(e){
         $all('[data-act=ke-chip]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-v')===ui.kDraft.note);});
       }
       break;
+    case 'k-sms-go':
     case 'k-wa-go':
       var kgp=findParty(t.getAttribute('data-pid'));
       if(t.getAttribute('data-kind')==='remind'&&kgp){kgp.remindedAt=Date.now();save();}
