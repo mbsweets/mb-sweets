@@ -17,8 +17,8 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 14,
-  updated: '2026-11-01',
+  version: 15,
+  updated: '2026-11-04',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
@@ -67,12 +67,12 @@ window.MB_CATALOG = {
   off: [],
   /* त्योहार की पट्टी: from–to (दोनों दिन शामिल) मेन्यू और वेबसाइट पर सबसे ऊपर दिखती है, फिर अपने-आप हट जाती है।
      card = बटन दबाने पर मेन्यू का कौन-सा कार्ड खुले (उस कार्ड के दाम पट्टी में अपने-आप)। कोई त्योहार न हो तो: fest: null, */
-  fest: { from: '2026-10-26', to: '2026-10-29', card: 'dibba',
-    hi: '🪔 करवा चौथ स्पेशल (29 अक्टूबर) — पाँच मिठाई एक डिब्बे में',
-    en: '🪔 Karwa Chauth special (29 Oct) — five sweets in one box',
-    subHi: 'बालूशाही, चमचम, मिल्क केक, पेड़ा, गुलाब जामुन',
-    subEn: 'Balushahi, Cham Cham, Milk Cake, Peda, Gulab Jamun',
-    tagHi: '🪔 करवा चौथ स्पेशल', tagEn: '🪔 Karwa Chauth special' },
+  fest: { from: '2026-11-04', to: '2026-11-08', card: 'dibba',
+    hi: '🪔 दिवाली स्पेशल — पाँच मिठाई एक डिब्बे में',
+    en: '🪔 Diwali special — five sweets in one box',
+    subHi: 'बालूशाही, चमचम, मिल्क केक, पेड़ा, गुलाब जामुन · पूजा की मिठाई पहले से बुक करें',
+    subEn: 'Balushahi, Cham Cham, Milk Cake, Peda, Gulab Jamun · book your puja sweets in advance',
+    tagHi: '🪔 दिवाली स्पेशल', tagEn: '🪔 Diwali special' },
 
   /* [id, बिलिंग वाला नाम, category, unit, दाम, v] */
   items: [
