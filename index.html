@@ -6129,8 +6129,10 @@ function aiDevKey(s){
 /* एक शब्द → तुलना वाली चाबी: 'a' हटाओ (हिंदी में अ छिपा रहता है), बाकी स्वर रखो; skel = सिर्फ़ व्यंजन */
 function aiTokKey(w){
   var k=/[ऀ-ॿ]/.test(w)?aiDevKey(w):aiLatKey(w);
-  var full=k.replace(/a/g,'');
-  return {full:full||k,sk:k.replace(/[aeiouy]/g,'')||k};
+  k=k.replace(/v/g,'b');   // ब/व एक जैसे (विकास = बिकास, विनोद = बिनोद)
+  var dd=function(x){return x.replace(/(.)\1+/g,'$1');};   // 'a' हटने पर बने दोहरे अक्षर (pappu→ppu→pu = पप्पू)
+  var full=dd(k.replace(/a/g,''));
+  return {full:full||k,sk:dd(k.replace(/[aeiouy]/g,''))||k};
 }
 function aiLev(a,b){
   if(a===b)return 0;if(!a.length)return b.length;if(!b.length)return a.length;
@@ -6155,6 +6157,8 @@ function aiNameScore(q,name){
   qk.forEach(function(a){var best=0,bi=-1;nk.forEach(function(b,i){if(used[i])return;var s=aiTokSim(a,b);if(s>best){best=s;bi=i;}});if(bi>-1&&best>=0.6)used[bi]=1;tot+=best;});
   var sc=tot/qk.length;
   if(qk.length>=2&&nk.length>=2&&Object.keys(used).length>=2)sc=Math.min(1,sc+0.03);   // पूरा नाम मिला
+  /* सेव नाम के सारे शब्द बोले नाम में मिल गए, ऊपर से उपनाम ज़्यादा बोला ("Mohan Kumar" → "मोहन") — फिर भी पास का मेल */
+  if(qk.length>nk.length){var cov=nk.reduce(function(t,b){return t+Math.max.apply(null,qk.map(function(a){return aiTokSim(a,b);}));},0)/nk.length;if(cov>=0.9)sc=Math.max(sc,0.85*cov);}
   var ql=String(q).toLowerCase().trim(),nl=String(name).toLowerCase().trim();
   if(ql&&nl===ql)sc=1;
   return Math.round(sc*1000)/1000;
@@ -6221,7 +6225,8 @@ function aiItemMatch(name,unit,id){
 function aiItemByName(nm,unit){
   var u=aiUnit(unit),best=null;
   state.items.forEach(function(it){
-    var s=Math.max(aiNameScore(nm,displayName(it)),aiNameScore(nm,it.name));
+    var s=Math.max(aiNameScore(nm,displayName(it)),aiNameScore(nm,it.name),
+      aiNameScore(String(nm).replace(/\s+/g,''),displayName(it).replace(/\s+/g,'')));   // गुलाबजामुन = गुलाब जामुन, चम चम = चमचम
     if(u&&it.unit===u)s+=0.02;
     if(!best||s>best.s)best={it:it,s:s};
   });
@@ -6719,7 +6724,7 @@ function aiPP(a,t){
     if(rs>=0.6){if(ex)ex.s=Math.min(1,Math.max(ex.s,rs)+0.05);else L.unshift({x:rx,s:Math.min(1,rs+0.05)});L.sort(function(p,q){return q.s-p.s;});}
   }
   var pp={q:String(a.name||'').trim().slice(0,40),list:L.map(function(r){return {ref:aiPRef(r.x),s:r.s};}),pick:'',nn:String(a.name||'').trim().slice(0,40),np:'',srch:'',open:false};
-  if(L.length){var top=L[0].s,sec=L[1]?L[1].s:0;if(top>=0.9&&sec<top-0.07)pp.pick=pp.list[0].ref;}
+  if(L.length){var top=L[0].s,sec=L[1]?L[1].s:0;if(top>=0.95&&sec<top-0.07)pp.pick=pp.list[0].ref;}   // पक्का मेल हो तभी अपने-आप (Rinku ≠ रिंकी)
   if(!pp.pick&&pp.q&&(!L.length||L[0].s<0.6)&&(t==='udhar'||t==='order'||t==='jama'))pp.pick='new';
   return pp;
 }
@@ -7089,13 +7094,15 @@ function aiSend(){
   AI.s.text='';AI.s.imgs=[];AI.s.busy=true;AI.s.status='सोच रहा हूँ…';aiRender(true);
   var fx;try{fx=aiFacts(text);}catch(e){fx={fb:aiFB(),people:[],all:[],base:0};}
   var key=aiKey();
-  var done=function(o,note){AI.s.busy=false;AI.s.status='';aiHandle(o,fx,note,text);};
+  var done=function(o,note,rt){AI.s.busy=false;AI.s.status='';aiHandle(o,fx,note,text);
+    /* AI न चला — बात/फोटो खोए नहीं: एक बटन से वही दोबारा AI को */
+    if(rt){var lm=AI.s.msgs[AI.s.msgs.length-1];if(lm&&lm.r==='a'){lm.retry={t:text,imgs:imgs};aiRender(true);}}};
   if(!key){
     var lo=aiLocal(text,fx);
     done(lo,imgs.length?'फोटो पढ़ने के लिए AI की मुफ़्त चाबी चाहिए (ऊपर ⚙️)।':'AI की चाबी अभी नहीं लगी — फ़ोन ने आसान तरीके से समझा। कैसे भी बोलने के लिए ⚙️ में मुफ़्त चाबी डालिए।');
     return;
   }
-  if(navigator.onLine===false){done(aiLocal(text,fx),'इंटरनेट नहीं है — फ़ोन ने आसान तरीके से समझा।'+(imgs.length?' फोटो इंटरनेट आने पर भेजिए।':''));return;}
+  if(navigator.onLine===false){done(aiLocal(text,fx),'इंटरनेट नहीं है — फ़ोन ने आसान तरीके से समझा।'+(imgs.length?' फोटो रखी हुई है — इंटरनेट आते ही नीचे "🔄 AI से फिर भेजो" दबाइए।':''),true);return;}
   var sys=aiSys();
   var parts=function(extra){var p=[{text:aiCtxText(fx,text,imgs.length,extra)}];imgs.forEach(function(im){p.push({inlineData:{mimeType:im.mime,data:im.data}});});return p;};
   aiGen(sys,parts(''),key).then(function(r){
@@ -7120,7 +7127,7 @@ function aiSend(){
   }).then(function(o){done(o);},function(e){
     if(e&&e.code==='key')aiSet({ok:false});
     var lo=aiLocal(text,fx);
-    done(lo,aiErrText(e)+(lo.fallback?'':' फ़ोन ने आसान तरीके से समझा — ध्यान से जाँचें।'));
+    done(lo,aiErrText(e)+(lo.fallback?'':' फ़ोन ने आसान तरीके से समझा — ध्यान से जाँचें।'),e&&e.code!=='key'&&e.code!=='region');
   });
 }
 function aiNeed(fx,n){
@@ -7145,6 +7152,14 @@ function aiHandle(o,fx,note,text){
     var c=aiNewCard(a);if(c.st==='bad')return;
     var ri=a.replaces;if(ri!=null&&ri!==''&&pend[+ri])pend[+ri].st='replaced';
     m.cards.push(c);
+  });
+  /* कार्ड में दिखे नंबर (फोटो/बात से पढ़ी रकम, सामान का जोड़) — मालिक ✅ से पहले ख़ुद देखता है, इसलिए इन पर ⚠️ नहीं */
+  m.cards.forEach(function(c){
+    var cn=function(v){var n=round2(num(v));if(n>0)m.unums[String(n)]=1;};
+    aiNumsOf(JSON.stringify(aiCardBrief(c))).forEach(function(n){m.unums[n]=1;});
+    (c.lines||[]).forEach(function(l){cn(num(l.qty)*num(l.rate));});
+    if(c.lines&&c.lines.length)cn(aiLinesTotal(c.lines));
+    if(c.t==='hisaab'&&c.a&&Array.isArray(c.a.exp)){var et=0;c.a.exp.forEach(function(e){var v=hsSum(aiDigits(String(e&&e.amount!=null?e.amount:'')));if(v>0){cn(v);et+=v;}});cn(et);}
   });
   if(o.answer&&typeof o.answer==='object'){
     var ids=(Array.isArray(o.answer.facts)?o.answer.facts:[]).map(function(x){return String(x).trim();}).filter(function(id,i,arr){return fx.fb.map[id]&&arr.indexOf(id)===i;});
@@ -7319,6 +7334,7 @@ function aiMsgHtml(m,i){
   if(m.ask)h+='<p class="aiask">❓ '+esc(m.ask)+'</p>';
   if(m.fallback)h+=(m.say?'':'<p class="aisay">ये बात पूरी समझ नहीं आई। नाम + काम + रकम साथ में बोलिए (जैसे "रमेश का 500 उधार"), या सीधे फ़ॉर्म खोलिए:</p>')+
     '<div class="aiforms"><button data-act="ai-form" data-v="u">📒 उधार लिखो</button><button data-act="ai-form" data-v="j">💰 जमा लिखो</button><button data-act="ai-form" data-v="o">📦 नया ऑर्डर</button><button data-act="ai-form" data-v="h">🌙 रात का हिसाब</button></div>';
+  if(m.retry&&aiKey())h+='<div class="aiforms"><button data-act="ai-retry" data-i="'+i+'">🔄 AI से फिर भेजो'+(m.retry.imgs&&m.retry.imgs.length?' (फोटो के साथ)':'')+'</button></div>';
   if(bad)h+='<p class="ainote">⚠️ वाला नंबर ऐप के हिसाब में नहीं मिला (AI ने ख़ुद जोड़ा/अंदाज़ा लगाया) — 📊 वाले नंबर ही पक्के मानें।</p>';
   if(m.say||m.ans||m.ask)h+='<div class="aimeta"><button class="lnk" data-act="ai-speak" data-i="'+i+'">🔊 सुनो</button>'+(m.model?'<span>AI: '+esc(m.model)+'</span>':'<span>फ़ोन ने समझा (बिना AI)</span>')+'</div>';
   return h+'</div>';
@@ -7456,6 +7472,15 @@ function aiClick(t,act){
     case 'ai-imgx':AI.s.imgs.splice(+t.getAttribute('data-i'),1);aiRender();return true;
     case 'ai-ex':AI.s.text=v||'';aiRender();var fx=$('#ai-in');if(fx){fx.value=AI.s.text;fx.focus();}return true;
     case 'ai-clear':if(AI.s.listen)aiMicStop();AI.s.msgs=[];aiRender();return true;
+    case 'ai-retry':{
+      if(AI.s.busy)return true;
+      var rm=AI.s.msgs[+t.getAttribute('data-i')];if(!rm||!rm.retry)return true;
+      var rsv=(rm.cards||[]).some(function(x){return x.st==='saved';});
+      (rm.cards||[]).forEach(function(x){if(x.st==='open')x.st='replaced';});   // फ़ोन वाला कार्ड हटाकर AI का
+      AI.s.text=rm.retry.t;AI.s.imgs=(rm.retry.imgs||[]).slice();rm.retry=null;var rin=$('#ai-in');if(rin)rin.value=AI.s.text;
+      var rix=AI.s.msgs.indexOf(rm);
+      if(!rsv&&rix>0&&AI.s.msgs[rix-1].r==='u')AI.s.msgs.splice(rix-1,2);   // वही बात दोबारा न दिखे (कुछ सेव हो चुका हो तो रहने दो — AI दोहराएगा नहीं)
+      aiSend();return true;}
     case 'ai-set':if(AI.s.listen)aiMicStop();AI.s.page='set';AI.s.test='';if($('#aiw'))aiRender();else openSheet(aiSheetHtml());return true;
     case 'ai-back':AI.s.page='chat';AI.s.test='';aiRender(true);return true;
     case 'ai-test':aiTest(false);return true;
