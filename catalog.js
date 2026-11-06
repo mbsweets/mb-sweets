@@ -17,8 +17,8 @@
   पूरे दिन ऑनलाइन ऑर्डर बंद: pause:true
 */
 window.MB_CATALOG = {
-  version: 15,
-  updated: '2026-11-04',
+  version: 16,
+  updated: '2026-11-06',
 
   shop: {
     name: 'Maa Bhagwati Misthan Bhandar',
@@ -68,10 +68,10 @@ window.MB_CATALOG = {
   /* त्योहार की पट्टी: from–to (दोनों दिन शामिल) मेन्यू और वेबसाइट पर सबसे ऊपर दिखती है, फिर अपने-आप हट जाती है।
      card = बटन दबाने पर मेन्यू का कौन-सा कार्ड खुले (उस कार्ड के दाम पट्टी में अपने-आप)। कोई त्योहार न हो तो: fest: null, */
   fest: { from: '2026-11-04', to: '2026-11-08', card: 'dibba',
-    hi: '🪔 दिवाली स्पेशल — पाँच मिठाई एक डिब्बे में',
-    en: '🪔 Diwali special — five sweets in one box',
-    subHi: 'बालूशाही, चमचम, मिल्क केक, पेड़ा, गुलाब जामुन · पूजा की मिठाई पहले से बुक करें',
-    subEn: 'Balushahi, Cham Cham, Milk Cake, Peda, Gulab Jamun · book your puja sweets in advance',
+    hi: '🎉 दिवाली ऑफ़र — मिठाई के साथ फ्री गिफ्ट 🎁',
+    en: '🎉 Diwali offer — free gifts with sweets 🎁',
+    subHi: '₹1000 या ज़्यादा की मिठाई पर 250 ग्राम मोतीचूर लड्डू फ्री · किसी भी मिठाई के ½ किलो वाले 10 डिब्बे पर सेलिब्रेशन चॉकलेट पैक फ्री · सिर्फ़ 8 नवंबर तक · पाँच मिठाई डिब्बा:',
+    subEn: 'Sweets worth ₹1000+: 250 g Motichoor Laddoo free · 10 half-kg boxes of any sweet: Celebrations chocolate pack free · till 8 Nov only · Five-sweet box:',
     tagHi: '🪔 दिवाली स्पेशल', tagEn: '🪔 Diwali special' },
 
   /* [id, बिलिंग वाला नाम, category, unit, दाम, v] */
