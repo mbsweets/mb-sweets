@@ -369,6 +369,47 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .hscat i{display:block;height:10px;border-radius:5px;background:var(--red);opacity:.75;margin-top:4px;min-width:2px}
 .hscat .pv{display:block;font-size:.74rem;color:var(--muted);margin-top:2px}
 .hsbar em small{display:block;color:var(--red);font-size:.72rem}
+/* 💵 गल्ला मिलान + 🤝 सप्लायर + 📅 महीना (7 नवंबर 2026) */
+.glnav{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
+.glnav .btn{flex:1 1 150px;min-width:0}
+.glbell{margin:2px 0 8px;font-size:.82rem}
+.glrow{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:8px}
+.glrow .top{display:grid;grid-template-columns:1fr 112px 30px;gap:8px;align-items:center}
+.glrow .nm{font-weight:700;font-size:.92rem;min-width:0;overflow-wrap:anywhere}
+.glrow .nm small{display:block;font-weight:400;color:var(--muted);font-size:.74rem}
+.glrow input[type=tel]{width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:16px;text-align:right}
+.glrow .x{background:none;border:0;color:var(--red);font-size:1.3rem;line-height:1;min-height:36px;padding:0}
+.glrow input.nt{width:100%;margin-top:6px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:15px}
+.pmchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pmchips button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:0 11px;min-height:36px;font:inherit;font-size:.84rem}
+.pmchips button.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand);font-weight:700}
+.hschips button.due{border-color:var(--red);color:var(--red);font-weight:700}
+.glbox{margin-top:14px;padding-top:6px;border-top:1px solid var(--line)}
+.glline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.glline span{min-width:0}
+.glline small{display:block;font-size:.74rem;color:var(--muted);font-weight:400}
+.glline b{white-space:nowrap}
+.glline input{width:128px;flex:0 0 auto;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--paper);font-size:16px;text-align:right}
+.glline.big{border-bottom:0;font-weight:700}
+.glline.big input{border:2px solid var(--gold);font-weight:700;font-size:18px}
+.gltot b{color:var(--ink)}
+.glok{color:var(--green);font-weight:700;margin:8px 0 2px}
+.glmo .glline{font-size:.88rem}
+.due{color:var(--red)}.ok{color:var(--green)}
+.suplist{display:flex;flex-direction:column;gap:8px}
+.suprow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;text-align:left}
+.suprow .l{min-width:0}.suprow .l b{display:block;font-size:.95rem}
+.suprow small{display:block;color:var(--muted);font-size:.75rem;line-height:1.3}
+.suprow .r{text-align:right;flex:0 0 auto}.suprow .r b{font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:1.1rem}
+.supoff{margin-top:12px}.supoff summary{color:var(--muted);font-size:.86rem;padding:6px 0}
+.supbal{font-size:1rem;margin:4px 0 8px}.supbal small{color:var(--muted)}
+.supl{margin-top:10px;border-top:1px solid var(--line)}
+.supl>div{display:grid;grid-template-columns:72px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.supl>div>span:first-child{color:var(--muted)}
+.supl small{color:var(--muted);font-size:.76rem}.supl .nt{display:block}
+.supl .p{color:var(--green)}
+.mosup{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.mosup:last-of-type{border-bottom:0}
 .webtag{display:inline-block;font-size:.72rem;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
 .onpaid{color:var(--green);font-weight:700;font-size:.88rem}
 .onwait{color:var(--amber);font-weight:700;font-size:.88rem}
@@ -717,6 +758,8 @@ function load(){
       state.cpn=objs(d.cpn);
       state.daily=objs(d.daily);
       state.budget=(d.budget&&typeof d.budget==='object'&&!Array.isArray(d.budget))?d.budget:{v:{}};
+      if(Array.isArray(d.sup))state.sup=d.sup;
+      if(d.galla&&typeof d.galla==='object'&&!Array.isArray(d.galla))state.galla=d.galla;
       normalizeState();
       var mx=0;state.orders.forEach(function(o){if(o.no>mx)mx=o.no;});
       state.nextOrderNo=Math.max(d.nextOrderNo||1,mx+1);
@@ -755,7 +798,7 @@ function normalizeState(){
     o.payments.forEach(function(p){if(!p.id)p.id=uid();});
     o.items.forEach(function(it){if(!it.lid)it.lid=uid();});
   });
-  KH();LY();CPNS();DLY();LP_BIDX=null;
+  KH();LY();CPNS();DLY();SUP();GL();LP_BIDX=null;
   LY().m.forEach(function(m){if(!m.tk){m.tk=lpTok();ui.lpTokNew=true;}});
 }
 
@@ -978,13 +1021,13 @@ function renderNav(){
   var tabs=[['home','होम','\uD83C\uDFE0'],['online','ऑनलाइन','\uD83C\uDF10'],['orders','ऑर्डर्स','\uD83E\uDDFE'],['khata','उधारी','\uD83D\uDCD2'],['loyal','पॉइंट','\u2B50'],['items','आइटम्स','\uD83C\uDF6C'],['backup','बैकअप','\uD83D\uDCBE']];
   var newN=onlineNewCount(),remN=khataRemindList().length,lpN=lpRemindList().length;
   $('#navbar').innerHTML=tabs.map(function(t){
-    var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||ui.view==='hisaab'||(ui.view==='customer'&&ui.cameFrom==='dues')))||(t[0]==='khata'&&ui.view==='party')||(t[0]==='loyal'&&ui.view==='lmember')||(t[0]==='backup'&&ui.view==='shopset');
+    var on=(ui.view===t[0])||(t[0]===ui.cameFrom&&ui.view==='customer')||(t[0]==='home'&&(ui.view==='dues'||ui.view==='hisaab'||ui.view==='sup'||ui.view==='month'||(ui.view==='customer'&&ui.cameFrom==='dues')))||(t[0]==='khata'&&ui.view==='party')||(t[0]==='loyal'&&ui.view==='lmember')||(t[0]==='backup'&&ui.view==='shopset');
     var bd=(t[0]==='online'&&newN)?'<span class="bd">'+newN+'</span>':((t[0]==='khata'&&remN)?'<span class="bd">'+remN+'</span>':((t[0]==='loyal'&&lpN)?'<span class="bd">'+lpN+'</span>':''));
     return '<button class="navbtn'+(on?' on':'')+'" data-act="nav" data-v="'+t[0]+'">'+bd+'<span class="ic">'+t[2]+'</span>'+t[1]+'</button>';
   }).join('');
   var fab=$('#fab');
   if(ui.view==='items'){fab.style.display='';fab.textContent='+ नया आइटम';fab.setAttribute('data-fabact','item');}
-  else if(ui.view==='backup'||ui.view==='online'||ui.view==='shopset'||ui.view==='hisaab'){fab.style.display='none';}
+  else if(ui.view==='backup'||ui.view==='online'||ui.view==='shopset'||ui.view==='hisaab'||ui.view==='sup'||ui.view==='month'){fab.style.display='none';}
   else if(ui.view==='khata'||ui.view==='party'){fab.style.display='';fab.textContent='+ उधार लिखो';fab.setAttribute('data-fabact','udhar');}
   else if(ui.view==='loyal'||ui.view==='lmember'){fab.style.display='';fab.textContent='+ ख़रीद जोड़ो';fab.setAttribute('data-fabact','lbuy');}
   else{fab.style.display='';fab.textContent='+ नया ऑर्डर';fab.setAttribute('data-fabact','order');}
@@ -1193,6 +1236,8 @@ function buildPlanDays(){
     var s=sweetsMilk(live,k),d=dairyDay(live,k),o=hasOwn(near,k)?planOrders(live,k,near[k]):[];
     if(s||d||o.length){days[k]={};if(s)days[k].s=s;if(d)days[k].d=d;if(o.length)days[k].o=o;}
   });
+  /* 🌙 रात 8:40 की घंटी (रजिस्टर कोड 7): आज का हिसाब भरा या नहीं + सप्लायर का बाकी (सिर्फ़ सप्लायर का नाम, ग्राहक का कुछ नहीं) */
+  try{var t0=todayStr();days.hs={done:hsHas(hsGet(t0))?t0:'',due:supDues(t0).slice(0,6).map(function(x){return [String(x.n).slice(0,40),x.bal,x.since];}),d0:GL().d0};}catch(e){}
   return days;
 }
 function milkCard(live){
@@ -1841,6 +1886,8 @@ function renderRoute(){
   else if(ui.view==='loyal')renderLoyal();
   else if(ui.view==='lmember')renderLMember();
   else if(ui.view==='hisaab')renderHisaab();
+  else if(ui.view==='sup')renderSup();
+  else if(ui.view==='month')renderMonth();
   else if(ui.view==='shopset'){if(ghTok()&&SS.state!=='loading'&&!SS.saving&&(SS.state!=='ready'||Date.now()-SS.at>60000))ssLoad();else renderShopSet();}
   renderNav();
   renderBanner();
@@ -2342,6 +2389,12 @@ function checkWebImport(ev){
     onlineSync();
     return;
   }
+  if(h==='#hisaab'){                              // रात 8:40 की घंटी दबाई — आज का हिसाब खोलो
+    navHashStrip(ev);
+    if($('#ov'))closeSheet();
+    ui.hsDraft=hsDraftFor(todayStr());ui.view='hisaab';renderRoute();window.scrollTo(0,0);
+    return;
+  }
   var m=h.match(/^#o=([A-Za-z0-9_-]+)/);
   if(!m)return;
   navHashStrip(ev);
@@ -2666,12 +2719,80 @@ function hsExList(e){
   var L=[];if(!e)return L;var ex=e.ex||{};
   HS_EX.forEach(function(c){var x=ex[c[0]];if(x&&num(x.v)>0)L.push({k:c[0],ic:c[1],name:c[2],v:num(x.v),g:x.g!==false,grp:c[4],n:x.n||''});});
   (Array.isArray(e.exo)?e.exo:[]).forEach(function(o){if(o&&num(o.v)>0)L.push({k:'other',ic:'🧾',name:o.n||'अन्य',v:num(o.v),g:o.g!==false,grp:'r',n:''});});
+  /* 🚚 सप्लायर का माल — जिस दिन आया उसी दिन खर्च (पैसा चाहे बाद में दिया) */
+  glList(e.sm).forEach(function(m){var c=hsBox(m.b);
+    L.push({k:c?c[0]:'other',ic:c?c[1]:'🧾',name:c?c[2]:(m.n||'अन्य'),v:num(m.v),g:m.pm==='g',grp:c?c[4]:'r',n:m.n||'',sup:m.s||'',pm:m.pm||''});});
   return L;
 }
 function hsExp(e){return round2(hsExList(e).reduce(function(t,x){return t+x.v;},0));}
 function hsExpG(e){return round2(hsExList(e).reduce(function(t,x){return t+(x.g?x.v:0);},0));}
-function hsCashSale(e){return e?round2(num(e.cash)+hsExpG(e)+num(e.out)):0;}
-function hsTot(e){return e?round2(num(e.upi)+hsCashSale(e)):0;}
+function hsCashSale(e){if(!e)return 0;if(e.gm)return glCash(e);return round2(num(e.cash)+hsExpG(e)+num(e.out));}
+function hsUpiSale(e){if(!e)return 0;return e.gm?round2(num(e.upi)-kjOn(e.d,'u')):num(e.upi);}
+function hsTot(e){return e?round2(hsUpiSale(e)+hsCashSale(e)):0;}
+/* ---------- 💵 गल्ला मिलान + 🤝 सप्लायर खाता (7 नवंबर 2026, मालिक: "महीने में हिसाब परफेक्ट मिलना चाहिए… काउंटर में कितना कैश बचना चाहिए")
+   state.galla = {d0} — इस तारीख़ से गल्ला मिलान (मालिक: "कल की बिक्री से स्टार्ट" = 8 नवंबर)। गल्ले का पैसा रात में गल्ले में ही रहता है।
+   गल्ला-दिन की एंट्री: gm:1, go (सुबह गल्ले में — कल रात की गिनती से अपने-आप), gc (रात को गिनकर कुल), gin (घर/बैंक से गल्ले में डाला),
+     out (💼 निकाला — बैंक/बचत), hm:[{n,a,v}] (🏠 घर के लिए, गल्ले से — दुकान का खर्च नहीं),
+     sm:[{s,n,b,a,v,pm,nt}] (🚚 सप्लायर का माल; pm: g गल्ले से · u ऑनलाइन · h घर से · '' बाद में = बाकी),
+     sp:[{s,n,a,v,pm,nt}] (💸 सप्लायर का पुराना बाकी चुकाया — खर्च नहीं, सिर्फ़ बाकी घटा)
+   गल्ले में आया कैश = gc − go + गल्ले से गया (खर्च g + सप्लायर को g + घर के लिए + निकाला) − gin
+   कैश बिक्री = गल्ले में आया − उधारी का नकद जमा · UPI बिक्री = UPI − उधारी का UPI जमा (उधारी का जमा पैसा बिक्री नहीं) */
+var GL_START='2026-11-08';
+function GL(){if(!state.galla||typeof state.galla!=='object'||Array.isArray(state.galla))state.galla={};if(!/^\d{4}-\d\d-\d\d$/.test(state.galla.d0||''))state.galla.d0=GL_START;return state.galla;}
+function glDay(d){return d>=GL().d0;}
+function glList(a){return Array.isArray(a)?a.filter(function(x){return x&&typeof x==='object'&&num(x.v)>0;}):[];}
+function kjMode(e){if(e.m==='u'||e.m==='c')return e.m;return /upi|ऑनलाइन|online|paytm|phone ?pe|g ?pay|यूपीआई/i.test(String(e.note||''))?'u':'c';}
+function kjOn(d,m){var s=0;KH().entries.forEach(function(e){if(e.type==='j'&&e.date===d&&kjMode(e)===m)s+=num(e.amount);});return round2(s);}
+function glSpG(e){return round2(glList(e.sp).reduce(function(t,x){return t+(x.pm==='g'?num(x.v):0);},0));}
+function glHome(e){return round2(glList(e.hm).reduce(function(t,x){return t+num(x.v);},0));}
+function glOutAll(e){return round2(hsExpG(e)+glSpG(e)+glHome(e)+num(e.out));}
+function glIn(e){return round2(num(e.gc)-num(e.go)+glOutAll(e)-num(e.gin));}
+function glCash(e){if(e.gc===''||e.gc==null)return 0;return round2(glIn(e)-kjOn(e.d,'c'));}
+/* सुबह का गल्ला = कल रात की गिनती (कल न भरा हो तो पिछली गिनती सुझाव में) */
+function hsGoAuto(d){
+  var p=hsGet(hsKeyAdd(d,-1));
+  if(p&&p.gc!==''&&p.gc!=null)return {v:num(p.gc),src:'kal'};
+  var a=DLY().filter(function(e){return e.d<d&&e.gc!==''&&e.gc!=null;}).sort(function(x,y){return x.d<y.d?1:-1;})[0];
+  return a?{v:num(a.gc),src:'old',od:a.d}:{v:'',src:''};
+}
+/* सप्लायर — मालिक ने 7 नवंबर को बताया: पेड़ा-मिल्क केक, बीकाजी, खुला बिस्किट, कैडबरी = माल आते ही कैश; अमृत (दूध-दही) रोज़ (कभी बाकी);
+   अमूल 1–4 दिन में / अगला माल आने पर; कृष्णा पनीर अगले दिन (कभी 2–3 दिन बाद); सुधा = हमेशा ऑनलाइन */
+var SUP_DEF=[['peda','पेड़ा · मिल्क केक वाला','sweet','now','g'],['bikaji','बीकाजी','snack','now','g'],['biscuit','बिस्किट (खुला पैकेट)','snack','now','g'],
+  ['cadbury','कैडबरी','snack','now','g'],['amrit','अमृत (दूध · दही)','milk','now','g'],['amul','अमूल (दूध · दही · बटर)','milk','later','g'],
+  ['krishna','कृष्णा पनीर','milk','later','g'],['sudha','सुधा (दूध · दही)','milk','now','u']];
+var SUP_PM=[['g','💵 गल्ले से'],['u','📱 ऑनलाइन'],['h','🏠 घर से'],['','⏳ बाद में']];
+function SUP(){
+  if(!Array.isArray(state.sup))state.sup=SUP_DEF.map(function(s){return {id:s[0],n:s[1],b:s[2],pay:s[3],m:s[4],on:true};});
+  state.sup=state.sup.filter(function(s){return s&&typeof s==='object'&&s.id;});
+  return state.sup;
+}
+function supFind(id){var a=SUP();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
+function supActive(){return SUP().filter(function(s){return s.on!==false;});}
+function supDefPm(s){return s&&s.pay==='later'?'':((s&&s.m)||'g');}
+function hsBox(k){for(var i=0;i<HS_EX.length;i++)if(HS_EX[i][0]===k)return HS_EX[i];return null;}
+function pmTxt(pm){return pm==='g'?'गल्ले से':pm==='u'?'ऑनलाइन':pm==='h'?'घर से':'बाकी (बाद में देना)';}
+/* सप्लायर की बही: तारीख़ वार माल (m) और दिया (p) */
+function supLedger(sid,upto){
+  var L=[];
+  DLY().forEach(function(e){if(upto&&e.d>upto)return;
+    glList(e.sm).forEach(function(m){if(m.s===sid)L.push({d:e.d,t:'m',v:num(m.v),pm:m.pm||'',nt:m.nt||''});});
+    glList(e.sp).forEach(function(p){if(p.s===sid)L.push({d:e.d,t:'p',v:num(p.v),pm:p.pm||'g',nt:p.nt||''});});});
+  return L.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:(a.t===b.t?0:(a.t==='m'?-1:1));});
+}
+/* बाकी (सबसे पुराना माल पहले चुकता) — since = सबसे पुराना बिना चुका माल */
+function supBal(sid,upto){
+  var q=[],adv=0;
+  supLedger(sid,upto).forEach(function(x){
+    if(x.t==='m'){if(x.pm!=='')return;var v=x.v;if(adv>0){var u0=Math.min(adv,v);adv=round2(adv-u0);v=round2(v-u0);}if(v>0.001)q.push({d:x.d,v:v});}
+    else{var r=x.v;while(r>0.001&&q.length){var u=Math.min(r,q[0].v);q[0].v=round2(q[0].v-u);r=round2(r-u);if(q[0].v<=0.001)q.shift();}if(r>0.001)adv=round2(adv+r);}
+  });
+  var due=round2(q.reduce(function(t,z){return t+z.v;},0));
+  return {bal:round2(due-adv),since:q.length?q[0].d:''};
+}
+function supDues(upto){
+  return SUP().map(function(s){var b=supBal(s.id,upto);return {id:s.id,n:s.n,bal:b.bal,since:b.since};}).filter(function(x){return x.bal>0.001;}).sort(function(a,b){return b.bal-a.bal;});
+}
+function supDaysTxt(since,ref){if(!since)return '';var n=dayDiff(since,ref||todayStr());return n<=0?'आज का':(n===1?'कल का':n+' दिन से');}
 function hsHasExp(e){return hsExList(e).length>0;}
 /* जिस दिन जो बना — रसगुल्ला/बालूशाही + बटन वाली मिठाइयाँ */
 function hsMadeList(e){
@@ -2690,7 +2811,7 @@ function hsLastQ(k,beforeD){
   return '';
 }
 function khataOn(d,type){var s=0;KH().entries.forEach(function(e){if(e.type===type&&e.date===d)s+=num(e.amount);});return round2(s);}
-function hsHas(e){return !!(e&&(e.upi!==''&&e.upi!=null||e.cash!==''&&e.cash!=null));}
+function hsHas(e){if(!e)return false;if(e.gm)return e.gc!==''&&e.gc!=null;return !!(e.upi!==''&&e.upi!=null||e.cash!==''&&e.cash!=null);}
 function hsKeyAdd(k,n){var d=new Date(k+'T12:00:00');d.setDate(d.getDate()+n);return dayKey(d);}
 function hsDm(k){var d=new Date(k+'T12:00:00');return d.getDate()+' '+HS_MON[d.getMonth()];}
 function hsWdOf(k){return HS_WD[new Date(k+'T12:00:00').getDay()];}
@@ -2730,27 +2851,55 @@ function hsStats(){
 function hsMsg(d){
   var e=hsGet(d)||{},L=['🌙 '+hsWdOf(d)+', '+hsDm(d)+' का हिसाब'];
   var ge=hsExpG(e),out=num(e.out);
+  if(e.gm){
+    var kc=kjOn(d,'c'),kv=kjOn(d,'u');
+    L.push('UPI बिक्री: '+rupee(hsUpiSale(e))+(kv?' (UPI आया '+rupee(num(e.upi))+' − उधारी जमा '+rupee(kv)+')':''));
+    L.push('कैश बिक्री: '+(hsHas(e)?rupee(hsCashSale(e)):'— (गल्ला नहीं गिना)'));
+    L.push('कुल बिक्री: '+rupee(hsTot(e)));
+    var ku0=khataOn(d,'u');if(ku0||kc||kv)L.push('उधारी: उधार दिया '+rupee(ku0)+' · जमा मिला '+rupee(round2(kc+kv))+(kc&&kv?' (नकद '+rupee(kc)+', UPI '+rupee(kv)+')':''));
+    L.push('');L.push('💵 गल्ला: सुबह '+rupee(num(e.go))+(hsHas(e)?' → रात '+rupee(num(e.gc)):''));
+    var go2=[];if(ge)go2.push('खर्च '+rupee(ge));if(glSpG(e))go2.push('सप्लायर बाकी '+rupee(glSpG(e)));if(glHome(e))go2.push('घर के लिए '+rupee(glHome(e)));if(out)go2.push('निकाला '+rupee(out));
+    if(go2.length)L.push('गल्ले से गया: '+go2.join(' · '));
+    if(num(e.gin))L.push('गल्ले में डाला (घर/बैंक से): '+rupee(num(e.gin)));
+    glList(e.hm).forEach(function(h){L.push('🏠 '+(h.n||'घर के लिए')+': '+rupee(num(h.v)));});
+  }else{
   L.push('UPI: '+rupee(num(e.upi)));
   if(ge||out){L.push('कैश बिक्री: '+rupee(hsCashSale(e))+' (गल्ले में बढ़ा '+rupee(num(e.cash))+(ge?' + गल्ले से खर्च '+rupee(ge):'')+(out?' + घर/बैंक '+rupee(out):'')+')');}
   else L.push('कैश: '+rupee(num(e.cash)));
   L.push('कुल बिक्री: '+rupee(hsTot(e)));
   var ku=khataOn(d,'u'),kj=khataOn(d,'j');if(ku||kj)L.push('उधारी: उधार दिया '+rupee(ku)+' · जमा मिला '+rupee(kj));
+  }
   var mk=hsMadeList(e).map(hsMadeTxt);if(e.other)mk.push(e.other);
   if(mk.length)L.push('बना: '+mk.join(' · '));
   if(e.waste)L.push('ख़राब/फेंका: '+e.waste);
   var xl=hsExList(e);
-  if(xl.length){L.push('');L.push('खर्च:');xl.forEach(function(x){L.push('• '+x.name+': '+rupee(x.v)+(x.n?' ('+x.n+')':'')+(x.g?'':' — UPI/दूसरा'));});
+  if(xl.length){L.push('');L.push('खर्च:');xl.forEach(function(x){L.push(x.sup!=null?'• 🚚 '+x.n+': '+rupee(x.v)+' — '+pmTxt(x.pm):'• '+x.name+': '+rupee(x.v)+(x.n?' ('+x.n+')':'')+(x.g?'':' — UPI/दूसरा'));});
     L.push('कुल खर्च: '+rupee(hsExp(e)));L.push('बिक्री − खर्च: '+rupee(round2(hsTot(e)-hsExp(e))));}
+  var spl=glList(e.sp);
+  if(spl.length){L.push('');L.push('💸 सप्लायर का बाकी चुकाया:');spl.forEach(function(p){L.push('• '+p.n+': '+rupee(num(p.v))+' — '+pmTxt(p.pm||'g'));});}
+  if(e.gm){var du=supDues(d);if(du.length){L.push('');L.push('🤝 सप्लायर को देना बाकी: '+du.map(function(x){return x.n+' '+rupee(x.bal);}).join(' · '));}}
   var w=hsRange(hsKeyAdd(d,-6),d);L.push('');L.push('पिछले 7 दिन: '+rupee(w.sum)+' ('+w.days+' दिन भरे)');
   var we=hsExpRange(hsKeyAdd(d,-6),d);if(we.tot)L.push('पिछले 7 दिन का खर्च: '+rupee(we.tot));
   return L.join('\n');
 }
 function hsHomeCard(){
-  var t=todayStr(),h=new Date().getHours(),y=hsKeyAdd(t,-1);
+  var t=todayStr(),now=new Date(),h=now.getHours(),y=hsKeyAdd(t,-1),gm=glDay(t),out='';
   var w=hsRange(hsKeyAdd(t,-6),t);
-  if(!hsHas(hsGet(t))&&h>=19)return '<button class="hshome hot" data-act="hs-open" data-d="'+t+'">🌙 <b>आज का हिसाब भरें</b> — बिक्री, क्या बना, खर्च<span>भरो →</span></button>';
-  if(!hsHas(hsGet(y))&&h<13&&DLY().length)return '<button class="hshome hot" data-act="hs-open" data-d="'+y+'">🌙 <b>कल का हिसाब बाकी है</b><span>भरो →</span></button>';
-  return '<button class="hshome" data-act="hs-open" data-d="'+t+'">🌙 रात का हिसाब'+(w.days?' · पिछले 7 दिन <b>'+rupee(w.sum)+'</b>':'')+'<span>खोलो →</span></button>';
+  /* 🌅 गल्ला मिलान का पहला दिन — सुबह का गल्ला एक बार (कल रात की गिनती हो तो अपने-आप) */
+  if(gm&&hsGoAuto(t).src!=='kal'&&!DLY().some(function(e){return e.gm&&(hsHas(e)||(e.go!==''&&e.go!=null));}))
+    out+='<button class="hshome hot" data-act="gl-start">🌅 <b>आज से गल्ला मिलान</b> — सुबह गल्ले में कितना है? गिनकर लिखो<span>लिखो →</span></button>';
+  /* 📅 1–5 तारीख़: पिछले महीने का पूरा हिसाब */
+  var pm=moAdd(t.slice(0,7),-1);
+  if(now.getDate()<=5&&lsGet(MO_SEEN,'')!==pm&&DLY().some(function(e){return e.d.slice(0,7)===pm&&(hsHas(e)||hsExp(e));}))
+    out+='<button class="hshome hot" data-act="mo-open" data-m="'+pm+'">📅 <b>'+moName(pm)+' का पूरा हिसाब तैयार</b> — देखो, पापा को भेजो<span>खोलो →</span></button>';
+  var td=hsHas(hsGet(t));
+  if(!td&&h>=19)out+='<button class="hshome hot" data-act="hs-open" data-d="'+t+'">🌙 <b>आज का हिसाब भरें</b> — '+(gm?'🚚 सप्लायर का माल · 🏠 घर · 💵 गल्ला गिनो':'बिक्री, क्या बना, खर्च')+'<span>भरो →</span></button>';
+  else if(!hsHas(hsGet(y))&&h<13&&DLY().length)out+='<button class="hshome hot" data-act="hs-open" data-d="'+y+'">🌙 <b>कल का हिसाब बाकी है</b><span>भरो →</span></button>';
+  else out+='<button class="hshome" data-act="hs-open" data-d="'+t+'">🌙 रात का हिसाब'+(w.days?' · पिछले 7 दिन <b>'+rupee(w.sum)+'</b>':'')+'<span>खोलो →</span></button>';
+  /* 🤝 सप्लायर को देना है */
+  var du=supDues(t);
+  if(du.length)out+='<button class="hshome" data-act="nav" data-v="sup">🤝 <b>सप्लायर को देना है:</b> '+du.slice(0,3).map(function(x){return esc(x.n)+' <b>'+rupee(x.bal)+'</b>'+(x.since&&x.since<t?' ('+supDaysTxt(x.since)+')':'');}).join(' · ')+(du.length>3?' +'+(du.length-3):'')+'<span>देखो →</span></button>';
+  return out;
 }
 function hsDraftFor(d){
   var e=hsGet(d)||{},ex={},sv=function(v){return v==null?'':String(v);};
@@ -2758,15 +2907,32 @@ function hsDraftFor(d){
   return {d:d,upi:sv(e.upi),cash:sv(e.cash),out:sv(e.out),rg:sv(e.rg),bs:sv(e.bs),other:e.other||'',waste:e.waste||'',
     mk:(Array.isArray(e.mk)?e.mk:[]).map(function(m){return {k:m.k,n:m.n,q:sv(m.q),u:m.u||'लीटर'};}),
     ex:ex,exo:(Array.isArray(e.exo)?e.exo:[]).map(function(o){return {n:o.n||'',a:o.a!=null&&o.a!==''?String(o.a):sv(o.v),g:o.g!==false};}),
-    ci:{open:false,n:'',u:'लीटर'}};
+    ci:{open:false,n:'',u:'लीटर'},
+    /* 💵 गल्ला मिलान (8 नवंबर 2026 से) */
+    gm:glDay(d),go:(e.go!=null&&e.go!=='')?String(e.go):(glDay(d)&&hsGoAuto(d).src==='kal'?String(hsGoAuto(d).v):''),gc:sv(e.gc),gin:sv(e.gin),
+    sm:(Array.isArray(e.sm)?e.sm:[]).filter(Boolean).map(function(m){return {s:m.s||'',n:m.n||'',b:m.b||'',a:m.a!=null&&m.a!==''?String(m.a):sv(m.v),pm:m.pm||'',nt:m.nt||''};}),
+    sp:(Array.isArray(e.sp)?e.sp:[]).filter(Boolean).map(function(p){return {s:p.s||'',n:p.n||'',a:p.a!=null&&p.a!==''?String(p.a):sv(p.v),pm:p.pm||'g',nt:p.nt||''};}),
+    hm:(Array.isArray(e.hm)?e.hm:[]).filter(Boolean).map(function(h){return {n:h.n||'',a:h.a!=null&&h.a!==''?String(h.a):sv(h.v)};}),
+    spAll:false};
 }
 function hsDraftExp(x,onlyG){
   var s=0;x=x||ui.hsDraft||{};
   HS_EX.forEach(function(c){var r=(x.ex||{})[c[0]];if(!r)return;var v=hsSum(r.a);if(v>0&&(!onlyG||r.g))s+=v;});
   (x.exo||[]).forEach(function(o){var v=hsSum(o.a);if(v>0&&(!onlyG||o.g))s+=v;});
+  (x.sm||[]).forEach(function(o){var v=hsSum(o.a);if(v>0&&(!onlyG||o.pm==='g'))s+=v;});
   return round2(s);
 }
-function hsDraftTot(){var x=ui.hsDraft||{};return round2(num(x.upi)+num(x.cash)+num(x.out)+hsDraftExp(x,true));}
+/* गल्ला-दिन के ड्राफ़्ट का जोड़ (टाइप करते-करते) */
+function glDraftCalc(x){
+  x=x||ui.hsDraft||{};
+  var v=function(k){return num(x[k]);},pos=function(a){var z=hsSum(a);return z>0?z:0;};
+  var expG=hsDraftExp(x,true),spG=round2((x.sp||[]).reduce(function(t,o){return t+(o.pm==='g'?pos(o.a):0);},0)),
+    hm=round2((x.hm||[]).reduce(function(t,o){return t+pos(o.a);},0));
+  var outAll=round2(expG+spG+hm+v('out')),kjC=kjOn(x.d,'c'),kjU=kjOn(x.d,'u'),has=String(x.gc==null?'':x.gc).trim()!=='';
+  var inn=round2(v('gc')-v('go')+outAll-v('gin')),cash=has?round2(inn-kjC):0,upi=round2(v('upi')-kjU);
+  return {expG:expG,spG:spG,hm:hm,out:v('out'),outAll:outAll,kjC:kjC,kjU:kjU,has:has,hasGo:String(x.go==null?'':x.go).trim()!=='',inn:inn,cash:cash,upi:upi,tot:round2(cash+upi)};
+}
+function hsDraftTot(){var x=ui.hsDraft||{};if(x.gm)return glDraftCalc(x).tot;return round2(num(x.upi)+num(x.cash)+num(x.out)+hsDraftExp(x,true));}
 function hsCashLine(){
   var x=ui.hsDraft||{},ge=hsDraftExp(x,true),out=num(x.out);
   if(!ge&&!out)return '';
@@ -2778,7 +2944,365 @@ function hsRefreshTotals(){
   var b=$('#hs-cashline');if(b)b.innerHTML=hsCashLine();
   var c=$('#hs-exptot');if(c)c.textContent=rupee(hsDraftExp());
   var g=$('#hs-expg');if(g){var gv=hsDraftExp(null,true),all=hsDraftExp();g.textContent=all?(gv===all?'सब गल्ले से':'गल्ले से '+rupee(gv)):'';}
+  if(ui.hsDraft&&ui.hsDraft.gm){
+    var k=glDraftCalc(),st=function(id,v){var el=$('#'+id);if(el)el.textContent=rupee(v);};
+    st('gl-expg',k.expG);st('gl-spg',k.spG);st('gl-hm',k.hm);st('gl-kjc',k.kjC);st('gl-smtot',hsDraftSup());st('gl-hmtot',k.hm);
+    var r=$('#gl-res');if(r)r.innerHTML=glResHtml(ui.hsDraft,k);
+  }
   var er=$('#hs-err');if(er)er.textContent='';
+}
+function hsDraftSup(x){x=x||ui.hsDraft||{};return round2((x.sm||[]).reduce(function(t,o){var v=hsSum(o.a);return t+(v>0?v:0);},0));}
+/* गल्ला-दिन: औसत कैश बिक्री (पिछले 14 भरे गल्ला-दिन) — "रोज़ से बहुत कम/ज़्यादा" की चेतावनी के लिए */
+function glAvgCash(d){
+  var a=DLY().filter(function(e){return e.gm&&e.d<d&&e.d>=hsKeyAdd(d,-28)&&hsHas(e);}).slice(-14);
+  if(a.length<3)return 0;return round2(a.reduce(function(t,e){return t+hsCashSale(e);},0)/a.length);
+}
+function glResHtml(x,k){
+  var w=[],h='';
+  if(!k.has){
+    h='<p class="hint" style="margin:6px 0 0">👆 गल्ला गिनकर ऊपर लिखते ही <b>कैश बिक्री</b> निकल आएगी।</p>'+
+      '<div class="hstot"><span>📱 UPI बिक्री'+(k.kjU?'<small>UPI आया '+rupee(num(x.upi))+' − उधारी का UPI जमा '+rupee(k.kjU)+'</small>':'')+'</span><b>'+rupee(k.upi)+'</b></div>';
+  }else{
+    h='<div class="hstot"><span>💵 कैश बिक्री<small>गिना '+rupee(num(x.gc))+' − सुबह '+rupee(num(x.go))+' + गल्ले से गया '+rupee(k.outAll)+(num(x.gin)?' − डाला '+rupee(num(x.gin)):'')+(k.kjC?' − उधारी नकद '+rupee(k.kjC):'')+'</small></span><b>'+rupee(k.cash)+'</b></div>'+
+      '<div class="hstot"><span>📱 UPI बिक्री'+(k.kjU?'<small>UPI आया '+rupee(num(x.upi))+' − उधारी का UPI जमा '+rupee(k.kjU)+'</small>':'')+'</span><b>'+rupee(k.upi)+'</b></div>'+
+      '<div class="hstot gltot"><span>कुल बिक्री</span><b id="hs-total">'+rupee(k.tot)+'</b></div>';
+    if(!k.hasGo)w.push('🌅 सुबह गल्ले में कितना था — ऊपर लिखिए, उसके बिना कैश बिक्री ग़लत आएगी।');
+    if(k.cash<0)w.push('कैश बिक्री माइनस आ रही है — गिनती दोबारा देखिए, या कोई खर्च/निकाला दो बार तो नहीं लिखा?');
+    var avg=glAvgCash(x.d);
+    if(avg>0&&k.cash>=0&&k.cash<avg*0.3)w.push('कैश बिक्री रोज़ (औसत '+rupee(avg)+') से बहुत कम है — गिनती एक बार और देख लीजिए।');
+    if(avg>0&&k.cash>avg*3)w.push('कैश बिक्री रोज़ (औसत '+rupee(avg)+') से बहुत ज़्यादा है — कोई खर्च, सप्लायर का पैसा या "घर के लिए" लिखना छूटा तो नहीं?');
+  }
+  if(k.upi<0)w.push('UPI बिक्री माइनस — Paytm का आज का जोड़ फिर से देखिए (उधारी का UPI जमा भी उसी में आता है)।');
+  var au=hsGoAuto(x.d);
+  if(k.hasGo&&au.src==='kal'&&round2(num(x.go))!==round2(au.v))w.push('सुबह का गल्ला कल रात की गिनती ('+rupee(au.v)+') से '+rupee(Math.abs(round2(num(x.go)-au.v)))+' '+(num(x.go)>au.v?'ज़्यादा':'कम')+' है — रात में पैसा निकला या डाला था?');
+  return h+w.map(function(m){return '<div class="aiwarn">⚠️ '+esc(m)+'</div>';}).join('');
+}
+var GL_HM=['घर खर्च','राशन','सब्ज़ी','दवा','बच्चों का'];
+/* रात 8:40 की घंटी किस हाल में है (रजिस्टर कोड 7 + इस फ़ोन पर घंटी) */
+function hsBellHint(){
+  if(!onlineCfg())return '';
+  var ps=lsGet(PLAN_SENT,{})||{},v=num(ps.v);
+  if(v>=7&&pushOn())return '<p class="hint glbell">🔔 रोज़ रात 8:40 पर घंटी चालू ✓ — आज का हिसाब भर दिया तो नहीं बजेगी, 9:40 तक न भरा तो एक बार फिर।</p>';
+  if(v>=7)return '<p class="hint glbell">🔔 रात 8:40 की घंटी के लिए: <button class="lnk" data-act="push-on" style="padding:0">इस फ़ोन पर घंटी चालू करो</button></p>';
+  return '<p class="hint glbell">🔔 रात 8:40 की घंटी: रजिस्टर का नया कोड (संस्करण 7) एक बार चिपकाना है — <a class="lnk" style="padding:0" href="online/setup.html#st-milk" target="_blank" rel="noopener">सेटअप पेज, चरण 7</a></p>';
+}
+/* 💵 गल्ला-दिन का फ़ॉर्म: 🚚 माल आया → 💸 बाकी चुकाया → 🧾 खर्च → 🏠 घर → 🍬 बना → 💰 गल्ला */
+function glFormHtml(x,saved,f,mkHtml,exRow,exoHtml){
+  var d=x.d,k=glDraftCalc(x),ku=khataOn(d,'u'),au=hsGoAuto(d);
+  var inp=function(id,key,ph){return '<input id="'+id+'" data-hs="'+key+'" type="number" inputmode="decimal" min="0" step="any" placeholder="'+(ph||'0')+'" value="'+esc(x[key])+'">';};
+  var pmB=function(kind,i,cur,later){return '<div class="pmchips">'+SUP_PM.filter(function(p){return later||p[0];}).map(function(p){return '<button type="button" class="'+(cur===p[0]?'on':'')+'" data-act="gl-pm" data-k="'+kind+'" data-i="'+i+'" data-v="'+p[0]+'">'+p[1]+'</button>';}).join('')+'</div>';};
+  /* 🚚 माल आया */
+  var have={};x.sm.forEach(function(m){if(m.s)have[m.s]=1;});
+  var smH='<div class="hschips">'+supActive().map(function(s){return '<button type="button" class="'+(have[s.id]?'on':'')+'" data-act="gl-sm-add" data-s="'+esc(s.id)+'">'+(have[s.id]?'✓ ':'+ ')+esc(s.n)+'</button>';}).join('')+
+      '<button type="button" data-act="sup-new" data-from="hs">+ नया सप्लायर</button></div>'+
+    x.sm.map(function(m,i){var bx=hsBox(m.b);
+      return '<div class="glrow"><div class="top"><span class="nm">'+esc(m.n)+'<small>'+(bx?bx[1]+' '+esc(bx[2]):'🧾 अन्य खर्च')+'</small></span>'+
+        '<input id="gl-sma-'+i+'" data-glsma="'+i+'" type="tel" inputmode="tel" placeholder="₹ 0" value="'+esc(m.a)+'">'+
+        '<button type="button" class="x" data-act="gl-sm-rm" data-i="'+i+'" aria-label="हटाओ">×</button></div>'+
+        pmB('sm',i,m.pm,true)+
+        '<input class="nt" id="gl-smn-'+i+'" data-glsmn="'+i+'" type="text" maxlength="40" placeholder="नोट — जैसे 20 किलो पनीर (ज़रूरी नहीं)" value="'+esc(m.nt)+'"></div>';}).join('')+
+    (x.sm.length?'<div class="hstot hsext"><span>आज आया माल<small>"⏳ बाद में" वाला सप्लायर के बाकी में जुड़ेगा</small></span><b id="gl-smtot">'+rupee(hsDraftSup(x))+'</b></div>':'');
+  /* 💸 पुराना बाकी चुकाया */
+  var dues=supDues(hsKeyAdd(d,-1)),inSp={};x.sp.forEach(function(p){inSp[p.s]=1;});
+  var dueB=dues.filter(function(z){return !inSp[z.id];}).map(function(z){return '<button type="button" class="due" data-act="gl-sp-add" data-s="'+esc(z.id)+'">'+esc(z.n)+' · बाकी '+rupee(z.bal)+(z.since?' ('+supDaysTxt(z.since,d)+')':'')+'</button>';});
+  var spH=x.sp.map(function(p,i){
+      return '<div class="glrow"><div class="top"><span class="nm">💸 '+esc(p.n)+'</span>'+
+        '<input id="gl-spa-'+i+'" data-glspa="'+i+'" type="tel" inputmode="tel" placeholder="₹ 0" value="'+esc(p.a)+'">'+
+        '<button type="button" class="x" data-act="gl-sp-rm" data-i="'+i+'" aria-label="हटाओ">×</button></div>'+pmB('sp',i,p.pm,false)+
+        '<input class="nt" id="gl-spn-'+i+'" data-glspn="'+i+'" type="text" maxlength="40" placeholder="नोट (ज़रूरी नहीं)" value="'+esc(p.nt)+'"></div>';}).join('')+
+    (dueB.length?'<div class="hschips">'+dueB.join('')+'</div>':(x.sp.length?'':'<p class="hint" style="margin:4px 0 0">किसी सप्लायर का पुराना बाकी नहीं है ✓</p>'))+
+    (x.spAll?'<div class="hschips">'+supActive().filter(function(s){return !inSp[s.id];}).map(function(s){return '<button type="button" data-act="gl-sp-add" data-s="'+esc(s.id)+'">+ '+esc(s.n)+'</button>';}).join('')+'</div>':
+      '<button type="button" class="lnk" style="padding:4px 0" data-act="gl-sp-all">किसी और सप्लायर को दिया?</button>');
+  /* 🏠 घर के लिए */
+  var hmH=x.hm.map(function(h,i){return '<div class="hsx has hso"><input id="gl-hmn-'+i+'" data-glhmn="'+i+'" class="onm" type="text" maxlength="30" placeholder="किस चीज़ के लिए" value="'+esc(h.n)+'">'+
+      '<input id="gl-hma-'+i+'" data-glhma="'+i+'" type="tel" inputmode="tel" placeholder="₹ 0" value="'+esc(h.a)+'">'+
+      '<div class="sub"><span class="hint" style="margin:0">गल्ले से</span><button type="button" class="lnk danger" data-act="gl-hm-rm" data-i="'+i+'">हटाओ</button></div></div>';}).join('')+
+    '<div class="hschips">'+GL_HM.map(function(n){return '<button type="button" data-act="gl-hm-add" data-n="'+esc(n)+'">+ '+esc(n)+'</button>';}).join('')+'<button type="button" data-act="gl-hm-add" data-n="">+ और</button></div>'+
+    (x.hm.length?'<div class="hstot hsext"><span>घर के लिए कुल</span><b id="gl-hmtot">'+rupee(k.hm)+'</b></div>':'');
+  /* 💰 बिक्री और 💵 गल्ला */
+  var goSub=au.src==='kal'?'कल रात की गिनती से अपने-आप':(au.src==='old'?'कल का गल्ला नहीं गिना — आज सुबह का गिनकर लिखिए':'पहला दिन — सुबह गिनकर लिखिए');
+  var gl='<div class="glbox"><h3 class="hsh">💰 बिक्री और 💵 गल्ला</h3>'+
+    f('hs-upi','upi','📱 UPI से आया ₹','Paytm ऐप में आज का जोड़')+
+    '<div class="glline in"><span>🌅 सुबह गल्ले में ₹<small>'+goSub+'</small></span>'+inp('gl-go','go')+'</div>'+
+    (au.src==='old'&&String(x.go).trim()===''?'<button type="button" class="lnk" style="padding:2px 0" data-act="gl-go-old">दुकान बंद थी? '+hsDm(au.od)+' रात वाला '+rupee(au.v)+' लो</button>':'')+
+    '<div class="glline"><span>➕ उधारी का नकद जमा<small>अपने-आप — 📒 उधारी से</small></span><b id="gl-kjc">'+rupee(k.kjC)+'</b></div>'+
+    '<div class="glline in"><span>➕ घर/बैंक से गल्ले में डाला ₹<small>हो तो</small></span>'+inp('gl-gin','gin')+'</div>'+
+    '<div class="glline"><span>➖ गल्ले से दिया खर्च<small>🚚 माल + 🧾 खर्च — अपने-आप</small></span><b id="gl-expg">'+rupee(k.expG)+'</b></div>'+
+    '<div class="glline"><span>➖ सप्लायर का बाकी चुकाया<small>गल्ले से — अपने-आप</small></span><b id="gl-spg">'+rupee(k.spG)+'</b></div>'+
+    '<div class="glline"><span>➖ 🏠 घर के लिए<small>अपने-आप</small></span><b id="gl-hm">'+rupee(k.hm)+'</b></div>'+
+    '<div class="glline in"><span>➖ 💼 निकाला ₹<small>बैंक में जमा / बचत — खर्च नहीं</small></span>'+inp('hs-out','out')+'</div>'+
+    '<div class="glline in big"><span>🌙 रात को गल्ला गिनकर कुल ₹<small>नोट + सिक्के, सब</small></span>'+inp('gl-gc','gc','गिनकर')+'</div>'+
+    '<div id="gl-res">'+glResHtml(x,k)+'</div>'+
+    (ku||k.kjC||k.kjU?'<p class="hint hsud">📒 उधारी (अपने-आप): उधार दिया <b>'+rupee(ku)+'</b> · जमा मिला नकद <b>'+rupee(k.kjC)+'</b> · UPI <b>'+rupee(k.kjU)+'</b></p>':'')+
+    '</div>';
+  return '<div class="hsform">'+
+    '<div class="hsexp" style="border-top:0;margin-top:4px"><h3>🚚 आज माल आया (सप्लायर)</h3>'+
+      '<p class="hint" style="margin:2px 0 0">सप्लायर दबाओ → रकम → पैसा कैसे दिया। <b>⏳ बाद में</b> = उसके बाकी में जुड़ेगा। खर्च उसी दिन गिना जाएगा।</p>'+smH+
+      '<h4>💸 पुराना बाकी चुकाया</h4>'+spH+'</div>'+
+    '<div class="hsexp"><h3>🧾 दूसरे खर्च</h3>'+
+      '<p class="hint" style="margin:2px 0 0">बाज़ार से ख़रीदा, गैस, बिजली वगैरह · सप्लायर वाला माल ऊपर 🚚 में · दो बार दिया तो <b>1200+800</b></p>'+
+      '<h4>माल ख़रीदा</h4>'+HS_EX.filter(function(c){return c[4]==='m';}).map(exRow).join('')+
+      '<h4>दुकान चलाने का खर्च</h4>'+HS_EX.filter(function(c){return c[4]==='r';}).map(exRow).join('')+
+      '<div class="hsx"><span class="nm">🧾 अन्य खर्च</span><span></span></div>'+exoHtml+
+      '<div class="hschips">'+HS_OCH.map(function(n){return '<button type="button" data-act="hs-o-add" data-n="'+esc(n)+'">+ '+esc(n)+'</button>';}).join('')+'<button type="button" data-act="hs-o-add" data-n="">+ और खर्च</button></div>'+
+      '<div class="hstot hsext"><span>आज का कुल खर्च<small id="hs-expg"></small></span><b id="hs-exptot">'+rupee(hsDraftExp())+'</b></div>'+
+    '</div>'+
+    '<div class="hsexp"><h3>🏠 घर के लिए (गल्ले से)</h3><p class="hint" style="margin:2px 0 0">घर का सामान/खर्च — दुकान के खर्च और मुनाफ़े में नहीं जुड़ता, पर गल्ले से गया गिना जाता है</p>'+hmH+'</div>'+
+    '<div class="hsmade"><h3>🍬 आज क्या बना? <span style="font-weight:400;color:var(--muted);font-size:.8rem">(जिस दिन बनाया, उसी दिन)</span></h3>'+
+      '<div class="row2">'+f('hs-rg','rg','रसगुल्ला','कितने लीटर दूध')+f('hs-bs','bs','बालूशाही','कितने किलो')+'</div>'+
+      '<p class="hint" style="margin:10px 0 0">और क्या बना? बटन दबाओ — पिछली बार की मात्रा अपने-आप आ जाएगी</p>'+mkHtml+
+      (x.other?f('hs-other','other','पहले लिखा हुआ','','t'):'')+
+      f('hs-waste','waste','🗑️ कुछ ख़राब होकर फेंका?','जैसे: गुलाब जामुन 1 किलो','t')+
+    '</div>'+
+    gl+
+    '<div class="err" id="hs-err"></div>'+
+    '<div class="sh-actions"><button class="btn primary" data-act="hs-save">✓ '+(saved?'बदलाव सेव करो':'सेव करो')+'</button></div>'+
+    (saved?'<button class="lnk" style="display:block;margin:10px auto 0" data-act="hs-wa">📤 ये हिसाब WhatsApp पर भेजो</button>':'')+
+  '</div>';
+}
+/* बाकी चुकाया — रात के हिसाब के बाहर से (सप्लायर पेज / होम) — उसी दिन की एंट्री में */
+function glAddSp(d,row){
+  var e=hsGet(d);
+  if(!e){e={d:d,at:Date.now()};DLY().push(e);DLY().sort(function(a,b){return a.d<b.d?-1:1;});}
+  if(glDay(d))e.gm=1;
+  if(!Array.isArray(e.sp))e.sp=[];
+  e.sp.push(row);
+  if(ui.hsDraft&&ui.hsDraft.d===d&&Array.isArray(ui.hsDraft.sp))ui.hsDraft.sp.push({s:row.s,n:row.n,a:String(row.v),pm:row.pm,nt:row.nt||''});
+  save();
+}
+function shareText(txt,title){
+  if(navigator.share){navigator.share({text:txt,title:title||''}).catch(function(){});return;}
+  window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(txt),'_blank');
+}
+
+/* ---------- 🤝 सप्लायर खाता (पेज) ---------- */
+function supMonthOf(sid,from,to){
+  var m=0,pd=0;supLedger(sid,to).forEach(function(x){if(x.d<from)return;if(x.t==='m'){m+=x.v;if(x.pm!=='')pd+=x.v;}else pd+=x.v;});
+  return {m:round2(m),pd:round2(pd)};
+}
+function renderSup(){
+  var t=todayStr(),from=t.slice(0,7)+'-01',tot=0,mm=0,pp=0;
+  var rows=SUP().map(function(s){var b=supBal(s.id,t),mo=supMonthOf(s.id,from,t);tot+=Math.max(0,b.bal);mm+=mo.m;pp+=mo.pd;return {s:s,b:b,mo:mo};});
+  var act=rows.filter(function(r){return r.s.on!==false||r.b.bal>0.001;}).sort(function(a,b){return (b.b.bal>0.001)-(a.b.bal>0.001)||b.b.bal-a.b.bal;});
+  var off=rows.filter(function(r){return r.s.on===false&&!(r.b.bal>0.001);});
+  var row=function(r){var bx=hsBox(r.s.b);
+    return '<button class="suprow" data-act="sup-open" data-s="'+esc(r.s.id)+'"><span class="l"><b>'+esc(r.s.n)+'</b><small>'+(bx?bx[1]+' '+esc(bx[2]):'🧾 अन्य')+' · '+(r.s.pay==='later'?'पैसा बाद में':'पैसा तुरंत')+' ('+(r.s.m==='u'?'ऑनलाइन':r.s.m==='h'?'घर से':'गल्ले से')+')'+(r.s.on===false?' · हटाया हुआ':'')+'</small></span>'+
+      '<span class="r">'+(r.b.bal>0.001?'<b class="due">'+rupee(r.b.bal)+'</b><small>बाकी'+(r.b.since?' · '+supDaysTxt(r.b.since):'')+'</small>':(r.b.bal<-0.001?'<b class="ok">'+rupee(-r.b.bal)+'</b><small>एडवांस दिया</small>':'<b class="ok">✓</b><small>साफ़</small>'))+
+      (r.mo.m?'<small>इस महीने माल '+rupee(r.mo.m)+'</small>':'')+'</span></button>';};
+  var html='<button class="backbtn" data-act="nav" data-v="hisaab">← रात का हिसाब</button>'+
+    '<div class="sechead" style="margin-top:0"><h2>🤝 सप्लायर खाता</h2></div>'+
+    '<div class="band"><div class="due"><b>'+rupee(round2(tot))+'</b><span>कुल देना बाकी</span></div><div><b>'+rupee(round2(mm))+'</b><span>'+HS_MON[+t.slice(5,7)-1]+' में माल</span></div><div class="tom"><b>'+rupee(round2(pp))+'</b><span>'+HS_MON[+t.slice(5,7)-1]+' में दिया</span></div></div>'+
+    '<div class="suplist">'+act.map(row).join('')+'</div>'+
+    '<button class="btn small" style="margin-top:10px" data-act="sup-new">+ नया सप्लायर</button>'+
+    (off.length?'<details class="supoff"><summary>हटाए हुए सप्लायर ('+off.length+')</summary><div class="suplist">'+off.map(row).join('')+'</div></details>':'')+
+    '<p class="hint" style="margin-top:12px">माल रात के हिसाब में "🚚 आज माल आया" से लिखा जाता है। '+hsDm(GL().d0)+' से पहले का कोई बाकी यहाँ नहीं गिना — उस दिन तक का सब साफ़ माना है।</p>';
+  paint($('#main'),html);
+}
+function openSupSheet(id){
+  var s=supFind(id);if(!s)return;
+  var t=todayStr(),b=supBal(id,t),L=supLedger(id,t).slice().reverse().slice(0,80);
+  openSheet('<div class="sh-head"><h2>🤝 '+esc(s.n)+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="supbal">'+(b.bal>0.001?'देना बाकी: <b class="due">'+rupee(b.bal)+'</b>'+(b.since?' <small>('+hsDm(b.since)+' से)</small>':''):(b.bal<-0.001?'एडवांस दिया: <b class="ok">'+rupee(-b.bal)+'</b>':'<b class="ok">✓ हिसाब साफ़</b>'))+'</p>'+
+    '<div class="actbar"><button class="btn primary small" data-act="sup-pay" data-s="'+esc(id)+'">💸 पैसा दिया</button><button class="btn small" data-act="sup-edit" data-s="'+esc(id)+'">✏️ बदलो</button>'+(L.length?'<button class="btn small" data-act="sup-share" data-s="'+esc(id)+'">📤 हिसाब भेजो</button>':'')+'</div>'+
+    (L.length?'<div class="supl">'+L.map(function(x){
+      return '<div class="'+(x.t==='m'?'m':'p')+'"><span>'+hsDm(x.d)+'</span><span>'+(x.t==='m'?'🚚 माल '+rupee(x.v)+' <small>'+(x.pm===''?'⏳ बाकी':pmTxt(x.pm))+'</small>':'💸 दिया '+rupee(x.v)+' <small>'+pmTxt(x.pm)+'</small>')+(x.nt?'<small class="nt">'+esc(x.nt)+'</small>':'')+'</span></div>';}).join('')+'</div>':
+      '<p class="hint">अभी कोई माल/पेमेंट नहीं लिखा। रात के हिसाब में "🚚 आज माल आया" से लिखिए।</p>'));
+}
+function supMsg(id){
+  var s=supFind(id);if(!s)return '';var t=todayStr(),b=supBal(id,t),L=supLedger(id,t);
+  var R=['🤝 '+s.n+' — हिसाब ('+state.shop.name+')',''];
+  L.slice(-40).forEach(function(x){R.push(hsDm(x.d)+': '+(x.t==='m'?'माल '+rupee(x.v)+(x.pm===''?' (बाकी)':' (दिया — '+pmTxt(x.pm)+')'):'दिया '+rupee(x.v)+' ('+pmTxt(x.pm)+')')+(x.nt?' · '+x.nt:''));});
+  R.push('');R.push(b.bal>0.001?'बाकी: '+rupee(b.bal):(b.bal<-0.001?'एडवांस दिया: '+rupee(-b.bal):'हिसाब साफ़ ✓'));
+  return R.join('\n');
+}
+function openSupPay(id){
+  var s=supFind(id);if(!s)return;var b=supBal(id,todayStr());
+  ui.supPay={s:id,a:b.bal>0.001?String(b.bal):'',pm:s.m==='u'||s.m==='h'?s.m:'g',d:todayStr(),nt:''};
+  renderSupPay(true);
+}
+function renderSupPay(first){
+  var p=ui.supPay,s=supFind(p.s),b=supBal(p.s,todayStr());
+  var html='<div class="sh-head"><h2>💸 '+esc(s?s.n:'')+' को पैसा दिया</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">अभी बाकी: <b>'+rupee(Math.max(0,b.bal))+'</b></p>'+
+    '<label class="fl bigamt">कितना दिया ₹<input id="sp-a" type="tel" inputmode="tel" placeholder="0" value="'+esc(p.a)+'"></label>'+
+    '<div class="pmchips">'+SUP_PM.filter(function(z){return z[0];}).map(function(z){return '<button type="button" class="'+(p.pm===z[0]?'on':'')+'" data-act="sp-pm" data-v="'+z[0]+'">'+z[1]+'</button>';}).join('')+'</div>'+
+    '<label class="fl">तारीख<input id="sp-d" type="date" min="'+GL().d0+'" max="'+todayStr()+'" value="'+esc(p.d)+'"></label>'+
+    '<label class="fl">नोट (चाहें तो)<input id="sp-nt" type="text" maxlength="40" value="'+esc(p.nt)+'"></label>'+
+    '<div class="err" id="sp-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="sp-save">✓ सेव करो</button></div>';
+  if(first)openSheet(html);else setSheet(html);
+}
+function supPayCapture(){var p=ui.supPay;if(!p)return;var a=$('#sp-a'),d=$('#sp-d'),n=$('#sp-nt');if(a)p.a=a.value;if(d)p.d=d.value;if(n)p.nt=n.value;}
+function saveSupPay(){
+  supPayCapture();var p=ui.supPay,err=$('#sp-err');if(!p)return;
+  var v=hsSum(p.a);if(v===''||!(v>0)||v>=10000000){err.textContent='कितना दिया — रकम लिखो।';return;}
+  if(!/^\d{4}-\d\d-\d\d$/.test(p.d)||p.d>todayStr()){err.textContent='सही तारीख चुनो।';return;}
+  if(p.d<GL().d0){err.textContent=hsDm(GL().d0)+' से पहले का हिसाब साफ़ माना है — उसके बाद की तारीख चुनो।';return;}
+  var s=supFind(p.s);
+  glAddSp(p.d,{s:p.s,n:s?s.n:'',a:String(p.a).replace(/\s/g,''),v:v,pm:p.pm,nt:String(p.nt||'').trim().slice(0,40)});
+  ui.supPay=null;closeSheet();
+  var nb=supBal(p.s,todayStr()).bal;
+  toast((s?s.n:'')+' को '+rupee(v)+' दिया ✓ · '+(nb>0.001?'अब बाकी '+rupee(nb):(nb<-0.001?rupee(-nb)+' एडवांस':'हिसाब साफ़')));
+  renderRoute();
+}
+var SUP_BOXES=HS_EX.map(function(c){return [c[0],c[1]+' '+c[2]];}).concat([['other','🧾 अन्य खर्च']]);
+function openSupEdit(id,from){
+  var s=id?supFind(id):null;
+  ui.supEd={id:s?s.id:'',n:s?s.n:'',b:s?s.b:'milk',pay:s?s.pay:'now',m:s?s.m:'g',on:s?s.on!==false:true,from:from||''};
+  renderSupEdit(true);
+}
+function renderSupEdit(first){
+  var e=ui.supEd;
+  var ch=function(act,list,cur){return '<div class="pmchips">'+list.map(function(z){return '<button type="button" class="'+(cur===z[0]?'on':'')+'" data-act="'+act+'" data-v="'+z[0]+'">'+z[1]+'</button>';}).join('')+'</div>';};
+  var html='<div class="sh-head"><h2>'+(e.id?'✏️ सप्लायर बदलो':'+ नया सप्लायर')+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<label class="fl">नाम<input id="se-n" type="text" maxlength="40" placeholder="जैसे: कृष्णा पनीर, बीकाजी" value="'+esc(e.n)+'"></label>'+
+    '<p class="fl" style="margin-bottom:2px">कौन-सा खर्च (डिब्बा)</p>'+ch('se-b',SUP_BOXES,e.b)+
+    '<p class="fl" style="margin-bottom:2px">पैसा कब देते हैं</p>'+ch('se-pay',[['now','माल आते ही'],['later','बाद में (उधार)']],e.pay)+
+    '<p class="fl" style="margin-bottom:2px">पैसा कैसे देते हैं</p>'+ch('se-m',SUP_PM.filter(function(z){return z[0];}),e.m)+
+    (e.id?'<label class="fl" style="display:flex;gap:8px;align-items:center"><input id="se-on" type="checkbox"'+(e.on?' checked':'')+' style="width:20px;height:20px"> लिस्ट में दिखाओ (हटाने पर भी पुराना हिसाब रहता है)</label>':'')+
+    '<div class="err" id="se-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="se-save">✓ सेव करो</button></div>';
+  if(first)openSheet(html);else setSheet(html);
+  if(first&&!e.id)setTimeout(function(){var n=$('#se-n');if(n)n.focus();},60);
+}
+function supEdCapture(){var e=ui.supEd;if(!e)return;var n=$('#se-n'),o=$('#se-on');if(n)e.n=n.value;if(o)e.on=o.checked;}
+function saveSupEdit(){
+  supEdCapture();var e=ui.supEd,err=$('#se-err');if(!e)return;
+  var nm=String(e.n||'').trim().slice(0,40);if(!nm){err.textContent='नाम लिखो।';return;}
+  var dup=SUP().filter(function(z){return z.id!==e.id&&String(z.n).trim()===nm;})[0];if(dup){err.textContent='"'+nm+'" पहले से है।';return;}
+  var s;
+  if(e.id){s=supFind(e.id);if(!s)return;s.n=nm;s.b=e.b;s.pay=e.pay;s.m=e.m;s.on=e.on;}
+  else{s={id:'s'+uid(),n:nm,b:e.b,pay:e.pay,m:e.m,on:true};SUP().push(s);}
+  save();var from=e.from;ui.supEd=null;closeSheet();
+  if(from==='hs'&&ui.hsDraft&&ui.hsDraft.gm){ui.hsDraft.sm.push({s:s.id,n:s.n,b:s.b,a:'',pm:supDefPm(s),nt:''});renderHisaab();var fi=$('#gl-sma-'+(ui.hsDraft.sm.length-1));if(fi)fi.focus();}
+  else renderRoute();
+  toast(e.id?'सप्लायर बदल गया ✓':'नया सप्लायर जुड़ा ✓');
+}
+/* 🌅 गल्ला मिलान शुरू — सुबह का गल्ला */
+function openGlStart(){
+  var t=todayStr(),e=hsGet(t);
+  openSheet('<div class="sh-head"><h2>🌅 सुबह का गल्ला</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<p class="hint">आज से गल्ला मिलान शुरू। दुकान खोलते समय गल्ले में जितना पैसा है (नोट + सिक्के) गिनकर लिखिए। कल से ये अपने-आप रात की गिनती से आएगा।</p>'+
+    '<label class="fl bigamt">सुबह गल्ले में ₹<input id="gs-v" type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="'+esc(e&&e.go!=null?e.go:'')+'"></label>'+
+    '<div class="err" id="gs-err"></div>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">बाद में</button><button class="btn primary" data-act="gs-save">✓ सेव करो</button></div>');
+  setTimeout(function(){var i=$('#gs-v');if(i)i.focus();},60);
+}
+function saveGlStart(){
+  var i=$('#gs-v'),err=$('#gs-err'),v=String(i?i.value:'').trim();
+  if(v===''||!(parseFloat(v)>=0)||parseFloat(v)>=10000000){err.textContent='गल्ले में कितना है — गिनकर लिखो (0 भी चलेगा)।';return;}
+  var t=todayStr(),e=hsGet(t);
+  if(!e){e={d:t,at:Date.now()};DLY().push(e);DLY().sort(function(a,b){return a.d<b.d?-1:1;});}
+  e.gm=1;e.go=round2(parseFloat(v));save();
+  if(ui.hsDraft&&ui.hsDraft.d===t){ui.hsDraft.gm=true;ui.hsDraft.go=String(e.go);}
+  closeSheet();renderRoute();toast('🌅 सुबह का गल्ला '+rupee(e.go)+' ✓ — रात को हिसाब में गिनती लिखिए');
+}
+
+/* ---------- 📅 महीने का पूरा हिसाब ---------- */
+var MO_SEEN='mbmb-mo-seen';
+function moAdd(ym,n){var dt=new Date(+ym.slice(0,4),+ym.slice(5,7)-1+n,1);return dt.getFullYear()+'-'+pad(dt.getMonth()+1);}
+function moName(ym){return HS_MON[+ym.slice(5,7)-1]+' '+ym.slice(0,4);}
+function moEnd(ym){return ym+'-'+pad(new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate());}
+function moData(ym){
+  var t=todayStr(),from=ym+'-01',end=moEnd(ym),to=end<t?end:t,d0=GL().d0;
+  var E=DLY().filter(function(e){return e.d>=from&&e.d<=to;});
+  var r={ym:ym,from:from,to:to,end:end,cur:to===t&&end>=t,days:0,cash:0,upi:0,miss:[],kU:0,kJc:0,kJu:0};
+  E.forEach(function(e){if(hsHas(e)){r.days++;r.cash+=hsCashSale(e);r.upi+=hsUpiSale(e);}});
+  r.cash=round2(r.cash);r.upi=round2(r.upi);r.sale=round2(r.cash+r.upi);
+  var anyBefore=DLY().some(function(e){return e.d<=to&&hsHas(e);});
+  if(anyBefore)for(var dk=from;dk<=to;dk=hsKeyAdd(dk,1)){if(dk!==t&&!hsHas(hsGet(dk)))r.miss.push(dk);}
+  KH().entries.forEach(function(e){if(e.date<from||e.date>to)return;if(e.type==='u')r.kU+=num(e.amount);else if(kjMode(e)==='u')r.kJu+=num(e.amount);else r.kJc+=num(e.amount);});
+  r.kU=round2(r.kU);r.kJc=round2(r.kJc);r.kJu=round2(r.kJu);
+  var pb={},kb=0;KH().entries.forEach(function(e){if(e.date>to)return;pb[e.partyId]=(pb[e.partyId]||0)+(e.type==='u'?1:-1)*num(e.amount);});
+  Object.keys(pb).forEach(function(k){if(pb[k]>0.001)kb+=pb[k];});r.kBal=round2(kb);
+  r.ex=hsExpRange(from,to);
+  r.sup=SUP().map(function(s){var mo=supMonthOf(s.id,from,to),b=supBal(s.id,to);return {id:s.id,n:s.n,m:mo.m,pd:mo.pd,bal:b.bal,since:b.since};}).filter(function(z){return z.m||z.pd||Math.abs(z.bal)>0.001;});
+  r.supDue=round2(r.sup.reduce(function(s,z){return s+Math.max(0,z.bal);},0));
+  r.home=0;r.homeBy={};E.forEach(function(e){glList(e.hm).forEach(function(h){r.home+=num(h.v);var k=h.n||'घर के लिए';r.homeBy[k]=round2((r.homeBy[k]||0)+num(h.v));});});r.home=round2(r.home);
+  var ps=d0>from?d0:from;r.pFrom=ps;
+  if(ps<=to){var sR=hsRange(ps,to);r.pSale=sR.sum;r.pDays=sR.days;r.pEx=hsExpRange(ps,to).tot;r.profit=round2(sR.sum-r.pEx);}
+  var G=E.filter(function(e){return e.gm&&hsHas(e);});
+  if(G.length){
+    var g={open:num(G[0].go),od:G[0].d,close:num(G[G.length-1].gc),cd:G[G.length-1].d,cash:0,kjc:0,gin:0,exg:0,spg:0,hm:0,out:0,jumps:[],gap:[]};
+    G.forEach(function(e,i){g.cash+=hsCashSale(e);g.kjc+=kjOn(e.d,'c');g.gin+=num(e.gin);g.exg+=hsExpG(e);g.spg+=glSpG(e);g.hm+=glHome(e);g.out+=num(e.out);
+      if(i>0){var p=G[i-1];if(round2(num(e.go))!==round2(num(p.gc)))g.jumps.push({d:e.d,go:num(e.go),pd:p.d,pc:num(p.gc)});}});
+    ['cash','kjc','gin','exg','spg','hm','out'].forEach(function(k){g[k]=round2(g[k]);});
+    g.exp=round2(g.open+g.cash+g.kjc+g.gin-g.exg-g.spg-g.hm-g.out);g.diff=round2(g.close-g.exp);
+    for(var d2=(d0>from?d0:from);d2<=to;d2=hsKeyAdd(d2,1)){if(d2!==t&&!hsHas(hsGet(d2)))g.gap.push(d2);}
+    r.g=g;
+  }
+  r.made=hsMadeRange(from,to);
+  var pym=moAdd(ym,-1);r.prev={name:moName(pym),sale:hsRange(pym+'-01',moEnd(pym)).sum,ex:hsExpRange(pym+'-01',moEnd(pym)).tot};
+  return r;
+}
+function moDays(a){if(!a.length)return '';var s=a.slice(0,8).map(function(k){return +k.slice(8,10);}).join(', ');return s+(a.length>8?' +'+(a.length-8):'');}
+function renderMonth(){
+  var t=todayStr(),cy=t.slice(0,7),ym=ui.mon&&/^\d{4}-\d\d$/.test(ui.mon)?ui.mon:cy;if(ym>cy)ym=cy;ui.mon=ym;
+  var r=moData(ym),mn=HS_MON[+ym.slice(5,7)-1],sec=function(h){return '<div class="sechead"><h2>'+h+'</h2></div>';};
+  var p=function(a){return '<div class="hsstat">'+a.filter(Boolean).map(function(l){return '<p>'+l+'</p>';}).join('')+'</div>';};
+  var html='<button class="backbtn" data-act="nav" data-v="hisaab">← रात का हिसाब</button>'+
+    '<div class="sechead" style="margin-top:0"><h2>📅 महीने का पूरा हिसाब</h2></div>'+
+    '<div class="hsdate"><button data-act="mo-nav" data-n="-1" aria-label="पिछला महीना">‹</button><b>'+moName(ym)+(r.cur?' (आज तक)':'')+'</b><button data-act="mo-nav" data-n="1" aria-label="अगला महीना"'+(ym>=cy?' disabled':'')+'>›</button></div>'+
+    '<div class="band"><div><b>'+rupee(r.sale)+'</b><span>कुल बिक्री</span></div><div class="due"><b>'+rupee(r.ex.tot)+'</b><span>कुल खर्च</span></div><div class="tom"><b>'+(r.profit!=null?rupee(r.profit):'-')+'</b><span>बिक्री − खर्च'+(r.pFrom>r.from?' ('+(+r.pFrom.slice(8,10))+' से)':'')+'</span></div></div>';
+  /* बिक्री */
+  html+=sec('💰 बिक्री')+p([
+    '💵 कैश <b>'+rupee(r.cash)+'</b> · 📱 UPI <b>'+rupee(r.upi)+'</b> · कुल <b>'+rupee(r.sale)+'</b>',
+    r.days+' दिन का हिसाब भरा'+(r.days?' · एक दिन औसत '+rupee(Math.round(r.sale/r.days)):''),
+    r.miss.length?'<span style="color:var(--red)">नहीं भरा: '+moDays(r.miss)+' '+mn+'</span>':'',
+    r.kU?'📒 उधार पर गई मिठाई: <b>'+rupee(r.kU)+'</b> (ये ऊपर की बिक्री में नहीं — पैसा आने पर जुड़ती है)':'',
+    (r.kJc||r.kJu)?'📒 उधारी में जमा मिला: नकद '+rupee(r.kJc)+' · UPI '+rupee(r.kJu)+(r.g?' (गल्ला मिलान वाले दिनों में बिक्री में नहीं जोड़ा)':''):''
+  ]);
+  /* खर्च */
+  var cats=Object.keys(r.ex.cat).map(function(k){return {k:k,c:r.ex.cat[k]};}).filter(function(z){return z.c.v>0;}).sort(function(a,b){return b.c.v-a.c.v;}),cmx=cats.length?cats[0].c.v:0;
+  html+=sec('🧾 खर्च')+'<div class="hsstat"><p>कुल <b>'+rupee(r.ex.tot)+'</b> · माल ख़रीदा '+rupee(r.ex.m)+' · दुकान चलाने का '+rupee(r.ex.r)+'</p>'+
+    (r.from<GL().d0&&r.to>=GL().d0?'<p class="hint" style="margin:2px 0">सप्लायर का माल '+hsDm(GL().d0)+' से लिखा जा रहा है।</p>':'')+
+    (cats.length?'<div class="hscats">'+cats.map(function(z){return '<div class="hscat"><div class="t"><span>'+z.c.ic+' '+esc(z.c.name)+'</span><b>'+rupee(round2(z.c.v))+' <small>'+Math.round(z.c.v/r.ex.tot*100)+'%</small></b></div><i style="width:'+Math.max(2,Math.round(z.c.v/cmx*100))+'%"></i></div>';}).join('')+'</div>':'<p>इस महीने कोई खर्च नहीं लिखा।</p>')+
+    (Object.keys(r.ex.oth).length?'<p style="margin-top:6px;font-size:.84rem;color:var(--muted)">अन्य में: '+Object.keys(r.ex.oth).sort(function(a,b){return r.ex.oth[b]-r.ex.oth[a];}).map(function(n){return esc(n)+' '+rupee(round2(r.ex.oth[n]));}).join(' · ')+'</p>':'')+'</div>';
+  /* सप्लायर */
+  if(r.sup.length)html+=sec('🤝 सप्लायर')+'<div class="hsstat">'+r.sup.map(function(z){return '<div class="mosup"><b>'+esc(z.n)+'</b><span>माल '+rupee(z.m)+' · दिया '+rupee(z.pd)+' · '+(z.bal>0.001?'<b class="due">बाकी '+rupee(z.bal)+'</b>':(z.bal<-0.001?'एडवांस '+rupee(-z.bal):'<b class="ok">साफ़ ✓</b>'))+'</span></div>';}).join('')+
+    '<p style="margin-top:6px">'+(r.cur?'आज तक':moName(ym)+' के आख़िर में')+' कुल देना बाकी: <b class="due">'+rupee(r.supDue)+'</b></p></div>';
+  /* मुनाफ़ा */
+  if(r.profit!=null)html+=sec('📈 बिक्री − खर्च')+p([
+    (r.pFrom>r.from?(+r.pFrom.slice(8,10))+'–'+(+r.to.slice(8,10))+' '+mn+' (खर्च लिखना '+hsDm(GL().d0)+' से शुरू): ':'')+'बिक्री '+rupee(r.pSale)+' − खर्च '+rupee(r.pEx)+' = <b>'+rupee(r.profit)+'</b>',
+    '<span class="hint" style="font-size:.78rem">मोटा अंदाज़ा — बचा हुआ माल और उधार पर गई मिठाई नहीं गिनी। सप्लायर का माल जिस दिन आया उसी दिन खर्च गिना।</span>']);
+  /* घर के लिए */
+  if(r.home)html+=sec('🏠 घर के लिए (गल्ले से)')+p(['कुल <b>'+rupee(r.home)+'</b>',Object.keys(r.homeBy).sort(function(a,b){return r.homeBy[b]-r.homeBy[a];}).map(function(n){return esc(n)+' '+rupee(r.homeBy[n]);}).join(' · ')]);
+  /* गल्ला मिलान */
+  if(r.g){var g=r.g,ln=function(a,b,c){return '<div class="glline"><span>'+a+'</span><b'+(c?' class="'+c+'"':'')+'>'+b+'</b></div>';};
+    html+=sec('💵 गल्ले का मिलान')+'<div class="hsstat glmo">'+
+      ln('🌅 शुरुआत ('+hsDm(g.od)+' सुबह)',rupee(g.open))+
+      ln('➕ कैश बिक्री',rupee(g.cash))+(g.kjc?ln('➕ उधारी का नकद जमा',rupee(g.kjc)):'')+(g.gin?ln('➕ घर/बैंक से डाला',rupee(g.gin)):'')+
+      ln('➖ गल्ले से खर्च (माल + दूसरे खर्च)',rupee(g.exg))+(g.spg?ln('➖ सप्लायर का बाकी चुकाया',rupee(g.spg)):'')+(g.hm?ln('➖ 🏠 घर के लिए',rupee(g.hm)):'')+(g.out?ln('➖ 💼 निकाला (बैंक/बचत)',rupee(g.out)):'')+
+      ln('= गल्ले में होना चाहिए',rupee(g.exp))+
+      ln('🌙 आख़िरी गिनती ('+hsDm(g.cd)+' रात)',rupee(g.close))+
+      (Math.abs(g.diff)<0.5?'<p class="glok">✅ हिसाब मिल गया</p>':'<div class="aiwarn">⚠️ '+rupee(Math.abs(g.diff))+' '+(g.diff>0?'ज़्यादा':'कम')+' — नीचे वाले दिनों में सुबह का गल्ला पिछली रात से अलग लिखा है</div>')+
+      g.jumps.map(function(j){return '<p class="hint" style="margin:2px 0">• '+hsDm(j.d)+' सुबह '+rupee(j.go)+' लिखा, जबकि '+hsDm(j.pd)+' रात '+rupee(j.pc)+' गिना था</p>';}).join('')+
+      (g.gap.length?'<div class="aiwarn">⚠️ इन दिनों गल्ला नहीं गिना: '+moDays(g.gap)+' '+mn+' — उस दिन की बिक्री अगले भरे दिन में जुड़ जाती है</div>':'')+
+      '</div>';}
+  /* उधारी */
+  if(r.kU||r.kJc||r.kJu||r.kBal)html+=sec('📒 उधारी')+p(['महीने में उधार दिया <b>'+rupee(r.kU)+'</b> · जमा मिला <b>'+rupee(round2(r.kJc+r.kJu))+'</b>',(r.cur?'आज':moName(ym)+' के आख़िर में')+' कुल लेना बाकी: <b class="due">'+rupee(r.kBal)+'</b>']);
+  /* बना */
+  if(r.made.length)html+=sec('🍬 क्या बना')+p([r.made.map(function(m){return esc(hsMadeTxt(m))+(m.times>1?' ('+m.times+' बार)':'');}).join(' · ')]);
+  /* पिछला महीना */
+  if(r.prev.sale||r.prev.ex)html+=sec('↔️ '+r.prev.name+' से तुलना')+p(['बिक्री: '+r.prev.name+' '+rupee(r.prev.sale)+' → '+mn+' '+rupee(r.sale)+(r.cur?' (अब तक)':''),'खर्च: '+r.prev.name+' '+rupee(r.prev.ex)+' → '+mn+' '+rupee(r.ex.tot)]);
+  html+='<div class="sh-actions" style="margin-top:14px"><button class="btn primary" data-act="mo-share">📤 WhatsApp पर भेजो</button></div>'+
+    '<p class="hint" style="margin:10px 0 4px">ये हिसाब इसी फ़ोन में रहता है और बैकअप में साथ जाता है।</p>';
+  paint($('#main'),html);
+}
+function moMsg(ym){
+  var r=moData(ym),mn=moName(ym),L=['📅 '+mn+' का हिसाब'+(r.cur?' (आज तक)':'')+' — '+state.shop.name,''];
+  L.push('💰 बिक्री: '+rupee(r.sale)+' (कैश '+rupee(r.cash)+' + UPI '+rupee(r.upi)+') · '+r.days+' दिन भरे');
+  if(r.kU)L.push('📒 उधार पर गई: '+rupee(r.kU));
+  L.push('🧾 खर्च: '+rupee(r.ex.tot)+' (माल '+rupee(r.ex.m)+' · दुकान चलाने का '+rupee(r.ex.r)+')');
+  Object.keys(r.ex.cat).map(function(k){return r.ex.cat[k];}).filter(function(c){return c.v>0;}).sort(function(a,b){return b.v-a.v;}).forEach(function(c){L.push('  • '+c.name+': '+rupee(round2(c.v)));});
+  if(r.profit!=null)L.push('📈 बिक्री − खर्च'+(r.pFrom>r.from?' ('+(+r.pFrom.slice(8,10))+' तारीख़ से)':'')+': '+rupee(r.profit));
+  if(r.home)L.push('🏠 घर के लिए: '+rupee(r.home));
+  if(r.sup.length){L.push('');L.push('🤝 सप्लायर:');r.sup.forEach(function(z){L.push('  • '+z.n+': माल '+rupee(z.m)+', दिया '+rupee(z.pd)+(z.bal>0.001?', बाकी '+rupee(z.bal):(z.bal<-0.001?', एडवांस '+rupee(-z.bal):', साफ़ ✓')));});}
+  if(r.g){var g=r.g;L.push('');L.push('💵 गल्ला: शुरुआत '+rupee(g.open)+' → होना चाहिए '+rupee(g.exp)+' · गिना '+rupee(g.close)+(Math.abs(g.diff)<0.5?' ✅ मिल गया':' ⚠️ फ़र्क '+rupee(g.diff)));
+    var gl2=[];if(g.out)gl2.push('निकाला '+rupee(g.out));if(g.hm)gl2.push('घर के लिए '+rupee(g.hm));if(gl2.length)L.push('   '+gl2.join(' · '));}
+  if(r.kBal)L.push('📒 उधारी में लेना बाकी: '+rupee(r.kBal));
+  if(r.miss.length)L.push('⚠️ नहीं भरा: '+moDays(r.miss)+' तारीख़');
+  return L.join('\n');
 }
 function hsQtyRow(i,m){
   var qs=HS_Q[m.u]||[];
@@ -2809,10 +3333,14 @@ function renderHisaab(){
   var exoHtml=x.exo.map(function(o,i){return '<div class="hsx has hso"><input id="hs-on-'+i+'" data-hson="'+i+'" class="onm" type="text" maxlength="30" placeholder="किस चीज़ का खर्च" value="'+esc(o.n)+'">'+
       '<input id="hs-oa-'+i+'" data-hsoa="'+i+'" type="tel" inputmode="tel" placeholder="₹ 0" value="'+esc(o.a)+'">'+
       '<div class="sub"><label><input id="hs-og-'+i+'" data-hsog="'+i+'" type="checkbox"'+(o.g?' checked':'')+'> गल्ले से</label><button type="button" class="lnk danger" data-act="hs-o-rm" data-i="'+i+'">हटाओ</button></div></div>';}).join('');
+  var duesAll=supDues(t),duesTot=round2(duesAll.reduce(function(s,z){return s+z.bal;},0));
   var html='<button class="backbtn" data-act="nav" data-v="home">← होम</button>'+
     '<div class="sechead" style="margin-top:0"><h2>🌙 रात का हिसाब</h2></div>'+
-    '<p class="hint" style="margin-top:-4px">काउंटर के हर ग्राहक की एंट्री नहीं — बस रात को दिन का जोड़: बिक्री, क्या बना, और खर्च।</p>'+
+    '<p class="hint" style="margin-top:-4px">'+(x.gm?'रात को दिन का पूरा मिलान: 🚚 सप्लायर का माल → 🧾 खर्च → 🏠 घर के लिए → 💵 गल्ला गिनकर कुल।':'काउंटर के हर ग्राहक की एंट्री नहीं — बस रात को दिन का जोड़: बिक्री, क्या बना, और खर्च।')+'</p>'+
+    '<div class="glnav"><button class="btn small" data-act="mo-open" data-m="'+d.slice(0,7)+'">📅 महीने का पूरा हिसाब</button><button class="btn small" data-act="nav" data-v="sup">🤝 सप्लायर खाता'+(duesTot?' · <b style="color:var(--red)">'+rupee(duesTot)+'</b> बाकी':'')+'</button></div>'+
+    hsBellHint()+
     '<div class="hsdate"><button data-act="hs-day" data-n="-1" aria-label="पिछला दिन">‹</button><b>'+hsWdOf(d)+', '+hsDm(d)+(d===t?' (आज)':'')+'</b><button data-act="hs-day" data-n="1" aria-label="अगला दिन"'+(d>=t?' disabled':'')+'>›</button></div>'+
+    (x.gm?glFormHtml(x,saved,f,mkHtml,exRow,exoHtml):
     '<div class="hsform">'+
       '<h3 class="hsh">💰 आज की बिक्री</h3>'+
       '<div class="row2">'+f('hs-upi','upi','📱 UPI से आया ₹','Paytm ऐप में आज का जोड़')+f('hs-cash','cash','💵 गल्ले में बढ़ा ₹','रात का गल्ला − सुबह का खुला पैसा')+'</div>'+
@@ -2833,10 +3361,11 @@ function renderHisaab(){
         '<div class="hschips">'+HS_OCH.map(function(n){return '<button type="button" data-act="hs-o-add" data-n="'+esc(n)+'">+ '+esc(n)+'</button>';}).join('')+'<button type="button" data-act="hs-o-add" data-n="">+ और खर्च</button></div>'+
         '<div class="hstot hsext"><span>आज का कुल खर्च<small id="hs-expg"></small></span><b id="hs-exptot">'+rupee(hsDraftExp())+'</b></div>'+
       '</div>'+
+      (hsKeyAdd(d,1)===GL().d0?'<div class="glbox">'+f('hs-gc','gc','🌙 रात को गल्ले में कुल कितना है ₹','कल ('+hsDm(GL().d0)+') से गल्ला मिलान शुरू — यही गिनती कल सुबह का गल्ला बनेगी')+'</div>':'')+
       '<div class="err" id="hs-err"></div>'+
       '<div class="sh-actions"><button class="btn primary" data-act="hs-save">✓ '+(saved?'बदलाव सेव करो':'सेव करो')+'</button></div>'+
       (saved?'<button class="lnk" style="display:block;margin:10px auto 0" data-act="hs-wa">📤 ये हिसाब WhatsApp पर भेजो</button>':'')+
-    '</div>';
+    '</div>');
   /* --- बिक्री का हाल --- */
   var diff=st.week.sum-st.prevWeek.sum,pct=st.prevWeek.sum?Math.round(diff/st.prevWeek.sum*100):null;
   var avg=st.month.days?st.month.sum/st.month.days:0;
@@ -2900,9 +3429,9 @@ function renderHisaab(){
 /* रात का हिसाब सेव (बटन और 🎤 सहायक — दोनों यही) */
 function hsSaveDraft(hx){
   if(!hx)return {err:'हिसाब खुला नहीं है।'};
-  var hbad=['upi','cash','out','rg','bs'].filter(function(k){var v=String(hx[k]).trim();return v!==''&&(!isFinite(parseFloat(v))||parseFloat(v)<0||parseFloat(v)>=10000000);});
+  var hbad=['upi','cash','out','rg','bs','go','gc','gin'].filter(function(k){var v=String(hx[k]==null?'':hx[k]).trim();return v!==''&&(!isFinite(parseFloat(v))||parseFloat(v)<0||parseFloat(v)>=10000000);});
   if(hbad.length){return {err:'रकम/नंबर सही लिखो (0 या उससे ज़्यादा)।'};}
-  var hv=function(k){var v=String(hx[k]).trim();return v===''?'':round2(parseFloat(v));};
+  var hv=function(k){var v=String(hx[k]==null?'':hx[k]).trim();return v===''?'':round2(parseFloat(v));};
   // बना: हर लाइन में मात्रा चाहिए
   var hmk=[],hmkErr='';
   hx.mk.forEach(function(m){var q=String(m.q).trim();if(q===''||!(parseFloat(q)>0)||parseFloat(q)>100000){if(!hmkErr)hmkErr=m.n+' की मात्रा लिखो (या × से हटाओ)।';return;}hmk.push({k:m.k,n:m.n,q:round2(parseFloat(q)),u:m.u});});
@@ -2918,11 +3447,37 @@ function hsSaveDraft(hx){
     if(v===''||!(v>0)||v>=10000000){if(!hexErr)hexErr=(nm||'अन्य खर्च')+' की रकम लिखो (या "हटाओ" दबाओ)।';return;}
     hexo.push({n:nm||'अन्य',a:String(o.a).replace(/\s/g,''),v:v,g:!!o.g});});
   if(hexErr){return {err:hexErr};}
-  var hrow={d:hx.d,upi:hv('upi'),cash:hv('cash'),out:hv('out'),rg:hv('rg'),bs:hv('bs'),mk:hmk,ex:hex,exo:hexo,
+  /* 💵 गल्ला-दिन: सप्लायर का माल / बाकी चुकाया / घर के लिए */
+  var gm=!!hx.gm,hsm=[],hsp=[],hhm=[],gErr='';
+  if(gm){
+    (hx.sm||[]).forEach(function(m){var v=hsSum(m.a),nm=String(m.n||'').trim().slice(0,40);
+      if(v===''||!(v>0)||v>=10000000){if(!gErr)gErr='🚚 '+(nm||'सप्लायर')+' — माल की रकम लिखो (या × से हटाओ)।';return;}
+      var s=m.s?supFind(m.s):null;
+      if(!s&&nm){s=SUP().filter(function(z){return aiNameScore(nm,z.n)>=0.92;})[0]||null;
+        if(!s){s={id:'s'+uid(),n:nm,b:hsBox(m.b)?m.b:'other',pay:m.pm===''?'later':'now',m:m.pm&&m.pm!==''?m.pm:'g',on:true};SUP().push(s);}}
+      if(!s){if(!gErr)gErr='🚚 सप्लायर का नाम चुनो।';return;}
+      hsm.push({s:s.id,n:s.n,b:hsBox(m.b)?m.b:(s.b||'other'),a:String(m.a).replace(/\s/g,''),v:v,pm:['g','u','h',''].indexOf(m.pm)>-1?m.pm:'',nt:String(m.nt||'').trim().slice(0,40)});});
+    (hx.sp||[]).forEach(function(p){var v=hsSum(p.a),s=supFind(p.s);
+      if(v===''||!(v>0)||v>=10000000){if(!gErr)gErr='💸 '+(p.n||'सप्लायर')+' — कितना दिया, लिखो (या × से हटाओ)।';return;}
+      hsp.push({s:p.s,n:s?s.n:(p.n||''),a:String(p.a).replace(/\s/g,''),v:v,pm:['g','u','h'].indexOf(p.pm)>-1?p.pm:'g',nt:String(p.nt||'').trim().slice(0,40)});});
+    (hx.hm||[]).forEach(function(h){var v=hsSum(h.a),nm=String(h.n||'').trim().slice(0,30);
+      if(v===''&&!nm)return;
+      if(v===''||!(v>0)||v>=10000000){if(!gErr)gErr='🏠 '+(nm||'घर के लिए')+' — रकम लिखो (या "हटाओ" दबाओ)।';return;}
+      hhm.push({n:nm||'घर के लिए',a:String(h.a).replace(/\s/g,''),v:v});});
+    if(!gErr&&hv('gc')!==''&&hv('go')==='')gErr='🌅 सुबह गल्ले में कितना था — लिखो (उसके बिना कैश बिक्री नहीं निकलेगी)।';
+  }
+  if(gErr){return {err:gErr};}
+  var hrow={d:hx.d,upi:hv('upi'),cash:gm?'':hv('cash'),out:hv('out'),rg:hv('rg'),bs:hv('bs'),mk:hmk,ex:hex,exo:hexo,
     other:String(hx.other||'').trim().slice(0,120),waste:String(hx.waste||'').trim().slice(0,120),at:Date.now()};
-  if(hrow.upi===''&&hrow.cash===''&&hrow.out===''&&hrow.rg===''&&hrow.bs===''&&!hmk.length&&!Object.keys(hex).length&&!hexo.length&&!hrow.other&&!hrow.waste){return {err:'कुछ तो भरो — कम से कम UPI या कैश।'};}
-  var hold=hsGet(hx.d);
+  if(gm){hrow.gm=1;hrow.go=hv('go');hrow.gin=hv('gin');hrow.sm=hsm;hrow.sp=hsp;hrow.hm=hhm;}
+  var hold0=hsGet(hx.d);if(gm||hv('gc')!==''||(hold0&&hold0.gc!=null))hrow.gc=hv('gc');
+  if(hrow.upi===''&&hrow.cash===''&&hrow.out===''&&hrow.rg===''&&hrow.bs===''&&!hmk.length&&!Object.keys(hex).length&&!hexo.length&&!hrow.other&&!hrow.waste&&
+    !(gm&&(hrow.go!==''||hrow.gc!==''||hrow.gin!==''||hsm.length||hsp.length||hhm.length))&&hv('gc')===''){return {err:gm?'कुछ तो भरो — सप्लायर का माल, खर्च या गल्ले की गिनती।':'कुछ तो भरो — कम से कम UPI या कैश।'};}
+  var hold=hsGet(hx.d),oldGc=hold&&hold.gc!=null?String(hold.gc):'';
   if(hold)Object.assign(hold,hrow);else{DLY().push(hrow);DLY().sort(function(a,b){return a.d<b.d?-1:1;});}
+  /* रात की गिनती बदली — अगले दिन का "सुबह का गल्ला" अगर इसी से आया था तो वो भी बदलो */
+  var nx=hsGet(hsKeyAdd(hx.d,1));
+  if(nx&&nx.gm&&oldGc!==''&&String(nx.go)===oldGc&&hrow.gc!==''&&hrow.gc!=null&&String(hrow.gc)!==oldGc)nx.go=hrow.gc;
   save();
   return {d:hx.d,old:!!hold};
 }
@@ -2937,6 +3492,13 @@ function hsInput(t){
   if((a=t.getAttribute('data-hsoa'))!=null){if(x.exo[+a])x.exo[+a].a=t.value;hsRefreshTotals();return true;}
   if((a=t.getAttribute('data-hsog'))!=null){if(x.exo[+a])x.exo[+a].g=!!t.checked;hsRefreshTotals();return true;}
   if(t.hasAttribute('data-hsci')){x.ci.n=t.value;return true;}
+  /* गल्ला-दिन: सप्लायर / बाकी चुकाया / घर के लिए */
+  if((a=t.getAttribute('data-glsma'))!=null){if(x.sm&&x.sm[+a])x.sm[+a].a=t.value;hsRefreshTotals();return true;}
+  if((a=t.getAttribute('data-glsmn'))!=null){if(x.sm&&x.sm[+a])x.sm[+a].nt=t.value;return true;}
+  if((a=t.getAttribute('data-glspa'))!=null){if(x.sp&&x.sp[+a])x.sp[+a].a=t.value;hsRefreshTotals();return true;}
+  if((a=t.getAttribute('data-glspn'))!=null){if(x.sp&&x.sp[+a])x.sp[+a].nt=t.value;return true;}
+  if((a=t.getAttribute('data-glhma'))!=null){if(x.hm&&x.hm[+a])x.hm[+a].a=t.value;hsRefreshTotals();return true;}
+  if((a=t.getAttribute('data-glhmn'))!=null){if(x.hm&&x.hm[+a])x.hm[+a].n=t.value;return true;}
   return false;
 }
 
@@ -3493,7 +4055,10 @@ function remindedText(p){
   var d=dayDiff(dayKey(p.remindedAt),todayStr());
   return d<=0?'आज याद दिलाया':(d===1?'कल याद दिलाया':d+' दिन पहले याद दिलाया');
 }
-function entryLabel(e){return (e.type==='u'?'उधार':'जमा')+(e.note?' — '+e.note:'');}
+function entryLabel(e){
+  if(e.type==='j'&&(e.m==='u'||e.m==='c')){var mt=e.m==='u'?'UPI':'नकद';return 'जमा · '+mt+(e.note&&!/^(upi|नकद|cash)$/i.test(String(e.note).trim())?' — '+e.note:'');}
+  return (e.type==='u'?'उधार':'जमा')+(e.note?' — '+e.note:'');
+}
 /* उधार में सामान (1 नवंबर 2026, मालिक: "बिलिंग ऐप जैसा… ग्राहक ने क्या लिया") — पुरानी एंट्री बिना सामान के वैसी ही चलती हैं */
 function kItems(e){return (e&&Array.isArray(e.items))?e.items.filter(function(i){return i&&typeof i==='object'&&num(i.qty)>0;}):[];}
 function kItemTxt(i){return displayName(i)+' '+fmtQty(i.qty)+' '+i.unit;}
@@ -3745,7 +4310,7 @@ function openKEntry(type,partyId,entryId){
   ui.kDraft={type:type,partyId:p?p.id:null,locked:!!e,editId:e?e.id:null,search:'',newOpen:false,newName:'',newPhone:'',
     amount:e?String(e.amount):'',note:e?(e.note||''):'',date:e?e.date:todayStr(),
     lines:kItems(e).map(function(i){return {lid:uid(),iid:i.iid||'',name:i.name,unit:i.unit,rate:i.rate,qty:i.qty};}),
-    activeCat:CATS[0][0],ciOpen:false,ciName:'',ciRate:'',ciUnit:''};
+    activeCat:CATS[0][0],ciOpen:false,ciName:'',ciRate:'',ciUnit:'',mode:e?kjMode(e):'c'};
   openSheet('');
   renderKEntrySheet();
   // उधार में नाम के बाद सामान चुनना है — कीबोर्ड अपने-आप न खुले (चिप्स छिप जाते)
@@ -3811,7 +4376,8 @@ function renderKEntrySheet(){
     '<label class="fl">किसका खाता</label>'+block+
     itemsBlock+
     amtBlock+
-    '<label class="fl">'+(isU?(hasL?'नोट (चाहें तो)':'किस चीज़ का (चाहें तो)'):'नोट (चाहें तो — जैसे नकद, UPI)')+'<input id="ke-note" type="text" maxlength="60" placeholder="'+(isU?'जैसे: दूध सितंबर, मिठाई':'जैसे: UPI')+'" value="'+esc(d.note)+'"></label>'+
+    (isU?'':'<p class="fl" style="margin-bottom:2px">पैसा कैसे मिला</p><div class="pmchips">'+[['c','💵 नकद (गल्ले में)'],['u','📱 UPI / ऑनलाइन']].map(function(m){return '<button type="button" class="'+(d.mode===m[0]?'on':'')+'" data-act="ke-mode" data-v="'+m[0]+'">'+m[1]+'</button>';}).join('')+'</div>')+
+    '<label class="fl">'+(isU?(hasL?'नोट (चाहें तो)':'किस चीज़ का (चाहें तो)'):'नोट (चाहें तो)')+'<input id="ke-note" type="text" maxlength="60" placeholder="'+(isU?'जैसे: दूध सितंबर, मिठाई':'जैसे: UPI')+'" value="'+esc(d.note)+'"></label>'+
     chips+
     '<label class="fl">तारीख<input id="ke-date" type="date" max="'+todayStr()+'" value="'+esc(d.date)+'"></label>'+
     '<div class="err" id="ke-err"></div>'+
@@ -3841,12 +4407,13 @@ function saveKEntry(){
   if(dk>todayStr()){err.textContent='आगे की तारीख नहीं लिख सकते।';return;}
   if(d.editId){
     var e=findKEntry(d.editId);if(!e){closeSheet();return;}
-    e.amount=amt;e.note=note;e.date=dk;
+    e.amount=amt;e.note=note;e.date=dk;if(e.type==='j')e.m=d.mode==='u'?'u':'c';
     if(items.length)e.items=items;else delete e.items;
     save();closeSheet();renderRoute();toast((e.type==='u'?'उधार':'जमा')+' बदल गया');
     return;
   }
   var ne={id:uid(),partyId:d.partyId,type:d.type,amount:amt,note:note,date:dk,createdAt:Date.now()};
+  if(d.type==='j')ne.m=d.mode==='u'?'u':'c';
   if(items.length)ne.items=items;
   KH().entries.push(ne);
   save();closeSheet();
@@ -5408,6 +5975,57 @@ document.addEventListener('click',function(e){
     case 'hs-wa':
       var hwd=(ui.hsDraft&&ui.hsDraft.d)||todayStr(),hlink=waLink(state.shop.phone,hsMsg(hwd));
       if(hlink)window.open(hlink,'_blank');else toast('दुकान सेटिंग में फ़ोन नंबर नहीं है');break;
+    /* --- 💵 गल्ला मिलान + 🤝 सप्लायर + 📅 महीना --- */
+    case 'gl-sm-add':
+      if(ui.hsDraft&&ui.hsDraft.gm){var gss=supFind(t.getAttribute('data-s'));if(!gss)break;
+        var gsi=-1;ui.hsDraft.sm.forEach(function(m,i){if(m.s===gss.id)gsi=i;});
+        if(gsi<0){ui.hsDraft.sm.push({s:gss.id,n:gss.n,b:gss.b,a:'',pm:supDefPm(gss),nt:''});gsi=ui.hsDraft.sm.length-1;renderHisaab();}
+        var gsf=$('#gl-sma-'+gsi);if(gsf){gsf.focus();try{gsf.scrollIntoView({block:'center'});}catch(e){}}}
+      break;
+    case 'gl-sm-rm':if(ui.hsDraft){ui.hsDraft.sm.splice(+t.getAttribute('data-i'),1);renderHisaab();}break;
+    case 'gl-pm':
+      if(ui.hsDraft){var gpl=ui.hsDraft[t.getAttribute('data-k')==='sp'?'sp':'sm'],gpr=gpl&&gpl[+t.getAttribute('data-i')];
+        if(gpr){gpr.pm=t.getAttribute('data-v');var gpw=t.parentNode;if(gpw)[].forEach.call(gpw.querySelectorAll('button'),function(b){b.classList.toggle('on',b===t);});hsRefreshTotals();}}
+      break;
+    case 'gl-sp-add':
+      if(ui.hsDraft&&ui.hsDraft.gm){var gps=supFind(t.getAttribute('data-s'));if(!gps)break;
+        var gpb=supBal(gps.id,hsKeyAdd(ui.hsDraft.d,-1)).bal;
+        ui.hsDraft.sp.push({s:gps.id,n:gps.n,a:gpb>0.001?String(gpb):'',pm:gps.m==='u'||gps.m==='h'?gps.m:'g',nt:''});ui.hsDraft.spAll=false;renderHisaab();
+        var gpf=$('#gl-spa-'+(ui.hsDraft.sp.length-1));if(gpf){gpf.focus();try{gpf.select();}catch(e){}}}
+      break;
+    case 'gl-sp-rm':if(ui.hsDraft){ui.hsDraft.sp.splice(+t.getAttribute('data-i'),1);renderHisaab();}break;
+    case 'gl-sp-all':if(ui.hsDraft){ui.hsDraft.spAll=true;renderHisaab();}break;
+    case 'gl-hm-add':
+      if(ui.hsDraft){ui.hsDraft.hm.push({n:t.getAttribute('data-n')||'',a:''});renderHisaab();
+        var ghf=$('#gl-'+(t.getAttribute('data-n')?'hma':'hmn')+'-'+(ui.hsDraft.hm.length-1));if(ghf)ghf.focus();}
+      break;
+    case 'gl-hm-rm':if(ui.hsDraft){ui.hsDraft.hm.splice(+t.getAttribute('data-i'),1);renderHisaab();}break;
+    case 'gl-go-old':
+      if(ui.hsDraft){var gau=hsGoAuto(ui.hsDraft.d);if(gau.src){ui.hsDraft.go=String(gau.v);renderHisaab();}}
+      break;
+    case 'gl-start':openGlStart();break;
+    case 'gs-save':saveGlStart();break;
+    case 'sup-open':openSupSheet(t.getAttribute('data-s'));break;
+    case 'sup-pay':openSupPay(t.getAttribute('data-s'));break;
+    case 'sp-pm':if(ui.supPay){supPayCapture();ui.supPay.pm=t.getAttribute('data-v');renderSupPay();}break;
+    case 'sp-save':saveSupPay();break;
+    case 'sup-edit':openSupEdit(t.getAttribute('data-s'));break;
+    case 'sup-new':openSupEdit(null,t.getAttribute('data-from')||'');break;
+    case 'se-b':case 'se-pay':case 'se-m':
+      if(ui.supEd){supEdCapture();ui.supEd[act==='se-b'?'b':(act==='se-pay'?'pay':'m')]=t.getAttribute('data-v');
+        if(act==='se-pay'&&ui.supEd.pay==='later'&&ui.supEd.m==='')ui.supEd.m='g';renderSupEdit();}
+      break;
+    case 'se-save':saveSupEdit();break;
+    case 'sup-share':var sms0=supMsg(t.getAttribute('data-s'));if(sms0)shareText(sms0);break;
+    case 'mo-open':
+      var mom=t.getAttribute('data-m')||todayStr().slice(0,7);
+      if(mom===moAdd(todayStr().slice(0,7),-1))lsSet(MO_SEEN,mom);
+      if($('#ov'))closeSheet();
+      ui.mon=mom;ui.view='month';renderRoute();window.scrollTo(0,0);break;
+    case 'mo-nav':
+      var mon2=moAdd(ui.mon||todayStr().slice(0,7),+t.getAttribute('data-n'));if(mon2>todayStr().slice(0,7))break;
+      ui.mon=mon2;renderMonth();break;
+    case 'mo-share':shareText(moMsg(ui.mon||todayStr().slice(0,7)),moName(ui.mon||todayStr().slice(0,7))+' का हिसाब');break;
     case 'add-customer':openCustomerForm();break;
     case 'edit-customer':openCustomerForm(id);break;
     case 'save-customer':
@@ -5606,6 +6224,8 @@ document.addEventListener('click',function(e){
         if(Array.isArray(rd2.cpn))state.cpn=rd2.cpn.filter(function(x){return x&&typeof x==='object';});
         if(Array.isArray(rd2.daily))state.daily=rd2.daily.filter(function(x){return x&&typeof x==='object';});
         if(rd2.budget&&typeof rd2.budget==='object'&&!Array.isArray(rd2.budget))state.budget=rd2.budget;
+        if(Array.isArray(rd2.sup))state.sup=rd2.sup;
+        if(rd2.galla&&typeof rd2.galla==='object'&&!Array.isArray(rd2.galla))state.galla=rd2.galla;
         normalizeState();applyCatalog();migrateUdharOrders();
         var mx2=0;state.orders.forEach(function(o){if(o.no>mx2)mx2=o.no;});
         state.nextOrderNo=Math.max(rd2.nextOrderNo||1,mx2+1);
@@ -5860,6 +6480,9 @@ document.addEventListener('click',function(e){
       var knP={id:uid(),name:knName,phone:knPhone,createdAt:Date.now(),remindedAt:0};
       KH().parties.push(knP);save();
       ui.kDraft.partyId=knP.id;ui.kDraft.newOpen=false;renderKEntrySheet();toast('नया खाता बन गया');
+      break;
+    case 'ke-mode':
+      if(ui.kDraft){ui.kDraft.mode=t.getAttribute('data-v')==='u'?'u':'c';$all('[data-act=ke-mode]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-v')===ui.kDraft.mode);});}
       break;
     case 'ke-chip':
       if(ui.kDraft){
@@ -6314,7 +6937,8 @@ function aiFB(){
 }
 function aiNumsOf(s){var a=[];aiDigits(s).replace(/\d[\d,]*(\.\d+)?/g,function(m){var n=String(+m.replace(/,/g,''));if(n!=='NaN')a.push(n);return m;});return a;}
 function aiDayTxt(e){
-  var p=['बिक्री '+rupee(hsTot(e))+' (UPI '+rupee(num(e.upi))+', कैश '+rupee(hsCashSale(e))+')'];
+  var p=['बिक्री '+rupee(hsTot(e))+' (UPI '+rupee(hsUpiSale(e))+', कैश '+rupee(hsCashSale(e))+')'];
+  if(e.gm&&hsHas(e))p.push('गल्ला सुबह '+rupee(num(e.go))+' → रात '+rupee(num(e.gc))+(glHome(e)?' · घर के लिए '+rupee(glHome(e)):'')+(num(e.out)?' · निकाला '+rupee(num(e.out)):''));
   var xl=hsExList(e);if(xl.length)p.push('खर्च '+rupee(hsExp(e))+' ['+xl.map(function(x){return x.name+' '+rupee(x.v)+(x.n?' ('+x.n+')':'');}).join(', ')+']');
   var mk=hsMadeList(e).map(hsMadeTxt);if(mk.length)p.push('बना: '+mk.join(', '));
   if(e.waste)p.push('फेंका/ख़राब: '+e.waste);
@@ -6411,6 +7035,17 @@ function aiFacts(text){
   var bs=bgStatus();
   if(bs.rows.length)bs.rows.forEach(function(r){fb.add('बजट ('+bs.mon+'): '+r.name,'बजट '+rupee(r.b)+' · अब तक खर्च '+rupee(r.sp)+' ('+r.pct+'%) · '+(r.left>=0?'बचा '+rupee(r.left):rupee(-r.left)+' ज़्यादा')+(r.proj!=null?' · इसी रफ़्तार से महीने में लगभग '+rupee(r.proj):''));});
   else fb.add('बजट','अभी कोई बजट तय नहीं है (रात का हिसाब → 💰 बजट तय करो)');
+  /* 🤝 सप्लायर + 💵 गल्ला + 🏠 घर (7 नवंबर 2026) */
+  try{
+    var sdu=supDues(t);
+    fb.add('सप्लायर को देना बाकी (कुल)',sdu.length?rupee(round2(sdu.reduce(function(s,z){return s+z.bal;},0))):'किसी का बाकी नहीं');
+    sdu.slice(0,8).forEach(function(z){fb.add('सप्लायर बाकी: '+z.n,rupee(z.bal)+(z.since?' ('+hsDm(z.since)+' से)':''));});
+    var smo=moData(t.slice(0,7));
+    smo.sup.filter(function(z){return z.m>0;}).slice(0,10).forEach(function(z){fb.add(mon+' — सप्लायर से माल: '+z.n,rupee(z.m)+' · दिया '+rupee(z.pd));});
+    if(smo.home)fb.add(mon+' — 🏠 घर के लिए गल्ले से',rupee(smo.home)+' ('+Object.keys(smo.homeBy).map(function(n){return n+' '+rupee(smo.homeBy[n]);}).join(', ')+')');
+    if(smo.g)fb.add(mon+' — गल्ले का मिलान','शुरुआत '+rupee(smo.g.open)+' ('+hsDm(smo.g.od)+') · होना चाहिए '+rupee(smo.g.exp)+' · आख़िरी गिनती '+rupee(smo.g.close)+' ('+hsDm(smo.g.cd)+')'+(Math.abs(smo.g.diff)<0.5?' · मिल गया':' · फ़र्क '+rupee(smo.g.diff))+(smo.g.gap.length?' · गल्ला नहीं गिना: '+smo.g.gap.length+' दिन':''));
+    var tg=hsGet(t);if(tg&&tg.gm)fb.add('आज गल्ला','सुबह '+(tg.go!==''&&tg.go!=null?rupee(tg.go):'नहीं लिखा')+' · रात '+(hsHas(tg)?rupee(tg.gc)+' · कैश बिक्री '+rupee(hsCashSale(tg)):'अभी नहीं गिना'));
+  }catch(e){}
   /* क्या बना + दूध */
   if(st.madeWeek.length)fb.add('पिछले 7 दिन में क्या बना',st.madeWeek.map(function(m){return hsMadeTxt(m)+(m.times>1?' ('+m.times+' बार)':'');}).join(' · '));
   if(st.madeMonth.length)fb.add(mon+' में क्या बना',st.madeMonth.map(function(m){return hsMadeTxt(m)+(m.times>1?' ('+m.times+' बार)':'');}).join(' · '));
@@ -6502,10 +7137,11 @@ function aiSys(){
 '- {"type":"order","name","nameEn","ref","phone","when","items":[…],"advance","mode","notes"} → a booking to deliver or collect later. phone only if the owner said a 10-digit mobile number.',
 '- {"type":"order","now":true,"name","nameEn","ref","items":[…],"paid"} → a bill for goods taken right now ("बिल बनाओ"). paid = money received now, or "full".',
 '- {"type":"hisaab","date","upi","cash","out","rg","bs","made":[{"k","name","qty","unit"}],"exp":[{"box","amount","note","galla"}],"waste"} → the night account. upi = UPI sale total; cash = गल्ले में बढ़ा (increase of cash in the drawer); out = गल्ले से निकाला (taken home or to bank); rg = रसगुल्ला बना (litres of milk); bs = बालूशाही (kg); made = other sweets made, k from MADE KEYS (or "" with a name), qty with unit (लीटर दूध / किलो / पीस); exp = money spent, box from EXPENSE BOXES, note = supplier or what it was (e.g. "सुधा", "बिजली"), galla=false if paid by UPI/online/bank, else true; waste = what was thrown or spoiled (text). Put only what the owner said.',
+'- From the galla start date (see SUPPLIERS line) the night account also has: "sup":[{"name","amount","paid","note"}] = goods that came from a supplier that day (name from SUPPLIERS if it matches; paid = "galla" paid now from the cash drawer, "online", "home" paid from home money, "later" not paid yet — बाद में/उधार/कल देंगे; leave paid empty if not said); "suppay":[{"name","amount","mode"}] = an old supplier due paid that day (mode galla/online/home); "home":[{"note","amount"}] = money taken from the drawer for home (घर के लिए, राशन, सब्ज़ी, दवा) — not a shop expense; "galla" = total cash counted in the drawer at night (रात को गल्ले में कुल / गल्ला गिना); "morning" = cash in the drawer in the morning; "gin" = money put into the drawer from home/bank; "out" = taken out for bank/savings. On those days never use "cash". A known supplier\'s goods go in "sup", not "exp".',
 '- {"type":"remind","name","nameEn","ref"} → send a payment reminder.',
 '- {"type":"phone","name","nameEn","ref","phone"} → save a person\'s mobile number.',
 '- {"type":"budget","box","amount"} → monthly budget limit for an expense box ("total" = whole month).',
-'- {"type":"open","view","name","nameEn","ref"} → open a screen: home, hisaab, khata, orders, dues, online, items, backup, shopset (price change, आज ख़त्म, ऑनलाइन बंद/चालू), party or customer (with a name).',
+'- {"type":"open","view","name","nameEn","ref"} → open a screen: home, hisaab, sup (सप्लायर खाता — किसका कितना देना है), month (महीने का पूरा हिसाब), khata, orders, dues, online, items, backup, shopset (price change, आज ख़त्म, ऑनलाइन बंद/चालू), party or customer (with a name).',
 '- One message can have several actions (e.g. two people). Never repeat an action that RECENT CHAT shows as already saved, unless the owner asks again.',
 '',
 'BILL / SLIP PHOTOS',
@@ -6528,6 +7164,7 @@ function aiCtxText(fx,text,imgN,extra){
   L.push('FACTS (computed by the app — the only true numbers):');L.push(fx.fb.text(0,fx.base));
   if(extra){L.push('');L.push('EXTRA FACTS (computed by the app for your "need"):');L.push(extra);}
   L.push('');
+  L.push('SUPPLIERS (galla start '+GL().d0+'): '+supActive().map(function(z){var bx=hsBox(z.b);return z.n+' ['+(bx?bx[0]:'other')+', '+(z.pay==='later'?'usually paid later':'usually paid at once')+(z.m==='u'?', online':'')+']';}).join(' | '));
   L.push('EXPENSE BOXES: '+HS_EX.map(function(c){return c[0]+' = '+c[2]+(c[3]?' ('+c[3]+')':'');}).join(' | ')+' | other = कोई और खर्च ('+HS_OCH.join(', ')+'…)');
   L.push('MADE KEYS: '+HS_MK.map(function(m){return m[0]+' = '+m[1]+' ('+m[2]+')';}).join(' | ')+'. रसगुल्ला → field rg (लीटर), बालूशाही → field bs (किलो).');
   L.push('');
@@ -6697,12 +7334,16 @@ function aiErrText(e){
 
 /* ---------- "मैंने ये समझा" कार्ड ---------- */
 var AI_T={udhar:'📒 उधार लिखना',jama:'💰 जमा लिखना',order:'📦 नया ऑर्डर',bill:'🧾 बिल',hisaab:'🌙 रात का हिसाब / खर्च',remind:'📲 याद दिलाना',phone:'📞 मोबाइल नंबर',budget:'💰 बजट',open:'📂 खोलना'};
-var AI_VIEWS={home:'होम',hisaab:'रात का हिसाब',khata:'उधारी',orders:'ऑर्डर्स',dues:'सबसे पुराना बाकी',online:'ऑनलाइन',items:'आइटम्स',backup:'बैकअप',shopset:'दुकान सेटिंग (दाम/ख़त्म/ऑनलाइन)',party:'उधारी खाता',customer:'ग्राहक'};
+var AI_VIEWS={home:'होम',hisaab:'रात का हिसाब',sup:'सप्लायर खाता',month:'महीने का पूरा हिसाब',khata:'उधारी',orders:'ऑर्डर्स',dues:'सबसे पुराना बाकी',online:'ऑनलाइन',items:'आइटम्स',backup:'बैकअप',shopset:'दुकान सेटिंग (दाम/ख़त्म/ऑनलाइन)',party:'उधारी खाता',customer:'ग्राहक'};
 function aiNewCard(a){
   var t=String((a&&a.type)||'').toLowerCase().trim();
   /* AI कभी दूसरे नाम से भेजे तो भी समझो */
   var AL={bill:'order',counter:'order',booking:'order',payment:'jama',paid:'jama',credit:'udhar',udhaar:'udhar',expense:'hisaab',kharch:'hisaab',spend:'hisaab',reminder:'remind',mobile:'phone',navigate:'open'};
   if(AL[t]){if(t==='bill'||t==='counter')a.now=true;if(AL[t]==='hisaab'&&!a.exp&&a.amount!=null)a.exp=[{box:a.box||'other',amount:a.amount,note:a.note||a.name||'',galla:a.galla}];t=AL[t];}
+  /* सप्लायर का माल / सप्लायर को पेमेंट / घर के लिए — अलग नाम से आए तो रात के हिसाब में */
+  if(/^(supplier|supply|sup|purchase|maal|goods)$/.test(t)){if(!a.sup&&a.amount!=null)a.sup=[{name:a.name||a.note||'',amount:a.amount,paid:a.paid||a.mode||''}];t='hisaab';}
+  else if(/^(suppay|supplier_payment|supplierpay)$/.test(t)){if(!a.suppay&&a.amount!=null)a.suppay=[{name:a.name||'',amount:a.amount,mode:a.mode||''}];t='hisaab';}
+  else if(/^(home|ghar|household)$/.test(t)){if(!a.home&&a.amount!=null)a.home=[{note:a.note||a.name||'',amount:a.amount}];t='hisaab';}
   var c={id:'c'+(++AI.seq),t:t,a:a,st:'open',err:''};
   if(!AI_T[t]){c.st='bad';return c;}
   if(['udhar','jama','order','remind','phone'].indexOf(t)>-1||(t==='open'&&(a.view==='party'||a.view==='customer')))c.pp=aiPP(a,t);
@@ -6766,10 +7407,14 @@ function aiUdAmt(c){return c.lines&&c.lines.length?aiLinesTotal(c.lines):num(c.a
 
 /* --- रात के हिसाब में जोड़ (पुराना भरा हुआ रहता है; खर्च "1200+800" बनकर जुड़ता है) --- */
 var AI_MKMAP={rasgulla:'rg',balushahi:'bs'};
+function aiSupMatch(nm){nm=String(nm||'').trim();if(!nm)return null;var best=null,bs=0;
+  SUP().forEach(function(s){var sc=Math.max(aiNameScore(nm,s.n),aiNameScore(nm,String(s.n).split(/[(·]/)[0].trim()));if(sc>bs){bs=sc;best=s;}});return bs>=0.7?best:null;}
+function aiPmOf(p,def){p=String(p==null?'':p).toLowerCase();if(!p)return def;return /later|बाद|उधार|baad|udh|बाकी|kal/.test(p)?'':(/online|upi|ऑनलाइन|यूपीआई|phone ?pe|paytm/.test(p)?'u':(/home|घर/.test(p)?'h':(/galla|गल्ल|cash|नकद|नगद|कैश/.test(p)?'g':def)));}
 function aiHsMerge(c){
   var a=c.a||{},d=c.d,x=hsDraftFor(d),ch=[],w=[];
-  [['upi','UPI बिक्री'],['cash','गल्ले में बढ़ा'],['out','गल्ले से निकाला'],['rg','रसगुल्ला बना (लीटर दूध)'],['bs','बालूशाही बनी (किलो)']].forEach(function(f){
-    var v=a[f[0]];if(v==null||v==='')return;v=num(aiDigits(String(v)).replace(/[,₹\s]/g,''));if(!(v>=0))return;
+  if(x.gm&&a.cash!=null&&a.cash!==''&&(a.galla==null||a.galla===''))w.push('गल्ला मिलान वाले दिन "गल्ले में बढ़ा" नहीं लिखते — रात को गल्ले में कुल कितना गिना, वो बताइए');
+  [['upi','UPI बिक्री'],['cash','गल्ले में बढ़ा'],['out',x.gm?'💼 निकाला (बैंक/बचत)':'गल्ले से निकाला'],['rg','रसगुल्ला बना (लीटर दूध)'],['bs','बालूशाही बनी (किलो)']].forEach(function(f){
+    var v=a[f[0]];if(v==null||v==='')return;if(x.gm&&f[0]==='cash')return;v=num(aiDigits(String(v)).replace(/[,₹\s]/g,''));if(!(v>=0))return;
     var old=String(x[f[0]]||'');x[f[0]]=String(round2(v));
     var isR=f[0]==='rg'||f[0]==='bs',fm=function(n){return isR?fmtQty(n):rupee(n);};
     ch.push(f[1]+': '+(old!==''&&num(old)!==round2(v)?fm(old)+' → ':'')+fm(v)+(old!==''&&num(old)===round2(v)?' (पहले से यही)':''));
@@ -6788,6 +7433,8 @@ function aiHsMerge(c){
   (Array.isArray(a.exp)?a.exp:[]).forEach(function(e){
     if(!e)return;var v=aiAmt(e.amount);if(!(v>0)){if(e.amount!=null)w.push('एक खर्च की रकम साफ़ नहीं थी — ✏️ से भरिए');return;}
     var box=String(e.box||'').trim(),note=String(e.note||'').trim().slice(0,40),g=e.galla!==false;
+    var sm0=x.gm?aiSupMatch(note):null;
+    if(sm0){var pm0=e.galla===false?'u':supDefPm(sm0);x.sm.push({s:sm0.id,n:sm0.n,b:sm0.b,a:String(v),pm:pm0,nt:''});ch.push('🚚 '+sm0.n+': '+rupee(v)+' — '+pmTxt(pm0));return;}
     if(x.ex[box]){
       var r=x.ex[box],terms=String(r.a||'').split('+').filter(function(z){return z!=='';}).map(function(z){return round2(num(z));});
       if(terms.indexOf(round2(v))>-1)w.push(bgLabel(box)+' में '+rupee(v)+' पहले से लिखा है — दोबारा जुड़ेगा');
@@ -6801,6 +7448,32 @@ function aiHsMerge(c){
       x.exo.push({n:nm.slice(0,30),a:String(v),g:g});ch.push('अन्य खर्च — '+nm+': '+rupee(v)+(g?'':' · UPI से'));
     }
   });
+  if(x.gm){
+    [['galla','gc','🌙 रात को गल्ले में कुल'],['morning','go','🌅 सुबह गल्ले में'],['gin','gin','➕ घर/बैंक से गल्ले में डाला']].forEach(function(f){
+      var v=a[f[0]];if(v==null||v==='')return;v=num(aiDigits(String(v)).replace(/[,₹\s]/g,''));if(!(v>=0))return;
+      var old=String(x[f[1]]||'');x[f[1]]=String(round2(v));ch.push(f[2]+': '+(old!==''&&num(old)!==round2(v)?rupee(old)+' → ':'')+rupee(v)+(old!==''&&num(old)===round2(v)?' (पहले से यही)':''));});
+    (Array.isArray(a.sup)?a.sup:[]).forEach(function(m){
+      if(!m)return;var v=aiAmt(m.amount);if(!(v>0)){w.push('सप्लायर के माल की रकम साफ़ नहीं थी — ✏️ से भरिए');return;}
+      var sp0=aiSupMatch(m.name),nm=sp0?sp0.n:String(m.name||'').trim().slice(0,40);if(!nm){w.push('किस सप्लायर का माल — नाम साफ़ नहीं');return;}
+      var pm=aiPmOf(m.paid,sp0?supDefPm(sp0):'g'),ex0=x.sm.filter(function(z){return sp0?z.s===sp0.id:(!z.s&&z.n===nm);})[0];
+      if(ex0){var tm=String(ex0.a||'').split('+').filter(function(z){return z!=='';});if(tm.map(function(z){return round2(num(z));}).indexOf(round2(v))>-1)w.push(nm+' का '+rupee(v)+' पहले से लिखा है — दोबारा जुड़ेगा');
+        ex0.a=tm.length?String(ex0.a).replace(/\+$/,'')+'+'+v:String(v);if(ex0.pm!==pm)w.push(nm+': एक लाइन में पैसे का एक ही तरीका रहता है ('+pmTxt(ex0.pm)+')');}
+      else x.sm.push({s:sp0?sp0.id:'',n:nm,b:sp0?sp0.b:(hsBox(m.box)?m.box:'other'),a:String(v),pm:pm,nt:String(m.note||'').trim().slice(0,40)});
+      ch.push('🚚 '+nm+': '+rupee(v)+' — '+pmTxt(pm)+(sp0?'':' (नया सप्लायर बनेगा)'));});
+    (Array.isArray(a.suppay)?a.suppay:[]).forEach(function(p0){
+      if(!p0)return;var v=aiAmt(p0.amount);if(!(v>0)){w.push('सप्लायर को दिए पैसे की रकम साफ़ नहीं थी');return;}
+      var sp1=aiSupMatch(p0.name);if(!sp1){w.push('"'+String(p0.name||'')+'" सप्लायर लिस्ट में नहीं — 🤝 सप्लायर खाते में जोड़कर फिर कहिए');return;}
+      var pm1=aiPmOf(p0.mode,sp1.m==='u'||sp1.m==='h'?sp1.m:'g')||'g';
+      x.sp.push({s:sp1.id,n:sp1.n,a:String(v),pm:pm1,nt:''});
+      var bb=supBal(sp1.id,hsKeyAdd(d,-1)).bal;
+      ch.push('💸 '+sp1.n+' का बाकी चुकाया: '+rupee(v)+' — '+pmTxt(pm1)+(bb>0.001?' (बाकी था '+rupee(bb)+')':''));
+      if(!(bb>0.001))w.push(sp1.n+' का कोई पुराना बाकी नहीं दिख रहा — फिर भी "दिया" लिखा जाएगा (एडवांस)');});
+    (Array.isArray(a.home)?a.home:[]).forEach(function(h){
+      if(!h)return;var v=aiAmt(h.amount);if(!(v>0))return;var nm=String(h.note||h.name||'घर के लिए').trim().slice(0,30)||'घर के लिए';
+      x.hm.push({n:nm,a:String(v)});ch.push('🏠 घर के लिए — '+nm+': '+rupee(v));});
+  }else if((Array.isArray(a.sup)&&a.sup.length)||(Array.isArray(a.suppay)&&a.suppay.length)||(Array.isArray(a.home)&&a.home.length)||a.galla!=null){
+    w.push('सप्लायर खाता और गल्ला मिलान '+hsDm(GL().d0)+' से है — इस तारीख़ पर नहीं जुड़ा');
+  }
   if(a.waste){var ws=String(a.waste).trim().slice(0,80);if(ws&&String(x.waste||'').indexOf(ws)<0){x.waste=(x.waste?x.waste+', ':'')+ws;x.waste=x.waste.slice(0,120);ch.push('फेंका/ख़राब: '+ws);}}
   return {x:x,ch:ch,w:w};
 }
@@ -6921,7 +7594,7 @@ function aiCardHtml(c){
   return '<div class="'+cls+'" id="aic-'+c.id+'">'+head+body+acts+'</div>';
 }
 function aiHM12(t){var m=String(t||'').match(/^(\d{1,2}):(\d{2})/);if(!m)return '';var h=+m[1],p=h<12?(h<5?'रात':'सुबह'):(h<16?'दोपहर':(h<20?'शाम':'रात'));return p+' '+(h%12||12)+':'+m[2];}
-function hsDraftTot0(x){return round2(num(x.upi)+num(x.cash)+num(x.out)+hsDraftExp(x,true));}
+function hsDraftTot0(x){if(x&&x.gm)return glDraftCalc(x).tot;return round2(num(x.upi)+num(x.cash)+num(x.out)+hsDraftExp(x,true));}
 function aiStdBtns(c,noSave,noEdit){
   return '<div class="aibtns">'+(noSave?'':'<button class="btn primary" data-act="ai-save" data-c="'+c.id+'">✅ सेव करो</button>')+
     (noEdit?'':'<button class="btn small" data-act="ai-edit" data-c="'+c.id+'">✏️ बदलो</button>')+
@@ -6986,6 +7659,7 @@ function aiSaveK(c,ty){
   var pr=aiPartyFor(px);if(pr.err)return {err:pr.err};
   var note=String(ty==='j'?(c.mode||''):(c.note||'')).trim().slice(0,60);
   var ne={id:uid(),partyId:pr.p.id,type:ty,amount:amt,note:note,date:dk,createdAt:Date.now()};
+  if(ty==='j')ne.m=c.mode==='UPI'?'u':'c';
   if(items.length)ne.items=items;
   KH().entries.push(ne);
   var bal=partyTotals(pr.p.id).bal;
@@ -7171,6 +7845,8 @@ function aiHandle(o,fx,note,text){
     (c.lines||[]).forEach(function(l){cn(num(l.qty)*num(l.rate));});
     if(c.lines&&c.lines.length)cn(aiLinesTotal(c.lines));
     if(c.t==='hisaab'&&c.a&&Array.isArray(c.a.exp)){var et=0;c.a.exp.forEach(function(e){var v=hsSum(aiDigits(String(e&&e.amount!=null?e.amount:'')));if(v>0){cn(v);et+=v;}});cn(et);}
+    if(c.t==='hisaab'&&c.a)['sup','suppay','home'].forEach(function(k){if(Array.isArray(c.a[k]))c.a[k].forEach(function(e){var v=hsSum(aiDigits(String(e&&e.amount!=null?e.amount:'')));if(v>0)cn(v);});});
+    if(c.t==='hisaab'&&c.a)['galla','morning','gin'].forEach(function(k){if(c.a[k]!=null)cn(aiDigits(String(c.a[k])).replace(/[,₹\s]/g,''));});
   });
   if(o.answer&&typeof o.answer==='object'){
     var ids=(Array.isArray(o.answer.facts)?o.answer.facts:[]).map(function(x){return String(x).trim();}).filter(function(id,i,arr){return fx.fb.map[id]&&arr.indexOf(id)===i;});
@@ -7873,12 +8549,12 @@ var udMoved=migrateUdharOrders();
 loadOnlineCache();online.cfg=onlineCfg();
 /* पेज रिफ़्रेश हुआ — जिस टैब/पेज पर थे वहीं खोलो (होम पर मत भेजो) */
 (function(){
-  if(/^#(o=|online|ack=)/.test(location.hash))return;
+  if(/^#(o=|online|ack=|hisaab)/.test(location.hash))return;
   var r=null;try{r=JSON.parse(sessionStorage.getItem(VIEW_KEY)||'null');}catch(e){r=null;}
   if(!r||!r.v)return;
   var nt='';try{var ne=performance.getEntriesByType('navigation')[0];nt=ne?ne.type:'';}catch(e){}
   if(nt==='back_forward'&&(r.d||0)!==NAV.hd)return;   // Back से किसी पुरानी एंट्री पर नया लोड हुआ — होम ही सही
-  var ok={home:1,online:1,orders:1,khata:1,loyal:1,items:1,backup:1,dues:1,shopset:1,hisaab:1};
+  var ok={home:1,online:1,orders:1,khata:1,loyal:1,items:1,backup:1,dues:1,shopset:1,hisaab:1,sup:1,month:1};
   if(r.v==='customer')ok.customer=!!findCustomer(r.c);
   if(r.v==='party')ok.party=!!findParty(r.p);
   if(r.v==='lmember')ok.lmember=!!findMember(r.m);

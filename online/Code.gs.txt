@@ -1,5 +1,5 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 6 (19 अक्टूबर 2026)
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 7 (7 नवंबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
@@ -12,11 +12,14 @@
  * और (संस्करण 6 से) आने वाले सारे ऑर्डर की लिस्ट: आज 2 बजे के बाद, कल, परसों — किसका, कहाँ का, क्या, कब।
  * जब तक घंटी पर क्लिक करके (या ऐप में "✓ देख लिया") देख न लें, तब तक 2:40, 3:40, 5:10, 7:10 बजे फिर से बजती है।
  *
+ * 🌙 रात का हिसाब (संस्करण 7 से): रोज़ रात 8:40 पर घंटी — "आज का हिसाब भरें: सप्लायर का माल/पेमेंट, घर के लिए, गल्ला गिनें"
+ * और किस सप्लायर का कितना देना बाकी है। आज का हिसाब भर दिया हो तो नहीं बजती; 9:40 तक न भरा तो एक बार फिर।
+ *
  * ⭐ माँ भगवती मिठास पॉइंट्स: असली हिसाब मालिक के फ़ोन (बिलिंग ऐप) में है। ऐप हर सदस्य का छोटा सार
  * "Points" शीट में भेजता है ताकि ग्राहक अपने पॉइंट ख़ुद देख सके — WhatsApp वाले लिंक से पूरा हिसाब,
  * सिर्फ़ मोबाइल नंबर से सिर्फ़ पॉइंट (नाम और ख़रीद नहीं)।
  */
-var VERSION = 6;
+var VERSION = 7;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -53,7 +56,29 @@ function setupReminder() {
   });
   props_().setProperty('REMINDER', 'on');
   planSheet_();
+  setupHisaabReminder();
   Logger.log('✅ दूध-दही + आने वाले ऑर्डर की घंटी चालू — रोज़ दोपहर करीब 2 बजे, देखने तक 7 बजे तक दोबारा');
+}
+
+/* 🌙 रात के हिसाब की घंटी: रोज़ 8:40 और (न भरा हो तो) 9:40 — setupSheet / setupReminder अपने-आप लगाते हैं */
+function setupHisaabReminder() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'hisaabReminder') ScriptApp.deleteTrigger(t);
+  });
+  [[20, 40], [21, 40]].forEach(function (x) {
+    ScriptApp.newTrigger('hisaabReminder').timeBased().atHour(x[0]).nearMinute(x[1]).everyDays(1).inTimezone('Asia/Kolkata').create();
+  });
+  props_().setProperty('HS_REM', 'on');
+  Logger.log('✅ रात 8:40 की हिसाब वाली घंटी चालू');
+}
+
+/* रात वाली घंटी बंद करनी हो तो इसे ▶ Run करें */
+function stopHisaabReminder() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'hisaabReminder') ScriptApp.deleteTrigger(t);
+  });
+  props_().setProperty('HS_REM', 'off');
+  Logger.log('रात की हिसाब वाली घंटी बंद');
 }
 
 /* रिमाइंडर बंद करना हो तो इसे ▶ Run करें */
@@ -179,7 +204,7 @@ function ntfy_(title, message, priority, click, tags) {
 function doGet(e) {
   var p = (e && e.parameter) || {};
   try {
-    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', vapid: wpVapid_().pub,
+    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', hsReminder: props_().getProperty('HS_REM') === 'on', vapid: wpVapid_().pub,
       seen: props_().getProperty('ACK') === istKey_(0) });
     if (p.action === 'ack') {                     // घंटी पर क्लिक / ऐप में "✓ देख लिया" — आज की दोबारा वाली घंटी बंद
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
@@ -202,6 +227,11 @@ function doGet(e) {
     if (p.action === 'testplan') {
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
       return out_(sendReminder_(true));
+    }
+    if (p.action === 'tesths') {
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      var hp = readPlan_();
+      return out_(sendHisaab_(true, false, (hp && hp.days && hp.days.hs) || null));
     }
     return out_({ ok: false, error: 'action' });
   } catch (err) {
@@ -542,6 +572,33 @@ function dailyReminder() {
   // पहली घंटी जा चुकी — देखी नहीं (क्लिक / "✓ देख लिया" नहीं हुआ) तो फिर से
   if (pr.getProperty('REMIND_NEED') !== today || pr.getProperty('ACK') === today) return;
   sendReminder_(false, true);
+}
+
+/* 🌙 रात का हिसाब — बिलिंग ऐप "Plan" में days.hs भेजता है: {done: आज की तारीख़ अगर हिसाब भर गया, due: [[सप्लायर, बाकी, कब से]]} */
+function hisaabReminder() {
+  var pr = props_(), today = istKey_(0), plan = readPlan_();
+  var hs = (plan && plan.days && plan.days.hs) || null;
+  if (hs && hs.done === today) return;                 // आज का हिसाब भर चुका — घंटी नहीं
+  var again = pr.getProperty('HS_LAST') === today;      // 8:40 वाली जा चुकी → ये 9:40 वाली
+  var r = sendHisaab_(false, again, hs);
+  if (r.ok) pr.setProperty('HS_LAST', today);
+}
+function sendHisaab_(test, again, hs) {
+  var pre = test ? '🧪 टेस्ट · ' : (again ? '🔁 फिर से याद · ' : '');
+  var b = ['• 🚚 आज आया सप्लायर का माल और दिया पैसा', '• 🏠 घर के लिए निकाला पैसा', '• 💵 गल्ला गिनकर कुल लिखें'];
+  var due = (hs && Array.isArray(hs.due)) ? hs.due.slice(0, 6) : [];
+  if (due.length) {
+    var today = istKey_(0);
+    b.push('');
+    b.push('🤝 सप्लायर को देना बाकी:');
+    due.forEach(function (x) {
+      if (!Array.isArray(x)) return;
+      var since = /^\d{4}-\d\d-\d\d$/.test(String(x[2] || '')) ? String(x[2]) : '';
+      var days = since ? Math.round((Date.parse(today + 'T00:00:00Z') - Date.parse(since + 'T00:00:00Z')) / 86400000) : -1;
+      b.push('• ' + str_(x[0], 40) + ' ' + rupee_(x[1]) + (days > 0 ? ' (' + days + ' दिन से)' : ''));
+    });
+  }
+  return deliver_(pre + '🌙 आज का हिसाब भरें', clip_(b.join('\n')), 5, BILLING_URL + '#hisaab', [], 'hisaab');
 }
 
 function sendReminder_(test, again) {
