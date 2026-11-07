@@ -6636,16 +6636,19 @@ function aiUse(model){
 }
 /* एक सवाल → मॉडल एक-एक करके (कोटा ख़त्म/मॉडल बंद हो तो अगला) */
 function aiGen(sys,parts,key){
+  var T0=Date.now(),LIM=AI.LIM||40000,hasImg=parts.some(function(p){return p&&(p.inlineData||p.inline_data);});
   return aiModelOrder(key).then(function(models){
+    if(!hasImg)models=models.slice().sort(function(a,b){return (/flash-lite/.test(b)?1:0)-(/flash-lite/.test(a)?1:0);});   // सिर्फ़ बात: तेज़ मॉडल पहले
     var tries=[];
     function attempt(mi,plain,again){
-      if(mi>=models.length||mi>=6){var er=new Error('allfail');er.code=aiWorst(tries);er.tries=tries;throw er;}
+      var left=LIM-(Date.now()-T0);
+      if(mi>=models.length||mi>=6||left<3000){var er=new Error('allfail');er.code=left<3000?'timeout':aiWorst(tries);er.tries=tries;throw er;}
       var m=models[mi],pl=aiCfg().plain||{},usePlain=plain||/gemma/i.test(m)||!!pl[m];
       var body=usePlain?
         {contents:[{role:'user',parts:[{text:sys+'\n\nReply with ONLY the JSON object.\n\n'}].concat(parts)}],generationConfig:{temperature:0.2}}:
         {systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:parts}],generationConfig:{temperature:0.2,responseMimeType:'application/json'}};
       aiStatus('सोच रहा हूँ…'+(mi?' (दूसरा मॉडल '+(mi+1)+')':''));
-      return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,90000).then(function(r){
+      return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,Math.min(hasImg?60000:25000,left)).then(function(r){
         if(r.ok){
           var txt=aiText(r.j);
           if(!txt){var fr=r.j&&r.j.candidates&&r.j.candidates[0]&&r.j.candidates[0].finishReason;tries.push({m:m,code:(r.j&&r.j.promptFeedback&&r.j.promptFeedback.blockReason)?'blocked':'empty',fr:fr});return attempt(mi+1,false);}
@@ -6657,7 +6660,7 @@ function aiGen(sys,parts,key){
         if(ei.code==='key'){var ek=new Error('key');ek.code='key';ek.msg=ei.msg;throw ek;}
         if(ei.code==='region'){var eg=new Error('region');eg.code='region';eg.msg=ei.msg;throw eg;}
         if(ei.code==='format'&&!usePlain)return attempt(mi,true);
-        if(ei.code==='rpm'&&!again&&ei.retry>0&&ei.retry<=20){aiStatus('एक मिनट की हद — '+Math.ceil(ei.retry)+' सेकंड रुककर फिर…');return aiWait(ei.retry*1000+400).then(function(){return attempt(mi,plain,true);});}
+        if(ei.code==='rpm'&&!again&&ei.retry>0&&ei.retry<=Math.min(20,(left-4000)/1000)){aiStatus('एक मिनट की हद — '+Math.ceil(ei.retry)+' सेकंड रुककर फिर…');return aiWait(ei.retry*1000+400).then(function(){return attempt(mi,plain,true);});}
         if(ei.code==='server'&&!again)return aiWait(1500).then(function(){return attempt(mi,plain,true);});
         aiMark(m,ei);
         return attempt(mi+1,false);
@@ -7099,6 +7102,7 @@ function aiSend(){
   if(aiHF()&&!imgs.length&&aiHFReply(text))return;   // बिना-हाथ मोड में ही
   AI.s.msgs.push({r:'u',t:text,thumbs:imgs.map(function(i){return i.thumb;}),imgN:imgs.length});
   AI.s.text='';AI.s.imgs=[];AI.s.busy=true;AI.s.status='सोच रहा हूँ…';aiRender(true);
+  var tk0=Date.now(),tick=setInterval(function(){if(!AI.s.busy){clearInterval(tick);return;}var el=$('#ai-busy');if(el)el.textContent=String(AI.s.status||'सोच रहा हूँ…').replace(/\s*\(\d+ सेकंड\)$/,'')+' ('+Math.round((Date.now()-tk0)/1000)+' सेकंड)';},1000);
   var fx;try{fx=aiFacts(text);}catch(e){fx={fb:aiFB(),people:[],all:[],base:0};}
   var key=aiKey();
   var done=function(o,note,rt){AI.s.busy=false;AI.s.status='';aiHandle(o,fx,note,text);
@@ -7364,10 +7368,11 @@ function aiHFReply(text){
 function aiSR(){return window.SpeechRecognition||window.webkitSpeechRecognition||null;}
 function aiCanRec(){return !!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&(window.AudioContext||window.webkitAudioContext));}
 function aiWaitSec(auto){var w=num(aiCfg().wait)||2;w=Math.min(4,Math.max(1,w));return auto?Math.min(w,1.6):w;}
+/* 7 नवंबर: मालिक — "AI वाला देर तक सुनता रहता है, कुछ लिखता नहीं, घूमता रहता है" → पहले जैसा Chrome वाला (बोलते-बोलते लिखा दिखता है)
+   ही default; AI से लिखवाना सिर्फ़ ⚙️ में "🤖 AI से" चुनने पर */
 function aiVoiceMode(){
   var ai=!!(aiKey()&&aiCanRec()),ch=!!aiSR();
-  if(aiCfg().voice==='chrome')return ch?'chrome':(ai?'ai':'');
-  if(ai&&!AI.s.recFail)return 'ai';
+  if(aiCfg().voice==='ai'&&ai&&!AI.s.recFail)return 'ai';
   return ch?'chrome':(ai?'ai':'');
 }
 function aiMic(auto){
@@ -7401,14 +7406,17 @@ function aiRecStart(auto){
       if(st.done)return;
       var c=new Float32Array(ev.inputBuffer.getChannelData(0));st.chunks.push(c);
       var s2=0;for(var i=0;i<c.length;i+=2)s2+=c[i]*c[i];var rms=Math.sqrt(s2/(c.length/2)),now=Date.now();
-      st.hist.push(rms);if(st.hist.length>40)st.hist.shift();
-      var so=st.hist.slice().sort(function(a,b){return a-b;}),floor=so[Math.floor(so.length*0.2)]||rms,thr=Math.max(0.01,floor*3);
-      if(st.chunks.length>2&&rms>thr){st.hot++;if(st.hot>=2){if(!st.started){st.started=true;st.first=st.chunks.length-3;}st.lastVoice=now;st.lastIdx=st.chunks.length-1;}}
+      st.hist.push(rms);if(st.hist.length>60)st.hist.shift();
+      var so=st.hist.slice().sort(function(a,b){return a-b;}),floor=so[Math.floor(so.length*0.15)]||rms,thr=Math.max(0.008,floor*2.2);
+      st.es=st.es==null?rms:st.es*0.6+rms*0.4;                 // थोड़ा smooth
+      st.pk=Math.max((st.pk||0)*0.997,st.es);                  // अब तक की सबसे तेज़ आवाज़ (धीरे-धीरे घटती)
+      var von=st.es>thr&&st.es>st.pk*0.22;                     // दुकान का शोर/दूर की बातें = बोलने से बहुत धीमी → चुप माना
+      if(st.chunks.length>2&&von){st.hot++;if(st.hot>=2){if(!st.started){st.started=true;st.first=st.chunks.length-3;}st.lastVoice=now;st.lastIdx=st.chunks.length-1;}}
       else{st.hot=0;}
       var bar=$('#ai-lv');if(bar)bar.style.width=Math.round(Math.min(1,rms/(thr*2.5))*100)+'%';
       if(st.started&&now-st.lastVoice>wait){aiRecFinish('sil');return;}
-      if(!st.started&&now-st.t0>(auto?7000:9000)){aiRecFinish('none');return;}
-      if(now-st.t0>60000){aiRecFinish('max');return;}
+      if(!st.started&&now-st.t0>(auto?6000:7000)){aiRecFinish('none');return;}
+      if(now-st.t0>30000){aiRecFinish('max');return;}
       var el=$('#ai-lvt');if(el)el.textContent=aiListenText(st);
     };
     src.connect(pr);pr.connect(ctx.destination);
@@ -7477,16 +7485,16 @@ function aiTxPrompt(){
 }
 function aiTranscribe(w){
   var key=aiKey();if(!key){var e0=new Error('key');e0.code='key';return Promise.reject(e0);}
-  var parts=[{inline_data:{mime_type:'audio/wav',data:w.b64}},{text:'Transcribe this audio.'}];
+  var parts=[{inline_data:{mime_type:'audio/wav',data:w.b64}},{text:'Transcribe this audio.'}],T0=Date.now();
   return aiModelOrder(key).then(function(models){
-    models=models.filter(function(m){return !/gemma|embed|image|tts|live/i.test(m);});
+    models=models.filter(function(m){return !/gemma|embed|image|tts|live/i.test(m);}).sort(function(a,b){return (/lite/.test(b)?1:0)-(/lite/.test(a)?1:0);});
     if(!models.length)models=['gemini-flash-lite-latest','gemini-flash-latest'];
     var tries=[];
     function attempt(mi,again){
-      if(mi>=models.length||mi>=4){var er=new Error('allfail');er.code=aiWorst(tries);throw er;}
+      if(mi>=models.length||mi>=2||Date.now()-T0>30000){var er=new Error('allfail');er.code=tries.length?aiWorst(tries):'timeout';throw er;}
       var m=models[mi];
       var body={systemInstruction:{parts:[{text:aiTxPrompt()}]},contents:[{role:'user',parts:parts}],generationConfig:{temperature:0}};
-      return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,45000).then(function(r){
+      return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,20000).then(function(r){
         if(r.ok){var t=aiText(r.j);aiUse(m);return t.replace(/^["“'`]+|["”'`]+$/g,'').trim();}
         var ei=aiErrInfo(r);tries.push({m:m,code:ei.code});
         if(ei.code==='key'){var ek=new Error('key');ek.code='key';throw ek;}
@@ -7501,6 +7509,23 @@ function aiTranscribe(w){
 }
 
 /* --- 2) Chrome का voice-typing (चाबी न हो / AI न चले / सेटिंग में चुना) --- */
+/* Chrome कई विकल्प दे तो वो चुनो जिसमें दुकान के नाम/आइटम/शब्द ज़्यादा मिलें */
+function aiVocab(){
+  if(AI.vocab&&Date.now()-AI.vocab.at<60000)return AI.vocab.w;
+  var w={};var addW=function(t){String(t||'').toLowerCase().split(/[\s,()/.-]+/).forEach(function(x){if(x.length>1)w[x]=1;});};
+  try{state.items.forEach(function(x){addW(displayName(x));});}catch(e){}
+  try{aiPeopleAll().forEach(function(x){addW(x.name);});}catch(e){}
+  'उधार उधारी जमा बाकी बिल ऑर्डर एडवांस डिलीवरी हिसाब खर्च गल्ला नकद upi किलो पाव आधा पीस पैकेट लीटर डिब्बा रुपये रुपया कल परसों आज सुबह शाम'.split(' ').forEach(addW);
+  AI.vocab={at:Date.now(),w:w};return w;
+}
+function aiBestAlt(res){
+  if(!res||!res.length)return '';if(res.length<2)return res[0].transcript;
+  var V=aiVocab(),best=0,bs=-1;
+  for(var k=0;k<res.length;k++){var t=String(res[k].transcript||''),sc=0;
+    t.toLowerCase().split(/\s+/).forEach(function(x){if(V[x])sc+=1;else if(/\d/.test(x))sc+=0.5;});
+    sc-=k*0.3;if(sc>bs){bs=sc;best=k;}}
+  return res[best].transcript;
+}
 function aiSRStart(auto){
   var SR=aiSR();if(!SR){toast('इस ब्राउज़र में बोलने वाला बटन नहीं चलता — कीबोर्ड के 🎤 से बोलिए');return;}
   var st={kind:'sr',auto:!!auto,base:String(AI.s.text||'').trim(),committed:'',finals:[],interim:'',last:Date.now(),t0:Date.now(),done:false,rec:null,restarts:0,heard:false,fatal:''};
@@ -7508,16 +7533,17 @@ function aiSRStart(auto){
   var show=function(){AI.s.text=[st.base,st.committed,st.finals.join(' '),st.interim].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();var f=$('#ai-in');if(f)f.value=AI.s.text;};
   var mk=function(){
     var r;try{r=new SR();}catch(e){return null;}
-    r.lang=aiCfg().lang==='en-IN'?'en-IN':'hi-IN';r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
+    r.lang=aiCfg().lang==='en-IN'?'en-IN':'hi-IN';r.interimResults=true;r.continuous=true;r.maxAlternatives=3;
     r.onresult=function(ev){
       if(st.done||st.rec!==r)return;
       if(!$('#aiw')){aiSRFinish(false);return;}
       var fins=[],it='';   // इस बार का पूरा लिखा दोबारा बनाओ (Android कभी-कभी एक ही बात दोहराता है)
-      for(var i=0;i<ev.results.length;i++){var tr=String(ev.results[i][0].transcript||'').trim();if(!tr)continue;
+      for(var i=0;i<ev.results.length;i++){var tr=String(aiBestAlt(ev.results[i])||'').trim();if(!tr)continue;
         if(ev.results[i].isFinal){var lf=fins[fins.length-1],a=tr.toLowerCase(),b=lf?lf.toLowerCase():'';
           if(lf&&a.indexOf(b)===0)fins[fins.length-1]=tr;else if(!lf||(b.indexOf(a)!==0))fins.push(tr);}
         else it=(it?it+' ':'')+tr;}
-      st.finals=fins;st.interim=it;st.last=Date.now();st.heard=true;show();
+      var nt=fins.join(' ')+'|'+it;if(nt!==st.lastTxt){st.lastTxt=nt;st.last=Date.now();}
+      st.finals=fins;st.interim=it;if(fins.length||it)st.heard=true;show();
     };
     r.onerror=function(ev){if(st.rec!==r)return;var er=ev&&ev.error;
       if(er==='not-allowed'||er==='service-not-allowed')st.fatal=st.auto?'जवाब बोलने के लिए 🎤 बोलो दबाइए':'माइक की अनुमति नहीं है — फ़ोन की सेटिंग में Chrome को माइक की अनुमति दीजिए (या कीबोर्ड के 🎤 से बोलिए)';
@@ -7529,7 +7555,7 @@ function aiSRStart(auto){
       if(st.done)return;
       if(st.fatal){aiSRFinish(false,st.fatal);return;}
       var now=Date.now();   // Chrome ख़ुद रुक गया (ठहराव) — असली चुप्पी तक फिर सुनो
-      if((st.heard&&now-st.last>=wait)||(!st.heard&&now-st.t0>(st.auto?7000:9000))||st.restarts++>40){aiSRFinish(true);return;}
+      if((st.heard&&now-st.last>=wait)||(!st.heard&&now-st.t0>(st.auto?6000:7000))||now-st.t0>30000||st.restarts++>30){aiSRFinish(true);return;}
       var r2=mk();if(!r2){aiSRFinish(true);return;}
       st.rec=r2;try{r2.start();}catch(e){aiSRFinish(true);}
     };
@@ -7540,7 +7566,7 @@ function aiSRStart(auto){
   st.tick=setInterval(function(){
     if(st.done){clearInterval(st.tick);return;}
     var now=Date.now();
-    if((st.heard&&now-st.last>=wait)||(!st.heard&&now-st.t0>(st.auto?7000:9000))||now-st.t0>60000){aiSRFinish(true);return;}
+    if((st.heard&&now-st.last>=wait)||(!st.heard&&now-st.t0>(st.auto?6000:7000))||now-st.t0>30000){aiSRFinish(true);return;}
     var el=$('#ai-lvt');if(el)el.textContent=aiListenText(st);
   },200);
   try{r.start();}catch(e){clearInterval(st.tick);AI.s.mic=null;AI.s.listen=false;toast('माइक शुरू नहीं हुआ — फिर से दबाइए');return;}
@@ -7677,12 +7703,12 @@ function aiSetHtml(){
     '<label class="aitog"><input type="checkbox" id="ai-o-hf"'+(c.hf?' checked':'')+'><span>🗣️ बिना हाथ लगाए — सहायक बोलकर पूछेगा, आप "हाँ" बोलें तो सेव, "नहीं" तो रहने दो, नाम बोलकर चुनें<small>ये रकम और नाम ज़ोर से बोलता है — ग्राहक के सामने ध्यान रखें। शुरू में बंद।</small></span></label>'+
     '<label class="aitog"><input type="checkbox" id="ai-o-speak"'+(c.speak?' checked':'')+'><span>🔊 हर जवाब बोलकर सुनाओ<small>ग्राहक के सामने किसी का उधार ज़ोर से न बोले, इसलिए शुरू में बंद</small></span></label>'+
     '<p class="hint" style="margin-top:8px">आवाज़ कौन लिखे:</p><div class="aimode">'+
-    '<button class="'+(c.voice!=='chrome'?'on':'')+'" data-act="ai-voice" data-v="ai">🤖 AI से<small>ज़्यादा सही, चाबी चाहिए</small></button><button class="'+(c.voice==='chrome'?'on':'')+'" data-act="ai-voice" data-v="chrome">Chrome से<small>तेज़, कम सही</small></button></div>'+
+    '<button class="'+(c.voice!=='ai'?'on':'')+'" data-act="ai-voice" data-v="chrome">📝 फ़ोन (Chrome)<small>बोलते-बोलते लिखा दिखता है · तेज़</small></button><button class="'+(c.voice==='ai'?'on':'')+'" data-act="ai-voice" data-v="ai">🤖 AI से<small>बोलकर रुकने पर लिखेगा · शांत जगह में</small></button></div>'+
     '<p class="hint" style="margin-top:8px">बोलना ख़त्म मानने से पहले कितना चुप रहे:</p><div class="aimode">'+
     [1.5,2,3].map(function(x){return '<button class="'+(aiWaitSec(false)===x?'on':'')+'" data-act="ai-wait" data-v="'+x+'">'+x+' सेकंड</button>';}).join('')+'</div>'+
-    '<p class="hint" style="margin-top:8px">बोलने की भाषा (Chrome वाले तरीके में):</p><div class="aimode">'+
+    '<p class="hint" style="margin-top:8px">बोलने की भाषा (फ़ोन वाले तरीके में):</p><div class="aimode">'+
     '<button class="'+(c.lang!=='en-IN'?'on':'')+'" data-act="ai-lang" data-v="hi-IN">हिंदी / Hinglish</button><button class="'+(c.lang==='en-IN'?'on':'')+'" data-act="ai-lang" data-v="en-IN">English</button></div></div>';
-  h+='<p class="hint">🔒 AI को सिर्फ़ ये जाता है: आपकी बात/फोटो, आइटम और दाम, ग्राहकों के नाम और रकम, बिक्री-खर्च का जोड़। <b>ग्राहक का फोन नंबर और पता कभी नहीं जाता।</b> 🎤 "AI से" चुनने पर आपकी आवाज़ भी Google AI को लिखने के लिए जाती है। मुफ़्त प्लान में Google इन बातों को अपना AI सुधारने में इस्तेमाल कर सकता है।</p>'+
+  h+='<p class="hint">🔒 AI को सिर्फ़ ये जाता है: आपकी बात/फोटो, आइटम और दाम, ग्राहकों के नाम और रकम, बिक्री-खर्च का जोड़। <b>ग्राहक का फोन नंबर और पता कभी नहीं जाता।</b> 🎤 "🤖 AI से" चुनने पर आपकी आवाज़ भी Google AI को लिखने के लिए जाती है। मुफ़्त प्लान में Google इन बातों को अपना AI सुधारने में इस्तेमाल कर सकता है।</p>'+
     '<p class="hint">⏳ मुफ़्त में दिन में कितनी बार चलेगा, ये Google तय करता है। एक मॉडल का कोटा ख़त्म हो तो ऐप अपने-आप दूसरा मुफ़्त मॉडल लेता है। कोटा रोज़ करीब '+aiResetText()+' नया होता है। AI न चले तब भी फ़ोन आसान बातें ख़ुद समझता है।</p>';
   if(k)h+='<button class="btn small" data-act="ai-delkey" style="margin-top:6px">🗑 चाबी हटाओ</button>';
   return h+'</div>';
@@ -7782,7 +7808,7 @@ function aiClick(t,act){
     case 'ai-test-old':aiTest(true);return true;
     case 'ai-delkey':aiSet({key:undefined,ok:undefined,last:undefined,models:undefined,ex:undefined,bad:undefined,plain:undefined});AI.s.test='चाबी हटा दी।';aiRender();return true;
     case 'ai-lang':aiSet({lang:v==='en-IN'?'en-IN':'hi-IN'});aiRender();return true;
-    case 'ai-voice':aiSet({voice:v==='chrome'?'chrome':undefined});AI.s.recFail=false;aiRender();return true;
+    case 'ai-voice':aiSet({voice:v==='ai'?'ai':undefined});AI.s.recFail=false;aiRender();return true;
     case 'ai-wait':aiSet({wait:Math.min(4,Math.max(1,parseFloat(v)||2))});aiRender();return true;
     case 'ai-speak':var mm=AI.s.msgs[+t.getAttribute('data-i')];if(mm)aiSpeakMsg(mm);return true;
     case 'ai-save':if(c&&c.st==='open'){if(aiSaveCard(c))toast('✅ सेव हो गया');aiRender();}return true;
