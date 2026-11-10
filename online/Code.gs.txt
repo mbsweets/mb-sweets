@@ -619,7 +619,7 @@ function hisaabReminder() {
 }
 function sendHisaab_(test, again, hs) {
   var pre = test ? '🧪 टेस्ट · ' : (again ? '🔁 फिर से याद · ' : '');
-  var b = ['• 🚚 आज आया सप्लायर का माल और दिया पैसा', '• 🏠 घर के लिए निकाला पैसा', '• 💵 गल्ला गिनकर कुल लिखें'];
+  var b = ['• 🚚 आज आया सप्लायर का माल और दिया पैसा', '• 🏠 घर के लिए निकाला पैसा', '• 🔝 काउंटर के बड़े नोट गिनकर ऊपर डालें और लिखें'];
   var due = (hs && Array.isArray(hs.due)) ? hs.due.slice(0, 6) : [];
   if (due.length) {
     var today = istKey_(0);
@@ -714,7 +714,7 @@ function backupGet_(id) {
     return { ok: true, data: f.getBlob().getDataAsString('UTF-8') };
   } catch (e) { return { ok: false, error: 'id' }; }
 }
-var HS_HEAD = ['तारीख़', 'दिन', 'कुल बिक्री', 'कैश बिक्री', 'UPI बिक्री', 'खर्च', 'सुबह गल्ला', 'रात गल्ला', 'घर के लिए', 'निकाला (बैंक/बचत)', 'सप्लायर से माल', 'सप्लायर को दिया', 'क्या बना', 'फेंका', 'अपडेट'];
+var HS_HEAD = ['तारीख़', 'दिन', 'कुल बिक्री', 'कैश बिक्री', 'UPI बिक्री', 'खर्च', 'ऊपर डाले (बड़े नोट)', 'ऊपर वाले गल्ले में (रात)', 'घर के लिए', 'निकाला (बैंक/बचत)', 'सप्लायर से माल', 'सप्लायर को दिया', 'क्या बना', 'फेंका', 'अपडेट'];
 function hisaabRows_(rows) {
   var ss = ss_(), sh = ss.getSheetByName('Hisaab') || ss.insertSheet('Hisaab');
   if (sh.getLastRow() < 1) { sh.appendRow(HS_HEAD); sh.setFrozenRows(1); }
