@@ -1,5 +1,5 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 7 (7 नवंबर 2026)
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 8 (10 नवंबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
@@ -15,11 +15,16 @@
  * 🌙 रात का हिसाब (संस्करण 7 से): रोज़ रात 8:40 पर घंटी — "आज का हिसाब भरें: सप्लायर का माल/पेमेंट, घर के लिए, गल्ला गिनें"
  * और किस सप्लायर का कितना देना बाकी है। आज का हिसाब भर दिया हो तो नहीं बजती; 9:40 तक न भरा तो एक बार फिर।
  *
+ * ☁️ बैकअप (संस्करण 8 से): बिलिंग ऐप रोज़ अपना पूरा डेटा आपकी Google Drive में "MB Sweets — ऐप का बैकअप" फ़ोल्डर में
+ * भेजता है (हर दिन की एक फ़ाइल; 40 दिन से पुरानी रोज़ वाली हटती हैं, हर महीने की 1 तारीख़ वाली हमेशा रहती है),
+ * और "Hisaab" शीट में हर दिन की एक लाइन (बिक्री, खर्च, गल्ला…) — सालों तक कंप्यूटर पर भी दिखे।
+ * 📊 रिपोर्ट: हर रविवार रात 9:30 हफ़्ते का और हर महीने की 1 तारीख़ सुबह 9:10 पिछले महीने का हिसाब घंटी से।
+ *
  * ⭐ माँ भगवती मिठास पॉइंट्स: असली हिसाब मालिक के फ़ोन (बिलिंग ऐप) में है। ऐप हर सदस्य का छोटा सार
  * "Points" शीट में भेजता है ताकि ग्राहक अपने पॉइंट ख़ुद देख सके — WhatsApp वाले लिंक से पूरा हिसाब,
  * सिर्फ़ मोबाइल नंबर से सिर्फ़ पॉइंट (नाम और ख़रीद नहीं)।
  */
-var VERSION = 7;
+var VERSION = 8;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -69,7 +74,21 @@ function setupHisaabReminder() {
     ScriptApp.newTrigger('hisaabReminder').timeBased().atHour(x[0]).nearMinute(x[1]).everyDays(1).inTimezone('Asia/Kolkata').create();
   });
   props_().setProperty('HS_REM', 'on');
+  setupReportReminder();
   Logger.log('✅ रात 8:40 की हिसाब वाली घंटी चालू');
+}
+
+/* 📊 हफ़्ते (रविवार रात 9:30) और महीने (1 तारीख़ सुबह 9:10) की रिपोर्ट वाली घंटी */
+function setupReportReminder() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    var h = t.getHandlerFunction();
+    if (h === 'weeklyReport' || h === 'monthlyReport') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('weeklyReport').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(21).nearMinute(30).inTimezone('Asia/Kolkata').create();
+  ScriptApp.newTrigger('monthlyReport').timeBased().atHour(9).nearMinute(10).everyDays(1).inTimezone('Asia/Kolkata').create();
+  props_().setProperty('RP_REM', 'on');
+  try { backupFolder_(); } catch (e) { Logger.log('⚠️ Drive फ़ोल्डर नहीं बना: ' + e); }   // Drive की अनुमति इसी Run में
+  Logger.log('✅ हफ़्ते/महीने की रिपोर्ट वाली घंटी + Drive बैकअप फ़ोल्डर तैयार');
 }
 
 /* रात वाली घंटी बंद करनी हो तो इसे ▶ Run करें */
@@ -204,7 +223,7 @@ function ntfy_(title, message, priority, click, tags) {
 function doGet(e) {
   var p = (e && e.parameter) || {};
   try {
-    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', hsReminder: props_().getProperty('HS_REM') === 'on', vapid: wpVapid_().pub,
+    if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', hsReminder: props_().getProperty('HS_REM') === 'on', rpReminder: props_().getProperty('RP_REM') === 'on', backupAt: num_(props_().getProperty('BK_LAST')), vapid: wpVapid_().pub,
       seen: props_().getProperty('ACK') === istKey_(0) });
     if (p.action === 'ack') {                     // घंटी पर क्लिक / ऐप में "✓ देख लिया" — आज की दोबारा वाली घंटी बंद
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
@@ -228,6 +247,20 @@ function doGet(e) {
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
       return out_(sendReminder_(true));
     }
+    if (p.action === 'backups') {                 // ☁️ Drive में रखे बैकअप की सूची
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      return out_(backupList_());
+    }
+    if (p.action === 'backupget') {
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      return out_(backupGet_(p.id));
+    }
+    if (p.action === 'testreport') {
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      var rpPlan = readPlan_(), rhs = (rpPlan && rpPlan.days && rpPlan.days.hs) || {};
+      var rw = rhs.rw || { t: '📊 हफ़्ते का हिसाब', b: 'ऐप एक बार खोलें — फिर यहाँ पूरा जोड़ आएगा।' };
+      return out_(deliver_('🧪 टेस्ट · ' + str_(rw.t, 120), clip_(String(rw.b || '')), 4, BILLING_URL + '#rep-week', [], 'report-week'));
+    }
     if (p.action === 'tesths') {
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
       var hp = readPlan_();
@@ -250,6 +283,7 @@ function doPost(e) {
     if (body.action === 'pushsub') return out_(pushSub_(body));
     if (body.action === 'pushunsub') return out_(pushUnsub_(body));
     if (body.action === 'lpsync') return out_(lpSync_(body));
+    if (body.action === 'backup') return out_(backup_(body));
     return out_({ ok: false, error: 'action' });
   } catch (err) {
     return out_({ ok: false, error: 'server', detail: String(err) });
@@ -599,6 +633,107 @@ function sendHisaab_(test, again, hs) {
     });
   }
   return deliver_(pre + '🌙 आज का हिसाब भरें', clip_(b.join('\n')), 5, BILLING_URL + '#hisaab', [], 'hisaab');
+}
+
+/* 📊 रविवार रात — इस हफ़्ते (सोम–रवि) का हिसाब; ऐप "Plan" में days.hs.rw = {k: सोमवार, t, b} भेजता है */
+function weeklyReport() {
+  var pr = props_(), mon = istKey_(-6);
+  if (pr.getProperty('RW_LAST') === mon) return;
+  var plan = readPlan_(), hs = (plan && plan.days && plan.days.hs) || {}, rw = hs.rw;
+  var r = (rw && rw.k === mon)
+    ? deliver_(str_(rw.t, 150), clip_(String(rw.b || '')), 4, BILLING_URL + '#rep-week', [], 'report-week')
+    : deliver_('📊 हफ़्ते का हिसाब तैयार', 'इस हफ़्ते की बिक्री, खर्च, सप्लायर और गल्ले का पूरा हिसाब ऐप में देखें।', 3, BILLING_URL + '#rep-week', [], 'report-week');
+  if (r.ok) pr.setProperty('RW_LAST', mon);
+}
+/* 📅 हर महीने की 1 तारीख़ — पिछले महीने का हिसाब (days.hs.rm = पिछला महीना, rc = चालू महीना — जो पिछले महीने का हो वो) */
+function monthlyReport() {
+  if (istDate_().getUTCDate() !== 1) return;
+  var pr = props_(), pym = istKey_(-1).slice(0, 7);
+  if (pr.getProperty('RM_LAST') === pym) return;
+  var plan = readPlan_(), hs = (plan && plan.days && plan.days.hs) || {};
+  var m = (hs.rm && hs.rm.k === pym) ? hs.rm : ((hs.rc && hs.rc.k === pym) ? hs.rc : null);
+  var r = m
+    ? deliver_(str_(m.t, 150), clip_(String(m.b || '') + '\n\nपूरा हिसाब, सप्लायर और गल्ले का मिलान ऐप में।'), 4, BILLING_URL + '#rep-month', [], 'report-month')
+    : deliver_('📅 पिछले महीने का हिसाब तैयार', 'बिक्री, खर्च, सप्लायर, घर और गल्ले का पूरा हिसाब ऐप में देखें — और पापा को भेजें।', 3, BILLING_URL + '#rep-month', [], 'report-month');
+  if (r.ok) pr.setProperty('RM_LAST', pym);
+}
+
+/* ---------- ☁️ बैकअप: पूरा डेटा Drive में, रोज़ की लाइन "Hisaab" शीट में ---------- */
+var BK_FOLDER_NAME = 'MB Sweets — ऐप का बैकअप';
+function backupFolder_() {
+  var pr = props_(), id = pr.getProperty('BK_FOLDER');
+  if (id) { try { var f0 = DriveApp.getFolderById(id); if (!f0.isTrashed()) return f0; } catch (e) { } }
+  var it = DriveApp.getFoldersByName(BK_FOLDER_NAME), f = it.hasNext() ? it.next() : DriveApp.createFolder(BK_FOLDER_NAME);
+  pr.setProperty('BK_FOLDER', f.getId());
+  return f;
+}
+function backup_(b) {
+  if (!keyOk_(b.key)) return { ok: false, error: 'key' };
+  var day = /^\d{4}-\d\d-\d\d$/.test(String(b.day || '')) ? String(b.day) : istKey_(0);
+  var res = { ok: true, v: VERSION };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    if (typeof b.full === 'string' && b.full.length > 20) {
+      if (b.full.length > 40 * 1024 * 1024) return { ok: false, error: 'big' };
+      try { JSON.parse(b.full); } catch (e) { return { ok: false, error: 'json' }; }
+      var folder = backupFolder_(), name = 'MB-Sweets-backup-' + day + '.json', old = folder.getFilesByName(name);
+      folder.createFile(Utilities.newBlob(b.full, 'application/json', name));
+      while (old.hasNext()) old.next().setTrashed(true);          // उसी दिन की पुरानी कॉपी की जगह नई
+      res.file = name;
+      bkCleanup_(folder);
+    }
+    if (Array.isArray(b.rows) && b.rows.length) res.rows = hisaabRows_(b.rows);
+    props_().setProperty('BK_LAST', String(Date.now()));
+  } finally {
+    lock.releaseLock();
+  }
+  return res;
+}
+/* 40 दिन से पुरानी रोज़ वाली फ़ाइलें हटाओ — हर महीने की 1 तारीख़ वाली हमेशा रखो */
+function bkCleanup_(folder) {
+  var cut = istKey_(-40), it = folder.getFiles();
+  while (it.hasNext()) {
+    var f = it.next(), m = /^MB-Sweets-backup-(\d{4}-\d\d-(\d\d))\.json$/.exec(f.getName());
+    if (m && m[1] < cut && m[2] !== '01') f.setTrashed(true);
+  }
+}
+function backupList_() {
+  var it = backupFolder_().getFiles(), L = [];
+  while (it.hasNext()) {
+    var f = it.next(), m = /^MB-Sweets-backup-(\d{4}-\d\d-\d\d)\.json$/.exec(f.getName());
+    if (m) L.push({ id: f.getId(), day: m[1], size: f.getSize(), at: f.getLastUpdated().getTime() });
+  }
+  L.sort(function (a, c) { return a.day < c.day ? 1 : -1; });
+  return { ok: true, files: L.slice(0, 20) };
+}
+function backupGet_(id) {
+  try {
+    var f = DriveApp.getFileById(String(id || ''));
+    if (f.getParents().next().getId() !== backupFolder_().getId()) return { ok: false, error: 'id' };
+    return { ok: true, data: f.getBlob().getDataAsString('UTF-8') };
+  } catch (e) { return { ok: false, error: 'id' }; }
+}
+var HS_HEAD = ['तारीख़', 'दिन', 'कुल बिक्री', 'कैश बिक्री', 'UPI बिक्री', 'खर्च', 'सुबह गल्ला', 'रात गल्ला', 'घर के लिए', 'निकाला (बैंक/बचत)', 'सप्लायर से माल', 'सप्लायर को दिया', 'क्या बना', 'फेंका', 'अपडेट'];
+function hisaabRows_(rows) {
+  var ss = ss_(), sh = ss.getSheetByName('Hisaab') || ss.insertSheet('Hisaab');
+  if (sh.getLastRow() < 1) { sh.appendRow(HS_HEAD); sh.setFrozenRows(1); }
+  sh.getRange('A:A').setNumberFormat('@');                       // तारीख़ टेक्स्ट ही रहे (Sheets उसे बदले नहीं)
+  var last = sh.getLastRow(), idx = {};
+  if (last >= 2) sh.getRange(2, 1, last - 1, 1).getDisplayValues().forEach(function (r, i) { idx[String(r[0])] = i + 2; });
+  var now = new Date(), n = 0, add = [];
+  rows.slice(0, 62).forEach(function (r) {
+    if (!Array.isArray(r) || !/^\d{4}-\d\d-\d\d$/.test(String(r[0]))) return;
+    var row = [String(r[0])].concat(r.slice(1, 14).map(function (v) { return (typeof v === 'number') ? v : str_(v, 200); }));
+    while (row.length < 14) row.push('');
+    row.push(now);
+    if (idx[row[0]]) sh.getRange(idx[row[0]], 1, 1, row.length).setValues([row]);
+    else add.push(row);
+    n++;
+  });
+  if (add.length) { sh.getRange(sh.getLastRow() + 1, 1, add.length, add[0].length).setValues(add); }
+  if (add.length && sh.getLastRow() > 2) sh.getRange(2, 1, sh.getLastRow() - 1, HS_HEAD.length).sort(1);
+  return n;
 }
 
 function sendReminder_(test, again) {
