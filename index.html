@@ -2941,7 +2941,7 @@ function glSpG(e){return round2(glList(e.sp).reduce(function(t,x){return t+(x.pm
 function glHome(e){return round2(glList(e.hm).reduce(function(t,x){return t+num(x.v);},0));}
 function glOutAll(e){return round2(hsExpG(e)+glSpG(e)+glHome(e)+num(e.out));}
 function glIn(e){return round2(num(e.gc)-num(e.go)+glOutAll(e)-num(e.gin));}
-function glCash(e){if(e.gc===''||e.gc==null)return 0;return round2(num(e.gc)+glPaid(e,'k'));}
+function glCash(e){if(e.gc===''||e.gc==null)return 0;return round2(num(e.gc));}   /* मालिक (10 नवंबर शाम): कैश बिक्री = ऊपर डाले नोट, बस — काउंटर की कोई गिनती नहीं */
 /* ===================== 💵 दो गल्ले (10 नवंबर 2026) =====================
    मालिक: "सभी दिन का बिक्री ऊपर वाले गल्ले में अलग से रहता है… आज का बिक्री रात को गिनती करके ऊपर वाले गल्ले में जाता है…
    सप्लायर का पेमेंट आज के गल्ले से नहीं, ऊपर वाले गल्ले से" · "छुट्टा नहीं गिनता — सिर्फ़ बड़े नोट गिनकर ऊपर डालता हूँ, छुट्टा उसी में रहता है"
@@ -3872,7 +3872,7 @@ function hxCloseCalc(){
   else if(s&&s.d<C.d)open=upEnd(upLedger(hsKeyAdd(C.d,-1)).map[hsKeyAdd(C.d,-1)]);
   else first=true;   // अभी शुरुआत नहीं (या यही पहली गिनती)
   var exp=open==null?null:round2(open+gc+gin-gOut),ucs=String(C.uc).trim(),cnt=ucs===''?null:num(hsSum(ucs));
-  return {e:e,has:has,gc:gc,upi:upi,kP:kP,kL:glPaidList(e,'k'),cash:has?round2(gc+kP):0,kjC:kjList(C.d,'j','c'),kjU:kjList(C.d,'j','u'),
+  return {e:e,has:has,gc:gc,upi:upi,kP:kP,kL:glPaidList(e,'k'),cash:has?round2(gc):0,kjC:kjList(C.d,'j','c'),kjU:kjList(C.d,'j','u'),
     open:open,first:first,gin:gin,gOut:gOut,gL:glPaidList(e,'g'),exp:exp,cnt:cnt,diff:cnt!=null&&exp!=null?round2(cnt-exp):null,isT:C.d===t};
 }
 function hxCloseRes(){
@@ -3880,7 +3880,7 @@ function hxCloseRes(){
   var sum=function(L){return round2(L.reduce(function(a,x){return a+x.v;},0));};
   if(k.has){
     h+='<div class="hxres"><div><small>💵 कैश बिक्री</small><b>'+rupee(k.cash)+'</b></div><div><small>📱 UPI बिक्री</small><b>'+rupee(k.upi)+'</b></div><div class="tot"><small>'+(k.isT?'आज':'उस दिन')+' की कुल बिक्री</small><b>'+rupee(round2(k.cash+k.upi))+'</b></div></div>'+
-      (k.kP?'<p class="hint hxhint">कैश = ऊपर डाले '+rupee(k.gc)+' + पहले लिखा काउंटर खर्च '+rupee(k.kP)+'</p>':'');
+      '';
     var avg=glAvgCash(C.d);
     if(avg>0&&k.cash<avg*0.3)w.push('रोज़ (औसत '+rupee(avg)+') से बहुत कम — नोट एक बार और गिन लीजिए।');
     if(avg>0&&k.cash>avg*3)w.push('रोज़ (औसत '+rupee(avg)+') से बहुत ज़्यादा — रकम एक बार देख लीजिए।');
@@ -4052,7 +4052,7 @@ function hxSaleHtml(){
     var e=r.e||{},det='';
     if(r.has&&r.gm){
       var kp=glPaid(e,'k'),kcL=kjList(r.d,'j','c'),kuL=kjList(r.d,'j','u');
-      det+='<div class="row"><span>💵 कैश बिक्री<small>ऊपर डाले बड़े नोट'+(kp?' '+rupee(num(e.gc))+' + पहले लिखा काउंटर खर्च '+rupee(kp):'')+'</small></span><b>'+rupee(r.c)+'</b></div>'+
+      det+='<div class="row"><span>💵 कैश बिक्री<small>ऊपर डाले बड़े नोट</small></span><b>'+rupee(r.c)+'</b></div>'+
         '<div class="row"><span>📱 UPI बिक्री<small>Paytm का जोड़</small></span><b>'+rupee(r.u)+'</b></div>'+
         (kcL.length||kuL.length?'<div class="row info"><span>📒 इसमें उधारी का जमा<small>'+(kcL.length?'नकद: '+kjTxt(kcL):'')+(kcL.length&&kuL.length?' · ':'')+(kuL.length?'UPI: '+kjTxt(kuL):'')+'</small></span><b>'+rupee(round2(kjOn(r.d,'c')+kjOn(r.d,'u')))+'</b></div>':'');
     }else if(r.has){
