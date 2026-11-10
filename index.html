@@ -423,8 +423,29 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .hxtitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}
 .hxtitle h2{font-size:1.2rem;margin:0;font-family:'Baloo 2','Mukta',system-ui,sans-serif;letter-spacing:.2px}
 .hxicon{min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:.85rem;font-weight:700;color:var(--ink)}
-.hxseg{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
-.hxseg button{border:0;background:transparent;border-radius:10px;min-height:38px;font:inherit;font-weight:700;font-size:.9rem;color:var(--muted)}
+.hxseg{display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.hxseg button{border:0;background:transparent;border-radius:10px;min-height:38px;font:inherit;font-weight:700;font-size:.86rem;color:var(--muted);padding:0 2px;white-space:nowrap}
+/* 💵 बिक्री टैब */
+.slsum{background:linear-gradient(135deg,rgba(47,111,78,.13),var(--card));border:1px solid var(--green);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.slsum>small{display:block;font-size:.8rem;color:var(--muted)}
+.slsum>b{display:block;font-family:'Baloo 2','Mukta',system-ui,sans-serif;font-size:2rem;line-height:1.15;color:var(--green)}
+.slsum .sp{display:flex;gap:8px;margin:8px 0 6px}.slsum .sp span{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-size:.78rem;color:var(--muted)}
+.slsum .sp b{display:block;font-size:1.05rem;color:var(--ink)}
+.slsum p{margin:4px 0 0;font-size:.78rem;color:var(--muted);line-height:1.45}.slsum p b{color:var(--ink)}
+.slsum .up{color:var(--green)!important}.slsum .dn{color:var(--red)!important}
+.slbar{display:block;height:5px;border-radius:3px;background:var(--line);margin-top:5px;overflow:hidden}.slbar i{display:block;height:100%;background:var(--green);border-radius:3px}
+.slrow.best .t b:after{content:' ⭐';font-size:.8rem}
+.sldet{padding:4px 14px 12px;border-top:1px dashed var(--line);background:var(--paper)}
+.sldet .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.sldet .row span{min-width:0;font-size:.9rem}.sldet .row small{display:block;font-size:.74rem;color:var(--muted);overflow-wrap:anywhere}
+.sldet .row b{white-space:nowrap;font-weight:700}.sldet .row.info b{color:var(--muted);font-weight:600}
+.sldet .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+/* 💵 गल्ला — सिर्फ़ कैश */
+.glres .row.tot{border-top:2px solid var(--ink);border-bottom:0;margin-top:2px}.glres .row.tot b{color:var(--green);font-size:1.35rem}
+.glres .row .op{display:inline-block;width:1.1em;font-weight:700;color:var(--muted)}
+.glwarn{color:var(--red)!important}
+.hint .lnk{min-height:0;padding:0 2px;font-size:inherit;vertical-align:baseline}
+.slsum p b{white-space:nowrap}
 .hxseg button.on{background:var(--brandband);color:var(--on-brand);box-shadow:0 2px 6px rgba(92,22,32,.25)}
 .hxdate{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 0}
 .hxdate>b{flex:1;text-align:center;font-size:.98rem}
@@ -2026,6 +2047,7 @@ function ssPauseBannerHtml(){
 /* ---------- ROUTE ---------- */
 function renderRoute(){
   if(ui.view==='sup'){ui.view='hisaab';HX().tab='sup';}
+  if(ui.view==='sale'||ui.view==='galla'){HX().tab=ui.view;ui.view='hisaab';}
   if(ui.view==='month'){ui.view='hisaab';HX().tab='rep';HX().rp={p:'month',ref:(ui.mon||todayStr().slice(0,7))+'-01',from:'',to:''};}
   if(ui.view!=='hisaab'&&ui.hxs){ui.hxs=null;}
   if(ui.view==='home')renderHome();
@@ -3478,7 +3500,7 @@ function moMsg(ym){
 
 /* ===================== 💰 हिसाब v2 (10 नवंबर 2026) =====================
    मालिक: "इतना कंफ्यूजिंग… सबका अपना अपना टैब… लिस्ट तीर दबाने पर खुले… कैलकुलेटर… सहायक अकाउंटेंट… कभी डिलीट नहीं… स्टॉक नहीं, सिर्फ़ पैसे में"
-   नीचे की पट्टी में अपना टैब। अंदर 4 टैब: आज (6 बटन + एंट्री की सूची + दिन बंद करो) · गल्ला · सप्लायर · रिपोर्ट (हफ़्ता/महीना/साल/तारीख़)
+   नीचे की पट्टी में अपना टैब। अंदर 5 टैब: आज (6 बटन + एंट्री की सूची + दिन बंद करो) · बिक्री (हर दिन अलग) · गल्ला (सिर्फ़ कैश) · सप्लायर · रिपोर्ट (हफ़्ता/महीना/साल/तारीख़)
    डेटा वही state.daily (गल्ला-दिन): sm माल · sp सप्लायर को पैसा · xe खर्च (नया) · hm घर · out/gin · go/gc/upi · mk/rg/bs/waste
    हर लाइन में id, at (समय), src:'ai' (सहायक से)। हटाई/बदली लाइन state.trash में रहती है — पूरी तरह कभी नहीं मिटती। */
 function HX(){if(!ui.hx)ui.hx={tab:'aaj',d:todayStr(),open:{},rp:{p:'week',ref:todayStr(),from:'',to:''}};return ui.hx;}
@@ -3537,7 +3559,7 @@ function hxGroupsHtml(e,d){
 }
 
 /* ---------- ऊपर का हिस्सा: टैब + तारीख़ ---------- */
-var HX_TABS=[['aaj','आज'],['galla','गल्ला'],['sup','सप्लायर'],['rep','रिपोर्ट']];
+var HX_TABS=[['aaj','आज'],['sale','बिक्री'],['galla','गल्ला'],['sup','सप्लायर'],['rep','रिपोर्ट']];
 function hxDateBar(){
   var d=HX().d,t=todayStr();
   return '<div class="hxdate"><button data-act="hx-day" data-n="-1" aria-label="पिछला दिन">‹</button>'+
@@ -3549,8 +3571,8 @@ function renderHisaab(){
   var h=HX(),t=todayStr();if(!h.d||h.d>t)h.d=t;
   var title='<div class="hxtitle"><h2>💰 हिसाब</h2><button class="hxicon" data-act="calc-open" aria-label="कैलकुलेटर">🧮 कैलकुलेटर</button></div>';
   var head='<div class="hxseg" role="tablist">'+HX_TABS.map(function(x){return '<button role="tab" class="'+(h.tab===x[0]?'on':'')+'" aria-selected="'+(h.tab===x[0])+'" data-act="hx-tab" data-v="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div>'+
-    ((h.tab==='aaj'||h.tab==='galla')?hxDateBar():'');
-  var body=h.tab==='galla'?hxGallaHtml():(h.tab==='sup'?supHtml():(h.tab==='rep'?rpHtml():hxAajHtml()));
+    ((h.tab==='aaj'||h.tab==='galla')?hxDateBar():(h.tab==='sale'?slMonBar():''));
+  var body=h.tab==='galla'?hxGallaHtml():(h.tab==='sale'?hxSaleHtml():(h.tab==='sup'?supHtml():(h.tab==='rep'?rpHtml():hxAajHtml())));
   paint($('#main'),title+'<div class="hxtop">'+head+'</div><div class="hxbody">'+body+'</div>');
 }
 
@@ -3813,17 +3835,26 @@ function hxGallaHtml(){
   var gOut=R.filter(function(r){return (r.kind==='sm'&&r.s.indexOf('गल्ले से')>-1)||((r.kind==='xe'||r.kind==='ex'||r.kind==='exo')&&r.s.indexOf('गल्ले से')>-1);});
   var spG=R.filter(function(r){return r.kind==='sp'&&r.s.indexOf('गल्ले से')>-1;}),hm=R.filter(function(r){return r.kind==='hm';}),kj=R.filter(function(r){return r.kind==='kj'&&r.s.indexOf('नकद')>-1;});
   var inn=round2(kjOn(d,'c')+num(e.gin)),out=glOutAll(e);
-  var html='<div class="hxgalla"><div class="row"><span>🌅 सुबह गल्ले में<small>'+(g.src==='kal'?'कल रात की गिनती से':(g.src==='set'?'लिखा हुआ':'अभी नहीं लिखा'))+'</small></span><b>'+(g.v!=null?rupee(g.v):'—')+'</b></div></div>'+
+  var pv=hsGet(hsKeyAdd(d,-1)),pgc=pv&&pv.gm&&pv.gc!==''&&pv.gc!=null?num(pv.gc):null,gjump=g.src==='set'&&pgc!=null&&round2(g.v)!==round2(pgc);
+  var html='<p class="hint" style="margin:2px 2px 8px">💵 यहाँ सिर्फ़ गल्ले का <b>कैश</b> — सुबह कितना था, क्या आया, क्या गया, रात को कितना बचा। बिक्री देखनी हो तो <button class="lnk" data-act="hx-tab" data-v="sale">बिक्री टैब</button></p>'+
+    '<div class="hxgalla"><div class="row"><span>🌅 सुबह गल्ले में<small'+(gjump?' class="glwarn"':'')+'>'+(gjump?'⚠️ कल रात '+rupee(pgc)+' गिना था — दोनों में फ़र्क़':(g.src==='kal'?'✅ कल रात की गिनती से':(g.src==='set'?(pgc!=null?'✅ कल रात की गिनती से मिलता है':'लिखा हुआ'):'अभी नहीं लिखा')))+'</small></span><b>'+(g.v!=null?rupee(g.v):'—')+'</b></div></div>'+
     '<div class="hxsec">➕ गल्ले में आया (बिक्री के अलावा)</div>'+
     sub('kj','📒 उधारी का नकद जमा',kjOn(d,'c'),kj,'up')+sub('gin','➕ घर/बैंक से डाला',num(e.gin),[],'up')+
     '<div class="hxsec">➖ गल्ले से गया</div>'+
     sub('ex','🧾 खर्च + 🚚 माल (गल्ले से)',hsExpG(e),gOut)+sub('sp','💸 सप्लायर का बाकी चुकाया',glSpG(e),spG)+sub('hm','🏠 घर के लिए',glHome(e),hm)+sub('out','💼 निकाला (बैंक/बचत)',num(e.out),[])+
     '<div class="hxgalla tot"><div class="row"><span>कुल गया</span><b class="due">'+rupee(out)+'</b></div></div>';
+  var gr=function(op,l,v,cl){return '<div class="row'+(cl?' '+cl:'')+'"><span><i class="op">'+op+'</i>'+l+'</span><b>'+v+'</b></div>';};
+  html+='<div class="hxsec">🧮 '+(d===t?'आज':'उस दिन')+' का गल्ला</div>';
   if(closed){
-    html+='<div class="hxres"><div><small>🌙 रात को गिना</small><b>'+rupee(num(e.gc))+'</b></div><div><small>💵 कैश बिक्री</small><b>'+rupee(hsCashSale(e))+'</b></div><div class="tot"><small>कुल बिक्री (UPI सहित)</small><b>'+rupee(hsTot(e))+'</b></div></div>'+
-      '<button class="btn small" style="margin:6px 0" data-act="hx-sheet" data-k="close">✏️ गिनती / UPI बदलो</button>';
+    html+='<div class="hxgalla glres">'+gr('','🌅 सुबह गल्ले में',rupee(num(e.go)))+gr('+','💵 कैश बिक्री <small>रात की गिनती से निकली</small>',rupee(hsCashSale(e)))+
+      (inn?gr('+','और आया <small>उधारी का नकद जमा / डाला</small>',rupee(inn)):'')+gr('−','गल्ले से गया',rupee(out))+
+      gr('=','🌙 रात को गल्ले में <small>गिना हुआ · कल सुबह यहीं से शुरू</small>',rupee(num(e.gc)),'tot')+'</div>'+
+      '<button class="btn small" style="margin:6px 0" data-act="hx-sheet" data-k="close">✏️ गिनती बदलो</button>';
   }else{
-    if(g.v!=null)html+='<div class="hxtip">🧮 अभी गल्ला गिनें तो उसमें से <b>'+rupee(round2(g.v+inn-out))+'</b> घटाइए = '+(d===t?'अब तक':'उस दिन')+' की कैश बिक्री</div>';
+    if(g.v!=null){var nob=round2(g.v+inn-out);
+      html+='<div class="hxgalla glres">'+gr('','🌅 सुबह गल्ले में',rupee(g.v))+(inn?gr('+','और आया',rupee(inn)):'')+gr('−','गल्ले से गया',rupee(out))+
+        gr('=','बिक्री छोड़कर गल्ले में <small>इसमें आज की कैश बिक्री जुड़ती जा रही है</small>',rupee(nob),'tot')+'</div>'+
+        '<div class="hxtip">🧮 अभी गल्ला गिनें तो उसमें से <b>'+rupee(nob)+'</b> घटाइए = '+(d===t?'अब तक':'उस दिन')+' की कैश बिक्री</div>';}
     html+='<button class="btn primary block" style="margin:8px 0" data-act="hx-sheet" data-k="close">🌙 दिन बंद करो — गल्ला गिनो</button>';
   }
   /* इस महीने का मिलान */
@@ -3835,8 +3866,71 @@ function hxGallaHtml(){
   var days=[];for(var i=0;i<14;i++){var k=hsKeyAdd(d,-i);if(!glDay(k))break;days.push(k);}
   html+='<div class="hxsec">पिछले दिन <small>दबाकर वो दिन खोलें</small></div><div class="hxgrp open">'+days.map(function(k){
     var x=hsGet(k),hh=hsHas(x),gg=hxGo(k,x),prev=hsGet(hsKeyAdd(k,-1)),jump=hh&&prev&&prev.gc!==''&&prev.gc!=null&&x.go!==''&&x.go!=null&&round2(num(x.go))!==round2(num(prev.gc));
-    return '<button class="hxrow" data-act="hx-goday" data-d="'+k+'"><span class="t"><b>'+hsDm(k)+' <small style="font-weight:400">'+hsWdOf(k)+'</small></b><small>'+(hh?'सुबह '+rupee(num(x.go))+' → रात '+rupee(num(x.gc)):(gg.v!=null?'सुबह '+rupee(gg.v)+' · गिना नहीं':'नहीं भरा'))+(jump?' · ⚠️ सुबह ≠ कल रात':'')+'</small></span><span class="v">'+(hh?rupee(hsCashSale(x)):'—')+'</span></button>';}).join('')+'</div>'+
-    '<p class="hint" style="margin:6px 2px 0">दाईं ओर = उस दिन की कैश बिक्री</p>';
+    return '<button class="hxrow" data-act="hx-goday" data-t="galla" data-d="'+k+'"><span class="t"><b>'+hsDm(k)+' <small style="font-weight:400">'+hsWdOf(k)+'</small></b><small>'+(hh?'सुबह '+rupee(num(x.go))+' · गया '+rupee(glOutAll(x)):(gg.v!=null?'सुबह '+rupee(gg.v)+' · गिना नहीं':'नहीं भरा'))+(jump?' · <span class="glwarn">⚠️ सुबह ≠ कल रात</span>':'')+'</small></span><span class="v">'+(hh?rupee(num(x.gc)):'—')+'</span></button>';}).join('')+'</div>'+
+    '<p class="hint" style="margin:6px 2px 0">दाईं ओर = रात को गल्ले में (गिना हुआ)</p>';
+  return html;
+}
+
+/* ---------- 💵 बिक्री — हर दिन की बिक्री अलग (10 नवंबर: "डेली का बिक्री सेपरेट रहना चाहिए अलग अलग") ----------
+   डेटा वही: कैश बिक्री = रात गिना − सुबह + गल्ले से गया − डाला − उधारी का नकद जमा · UPI = Paytm जोड़ − उधारी का UPI जमा */
+var HS_WDS=['रवि','सोम','मंगल','बुध','गुरु','शुक्र','शनि'];
+function slFirstMon(){var f=todayStr();DLY().forEach(function(e){if(e.d&&e.d<f)f=e.d;});return f.slice(0,7);}
+function slSM(){var h=HX(),cur=todayStr().slice(0,7),f=slFirstMon();if(!h.sm||h.sm>cur)h.sm=cur;if(h.sm<f)h.sm=f;return h.sm;}
+function slMonth(ym){
+  var t=todayStr(),dim=new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate(),last=ym+'-'+pad(dim),end=last<t?last:t,out=[];
+  for(var k=end;k>=ym+'-01';k=hsKeyAdd(k,-1)){var e=hsGet(k),h=hsHas(e);
+    out.push({d:k,e:e,has:h,c:h?hsCashSale(e):0,u:h?hsUpiSale(e):0,tot:h?hsTot(e):0,gm:glDay(k),ku:khataOn(k,'u')});}
+  return out;
+}
+function slMonBar(){
+  var ym=slSM(),cur=todayStr().slice(0,7);
+  return '<div class="hxdate"><button data-act="hx-slmon" data-n="-1" aria-label="पिछला महीना"'+(ym<=slFirstMon()?' disabled':'')+'>‹</button>'+
+    '<label class="hxdl"><b>'+moName(ym)+(ym===cur?' <span>अभी</span>':'')+'</b><small>महीना बदलें ▾</small>'+
+      '<input id="sl-mpick" type="month" min="'+slFirstMon()+'" max="'+cur+'" value="'+ym+'" aria-label="महीना चुनें"></label>'+
+    '<button data-act="hx-slmon" data-n="1" aria-label="अगला महीना"'+(ym>=cur?' disabled':'')+'>›</button></div>';
+}
+function hxSaleHtml(){
+  var h=HX(),t=todayStr(),ym=slSM(),cur=t.slice(0,7),rows=slMonth(ym),S={c:0,u:0,t:0,n:0,ku:0,best:null,max:0,miss:[]};
+  rows.forEach(function(r){S.ku+=r.ku;
+    if(r.has){S.c+=r.c;S.u+=r.u;S.t+=r.tot;S.n++;if(r.tot>S.max)S.max=r.tot;if(!S.best||r.tot>S.best.tot)S.best=r;}
+    else if(r.gm&&r.d<t)S.miss.push(r.d);});
+  ['c','u','t','ku'].forEach(function(k){S[k]=round2(S[k]);});
+  /* पिछले महीने से तुलना — चालू महीने में "इसी तारीख़ तक" */
+  var pm=moAdd(ym,-1),pdim=new Date(+pm.slice(0,4),+pm.slice(5,7),0).getDate(),upto=ym===cur?Math.min(+t.slice(8,10),pdim):pdim;
+  /* कुल नहीं, रोज़ का औसत मिलाओ — किसी महीने कुछ दिन न भरे हों तो भी तुलना सही रहे */
+  var P=hsRange(pm+'-01',pm+'-'+pad(upto)),cmp='';
+  if(P.days>=3&&S.n>=1){var pa=P.sum/P.days,ca=S.t/S.n,pc=Math.round((ca-pa)/pa*100);
+    cmp='<p>रोज़ औसत — '+HS_MON[+pm.slice(5,7)-1]+(ym===cur?' ('+upto+' तारीख़ तक)':'')+' '+rupee(Math.round(pa))+' → अब '+rupee(Math.round(ca))+' '+(pc>=0?'<b class="up">↑ '+pc+'%</b>':'<b class="dn">↓ '+(-pc)+'%</b>')+'</p>';}
+  var html='<div class="slsum"><small>'+moName(ym)+' की कुल बिक्री'+(ym===cur?' (आज तक)':'')+'</small><b>'+rupee(S.t)+'</b>'+
+    '<div class="sp"><span>💵 कैश<b>'+rupee(S.c)+'</b></span><span>📱 UPI<b>'+rupee(S.u)+'</b></span></div>'+
+    (S.n?'<p><b>'+S.n+'</b> दिन भरे · रोज़ औसत <b>'+rupee(Math.round(S.t/S.n))+'</b>'+(S.best&&S.n>1?' · सबसे ज़्यादा <b>'+hsDm(S.best.d)+' '+rupee(S.best.tot)+'</b>':'')+'</p>':'<p>इस महीने अभी कोई दिन बंद नहीं हुआ।</p>')+
+    cmp+(S.ku?'<p>📒 उधार पर दिया <b>'+rupee(S.ku)+'</b> — पैसा आना बाकी, ऊपर नहीं जुड़ा</p>':'')+'</div>';
+  if(S.miss.length)html+='<div class="aiwarn">⚠️ '+S.miss.length+' दिन बंद नहीं हुआ: '+S.miss.slice().reverse().map(function(k){return +k.slice(8,10);}).join(', ')+' '+HS_MON[+ym.slice(5,7)-1]+' — नीचे उस दिन को दबाकर भरिए</div>';
+  var vis=rows.filter(function(r){return r.has||r.d===t||(r.gm&&r.d<=t);});
+  html+='<div class="hxsec">हर दिन की बिक्री <small>दबाओ तो पूरा ब्योरा</small></div>';
+  if(!vis.length)return html+'<div class="hxnote">इस महीने का कोई दिन ऐप में नहीं है।</div>';
+  html+='<div class="hxgrp open">'+vis.map(function(r){
+    var o=!!h.open['s_'+r.d],isT=r.d===t,dw=HS_WDS[new Date(r.d+'T12:00:00').getDay()];
+    var sub=r.has?'कैश '+rupee(r.c)+' · UPI '+rupee(r.u):(isT?'रात को दिन बंद करने पर आएगी':'<span class="glwarn">⚠️ दिन बंद नहीं हुआ</span>');
+    var w=S.max?Math.max(2,Math.round(r.tot/S.max*100)):0;
+    var row='<button class="hxrow slrow'+(S.best&&S.n>1&&S.best.d===r.d?' best':'')+'" data-act="hx-grp" data-g="s_'+r.d+'" aria-expanded="'+o+'"><span class="t"><b>'+hsDm(r.d)+' <small style="display:inline;font-weight:400">'+dw+'</small>'+(isT?' <span class="hxtag">आज</span>':'')+'</b><small>'+sub+'</small>'+
+      (r.has?'<i class="slbar"><i style="width:'+w+'%"></i></i>':'')+'</span><span class="v">'+(r.has?rupee(r.tot):'—')+'</span><span class="ar2">'+(o?'▾':'▸')+'</span></button>';
+    if(!o)return row;
+    var e=r.e||{},det='';
+    if(r.has&&r.gm){
+      var kc=kjOn(r.d,'c'),ku2=kjOn(r.d,'u'),go2=glOutAll(e);
+      det+='<div class="row"><span>💵 कैश बिक्री<small>रात गिना '+rupee(num(e.gc))+' − सुबह '+rupee(num(e.go))+(go2?' + गल्ले से गया '+rupee(go2):'')+(num(e.gin)?' − डाला '+rupee(num(e.gin)):'')+(kc?' − उधारी का नकद जमा '+rupee(kc):'')+'</small></span><b>'+rupee(r.c)+'</b></div>'+
+        '<div class="row"><span>📱 UPI बिक्री<small>Paytm का जोड़ '+rupee(num(e.upi))+(ku2?' − उधारी का UPI जमा '+rupee(ku2):'')+'</small></span><b>'+rupee(r.u)+'</b></div>';
+    }else if(r.has){
+      det+='<div class="row"><span>💵 कैश बिक्री<small>पुराना तरीका ('+hsDm(GL().d0)+' से पहले): गल्ले में बढ़ा '+rupee(num(e.cash))+' + गल्ले से खर्च/निकाला</small></span><b>'+rupee(r.c)+'</b></div>'+
+        '<div class="row"><span>📱 UPI बिक्री</span><b>'+rupee(r.u)+'</b></div>';
+    }else det+='<p class="hint" style="margin:8px 0 0">'+(isT?'रात को UPI का जोड़ और गल्ला गिनकर लिखिए — बिक्री अपने-आप निकलेगी।':'इस दिन का गल्ला नहीं गिना गया।')+'</p>';
+    if(r.ku)det+='<div class="row info"><span>📒 उधार पर दिया<small>पैसा बाद में आएगा — बिक्री में नहीं जुड़ा</small></span><b>'+rupee(r.ku)+'</b></div>';
+    det+='<div class="btns">'+(r.gm?'<button class="btn small'+(r.has?'':' primary')+'" data-act="hx-slclose" data-d="'+r.d+'">'+(r.has?'✏️ गिनती / UPI बदलो':'🌙 दिन बंद करो')+'</button>':'')+
+      '<button class="btn small" data-act="hx-goday" data-d="'+r.d+'">📅 उस दिन का पूरा हिसाब</button></div>';
+    return row+'<div class="sldet">'+det+'</div>';
+  }).join('')+'</div>'+
+  '<p class="hint" style="margin:8px 2px 0">कुल बिक्री = कैश + UPI · ⭐ = महीने का सबसे अच्छा दिन · हफ़्ता/साल/पिछले साल से तुलना → <button class="lnk" data-act="hx-tab" data-v="rep">📊 रिपोर्ट</button></p>';
   return html;
 }
 
@@ -4216,7 +4310,9 @@ function hxClick(t,act){
   switch(act){
     case 'hx-tab':HX().tab=v;if(ui.view!=='hisaab')ui.view='hisaab';renderRoute();window.scrollTo(0,0);return true;
     case 'hx-day':var nd=hsKeyAdd(HX().d,+t.getAttribute('data-n'));if(nd>todayStr())return true;HX().d=nd;renderHisaab();return true;
-    case 'hx-goday':HX().d=t.getAttribute('data-d');HX().tab='aaj';renderHisaab();window.scrollTo(0,0);return true;
+    case 'hx-goday':HX().d=t.getAttribute('data-d');HX().tab=t.getAttribute('data-t')||'aaj';renderHisaab();window.scrollTo(0,0);return true;
+    case 'hx-slmon':var smn=moAdd(slSM(),+t.getAttribute('data-n'));if(smn>todayStr().slice(0,7)||smn<slFirstMon())return true;HX().sm=smn;renderHisaab();window.scrollTo(0,0);return true;
+    case 'hx-slclose':openHxClose(t.getAttribute('data-d'));return true;
     case 'hx-grp':var g=t.getAttribute('data-g');HX().open[g]=!HX().open[g];renderHisaab();return true;
     case 'hx-sheet':hxSheet(t.getAttribute('data-k'));return true;
     case 'hx-edit':
@@ -4284,6 +4380,7 @@ function hxClick2(t,act){
 }
 function hxLastF(f,beforeD){var a=DLY().slice().sort(function(x,y){return x.d<y.d?1:-1;});for(var i=0;i<a.length;i++){if(beforeD&&a[i].d>=beforeD)continue;if(num(a[i][f])>0)return num(a[i][f]);}return '';}
 function hxInputEv(t){
+  if(t.id==='sl-mpick'){if(/^\d{4}-\d\d$/.test(t.value)&&t.value<=todayStr().slice(0,7)){HX().sm=t.value;renderHisaab();}return true;}
   if(t.id==='hx-dpick'){if(/^\d{4}-\d\d-\d\d$/.test(t.value)&&t.value<=todayStr()){HX().d=t.value;renderHisaab();}return true;}
   if(t.id==='rp-from'||t.id==='rp-to'){var r=HX().rp;r.p='custom';if(t.id==='rp-from')r.from=t.value;else r.to=t.value;if(/^\d{4}-\d\d-\d\d$/.test(t.value))renderHisaab();return true;}
   var k=t.getAttribute&&t.getAttribute('data-hxc');
@@ -8108,7 +8205,7 @@ function aiSys(){
 'YOUR JOBS',
 '1. Turn instructions and bill/slip photos into ACTIONS (below). The app shows each action to the owner and only he saves it, so never say it is saved or done; say what you understood (e.g. "रमेश यादव का 2 किलो रसगुल्ला उधार — नीचे जाँचकर ✅ दबाइए").',
 '2. Answer every question about the shop\'s money and the app like its accountant: sales (cash/UPI), expenses by head, supplier goods/payments/dues, the cash drawer (गल्ला) and its reconciliation, money for home, udhari, unpaid bills, orders and online orders, items and prices, loyalty points, budget, fixed monthly costs, profit, trends (day/week/month/year, same period last year), cash flow, where money is stuck, what is causing loss, where profit comes from. Advice must be practical, specific to this shop and tied to the FACTS.',
-'3. When the owner asks how to do something in the app, explain the exact taps: नीचे 💰 हिसाब टैब → आज (🚚 माल आया · 💸 सप्लायर को पैसा · 🧾 खर्च · 🏠 घर के लिए · 🍬 क्या बना · 💼 निकाला/डाला · 🌙 दिन बंद करो) · गल्ला · सप्लायर · रिपोर्ट (हफ़्ता/महीना/साल/तारीख़); 📒 उधारी टैब; 🧾 ऑर्डर्स; 🌐 ऑनलाइन; 🧮 कैलकुलेटर हर रकम के बगल में.',
+'3. When the owner asks how to do something in the app, explain the exact taps: नीचे 💰 हिसाब टैब → आज (🚚 माल आया · 💸 सप्लायर को पैसा · 🧾 खर्च · 🏠 घर के लिए · 🍬 क्या बना · 💼 निकाला/डाला · 🌙 दिन बंद करो) · बिक्री (हर दिन की बिक्री अलग, कैश/UPI) · गल्ला (सिर्फ़ कैश: सुबह + आया − गया = रात) · सप्लायर · रिपोर्ट (हफ़्ता/महीना/साल/तारीख़); 📒 उधारी टैब; 🧾 ऑर्डर्स; 🌐 ऑनलाइन; 🧮 कैलकुलेटर हर रकम के बगल में.',
 '',
 'MONEY DIRECTION (very important — never mix these up)',
 '- SUPPLIERS = the SUPPLIERS line, and anyone who sends goods to the shop (दूधवाला, पनीर वाला, कंपनी, एजेंसी, थोक वाला). "X से माल आया / X का माल / X का बिल / X ने माल दिया" → hisaab "sup". "X को दिया / X को पेमेंट किया / X का पैसा चुकाया / X को भेजा / X का हिसाब किया" → hisaab "suppay". NEVER use udhar or jama for a supplier.',
@@ -8336,7 +8433,7 @@ function aiErrText(e){
 
 /* ---------- "मैंने ये समझा" कार्ड ---------- */
 var AI_T={udhar:'📒 उधार लिखना',jama:'💰 जमा लिखना',order:'📦 नया ऑर्डर',bill:'🧾 बिल',hisaab:'💰 हिसाब में जोड़ना',remind:'📲 याद दिलाना',phone:'📞 मोबाइल नंबर',budget:'💰 बजट',open:'📂 खोलना'};
-var AI_VIEWS={home:'होम',hisaab:'💰 हिसाब',sup:'💰 हिसाब › सप्लायर',month:'💰 हिसाब › रिपोर्ट',khata:'उधारी',orders:'ऑर्डर्स',dues:'सबसे पुराना बाकी',online:'ऑनलाइन',items:'आइटम्स',backup:'बैकअप',shopset:'दुकान सेटिंग (दाम/ख़त्म/ऑनलाइन)',party:'उधारी खाता',customer:'ग्राहक'};
+var AI_VIEWS={home:'होम',hisaab:'💰 हिसाब',sale:'💰 हिसाब › बिक्री (हर दिन)',galla:'💰 हिसाब › गल्ला (कैश)',sup:'💰 हिसाब › सप्लायर',month:'💰 हिसाब › रिपोर्ट',khata:'उधारी',orders:'ऑर्डर्स',dues:'सबसे पुराना बाकी',online:'ऑनलाइन',items:'आइटम्स',backup:'बैकअप',shopset:'दुकान सेटिंग (दाम/ख़त्म/ऑनलाइन)',party:'उधारी खाता',customer:'ग्राहक'};
 function aiNewCard(a){
   var t=String((a&&a.type)||'').toLowerCase().trim();
   /* AI कभी दूसरे नाम से भेजे तो भी समझो */
