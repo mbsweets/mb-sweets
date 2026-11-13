@@ -8549,6 +8549,38 @@ function aiUse(model){
   var c=aiCfg(),t=todayStr(),u=(c.use&&c.use.d===t)?c.use:{d:t,n:0,m:{}};
   u.n++;u.m[model]=(u.m[model]||0)+1;aiSet({use:u,last:model,lastAt:Date.now()});
 }
+/* जवाब से पहले "सोचना" (thinking) — सबसे ज़्यादा देर यही करता है (13 नवंबर 2026, मालिक: "टाइम बहुत ले रहा है")
+   Google की गाइड (ai.google.dev, cloud.google.com — नवंबर 2026):
+   · Gemini 2.5 Flash / Flash-Lite: thinkingBudget 0 = सोचना बंद। 2.5 Pro में बंद नहीं होता (कम-से-कम 128)।
+   · Gemini 3 और नए: thinkingLevel — minimal / low / medium / high (3.8 Flash में minimal नहीं, वहाँ low सबसे कम)।
+     thinkingLevel 2.5 पर भेजो तो 400; दोनों एक साथ भेजो तो 400।
+   · Gemini 3: temperature default (1.0) ही रखने की सलाह (कम करने से अटक/दोहराव) — इसलिए वहाँ temperature नहीं भेजते।
+   "…-latest" नाम से पीढ़ी पता नहीं चलती → जवाब में आया modelVersion याद रखते हैं; जो सेटिंग 400 दे, उसे छोड़कर अगली — और याद रखते हैं। */
+function aiRealModel(m){var c=aiCfg();return String((c.mv&&c.mv[m])||m).toLowerCase();}
+function aiGenVer(m){var v=aiRealModel(m).match(/gemini-(\d+(?:\.\d+)?)/);return v?parseFloat(v[1]):0;}
+function aiThinkOpts(m){
+  var l=aiRealModel(m),ver=aiGenVer(m),pro=/-pro/.test(l);
+  if(/gemma/.test(l)||(ver&&ver<2.5))return [null];
+  if(ver&&ver<3)return pro?[{thinkingBudget:128},null]:[{thinkingBudget:0},null];
+  if(ver>=3)return pro?[{thinkingLevel:'low'},null]:[{thinkingLevel:'minimal'},{thinkingLevel:'low'},null];
+  return [{thinkingLevel:'minimal'},{thinkingLevel:'low'},{thinkingBudget:0},null];
+}
+function aiThinkBad(m){var t=(aiCfg().th||{})[m];return (t&&Date.now()-num(t.at)<3*86400000&&Array.isArray(t.bad))?t.bad:[];}
+function aiThinkPick(m){var bad=aiThinkBad(m),ops=aiThinkOpts(m);for(var i=0;i<ops.length;i++){if(ops[i]==null||bad.indexOf(JSON.stringify(ops[i]))<0)return ops[i];}return null;}
+function aiThinkFail(m,th){if(!th)return false;var c=aiCfg(),t=c.th||{},bad=aiThinkBad(m).slice(),k=JSON.stringify(th);if(bad.indexOf(k)<0)bad.push(k);t[m]={bad:bad,at:Date.now()};aiSet({th:t});return true;}
+function aiGenConf(m,base){
+  var g=Object.assign({},base||{}),ver=aiGenVer(m),nt=(aiCfg().notemp||{})[m];
+  if(nt||(!/gemma/i.test(m)&&!(ver&&ver<3)))delete g.temperature;   // Gemini 3+ / पीढ़ी पता नहीं — temperature default (Gemma, 2.5 पर पहले जैसा)
+  var th=/gemma/i.test(m)?null:aiThinkPick(m);if(th)g.thinkingConfig=th;
+  return {g:g,th:th};
+}
+function aiLearnModel(m,j){var mv=j&&j.modelVersion;if(!mv)return;mv=String(mv).replace(/^models\//,'');var c=aiCfg(),o=c.mv||{};if(o[m]!==mv){o[m]=mv;aiSet({mv:o});}}
+function aiConfErr(m,r,th){   // 400 सोचने/temperature की सेटिंग से? तो वही मॉडल बिना उस सेटिंग के
+  if(r.status!==400)return false;var msg=String(((r.j&&r.j.error)||{}).message||r.t||'');
+  if(th&&/think|budget|level|reasoning/i.test(msg))return aiThinkFail(m,th);
+  if(/temperature|sampling|top_?p|top_?k/i.test(msg)){var c=aiCfg(),o=c.notemp||{};if(o[m])return false;o[m]=1;aiSet({notemp:o});return true;}
+  return false;
+}
 /* एक सवाल → मॉडल एक-एक करके (कोटा ख़त्म/मॉडल बंद हो तो अगला) */
 function aiGen(sys,parts,key){
   var T0=Date.now(),LIM=AI.LIM||40000,hasImg=parts.some(function(p){return p&&(p.inlineData||p.inline_data);});
@@ -8561,18 +8593,21 @@ function aiGen(sys,parts,key){
       var left=LIM-(Date.now()-T0);
       if(mi>=models.length||mi>=6||left<3000){var er=new Error('allfail');er.code=left<3000?'timeout':aiWorst(tries);er.tries=tries;throw er;}
       var m=models[mi],pl=aiCfg().plain||{},usePlain=plain||/gemma/i.test(m)||!!pl[m];
+      var gc=aiGenConf(m,usePlain?{temperature:0.2}:{temperature:0.2,responseMimeType:'application/json'});
       var body=usePlain?
-        {contents:[{role:'user',parts:[{text:sys+'\n\nReply with ONLY the JSON object.\n\n'}].concat(parts)}],generationConfig:{temperature:0.2}}:
-        {systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:parts}],generationConfig:{temperature:0.2,responseMimeType:'application/json'}};
+        {contents:[{role:'user',parts:[{text:sys+'\n\nReply with ONLY the JSON object.\n\n'}].concat(parts)}],generationConfig:gc.g}:
+        {systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:parts}],generationConfig:gc.g};
       aiStatus('सोच रहा हूँ…'+(mi?' (दूसरा मॉडल '+(mi+1)+')':''));
       return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,Math.min(hasImg?60000:25000,left)).then(function(r){
         if(r.ok){
+          aiLearnModel(m,r.j);
           var txt=aiText(r.j);
           if(!txt){var fr=r.j&&r.j.candidates&&r.j.candidates[0]&&r.j.candidates[0].finishReason;tries.push({m:m,code:(r.j&&r.j.promptFeedback&&r.j.promptFeedback.blockReason)?'blocked':'empty',fr:fr});return attempt(mi+1,false);}
           aiUse(m);
           if(usePlain&&plain&&!/gemma/i.test(m)){pl[m]=1;aiSet({plain:pl});}
           return {text:txt,model:m};
         }
+        if(aiConfErr(m,r,gc.th))return attempt(mi,plain,again);
         var ei=aiErrInfo(r);tries.push({m:m,code:ei.code,msg:ei.msg});
         if(ei.code==='key'){var ek=new Error('key');ek.code='key';ek.msg=ei.msg;throw ek;}
         if(ei.code==='region'){var eg=new Error('region');eg.code='region';eg.msg=ei.msg;throw eg;}
@@ -9284,7 +9319,7 @@ function aiSend(){
   var tk0=Date.now(),tick=setInterval(function(){if(!AI.s.busy){clearInterval(tick);return;}var el=$('#ai-busy');if(el)el.textContent=String(AI.s.status||'सोच रहा हूँ…').replace(/\s*\(\d+ सेकंड\)$/,'')+' ('+Math.round((Date.now()-tk0)/1000)+' सेकंड)';},1000);
   var fx;try{fx=aiFacts(text);}catch(e){fx={fb:aiFB(),people:[],all:[],base:0};}
   var key=aiKey();
-  var done=function(o,note,rt){AI.s.busy=false;AI.s.status='';aiHandle(o,fx,note,text);
+  var done=function(o,note,rt){AI.s.busy=false;AI.s.status='';if(o&&typeof o==='object')o.__ms=Date.now()-tk0;aiHandle(o,fx,note,text);
     /* AI न चला — बात/फोटो खोए नहीं: एक बटन से वही दोबारा AI को */
     if(rt){var lm=AI.s.msgs[AI.s.msgs.length-1];if(lm&&lm.r==='a'){lm.retry={t:text,imgs:imgs};aiRender(true);}}};
   if(!key){
@@ -9293,12 +9328,16 @@ function aiSend(){
     return;
   }
   if(navigator.onLine===false){done(aiLocal(text,fx),'इंटरनेट नहीं है — फ़ोन ने आसान तरीके से समझा।'+(imgs.length?' फोटो रखी हुई है — इंटरनेट आते ही नीचे "🔄 AI से फिर भेजो" दबाइए।':''),true);return;}
+  /* साफ़ बिक्री वाली बात ("आज की बिक्री 10,000 UPI और 10,000 कैश") — AI का इंतज़ार नहीं, फ़ोन तुरंत कार्ड बनाता है */
+  if(!imgs.length&&aiSaleOnly(text)){var lq=aiLocal(text,fx);if(lq.actions&&lq.actions.length===1&&lq.actions[0].type==='hisaab'){done(lq,'');return;}}
   var sys=aiSys();
   var parts=function(extra){var p=[{text:aiCtxText(fx,text,imgs.length,extra)}];imgs.forEach(function(im){p.push({inlineData:{mimeType:im.mime,data:im.data}});});return p;};
   aiGen(sys,parts(''),key).then(function(r){
     var o=aiJSON(r.text);
     if(!o||typeof o!=='object')o={say:String(r.text).replace(/[{}"]/g,' ').slice(0,700),actions:[]};
     o.__m=r.model;
+    /* लिखने वाली बात पर AI ने एंट्री दे दी — दूसरा चक्कर (पुराना हिसाब मँगाना) नहीं, वरना दुगना समय + रिपोर्ट */
+    if(o.need&&Array.isArray(o.actions)&&o.actions.length&&!aiIsQ(text))o.need=null;
     if(o.need&&typeof o.need==='object'){
       var before=fx.fb.size();
       try{aiNeed(fx,o.need);}catch(e){}
@@ -9369,7 +9408,7 @@ function aiHandle(o,fx,note,text){
     try{var lo2=aiLocal(text,fx);if(lo2.actions&&lo2.actions.length)o={say:lo2.say,actions:lo2.actions,__m:o.__m,__entry:1};
       else if(lo2.ask&&/बिक्री/.test(lo2.ask))o={say:'',ask:lo2.ask,actions:[],__m:o.__m,__entry:1};}catch(e){}
   }
-  var m={r:'a',say:String(o.say||'').trim().slice(0,600),cards:[],note:note||'',ask:o.ask?String(o.ask).slice(0,300):'',model:o.__m||'',fallback:!!o.fallback,nums:fx.fb.nums,unums:{}};
+  var m={r:'a',say:String(o.say||'').trim().slice(0,600),cards:[],note:note||'',ask:o.ask?String(o.ask).slice(0,300):'',model:o.__m||'',ms:num(o.__ms),fallback:!!o.fallback,nums:fx.fb.nums,unums:{}};
   aiNumsOf(text||'').forEach(function(n){m.unums[n]=1;});
   var pend=aiPending();
   (Array.isArray(o.actions)?o.actions:[]).slice(0,8).forEach(function(a){
@@ -9473,6 +9512,13 @@ function aiSaleEntry(text){
   if(rest){var tot=Math.max.apply(null,all.concat([0])),got=used.reduce(function(a,v){return a+v;},0);
     if(tot>got&&used.indexOf(tot)<0)add(rest,round2(tot-got));}
   return (r.upi||r.galla)?r:null;
+}
+/* बात में सिर्फ़ आज की बिक्री है (और कुछ नहीं)? तो AI के बिना तुरंत */
+function aiSaleOnly(text){
+  var n=aiNorm(text).replace(/(\d),(?=\d)/g,'$1').replace(/[₹.,।;:!?()"'“”‘’\-–—]/g,' ').trim();if(!n)return false;
+  var W=/^(आज|aaj|today|की|का|के|में|से|और|तथा|है|हैं|हुई|हुआ|हुए|रही|रहा|कुल|टोटल|total|बिक्री|बिकी|बिका|सेल|रुपये|रुपया|रुपए|रु|ऑनलाइन|यूपीआई|upi|पेटीएम|फोन|पे|गूगल|स्कैन|नकद|कैश|cash|गल्ले|गल्ला|ऊपर|डाले|डाला|बड़े|नोट|बाकी|बाक़ी|सब|rest|remaining|जिसमें|इसमें|उसमें|लिखो|लिख|दो|दीजिए|करो|जोड़ो|हिसाब|हज़ार|हजार|सौ|लाख|साढ़े|पौने|सवा|ढाई|डेढ़|k)$/i;
+  var ok=n.split(/\s+/).every(function(t){return W.test(t)||/^\d+(\.\d+)?k?$/i.test(t)||aiAmtList(t).length>0;});
+  return ok&&!!aiSaleEntry(text)&&/बिक्री|बिकी|बिका|सेल/.test(n);
 }
 function aiEscRe(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 function aiLocal(text,fx){
@@ -9790,9 +9836,10 @@ function aiTranscribe(w){
     function attempt(mi,again){
       if(mi>=models.length||mi>=2||Date.now()-T0>30000){var er=new Error('allfail');er.code=tries.length?aiWorst(tries):'timeout';throw er;}
       var m=models[mi];
-      var body={systemInstruction:{parts:[{text:aiTxPrompt()}]},contents:[{role:'user',parts:parts}],generationConfig:{temperature:0}};
+      var gc=aiGenConf(m,{temperature:0}),body={systemInstruction:{parts:[{text:aiTxPrompt()}]},contents:[{role:'user',parts:parts}],generationConfig:gc.g};
       return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,20000).then(function(r){
-        if(r.ok){var t=aiText(r.j);aiUse(m);return t.replace(/^["“'`]+|["”'`]+$/g,'').trim();}
+        if(r.ok){aiLearnModel(m,r.j);var t=aiText(r.j);aiUse(m);return t.replace(/^["“'`]+|["”'`]+$/g,'').trim();}
+        if(aiConfErr(m,r,gc.th))return attempt(mi,again);
         var ei=aiErrInfo(r);tries.push({m:m,code:ei.code});
         if(ei.code==='key'){var ek=new Error('key');ek.code='key';throw ek;}
         if(ei.code==='rpm'&&!again&&ei.retry>0&&ei.retry<=10)return aiWait(ei.retry*1000+300).then(function(){return attempt(mi,true);});
@@ -9949,7 +9996,7 @@ function aiMsgHtml(m,i){
     '<div class="aiforms"><button data-act="ai-form" data-v="u">📒 उधार लिखो</button><button data-act="ai-form" data-v="j">💰 जमा लिखो</button><button data-act="ai-form" data-v="o">📦 नया ऑर्डर</button><button data-act="ai-form" data-v="h">💰 हिसाब खोलो</button></div>';
   if(m.retry&&aiKey())h+='<div class="aiforms"><button data-act="ai-retry" data-i="'+i+'">🔄 AI से फिर भेजो'+(m.retry.imgs&&m.retry.imgs.length?' (फोटो के साथ)':'')+'</button></div>';
   if(bad)h+='<p class="ainote">⚠️ वाला नंबर ऐप के हिसाब में नहीं मिला (AI ने ख़ुद जोड़ा/अंदाज़ा लगाया) — 📊 वाले नंबर ही पक्के मानें।</p>';
-  if(m.say||m.ans||m.ask)h+='<div class="aimeta"><button class="lnk" data-act="ai-speak" data-i="'+i+'">🔊 सुनो</button>'+(m.model?'<span>AI: '+esc(m.model)+'</span>':'<span>फ़ोन ने समझा (बिना AI)</span>')+'</div>';
+  if(m.say||m.ans||m.ask||(m.cards&&m.cards.length))h+='<div class="aimeta"><button class="lnk" data-act="ai-speak" data-i="'+i+'">🔊 सुनो</button>'+(m.model?'<span>AI: '+esc(m.model)+(m.ms>0?' · '+(m.ms/1000).toFixed(1)+' सेकंड':'')+'</span>':'<span>फ़ोन ने समझा'+(m.ms>0&&m.ms<1500?' — तुरंत':' (बिना AI)')+'</span>')+'</div>';
   return h+'</div>';
 }
 function aiHelloHtml(){
