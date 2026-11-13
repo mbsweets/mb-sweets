@@ -7984,7 +7984,7 @@ function aiPMatch(name,nameEn,all){
     .filter(function(r){return r.s>=0.45;}).sort(function(a,b){return b.s-a.s;}).slice(0,6);
 }
 /* बोलचाल के आम शब्द — ये कभी किसी का नाम नहीं ("दिया" ≈ "दुधिया" से ग्राहक पकड़ लेता था — 13 नवंबर 2026) */
-var AI_NOTNAME=/^(दिया|दिए|दिये|दी|दे|दो|दें|देना|देने|देनी|देंगे|दूँगा|दूंगा|दिलवाओ|लिया|लिए|लिये|ली|ले|लो|लें|लेना|लेने|लेगा|लेंगे|जमा|उधार|उधारी|बाकी|बाक़ी|बकाया|रुपया|रुपये|रुपए|रुपैया|हज़ार|हजार|सौ|लाख|पैसा|पैसे|नकद|नगद|कैश|यूपीआई|ऑनलाइन|आज|कल|परसों|अभी|सुबह|शाम|रात|दोपहर|गया|गई|गए|गयी|किया|किए|करो|करें|कर|करना|लिखो|लिख|लिखें|लिखना|है|हैं|था|थी|थे|और|भी|मिला|मिले|मिली|भेजा|भेजो|भेज|वापस|बिल|ऑर्डर|आर्डर|माल|सामान|हिसाब|खर्च|ख़र्च|स्टाफ|स्टाफ़|कारीगर|हलवाई|नौकर|पगार|तनख्वाह|तनख़्वाह|सैलरी|वेतन|मज़दूरी|मजदूरी|मजदूर|मज़दूर|लेबर|बिजली|किराया|गैस|सप्लायर|दुकान|घर|गल्ला|गल्ले|ऊपर|किलो|ग्राम|पाव|आधा|पीस|डिब्बा|पैकेट|लीटर|वाला|वाले|वाली|दिलाओ|चुकाया|चुका|पेमेंट|हुआ|हुई|हुए|बोलो|बताओ|कितना|कितनी|क्या|कौन|diya|diye|liya|jama|udhar|baki|rupay|rupaye|hazar|paisa|staff|salary|aaj|kal|bill|order|ko|se|ka|ki|ke|ne)$/i;
+var AI_NOTNAME=/^(दिया|दिए|दिये|दी|दे|दो|दें|देना|देने|देनी|देंगे|दूँगा|दूंगा|दिलवाओ|लिया|लिए|लिये|ली|ले|लो|लें|लेना|लेने|लेगा|लेंगे|जमा|उधार|उधारी|बाकी|बाक़ी|बकाया|रुपया|रुपये|रुपए|रुपैया|हज़ार|हजार|सौ|लाख|पैसा|पैसे|नकद|नगद|कैश|यूपीआई|ऑनलाइन|आज|कल|परसों|अभी|सुबह|शाम|रात|दोपहर|गया|गई|गए|गयी|किया|किए|करो|करें|कर|करना|लिखो|लिख|लिखें|लिखना|है|हैं|था|थी|थे|और|भी|मिला|मिले|मिली|भेजा|भेजो|भेज|वापस|बिल|ऑर्डर|आर्डर|माल|सामान|हिसाब|खर्च|ख़र्च|स्टाफ|स्टाफ़|कारीगर|हलवाई|नौकर|पगार|तनख्वाह|तनख़्वाह|सैलरी|वेतन|मज़दूरी|मजदूरी|मजदूर|मज़दूर|लेबर|बिजली|किराया|गैस|सप्लायर|दुकान|घर|गल्ला|गल्ले|ऊपर|किलो|ग्राम|पाव|आधा|पीस|डिब्बा|पैकेट|लीटर|वाला|वाले|वाली|दिलाओ|चुकाया|चुका|पेमेंट|हुआ|हुई|हुए|बोलो|बताओ|कितना|कितनी|क्या|कौन|diya|diye|liya|jama|udhar|baki|rupay|rupaye|hazar|paisa|staff|salary|aaj|kal|bill|order|ko|se|ka|ki|ke|ne|paid|pay|payment|received|recieved|got|gave|give|given|due|owe|owes|credit|deposit|salary|wages|worker|supplier|thousand|hundred|lakh|lac|rupees|rupee|rs|online|cash|upi|today|yesterday|tomorrow|hai|dena|lena|liye|kiya|karo|kar|likho|likh|maal|aaya|aaj|to|from|for|and|the|is|was|by|on|in|my|i|we|me|baad|later|abhi|udhaar|baaki|bakaya|hisab|hisaab|kharch|paise|rupaye|hazaar|hajar|sau|ek|do|teen|char|paanch|das|bees|pachas|ten|five|kilo|kg|piece|pcs|पेड|पेमेंट|रिसीव|ड्यू|क्रेडिट|डिपॉजिट|सैलरी|थाउजेंड|हंड्रेड|ट्रांसफर|पेंडिंग|कैश|फोनपे|पेटीएम|मैंने|हमने)$/i;
 var AI_SURNAME=/^(यादव|साह|शाह|कुमार|कुमारी|देवी|सिंह|गुप्ता|प्रसाद|राय|झा|मिश्रा|मिश्र|पासवान|मंडल|ठाकुर|शर्मा|चौधरी|महतो|पंडित|पांडे|पाण्डेय|सहनी|मुखिया|yadav|sah|shah|kumar|kumari|devi|singh|gupta|prasad|rai|jha|mishra|paswan|mandal|thakur|sharma|choudhary|mahto)$/i;
 function aiNameToks(text){return aiToks(text).filter(function(w){return !AI_NOTNAME.test(w);});}
 /* मैसेज के अंदर किसका नाम है — 1–3 शब्द के टुकड़ों से */
@@ -8350,7 +8350,9 @@ function aiSys(){
 'Now: '+t+' ('+hsWdOf(t)+'), '+aiNowHM()+' India time.',
 '',
 'LANGUAGE',
-'- Understand Hindi, English and Hinglish (mixed words, Devanagari or Roman script) and common Maithili/Bhojpuri words (देलक, लेलक, बाँकी, हमर, ओकर…). Text often comes from voice typing and has mistakes (उधर=उधार, जमां=जमा, "पांच सौ"=500, "ढाई हज़ार"=2500, "डेढ़ किलो"=1.5 kg). Infer the intended meaning.',
+'- Understand Hindi, English and Hinglish equally well — Devanagari, Roman Hindi ("krishna ko 1900 dena hai") or plain English ("need to pay Krishna 1900"), and any mix — plus common Maithili/Bhojpuri words (देलक, लेलक, बाँकी, हमर, ओकर…). Text often comes from voice typing and has mistakes (उधर=उधार, जमां=जमा, "पांच सौ"=500, "ढाई हज़ार"=2500, "डेढ़ किलो"=1.5 kg). Voice typing writes English words in Devanagari (पेड = paid, पेमेंट, रिसीव = received, ड्यू = due, क्रेडिट = credit, डिपॉजिट = deposit, सैलरी = salary, थाउजेंड = thousand). Infer the intended meaning.',
+'- Same meaning in all three: दिया = diya = de diya = paid / gave / sent · देना है / बाकी है = dena hai / baaki hai = due / owe / need to pay / pay later · जमा = jama = deposit · मिला = mila = received / got · उधार = udhaar = credit / on credit · माल आया = maal aaya = goods / stock arrived · स्टाफ / पगार / तनख्वाह = staff / salary / wages · "X को" = "to X" (shop gives) · "X ने" / "X से मिला" = "X paid" / "received from X" (shop gets). Numbers: 10k = 10 हज़ार = das hazaar = ten thousand = 10000; 1.5k = डेढ़ हज़ार = 1500; 2 lakh = 200000.',
+'- A name written in Roman script (Ramesh, krishna) is the same person as the Devanagari name (रमेश, कृष्णा): put the Devanagari form in "name" and the Roman form in "nameEn".',
 '- Reply in simple Hindi (Devanagari). If the owner wrote fully in English, reply in simple English.',
 '',
 'YOUR JOBS',
@@ -8417,6 +8419,7 @@ function aiSys(){
 '- "बिजली का बिल 1200 दिया" → hisaab exp [{"box":"other","name":"बिजली","amount":1200}] · "घर के लिए 500 लिया" → hisaab home · "आज 9000 ऊपर डाले" → hisaab galla 9000',
 '- "10000 स्टाफ को दिया" → {"type":"hisaab","exp":[{"box":"other","name":"मज़दूरी","amount":10000,"note":"स्टाफ"}]} · "कारीगर राजू को 3000 पगार दी" → same with note "राजू" (no PEOPLE, no udhar/jama)',
 '- "मोहन को 500 दे दिया" → udhar 500 for मोहन · "मोहन ने 500 दिया" → jama 500 from मोहन',
+'- Hinglish / English say the same: "krishna ko 1900 dena hai" = "need to pay Krishna 1900" = "Krishna 1900 due" → sup paid "later" · "krishna ko 1900 de diya" = "paid 1900 to Krishna" → suppay · "ramesh ne 500 jama kiya upi se" = "Ramesh paid 500 by UPI" = "received 500 from Ramesh on UPI" → jama 500 UPI · "ramesh ko 2 kilo rasgulla udhaar" = "give Ramesh 2 kg rasgulla on credit" → udhar · "10k staff ko diya" = "paid staff salary 10000" → exp मज़दूरी 10000 · "aaj upi 5200" = "today UPI total 5200" → hisaab upi',
 '- "'+exB+' को कितना देना है?" → no action; answer from FACTS (supplier dues).',
 '',
 'FOLLOW-UPS',
@@ -8610,11 +8613,43 @@ var AI_VIEWS={home:'होम',hisaab:'💰 हिसाब',sale:'💰 हि�
 /* पैसा किस तरफ़ — मालिक की अपनी बात से (AI गलत समझे तब भी): "देना है / बाकी है" = अभी दिया नहीं; "दिया / चुका दिया" = दे दिया
    (13 नवंबर 2026, मालिक: "कृष्णा सप्लायर को 1900 देना है" बोला तो सहायक ने "1900 दिया" लिख दिया) */
 var AI_OWE=/देना\s*(है|हैं|बा|बाकी|बाक़ी|होगा|होगी|पड़ेगा|पडेगा|रह\s*गया|बचा|अछि)|देने\s*(है|हैं|बाकी|होंगे)|देनी\s*(है|हैं)|चुकाना\s*(है|बाकी)|देबाक|देबा\s*के|बाकी\s*(है|हैं|बा|अछि|रह\s*गया|रखो|लिखो|रखिए|लिखिए|रखना|लिखना|में)|बाक़ी\s*(है|हैं|रखो|लिखो)|बाँकी|बकाया\s*(है|हैं|लिखो|रखो)|उधार\s*(है|पर|में|लिखो|रखो)|पैसा\s*(कल|बाद\s*में)|बाद\s*में\s*(देंगे|देना|दूँगा|दूंगा)|कल\s*(देंगे|दूँगा|दूंगा|देना)|dena\s*(hai|h\b|baki|hoga|padega)|baki\s*(hai|h\b|rakho|likho)|bakaya|baad\s*me\s*(denge|dena)|kal\s*denge/i;
+/* हिंदी · इंग्लिश · हिंग्लिश — फ़ोन के अपने नियमों (दिया / देना है / जमा / उधार / स्टाफ / माल…) के लिए एक भाषा में
+   (13 नवंबर 2026, मालिक: "हिंदी, इंग्लिश और हिंग्लिश — सब सही समझे")। AI को मालिक की असली बात ही जाती है; ये सिर्फ़ फ़ोन की जाँच के लिए */
+var AI_NORM=[
+  [/\b(have|has|need|needs)\s+to\s+(pay|give)\b|\bto\s+be\s+paid\b|\bpayable\b|\bdena\s*(hai|h|he|hain|baki|baaki|padega|hoga)\b|\bdene\s*(hai|hain|h)\b|\bchukana\s*(hai|h)\b/gi,' देना है '],
+  [/\bpay\b([^.?!]{0,40}?)\b(later|tomorrow)\b/gi,' $1 बाद में देंगे '],
+  [/\bpay\s+later\b|\bbaad\s*(me|mein|main)\s*(denge|dunga|de\s*denge|dena)?\b|\bkal\s*(denge|dunga|de\s*denge)\b/gi,' बाद में देंगे '],
+  [/\b(due|owe|owes|owed|outstanding|pending)\b|\bba+ki\s*(hai|h|he)\b|\bbakaya\b/gi,' बाकी है '],
+  [/\blena\s*(hai|h|he|baki|baaki)\b|\bto\s+(take|collect)\s+from\b/gi,' लेना है '],
+  [/\b(de\s*diya|de\s*diye|de\s*di|de\s*dia|diya|diye|dia|gave|given|paid|pay\s*kiya|pay\s*kar\s*(diya|di|dia)|payment\s*(kiya|kar\s*(diya|di|dia)|done|ho\s*gaya)|bhej\s*(diya|di)|bheja|sent|transfer\s*(kiya|kar\s*diya)|transferred|chuka\s*(diya|di)|chukaya|clear\s*(kiya|kar\s*diya))\b/gi,' दिया '],
+  [/\b(received|recieved|receive\s*kiya|got|mila|mil\s*gaya|mile|mili)\b/gi,' मिला '],
+  [/\b(jama|jma|deposit|deposited)\b/gi,' जमा '],
+  [/\b(udhaar|udhar|udhari|udhaari|on\s+credit|credit)\b/gi,' उधार '],
+  [/\b(staff|salary|salaries|wage|wages|worker|workers|karigar|kaarigar|halwai|naukar|labour|labor|tankhwah|tankha|pagaar|pagar|vetan)\b/gi,' स्टाफ '],
+  [/\b(maal|stock|goods|saman|samaan)\b/gi,' माल '],
+  [/\b(aaya|aya|aayi|ayi|aaye|came|arrived|delivered)\b/gi,' आया '],
+  [/\b(supplier|suppliers|vendor|dealer|distributor|agency)\b/gi,' सप्लायर '],
+  [/\b(ko|to)\b/gi,' को '],[/\bne\b/gi,' ने '],[/\b(se|from)\b/gi,' से '],[/\b(ka|ki|ke|of)\b/gi,' का '],
+  [/\b(i|we|maine|mainne|humne|hamne)\b/gi,' मैंने '],
+  [/\b(rupees|rupee|rupaye|rupaiya|rupay|rs|inr)\b\.?/gi,' रुपये '],
+  [/\b(phone\s*pe|phonepe|paytm|g\s*pay|gpay|google\s*pay|upi|online)\b/gi,' ऑनलाइन '],
+  [/\b(cash|nakad|nagad)\b/gi,' नकद '],
+  [/\b(thousand|hazar|hazaar|hajar)\b/gi,' हज़ार '],[/\b(hundred|sau)\b/gi,' सौ '],[/\b(lakh|lac|lakhs)\b/gi,' लाख '],
+  /* आवाज़ से इंग्लिश शब्द देवनागरी में आते हैं */
+  [/पेड\s*(किया|कर\s*दिया|कर\s*दी|हो\s*गया)?|पैड\s*कर\s*दिया|पेमेंट\s*(किया|कर\s*दिया|कर\s*दी|हो\s*गया|भेज\s*दिया)|ट्रांसफर\s*(किया|कर\s*दिया)|क्लियर\s*(किया|कर\s*दिया)/g,' दिया '],
+  [/रिसीव\s*(किया|हुआ|हो\s*गया)?|रिसीव्ड/g,' मिला '],
+  [/ड्यू(\s*है)?|पेंडिंग(\s*है)?|आउटस्टैंडिंग/g,' बाकी है '],
+  [/क्रेडिट/g,' उधार '],[/डिपॉजिट|डिपॉज़िट|डिपाजिट/g,' जमा '],
+  [/सैलरी|वेजेस|वर्कर|लेबर/g,' स्टाफ '],
+  [/थाउजेंड|थाउज़ेंड|थाउसेंड/g,' हज़ार '],[/हंड्रेड|हन्ड्रेड/g,' सौ '],
+  [/गुड्स|स्टॉक/g,' माल '],
+];
+function aiNorm(text){var s=' '+aiDigits(String(text||''))+' ';AI_NORM.forEach(function(r){s=s.replace(r[0],r[1]);});return s.replace(/\s+/g,' ').trim();}
 var AI_PAID=/दिया|दिए|दिये|दे\s*दी|दी\s*है|चुका\s*(दिया|दिए|दी)|चुकाया|चुकता\s*(कर\s*)?(दिया|हो\s*गया)|पेमेंट\s*(कर\s*)?(दिया|दी|किया|हो\s*गया)|भेज\s*(दिया|दिए|दी)|भेजा|देलियै|देलिऐ|देलौं|देलहुँ|देलक|\bdiya\b|\bdiye\b|de\s*diya|chuka\s*diya|chukaya|\bpaid\b|payment\s*(kar\s*)?(diya|kiya|done|kar\s*diya)|bhej\s*diya/i;
 var AI_GET=/लेना\s*(है|हैं|बाकी|बा)|लेने\s*(हैं|है|बाकी)|लेबाक|lena\s*(hai|h\b|baki)/i;
 var AI_GOT=/जमा|दिया|दिए|दे\s*गय|दे\s*दिय|मिला|मिल\s*गया|मिले|आ\s*गया|लौटा|चुका|jama|diya|mila|de\s*gaya/i;
 var AI_NEGPAID=/(नहीं|नही|ना|nahi|nahin)\s*(दिया|दिए|दिये|दी|diya|diye)|(दिया|दिए|दिये|दी|diya|diye)\s*(नहीं|नही|nahi|nahin)/gi;
-function aiPaidSaid(text){var s=aiDigits(String(text||'')).replace(AI_NEGPAID,' ');return AI_PAID.test(s);}
+function aiPaidSaid(text){var s=aiNorm(text).replace(AI_NEGPAID,' ');return AI_PAID.test(s);}
 /* स्टाफ-कारीगर की पगार = दुकान का खर्च (मज़दूरी), किसी ग्राहक का जमा/उधार नहीं (13 नवंबर 2026, मालिक: "10,000 स्टाफ को दिया" → सहायक ने "अभिषेक जी दुधिया का जमा" बना दिया) */
 var AI_STAFF=/स्टाफ|स्टॉफ|कारीगर|कारिगर|हलवाई|नौकर|पगार|तनख्वाह|तनख़्वाह|तनखा|तनख़ा|सैलरी|वेतन|मज़दूरी|मजदूरी|मजदूर|मज़दूर|लेबर|staff|karigar|halwai|naukar|pagar|tankhwah|salary|majduri|mazduri|labour|labor/i;
 /* AI ने जो नाम दिया, वो मालिक ने बोला भी था? (पिछली 4 बातें भी — "उसका 500 और") */
@@ -8628,9 +8663,9 @@ function aiNameSaid(name,nameEn,texts){
   return false;
 }
 /* "रमेश को 500 दिया" = पैसा आपने दिया (उधार); "रमेश ने 500 दिया" = उसने दिया (जमा) */
-var AI_KODIYA=/(^|\s)को\s.*(दिया|दिए|दिये|दी|दे\s*दिया|दे\s*दिए|दे\s*दी)|(^|\s)ko\s.*(diya|diye|de\s*diya)/i;
+var AI_KODIYA=/(^|\s)को\s.*(दिया|दिए|दिये|दी|दे\s*दिया|दे\s*दिए|दे\s*दी)|(दिया|दिए|दी)\s.*(^|\s)को(\s|$)|^(मैंने\s+)?दिया\s|मैंने\s.*\sको\s/i;
 var AI_TOUS=/(^|\s)ने(\s|$)|जमा|मिला|मिले|मिली|दे\s*गय|लौटा|वापस\s*(किया|किए|दिया)|(^|\s)ne(\s|$)|jama|mila|de\s*gaya/i;
-function aiOweSaid(text){var s0=aiDigits(String(text||'')),neg=s0.search(AI_NEGPAID)>-1,s=s0.replace(AI_NEGPAID,' ');return (AI_OWE.test(s)||neg)&&!AI_PAID.test(s);}
+function aiOweSaid(text){var s0=aiNorm(text),neg=s0.search(AI_NEGPAID)>-1,s=s0.replace(AI_NEGPAID,' ');return (AI_OWE.test(s)||neg)&&!AI_PAID.test(s);}
 function aiNewCard(a,said){
   var t=String((a&&a.type)||'').toLowerCase().trim();
   /* AI कभी दूसरे नाम से भेजे तो भी समझो */
@@ -8665,15 +8700,15 @@ function aiNewCard(a,said){
     if(mv)a.__owe=1;
   }
   /* स्टाफ/कारीगर की पगार — खर्च (मज़दूरी), किसी ग्राहक का खाता नहीं */
-  if((t==='jama'||t==='udhar')&&said!=null&&AI_STAFF.test(aiDigits(String(said)))&&a&&a.amount!=null&&a.amount!==''){
+  if((t==='jama'||t==='udhar')&&said!=null&&AI_STAFF.test(aiNorm(said))&&a&&a.amount!=null&&a.amount!==''){
     var stN=aiNameSaid(a.name,a.nameEn,[String(said)])?String(a.name||'').trim():'';
     a.exp=[{box:'other',name:'मज़दूरी',amount:a.amount,mode:a.mode==='UPI'?'online':'',note:('स्टाफ'+(stN&&!AI_STAFF.test(stN)?' — '+stN:'')).slice(0,40)}];
     a.__staff=1;a.__was=t;t='hisaab';
   }
   /* "X को 500 दिया" — पैसा आपने दिया: ये जमा नहीं, उधार */
-  if(t==='jama'&&said!=null){var sd=aiDigits(String(said));if(AI_KODIYA.test(sd)&&!AI_TOUS.test(sd)){t='udhar';a.type='udhar';a.__kodiya=1;}}
+  if(t==='jama'&&said!=null){var sd=aiNorm(said);if(AI_KODIYA.test(sd)&&!AI_TOUS.test(sd)){t='udhar';a.type='udhar';a.__kodiya=1;}}
   /* ग्राहक: "X से 500 लेना है" = उधार (जमा नहीं) */
-  if(t==='jama'&&said!=null){var s0=aiDigits(String(said));if(AI_GET.test(s0)&&!AI_GOT.test(s0.replace(AI_GET,''))){t='udhar';a.type='udhar';a.__get=1;}}
+  if(t==='jama'&&said!=null){var s0=aiNorm(said);if(AI_GET.test(s0)&&!AI_GOT.test(s0.replace(AI_GET,''))){t='udhar';a.type='udhar';a.__get=1;}}
   var c={id:'c'+(++AI.seq),t:t,a:a,st:'open',err:''};
   if(!AI_T[t]){c.st='bad';return c;}
   if(['udhar','jama','order','remind','phone'].indexOf(t)>-1||(t==='open'&&(a.view==='party'||a.view==='customer')))c.pp=aiPP(a,t);
@@ -8770,7 +8805,7 @@ function supScoreAll(name,nameEn){
 function supTopSure(L){return !!L.length&&(L[0].ex||!(L[1]&&L[1].sc>=L[0].sc-0.02));}
 /* बात में कोई सप्लायर का नाम? (सिर्फ़ एक मिले तभी) */
 function aiSupInText(text){
-  var toks=aiDigits(String(text||'')).replace(/[()·,.।!?:;"'’]/g,' ').split(/\s+/).filter(function(w){return w.length>=3&&!SUP_GEN.test(w)&&!/^\d/.test(w);});
+  var toks=aiDigits(String(text||'')).replace(/[()·,.।!?:;"'’]/g,' ').split(/\s+/).filter(function(w){return w.length>=3&&!SUP_GEN.test(w)&&!/^\d/.test(w)&&!AI_NOTNAME.test(w);});   // "paid"/"पेड" ≠ पेड़ा
   var best=null,bs=0,n=0;
   SUP().forEach(function(s){var base=String(s.n).split(/[(·]/)[0].trim(),bw=supCore(base).split(/\s+/).filter(function(w){return w.length>=3;}),sc=0;
     bw.forEach(function(b){toks.forEach(function(x){sc=Math.max(sc,aiNameScore(x,b));});});
@@ -9334,7 +9369,8 @@ function aiHandle(o,fx,note,text){
 }
 /* AI न चले तब: फ़ोन ख़ुद — नाम + उधार/जमा + रकम, और आम सवाल (बाकी/बिक्री/खर्च/उधारी/ऑर्डर) */
 var AI_NUMW={'एक':1,'दो':2,'तीन':3,'चार':4,'पाँच':5,'पांच':5,'छह':6,'छः':6,'सात':7,'आठ':8,'नौ':9,'दस':10,'ग्यारह':11,'बारह':12,'पंद्रह':15,'बीस':20,'पच्चीस':25,'तीस':30,'चालीस':40,'पचास':50,'साठ':60,'सत्तर':70,'अस्सी':80,'नब्बे':90,'डेढ़':1.5,'ढाई':2.5,'सवा':1.25,
-  'ek':1,'do':2,'teen':3,'char':4,'paanch':5,'panch':5,'das':10,'bees':20,'pachas':50,'dedh':1.5,'dhai':2.5};
+  'ek':1,'do':2,'teen':3,'char':4,'chaar':4,'paanch':5,'panch':5,'chhe':6,'chhah':6,'saat':7,'aath':8,'nau':9,'das':10,'gyarah':11,'barah':12,'pandrah':15,'bees':20,'pachchis':25,'pachis':25,'tees':30,'chalis':40,'pachas':50,'saath':60,'sattar':70,'assi':80,'nabbe':90,'dedh':1.5,'dhai':2.5,'dhaai':2.5,'sava':1.25,
+  'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12,'fifteen':15,'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,'seventy':70,'eighty':80,'ninety':90};
 function aiLocalAmt(s){
   s=aiDigits(s).replace(/₹/g,' ').replace(/(\d),(?=\d)/g,'$1');
   var toks=s.split(/[\s,]+/),best=0,cur=null,tot=0,run=false,afterM=false;
@@ -9348,9 +9384,10 @@ function aiLocalAmt(s){
       continue;}
     var wv=AI_NUMW[w]!=null?AI_NUMW[w]:AI_NUMW[lw];
     if(wv!=null){cur=(cur||0)+wv;run=true;afterM=false;continue;}
-    if(/^(सौ|sau)$/.test(lw)&&run){cur=(cur||1)*100;afterM=true;continue;}
-    if(/^(हज़ार|हजार|hazar|hajar|hazaar)$/.test(lw)&&run){tot+=(cur||1)*1000;cur=0;afterM=true;continue;}
-    if(/^(रुपये|रुपया|रुपए|rupay|rupaye|rupees|rs|का|की|के)$/.test(lw))continue;
+    if(/^(सौ|sau|hundred|हंड्रेड)$/.test(lw)&&run){cur=(cur||1)*100;afterM=true;continue;}
+    if(/^(लाख|lakh|lac|lakhs)$/.test(lw)&&run){tot+=(cur||1)*100000;cur=0;afterM=true;continue;}
+    if(/^(हज़ार|हजार|hazar|hajar|hazaar|thousand|थाउजेंड|थाउज़ेंड)$/.test(lw)&&run){tot+=(cur||1)*1000;cur=0;afterM=true;continue;}
+    if(/^(रुपये|रुपया|रुपए|rupay|rupaye|rupees|rupee|rs|inr|का|की|के|and|aur|और)$/.test(lw))continue;
     if(run)flush();
   }
   if(run)flush();
@@ -9358,11 +9395,11 @@ function aiLocalAmt(s){
 }
 function aiEscRe(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 function aiLocal(text,fx){
-  var s=aiDigits(String(text||'')),lo=s.toLowerCase(),o={say:'',actions:[],answer:null,local:true};
-  var amt=aiLocalAmt(s),top=(fx.people[0]&&fx.people[0].s>=0.8)?fx.people[0].x:null;
-  var isJ=/जमा|jama|jma|दिया|दिए|diya|diye|दे ?गय|de ?gay|दे ?दिय|de ?diy|payment|पेमेंट|चुका|chuka|लौटा|lauta|received|paid/i.test(lo);
-  var isU=/उधार|उधर लिख|udhar|udhaar|उधारी|खाते में|khate me|khata me|बाकी लिख|बाक़ी लिख|baki likh|credit/i.test(lo);
-  var isQ=/कितना|कितनी|कितने|kitna|kitni|kitne|क्या|कौन|kaun|कब|kab|कहाँ|कहां|kahan|क्यों|kyon|kyu|बताओ|बताइए|batao|\?|how much|what|report|हाल/i.test(lo);
+  var s=aiDigits(String(text||'')),nrm=aiNorm(text),lo=(s+' ¦ '+nrm).toLowerCase(),o={say:'',actions:[],answer:null,local:true};
+  var amt=aiLocalAmt(s)||aiLocalAmt(nrm),top=(fx.people[0]&&fx.people[0].s>=0.8)?fx.people[0].x:null;
+  var isJ=/जमा|jama|jma|दिया|दिए|diya|diye|दे ?गय|de ?gay|दे ?दिय|de ?diy|payment|पेमेंट|चुका|chuka|लौटा|lauta|received|paid|मिला|मिले/i.test(lo);
+  var isU=/उधार|उधर लिख|udhar|udhaar|उधारी|खाते में|khate me|khata me|बाकी लिख|बाक़ी लिख|baki likh|credit|लेना है/i.test(lo);
+  var isQ=/कितना|कितनी|कितने|kitna|kitni|kitne|क्या|कौन|kaun|कब|kab|कहाँ|कहां|kahan|क्यों|kyon|kyu|बताओ|बताइए|बता दो|batao|bata do|\?|how much|how many|what|which|when|show|total|report|हाल/i.test(lo);
   var ids=function(re,max){var r=[];Object.keys(fx.fb.map).forEach(function(k){if(re.test(fx.fb.map[k].l))r.push(k);});return r.slice(0,max||10);};
  /* स्टाफ/कारीगर (AI के बिना भी): "10000 स्टाफ को दिया" = खर्च (मज़दूरी) */
   if(!isQ&&amt>0&&AI_STAFF.test(lo)){
@@ -9371,7 +9408,7 @@ function aiLocal(text,fx){
   }
   /* सप्लायर (AI के बिना भी): "कृष्णा को 1900 दिया" = पैसा दिया · "कृष्णा को 1900 देना है" = बाकी · "कृष्णा से 1900 का माल आया" = माल */
   var sx=aiSupInText(s),supSaid=supHasGen(s)||/माल|maal|सप्लायर|supplier/i.test(lo);
-  if(!isQ&&sx&&amt>0&&(!top||supSaid||fx.people[0].s<0.95)){
+  if(!isQ&&sx&&amt>0&&(!top||supSaid||fx.people[0].s<0.95||aiOweSaid(text)||/माल|आया/.test(nrm))){   // "X को देना है" / "X से माल आया" — दुकान किसी ग्राहक की देनदार नहीं, ये सप्लायर है
     var owe=aiOweSaid(s),maal=/माल|maal|आया|आए|आयी|आई|aaya|aya|बिल|bill/i.test(lo),paid=aiPaidSaid(s),d0=todayStr();
     var md=/upi|यूपीआई|online|ऑनलाइन|phone ?pe|फोन ?पे|paytm|पेटीएम/i.test(lo)?'online':(/घर से|ghar se/i.test(lo)?'home':'');
     if(owe)o.actions.push({type:'hisaab',date:d0,sup:[{name:sx.n,amount:amt,paid:'later'}]});
@@ -9382,6 +9419,7 @@ function aiLocal(text,fx){
   }
   if(!isQ&&top&&amt>0&&(isJ||isU)){
     var ty=(isJ&&!isU)?'jama':(isU&&!isJ?'udhar':(/जमा|jama/i.test(lo)?'jama':'udhar'));
+    if(ty==='jama'&&AI_KODIYA.test(nrm)&&!AI_TOUS.test(nrm))ty='udhar';   // "रमेश को 500 दिया" / "gave 500 to Ramesh" = उधार
     o.actions.push({type:ty,name:top.name,ref:aiPRef(top),amount:amt,mode:/upi|यूपीआई|online|ऑनलाइन/i.test(lo)?'UPI':(/नकद|cash|कैश/i.test(lo)?'नकद':'')});
     o.say='मैंने ये समझा — जाँचकर ✅ दबाइए।';return o;
   }
@@ -9479,8 +9517,8 @@ function aiHFAfter(m){
   if(m.fallback&&!m.say)p.push('ये बात समझ नहीं आई — नाम, काम और रकम साथ में बोलिए।');
   aiSay(p.join('। '),(m.ask||m.fallback)?function(){aiMic(true);}:null);
 }
-var AI_HF_YES=/^(हाँ|हां|हा|हाँ जी|हां जी|जी|जी हाँ|जी हां|हम्म|ha|haa|haan|han|ji|ji haan|yes|yeah|ok|okay|ओके|ठीक|ठीक है|सही|सही है|बिल्कुल|सेव|सेव करो|सेव कर दो|save|save karo|save kar do|कर दो|करो|लिख दो|लिखो|हाँ सेव करो|हां सेव करो|हाँ कर दो|हां कर दो|हाँ लिख दो|हां लिख दो|हाँ ठीक है|हां ठीक है|हाँ भेजो|खोलो|खोल दो|done)$/i;
-var AI_HF_NO=/^(नहीं|नही|ना|no|nahi|nahin|नो|मत करो|मत|रहने दो|रहने दीजिए|cancel|कैंसल|कैंसिल|हटाओ|हटा दो|छोड़ो|छोड़ दो|नहीं चाहिए|नहीं करना)$/i;
+var AI_HF_YES=/^(yes|yep|yup|sure|save it|do it|correct|right|ha ji|haan ji|यस|डन|सेव इट|करेक्ट|राइट|हाँ|हां|हा|हाँ जी|हां जी|जी|जी हाँ|जी हां|हम्म|ha|haa|haan|han|ji|ji haan|yes|yeah|ok|okay|ओके|ठीक|ठीक है|सही|सही है|बिल्कुल|सेव|सेव करो|सेव कर दो|save|save karo|save kar do|कर दो|करो|लिख दो|लिखो|हाँ सेव करो|हां सेव करो|हाँ कर दो|हां कर दो|हाँ लिख दो|हां लिख दो|हाँ ठीक है|हां ठीक है|हाँ भेजो|खोलो|खोल दो|done)$/i;
+var AI_HF_NO=/^(nope|nah|cancel it|don't|dont|wrong|not now|रॉन्ग|कैंसल करो|नहीं|नही|ना|no|nahi|nahin|नो|मत करो|मत|रहने दो|रहने दीजिए|cancel|कैंसल|कैंसिल|हटाओ|हटा दो|छोड़ो|छोड़ दो|नहीं चाहिए|नहीं करना)$/i;
 var AI_HF_ORD=[/^(पहला|पहले|पहली|पहले वाला|पहला वाला|first|1|एक|ek|pehla|pahla)$/i,/^(दूसरा|दूसरे|दूसरी|दूसरा वाला|second|2|दो|do|dusra)$/i,/^(तीसरा|तीसरे|तीसरी|third|3|तीन|teen|tisra)$/i];
 /* छोटा जवाब फ़ोन ख़ुद संभाले — संभाला तो true (AI को नहीं भेजा) */
 function aiHFReply(text){
