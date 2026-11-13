@@ -760,6 +760,13 @@ label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:p
 .aimode button small{font-size:.76rem;color:var(--muted)}
 .aimode button.on{background:var(--brandband);border-color:var(--brandband);color:var(--on-brand)}
 .aimode button.on small{color:var(--on-brand)}
+.aisupdir{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+.aisupdir .aiq{margin:0 0 2px}
+.aisdr{margin-top:6px}
+.aisdr>b{font-size:.92rem}
+.aidir{margin-top:4px}
+.aidir button{flex:1 1 30%;font-size:.86rem;padding:6px 6px;line-height:1.2}
+.aiundo{margin-left:auto}
 .aich2{margin:4px 0;padding-left:18px;font-size:.92rem}
 .aiwarn{background:#FFF4D6;color:#5E4300;border-radius:8px;padding:6px 9px;font-size:.84rem;margin-top:6px}
 .aibtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -3070,6 +3077,9 @@ function supBal(sid,upto){
   var due=round2(q.reduce(function(t,z){return t+z.v;},0));
   return {bal:round2(due-adv),since:q.length?q[0].d:''};
 }
+/* पिछले N दिन में किस सप्लायर से कितनी बार माल/पैसा — बटन उसी क्रम में */
+function supUse(days){var f=hsKeyAdd(todayStr(),-(days||30)),u={};
+  DLY().forEach(function(e){if(e.d<f)return;glList(e.sm).concat(glList(e.sp)).forEach(function(z){if(z.s)u[z.s]=(u[z.s]||0)+1;});});return u;}
 function supDues(upto){
   return SUP().map(function(s){var b=supBal(s.id,upto);return {id:s.id,n:s.n,bal:b.bal,since:b.since};}).filter(function(x){return x.bal>0.001;}).sort(function(a,b){return b.bal-a.bal;});
 }
@@ -3722,12 +3732,15 @@ function hxPmAuto(){}
 function hxSupChips(withDue){
   var S=ui.hxs,d=S.d,L=supActive().slice();
   var due={};supDues(d).forEach(function(z){due[z.id]=z;});
-  if(withDue)L.sort(function(a,b){return (due[b.id]?due[b.id].bal:0)-(due[a.id]?due[a.id].bal:0);});
+  /* (13 नवंबर 2026, मालिक: "कृष्णा पनीर वाले को हटा दिया") — पहले सिर्फ़ पहले 6 दिखते थे, कृष्णा 7वें पर छिप जाता था।
+     अब 10 तक सब दिखते हैं; क्रम: (पैसा देते समय) जिसका बाकी ज़्यादा, फिर जिससे पिछले 30 दिन में सबसे ज़्यादा लेन-देन */
+  var use=supUse(30);
+  L.sort(function(a,b){return (withDue?(due[b.id]?due[b.id].bal:0)-(due[a.id]?due[a.id].bal:0):0)||(use[b.id]||0)-(use[a.id]||0);});
   if(S.s&&!L.some(function(x){return x.id===S.s;})){var cur=supFind(S.s);if(cur)L.unshift(cur);}
-  var show=S.more?L:L.slice(0,6);if(S.s&&!show.some(function(x){return x.id===S.s;})){var c2=supFind(S.s);if(c2)show=show.concat([c2]);}
+  var show=(S.more||L.length<=10)?L:L.slice(0,8);if(S.s&&!show.some(function(x){return x.id===S.s;})){var c2=supFind(S.s);if(c2)show=show.concat([c2]);}
   return '<p class="hxlbl">किसका</p><div class="hxchips">'+show.map(function(x){var z=due[x.id];
     return '<button type="button" class="'+(S.s===x.id?'on':'')+'" data-act="hx-pick" data-s="'+esc(x.id)+'">'+esc(x.n)+(withDue&&z?'<small>बाकी '+rupee(z.bal)+'</small>':'')+'</button>';}).join('')+
-    (L.length>6?'<button type="button" class="hxmore" data-act="hx-more">'+(S.more?'▴ कम दिखाओ':'▾ सब सप्लायर ('+L.length+')')+'</button>':'')+
+    (L.length>10?'<button type="button" class="hxmore" data-act="hx-more">'+(S.more?'▴ कम दिखाओ':'▾ सब सप्लायर ('+L.length+')')+'</button>':'')+
     '<button type="button" class="hxmore" data-act="sup-new" data-from="hx">+ नया सप्लायर</button></div>';
 }
 function hxSheetRender(first){
@@ -8321,6 +8334,9 @@ function aiFacts(text){
 /* ---------- AI को क्या बताना है (नियम) ---------- */
 function aiSys(){
   var s=state.shop,t=todayStr();
+  /* उदाहरण दुकान के अपने सप्लायरों के नाम से (दूसरी दुकान में उसके नाम आएँगे) */
+  var sa=supActive(),eL=sa.filter(function(z){return z.pay==='later';})[0]||sa[0]||{n:'पनीर वाला'},eN=sa.filter(function(z){return z!==eL&&z.pay!=='later';})[0]||sa.filter(function(z){return z!==eL;})[0]||{n:'दूध वाला'};
+  var exS=eL.n,exB=String(exS).split(/[(·]/)[0].trim()||exS,exAn=eN.n,exA=String(exAn).split(/[(·]/)[0].trim()||exAn;
   return [
 'You are "सहायक", the owner\'s personal accountant and business advisor inside the billing app of a sweet shop in Bihar (Mithila region, India). Think and speak like a senior chartered accountant with 20+ years of experience with small sweet shops: you know where money comes from, where it goes, where it is stuck (customer udhari, unpaid bills, supplier dues), what causes loss and where the profit is, and you give clear, practical, honest advice. The shop does NOT track stock or quantities — supplier goods are recorded only in rupees.',
 'Shop: '+s.name+'. Address: '+s.addr+'. Owner: '+(s.owner||'')+'.',
@@ -8336,8 +8352,11 @@ function aiSys(){
 '3. When the owner asks how to do something in the app, explain the exact taps: नीचे 💰 हिसाब टैब → आज (🚚 माल आया · 💸 सप्लायर को पैसा · 🧾 खर्च · 🏠 घर के लिए · 🍬 क्या बना · 💼 निकाला/डाला · 🌙 दिन बंद करो) · बिक्री (हर दिन की बिक्री अलग, कैश/UPI) · गल्ला (सिर्फ़ कैश: सुबह + आया − गया = रात) · सप्लायर · रिपोर्ट (हफ़्ता/महीना/साल/तारीख़); 📒 उधारी टैब; 🧾 ऑर्डर्स; 🌐 ऑनलाइन; 🧮 कैलकुलेटर हर रकम के बगल में.',
 '',
 'MONEY DIRECTION (very important — never mix these up)',
-'- SUPPLIERS = the SUPPLIERS line, and anyone who sends goods to the shop (दूधवाला, पनीर वाला, कंपनी, एजेंसी, थोक वाला). "X से माल आया / X का माल / X का बिल / X ने माल दिया" → hisaab "sup". "X को दिया / X को पेमेंट किया / X का पैसा चुकाया / X को भेजा / X का हिसाब किया" → hisaab "suppay". NEVER use udhar or jama for a supplier.',
-'- CUSTOMERS: "X ने दिया / X ने जमा किया / X दे गया / X से पैसा मिला" → jama. "X को उधार / X ले गया / X के खाते में लिखो" → udhar.',
+'- SUPPLIERS = the SUPPLIERS line, and anyone who sends goods to the shop (दूधवाला, पनीर वाला, कंपनी, एजेंसी, थोक वाला). "X से माल आया / X का माल / X का बिल / X ने माल दिया" → hisaab "sup". "X को दिया / X को दे दिया / X को पेमेंट किया / X का पैसा चुका दिया / X को भेजा / X का हिसाब कर दिया" → hisaab "suppay". NEVER use udhar or jama for a supplier.',
+'- "देना है" is NOT "दिया". "X को N देना है / X का N बाकी है / X का N उधार है / X को बाद में देंगे / X का पैसा कल देना है / X का N चुकाना है" (X = supplier) means the shop still owes X → hisaab "sup" with paid "later" (goods taken, money due). Use "suppay" ONLY when the owner says the money was actually given (दिया, दे दिया, चुका दिया, भेज दिया, पेमेंट कर दिया, diya, paid). If one sentence has both ("1000 दिया, 900 बाकी"), make one suppay line and one sup line with paid "later".',
+'- Supplier names often come with extra words: "कृष्णा सप्लायर", "कृष्णा पनीर वाला", "पनीर वाले", "Krishna ji" all mean the SUPPLIERS entry whose name contains कृष्णा/पनीर. In sup/suppay "name" copy the exact name from the SUPPLIERS line. Do not invent a new supplier when one on the SUPPLIERS line clearly matches. If two suppliers could match (e.g. "दूध वाला" when several sell milk), ask which one.',
+'- CUSTOMERS: "X ने दिया / X ने जमा किया / X दे गया / X से पैसा मिला" → jama. "X को उधार / X ले गया / X के खाते में लिखो / X से N लेना है / X पर N बाकी है" → udhar (X owes the shop).',
+'- Questions ("X को कितना देना है?", "किसका कितना बाकी है?", "X का हिसाब बताओ") → answer from FACTS (or "need" supplier/person) with NO action.',
 '- If you cannot tell whether X is a supplier or a customer, ask in "ask" (one short question).',
 '- Shop expenses (बिजली, गैस, मज़दूरी, भाड़ा, किराया, मरम्मत, चीनी, मैदा, डिब्बा…) → hisaab "exp". Money taken for the home (घर के लिए, राशन, सब्ज़ी, दवा) → hisaab "home" (not a shop expense). Taken to bank/savings → "out". Put into the upper drawer from home/bank → "gin". Paytm/UPI total of the day → "upi".',
 '- TWO DRAWERS: 🧾 काउंटर (आज का गल्ला) gets the day\'s cash sale; loose change stays there and is never counted, and small counter spends are NOT recorded. 🔝 ऊपर वाला गल्ला holds all saved cash; every recorded payment comes from here. Every night the owner counts only the big notes in the counter and puts them in the upper drawer → "galla" (e.g. "आज 9000 ऊपर डाले", "बड़े नोट 9000"). If he counts the whole upper drawer → "upar". There is no morning count any more — never use "morning". mode for exp/home/suppay/sup: "upar" (default), "online", "home"; leave it empty if not said.',
@@ -8377,6 +8396,16 @@ function aiSys(){
 '- A supplier or purchase bill (दूध-दही-पनीर, मिठाई, नमकीन-बिस्किट, कोल्ड ड्रिंक, चीनी-मैदा-तेल, गैस, डिब्बा-थैली) → one "hisaab" action with "exp" lines (amount = that bill\'s total for each box; note = supplier + main items). date = the bill date if printed, else today.',
 '- A customer\'s slip or list of goods taken on credit → "udhar". An order/booking slip → "order". This shop\'s own printed bill → "order" with now:true.',
 '- Copy numbers exactly. If something is unclear or cut off, use null and say what is unclear in "say".',
+'',
+'EXAMPLES (owner says → actions; supplier names are taken from the SUPPLIERS line)',
+'- "'+exB+' सप्लायर को 1900 रुपया देना है" → {"type":"hisaab","sup":[{"name":"'+exS+'","amount":1900,"paid":"later"}]}',
+'- "'+exB+' को 1900 दे दिया" → {"type":"hisaab","suppay":[{"name":"'+exS+'","amount":1900,"mode":""}]}',
+'- "'+exB+' वाले का 2500 का माल आया, पैसा कल देंगे" → {"type":"hisaab","sup":[{"name":"'+exS+'","amount":2500,"paid":"later"}]}',
+'- "'+exA+' से 1450 का माल आया, पैसा दे दिया" → {"type":"hisaab","sup":[{"name":"'+exAn+'","amount":1450,"paid":"upar"}]}',
+'- "'+exA+' को 2000 फोन पे से भेजा" → {"type":"hisaab","suppay":[{"name":"'+exAn+'","amount":2000,"mode":"online"}]}',
+'- "मोहन 2 किलो रसगुल्ला ले गया, खाते में लिखो" → udhar · "मोहन ने 500 जमा किया" → jama · "मोहन से 700 लेना है" → udhar amount 700',
+'- "बिजली का बिल 1200 दिया" → hisaab exp [{"box":"other","name":"बिजली","amount":1200}] · "घर के लिए 500 लिया" → hisaab home · "आज 9000 ऊपर डाले" → hisaab galla 9000',
+'- "'+exB+' को कितना देना है?" → no action; answer from FACTS (supplier dues).',
 '',
 'FOLLOW-UPS',
 '- PENDING lists actions the owner has not saved yet. If he corrects one ("नहीं, 600", "उसमें 1 किलो पेड़ा भी जोड़ो", "नाम सुरेश है"), return the full corrected action with "replaces": its index.',
@@ -8504,7 +8533,9 @@ function aiUse(model){
 function aiGen(sys,parts,key){
   var T0=Date.now(),LIM=AI.LIM||40000,hasImg=parts.some(function(p){return p&&(p.inlineData||p.inline_data);});
   return aiModelOrder(key).then(function(models){
-    if(!hasImg)models=models.slice().sort(function(a,b){return (/flash-lite/.test(b)?1:0)-(/flash-lite/.test(a)?1:0);});   // सिर्फ़ बात: तेज़ मॉडल पहले
+    /* समझ पहले, रफ़्तार बाद में (13 नवंबर 2026, मालिक: "ठीक से बात नहीं समझ पा रहा") — पूरा flash पहले, flash-lite सिर्फ़ उसके न चलने पर
+       (पहले सिर्फ़ बात पर flash-lite पहले चलता था — तेज़ था, पर "देना है" और "दिया" जैसी बातें गड़बड़ाता था) */
+    models=models.slice().sort(function(a,b){return (/flash-lite|flash-8b/.test(a)?1:0)-(/flash-lite|flash-8b/.test(b)?1:0);});
     var tries=[];
     function attempt(mi,plain,again){
       var left=LIM-(Date.now()-T0);
@@ -8564,7 +8595,16 @@ function aiErrText(e){
 /* ---------- "मैंने ये समझा" कार्ड ---------- */
 var AI_T={udhar:'📒 उधार लिखना',jama:'💰 जमा लिखना',order:'📦 नया ऑर्डर',bill:'🧾 बिल',hisaab:'💰 हिसाब में जोड़ना',remind:'📲 याद दिलाना',phone:'📞 मोबाइल नंबर',budget:'💰 बजट',open:'📂 खोलना'};
 var AI_VIEWS={home:'होम',hisaab:'💰 हिसाब',sale:'💰 हिसाब › बिक्री (हर दिन)',galla:'💰 हिसाब › गल्ला (कैश)',sup:'💰 हिसाब › सप्लायर',month:'💰 हिसाब › रिपोर्ट',khata:'उधारी',orders:'ऑर्डर्स',dues:'सबसे पुराना बाकी',online:'ऑनलाइन',items:'आइटम्स',backup:'बैकअप',shopset:'दुकान सेटिंग (दाम/ख़त्म/ऑनलाइन)',party:'उधारी खाता',customer:'ग्राहक'};
-function aiNewCard(a){
+/* पैसा किस तरफ़ — मालिक की अपनी बात से (AI गलत समझे तब भी): "देना है / बाकी है" = अभी दिया नहीं; "दिया / चुका दिया" = दे दिया
+   (13 नवंबर 2026, मालिक: "कृष्णा सप्लायर को 1900 देना है" बोला तो सहायक ने "1900 दिया" लिख दिया) */
+var AI_OWE=/देना\s*(है|हैं|बा|बाकी|बाक़ी|होगा|होगी|पड़ेगा|पडेगा|रह\s*गया|बचा|अछि)|देने\s*(है|हैं|बाकी|होंगे)|देनी\s*(है|हैं)|चुकाना\s*(है|बाकी)|देबाक|देबा\s*के|बाकी\s*(है|हैं|बा|अछि|रह\s*गया|रखो|लिखो|रखिए|लिखिए|रखना|लिखना|में)|बाक़ी\s*(है|हैं|रखो|लिखो)|बाँकी|बकाया\s*(है|हैं|लिखो|रखो)|उधार\s*(है|पर|में|लिखो|रखो)|पैसा\s*(कल|बाद\s*में)|बाद\s*में\s*(देंगे|देना|दूँगा|दूंगा)|कल\s*(देंगे|दूँगा|दूंगा|देना)|dena\s*(hai|h\b|baki|hoga|padega)|baki\s*(hai|h\b|rakho|likho)|bakaya|baad\s*me\s*(denge|dena)|kal\s*denge/i;
+var AI_PAID=/दिया|दिए|दिये|दे\s*दी|दी\s*है|चुका\s*(दिया|दिए|दी)|चुकाया|चुकता\s*(कर\s*)?(दिया|हो\s*गया)|पेमेंट\s*(कर\s*)?(दिया|दी|किया|हो\s*गया)|भेज\s*(दिया|दिए|दी)|भेजा|देलियै|देलिऐ|देलौं|देलहुँ|देलक|\bdiya\b|\bdiye\b|de\s*diya|chuka\s*diya|chukaya|\bpaid\b|payment\s*(kar\s*)?(diya|kiya|done|kar\s*diya)|bhej\s*diya/i;
+var AI_GET=/लेना\s*(है|हैं|बाकी|बा)|लेने\s*(हैं|है|बाकी)|लेबाक|lena\s*(hai|h\b|baki)/i;
+var AI_GOT=/जमा|दिया|दिए|दे\s*गय|दे\s*दिय|मिला|मिल\s*गया|मिले|आ\s*गया|लौटा|चुका|jama|diya|mila|de\s*gaya/i;
+var AI_NEGPAID=/(नहीं|नही|ना|nahi|nahin)\s*(दिया|दिए|दिये|दी|diya|diye)|(दिया|दिए|दिये|दी|diya|diye)\s*(नहीं|नही|nahi|nahin)/gi;
+function aiPaidSaid(text){var s=aiDigits(String(text||'')).replace(AI_NEGPAID,' ');return AI_PAID.test(s);}
+function aiOweSaid(text){var s0=aiDigits(String(text||'')),neg=s0.search(AI_NEGPAID)>-1,s=s0.replace(AI_NEGPAID,' ');return (AI_OWE.test(s)||neg)&&!AI_PAID.test(s);}
+function aiNewCard(a,said){
   var t=String((a&&a.type)||'').toLowerCase().trim();
   /* AI कभी दूसरे नाम से भेजे तो भी समझो */
   var AL={bill:'order',counter:'order',booking:'order',payment:'jama',paid:'jama',credit:'udhar',udhaar:'udhar',expense:'hisaab',kharch:'hisaab',spend:'hisaab',reminder:'remind',mobile:'phone',navigate:'open'};
@@ -8586,6 +8626,19 @@ function aiNewCard(a){
       }
     }
   }
+  /* "X को देना है / X का बाकी है" — सप्लायर को पैसा दिया नहीं, माल का पैसा बाकी है */
+  if(t==='hisaab'&&said!=null&&aiOweSaid(said)){
+    var mv=0;
+    if(Array.isArray(a.suppay)&&a.suppay.length){
+      if(!Array.isArray(a.sup))a.sup=[];
+      a.suppay.forEach(function(p){if(p)a.sup.push({name:p.name||'',nameEn:p.nameEn||'',amount:p.amount,paid:'later',note:p.note||''});mv++;});
+      a.suppay=[];
+    }
+    (Array.isArray(a.sup)?a.sup:[]).forEach(function(m){if(m&&!/later|बाद|उधार|baad|बाकी/i.test(String(m.paid||''))){m.paid='later';mv++;}});
+    if(mv)a.__owe=1;
+  }
+  /* ग्राहक: "X से 500 लेना है" = उधार (जमा नहीं) */
+  if(t==='jama'&&said!=null){var s0=aiDigits(String(said));if(AI_GET.test(s0)&&!AI_GOT.test(s0.replace(AI_GET,''))){t='udhar';a.type='udhar';a.__get=1;}}
   var c={id:'c'+(++AI.seq),t:t,a:a,st:'open',err:''};
   if(!AI_T[t]){c.st='bad';return c;}
   if(['udhar','jama','order','remind','phone'].indexOf(t)>-1||(t==='open'&&(a.view==='party'||a.view==='customer')))c.pp=aiPP(a,t);
@@ -8649,18 +8702,53 @@ function aiUdAmt(c){return c.lines&&c.lines.length?aiLinesTotal(c.lines):num(c.a
 
 /* --- रात के हिसाब में जोड़ (पुराना भरा हुआ रहता है; खर्च "1200+800" बनकर जुड़ता है) --- */
 var AI_MKMAP={rasgulla:'rg',balushahi:'bs'};
-function aiSupMatch(nm){nm=String(nm||'').trim();if(!nm)return null;var best=null,bs=0;
-  SUP().forEach(function(s){var sc=Math.max(aiNameScore(nm,s.n),aiNameScore(nm,String(s.n).split(/[(·]/)[0].trim()));if(sc>bs){bs=sc;best=s;}});return bs>=0.7?best:null;}
+/* सप्लायर का नाम — "कृष्णा सप्लायर", "कृष्णा पनीर वाला", "Krishna supplier", "पनीर वाले" सब = कृष्णा पनीर
+   (13 नवंबर 2026, मालिक: "कृष्णा सप्लायर को 1900 देना है" — "सप्लायर/वाला/जी/को" जैसे शब्द नाम का हिस्सा नहीं) */
+var SUP_GEN=/^(सप्लायर|सप्लाइयर|सप्लायरों|सप्लाई|supplier|suppliers|suplier|supplyer|supply|वाला|वाले|वाली|वालों|wala|wale|wali|vala|vale|जी|ji|भैया|भईया|भइया|भाई|bhaiya|bhaiyya|bhai|सेठ|seth|साहब|sahab|को|से|का|की|के|ko|se|ka|ki|ke|ने|ne|एजेंसी|agency|दुकान|dukan)$/i;
+function supCore(n){return String(n||'').replace(/[()·,.।!?:;"'’]/g,' ').split(/\s+/).filter(function(w){return w&&!SUP_GEN.test(w);}).join(' ').trim();}
+function supHasGen(n){return String(n||'').replace(/[()·,.]/g,' ').split(/\s+/).some(function(w){return /^(सप्लायर|सप्लाइयर|सप्लाई|supplier|suplier|supplyer|वाला|वाले|wala|wale|vala|vale)$/i.test(w);});}
+/* हर सप्लायर से मेल (0–1): पूरा नाम / पहला हिस्सा / एक-एक शब्द ("कृष्णा" = कृष्णा पनीर का पहला शब्द) */
+function supScoreAll(name,nameEn){
+  var q=[name,supCore(name),nameEn,supCore(nameEn)].filter(function(x){return x&&String(x).trim();});
+  var qw=[];q.forEach(function(x){String(x).split(/\s+/).forEach(function(w){if(w.length>=3&&!SUP_GEN.test(w)&&qw.indexOf(w)<0)qw.push(w);});});
+  var L=SUP().map(function(s){
+    var base=String(s.n).split(/[(·]/)[0].trim(),sc=0;
+    q.forEach(function(x){sc=Math.max(sc,aiNameScore(x,s.n),aiNameScore(x,base));});
+    var bw=supCore(base).split(/\s+/).filter(function(w){return w.length>=3;}),
+        ow=supCore(String(s.n).slice(base.length)).split(/\s+/).filter(function(w){return w.length>=3;});
+    var hit=function(ws){return ws.some(function(b){return qw.some(function(x){return aiNameScore(x,b)>=0.95;});});};
+    return {s:s,sc:sc,bw:hit(bw),ow:hit(ow)};
+  });
+  /* शब्द-मेल तभी पक्का जब सिर्फ़ एक सप्लायर से हो ("दही वाला" = अमृत/अमूल/सुधा — तीनों, तो पूछो) */
+  var nb=L.filter(function(r){return r.bw;}).length,no=L.filter(function(r){return r.ow;}).length;
+  L.forEach(function(r){if(r.bw&&nb===1)r.sc=Math.max(r.sc,0.9);else if(r.ow&&no===1&&!nb)r.sc=Math.max(r.sc,0.86);});
+  var qc=[supCore(name),supCore(nameEn)].filter(Boolean).map(function(x){return x.toLowerCase();});
+  L.forEach(function(r){var b=supCore(String(r.s.n).split(/[(·]/)[0]).toLowerCase();r.ex=!!b&&qc.indexOf(b)>-1;});
+  return L.sort(function(a,b){return b.sc-a.sc||(b.ex?1:0)-(a.ex?1:0);});
+}
+/* सबसे ऊपर वाला पक्का है? — दो सप्लायर बराबर मिलें ("दही वाला" = अमृत/अमूल/सुधा) तो नहीं, जब तक नाम हूबहू न हो */
+function supTopSure(L){return !!L.length&&(L[0].ex||!(L[1]&&L[1].sc>=L[0].sc-0.02));}
+/* बात में कोई सप्लायर का नाम? (सिर्फ़ एक मिले तभी) */
+function aiSupInText(text){
+  var toks=aiDigits(String(text||'')).replace(/[()·,.।!?:;"'’]/g,' ').split(/\s+/).filter(function(w){return w.length>=3&&!SUP_GEN.test(w)&&!/^\d/.test(w);});
+  var best=null,bs=0,n=0;
+  SUP().forEach(function(s){var base=String(s.n).split(/[(·]/)[0].trim(),bw=supCore(base).split(/\s+/).filter(function(w){return w.length>=3;}),sc=0;
+    bw.forEach(function(b){toks.forEach(function(x){sc=Math.max(sc,aiNameScore(x,b));});});
+    if(sc>=0.95){n++;if(sc>bs){bs=sc;best=s;}}});
+  return n===1?best:null;
+}
+function aiSupMatch(nm,nmEn){nm=String(nm||'').trim();if(!nm&&!nmEn)return null;var L=supScoreAll(nm,nmEn);
+  if(!L.length||L[0].sc<0.8||!supTopSure(L))return null;   // दो बराबर मिले — अंदाज़ा नहीं
+  return L[0].s;}
 /* खर्च की लाइन को सप्लायर मानना हो तो पक्का मिलान चाहिए — "मरम्मत" ≠ "अमृत" (10 नवंबर 2026) */
 var AI_EXWORDS=/मरम्मत|बिजली|किराया|किराय|मज़दूरी|मजदूरी|भाड़ा|भाडा|गैस|सिलेंडर|पानी|चाय|नाश्ता|डिब्बा|पैकिंग|तेल|चीनी|मैदा|बेसन|सब्ज़ी|दवा|राशन|पेट्रोल/;
-function aiSupMatchStrict(nm){nm=String(nm||'').trim();if(!nm||AI_EXWORDS.test(nm))return null;var best=null,bs=0;
-  SUP().forEach(function(s){var base=String(s.n).split(/[(·]/)[0].trim(),sc=Math.max(aiNameScore(nm,s.n),aiNameScore(nm,base));if(sc>bs){bs=sc;best=s;}});return bs>=0.88?best:null;}
+function aiSupMatchStrict(nm){nm=String(nm||'').trim();if(!nm||AI_EXWORDS.test(nm))return null;var L=supScoreAll(nm);return L.length&&L[0].sc>=0.88&&supTopSure(L)?L[0].s:null;}
 function aiSupScore(name,nameEn){
-  var best=null,bs=0;
-  SUP().forEach(function(s){var base=String(s.n).split(/[(·]/)[0].trim(),sc=Math.max(aiNameScore(name,s.n),aiNameScore(name,base),nameEn?aiNameScore(nameEn,base):0);
-    if(base.split(/\s+/).some(function(w){return w.length>=3&&String(name||'').indexOf(w)>-1;}))sc=Math.max(sc,0.9);
-    if(sc>bs){bs=sc;best=s;}});
-  return {s:bs,sup:best};
+  var L=supScoreAll(name,nameEn);if(!L.length)return {s:0,sup:null};
+  var sc=L[0].sc;
+  if(!supTopSure(L))sc=Math.min(sc,0.8);           // दो सप्लायर बराबर — पक्का नहीं
+  if(sc>=0.85&&(supHasGen(name)||supHasGen(nameEn)))sc=Math.max(sc,0.97);   // "कृष्णा सप्लायर" — बोला ही सप्लायर
+  return {s:sc,sup:L[0].s};
 }
 function aiPmOf(p,def){p=String(p==null?'':p).toLowerCase();if(!p)return def;return /later|बाद|उधार|baad|udh|बाकी|kal/.test(p)?'':(/online|upi|ऑनलाइन|यूपीआई|phone ?pe|paytm/.test(p)?'u':(/upar|ऊपर|उपर|tijori|तिजोरी|बड़े गल्ल|bade gall|counter|काउंटर/.test(p)?'g':(/home|घर/.test(p)?'h':def)));}
 function aiHsMerge(c){
@@ -8744,6 +8832,33 @@ function aiHsMerge(c){
   return {x:x,ch:ch,w:w};
 }
 
+/* --- सप्लायर वाली लाइन: एक दबाव में सही तरफ़ — 💸 पैसा दिया / ⏳ देना बाकी / 🚚 माल आया + पैसा दिया
+   (13 नवंबर 2026: "देना है" को "दिया" समझ ले तो मालिक ख़ुद ठीक कर सके, ✏️ फ़ॉर्म खोले बिना) --- */
+function aiSupSt(k,e){if(k==='suppay')return 'pay';var sp=aiSupMatch(e.name,e.nameEn);return aiPmOf(e.paid,sp?supDefPm(sp):'g')===''?'due':'maalpaid';}
+function aiSupDirRows(c){
+  var a=(c&&c.a)||{},R=[];
+  ['suppay','sup'].forEach(function(k){(Array.isArray(a[k])?a[k]:[]).forEach(function(e,i){if(e&&aiAmt(e.amount)>0)R.push({k:k,i:i,n:e.name,nEn:e.nameEn,v:aiAmt(e.amount),st:aiSupSt(k,e)});});});
+  return R;
+}
+function aiSupDirHtml(c){
+  var R=aiSupDirRows(c);if(!R.length)return '';
+  var h='<div class="aisupdir"><p class="aiq">'+(R.length>1?'हर सप्लायर के लिए सही वाला चुनिए:':'सही है? नहीं तो सही वाला दबाइए:')+'</p>';
+  R.forEach(function(r){var sp=aiSupMatch(r.n,r.nEn),nm=sp?sp.n:String(r.n||'सप्लायर');
+    h+='<div class="aisdr"><b>'+esc(nm)+' · '+rupee(r.v)+'</b><div class="aimode aidir">'+
+      [['pay','💸 पैसा दिया'],['due','⏳ देना बाकी'],['maalpaid','🚚 माल + पैसा दिया']].map(function(o){
+        return '<button class="'+(r.st===o[0]?'on':'')+'" data-act="ai-supdir" data-c="'+c.id+'" data-k="'+r.k+'" data-i="'+r.i+'" data-v="'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div></div>';});
+  return h+'</div>';
+}
+function aiSupDir(c,k,i,v){
+  var a=c.a||{},L=a[k];if(!Array.isArray(L)||!L[i])return false;
+  var e=L[i];if(aiSupSt(k,e)===v)return false;
+  var md=k==='suppay'?String(e.mode||''):String(e.paid||'');if(/later|बाद|उधार|बाकी|baad/i.test(md))md='';
+  L.splice(i,1);
+  if(v==='pay'){if(!Array.isArray(a.suppay))a.suppay=[];a.suppay.push({name:e.name||'',nameEn:e.nameEn||'',amount:e.amount,mode:md});}
+  else{if(!Array.isArray(a.sup))a.sup=[];a.sup.push({name:e.name||'',nameEn:e.nameEn||'',amount:e.amount,paid:v==='due'?'later':(md||'upar'),note:e.note||''});}
+  a.__owe=0;c.err='';return true;
+}
+
 /* --- चेतावनी (दोहरी एंट्री, रेट, तारीख़) --- */
 function aiWarn(c){
   var w=[],px=aiPX(c),t=todayStr();
@@ -8798,7 +8913,7 @@ function aiCardHtml(c){
   if(c.st==='bad'||c.st==='replaced')return '';
   var px=aiPX(c),body='',acts='',cls='aicard';
   var head='<div class="aich"><span>'+(c.t==='order'&&c.now?AI_T.bill:AI_T[c.t])+'</span>'+(c.st==='saved'?'<span class="aiok">✅ सेव</span>':'')+'</div>';
-  if(c.st==='saved')return '<div class="aicard saved">'+head+aiSavedHtml(c)+'</div>';
+  if(c.st==='saved')return '<div class="aicard saved" id="aic-'+c.id+'">'+head+aiSavedHtml(c)+'</div>';
   if(c.st==='off')return '<div class="aicard off">'+head+'<p class="aiq">❌ हटा दिया</p><div class="aibtns"><button class="btn small" data-act="ai-reopen" data-c="'+c.id+'">वापस लाओ</button></div></div>';
   if(c.st==='form')return '<div class="aicard off">'+head+'<p class="aiq">✏️ फ़ॉर्म में खोला — वहीं Save करें।</p><div class="aibtns"><button class="btn small" data-act="ai-reopen" data-c="'+c.id+'">फिर से कार्ड पर लाओ</button></div></div>';
   if(c.pp)body+=aiPPHtml(c);
@@ -8835,6 +8950,8 @@ function aiCardHtml(c){
     if(c.a&&c.a.__fromSup)body+='<p class="aisub">ℹ️ "'+esc(c.a.__supN)+'" सप्लायर है — इसलिए ये उधारी में नहीं, 💰 हिसाब › सप्लायर में जाएगा।</p>';
     body+='<p class="aisub">तारीख़: <b>'+hsWdOf(c.d)+', '+hsDm(c.d)+'</b>'+(hsGet(c.d)?' — पहले भरे हिसाब में जुड़ेगा':'')+'</p>';
     body+=mg.ch.length?'<ul class="aich2">'+mg.ch.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>':'<p class="aiq">कुछ भरने लायक नहीं मिला — ✏️ से हिसाब खोलिए।</p>';
+    if(c.a&&c.a.__owe)body+='<p class="aisub">ℹ️ आपने "देना है / बाकी" कहा — इसलिए <b>पैसा दिया नहीं</b>, सप्लायर के <b>बाकी</b> में लिखा।</p>';
+    body+=aiSupDirHtml(c);
     mg.w.forEach(function(x){body+='<div class="aiwarn">⚠️ '+esc(x)+'</div>';});
     var ne=hsDraftExp(mg.x),nt=hsDraftTot0(mg.x);
     if(ne||nt)body+='<p class="aisub">इसके बाद उस दिन: बिक्री <b>'+rupee(nt)+'</b> · खर्च <b>'+rupee(ne)+'</b></p>';
@@ -8875,7 +8992,8 @@ function aiSavedHtml(c){
   if(c.t==='order'&&r.oid)h+='<button class="btn primary small" data-act="ai-obill" data-v="'+r.oid+'">📤 बिल भेजो</button><button class="btn small" data-act="ai-gocust" data-v="'+r.cid+'">ग्राहक खोलो</button>';
   if(c.t==='hisaab')h+='<button class="btn small" data-act="ai-gohs" data-v="'+c.d+'">📍 हिसाब › '+(c.d===todayStr()?'आज':hsDm(c.d))+' में देखो →</button>';
   if(c.t==='budget')h+='<button class="btn small" data-act="rp-open" data-p="month" data-g="budget">💰 बजट देखो</button>';
-  return h+'</div>';
+  if(r.undo)h+='<button class="btn small aiundo" data-act="ai-undo" data-c="'+c.id+'">↩️ गलत है — वापस लो</button>';
+  return h+'</div>'+(c.err?'<div class="err">'+esc(c.err)+'</div>':'');
 }
 function aiJamaOpts(px){var o=[];if(px&&px.party)o.push({k:'k',b:partyTotals(px.party.id).bal});if(px&&px.cust)o.push({k:'b',b:customerTotals(px.cust.id).due});return o;}
 function aiJamaTo(c,px){
@@ -8898,6 +9016,29 @@ function aiSaveCard(c){
     try{renderRoute();}catch(e){}
     return true;
   }catch(e){c.err='सेव नहीं हो पाया: '+(e&&e.message||e);return false;}
+}
+/* ↩️ सहायक से सेव हुई एंट्री वापस (गलत समझा हो तो) — पुरानी कॉपी 🗑️ में सुरक्षित, कार्ड फिर खुल जाता है */
+function aiUndo(c){
+  var u=c.res&&c.res.undo;if(!u)return 'ये वापस नहीं हो सकता — उस पेज पर जाकर बदलिए।';
+  if(u.k==='hs'){
+    var e=hsGet(u.d);if(!e)return 'वो हिसाब नहीं मिला।';
+    if(e.at!==u.at)return 'इसके बाद '+hsDm(u.d)+' का हिसाब फिर बदला गया है — 💰 हिसाब › आज में एंट्री के ▸ से हटाइए।';
+    trashPut('सहायक ↩️ वापस',u.d,{day:JSON.parse(JSON.stringify(e))});
+    if(u.snap){Object.keys(e).forEach(function(k){delete e[k];});Object.assign(e,u.snap);}
+    else{var A=DLY(),ix=A.indexOf(e);if(ix>-1)A.splice(ix,1);}
+    (u.ns||[]).forEach(function(id){if(!supLedger(id).length){var L=SUP();for(var i=0;i<L.length;i++)if(L[i].id===id){L.splice(i,1);break;}}});
+    if(ui.hsDraft&&ui.hsDraft.d===u.d)ui.hsDraft=hsDraftFor(u.d);
+  }else if(u.k==='kh'){
+    var E=KH().entries,j=-1;for(var i2=0;i2<E.length;i2++)if(E[i2].id===u.eid){j=i2;break;}
+    if(j<0)return 'वो एंट्री नहीं मिली (पहले ही हटाई गई?)';
+    trashPut('सहायक ↩️ वापस',E[j].date,{kh:E[j]});E.splice(j,1);
+    if(u.made&&!E.some(function(x){return x.partyId===u.pid;})){var P=KH().parties;for(var i3=0;i3<P.length;i3++)if(P[i3].id===u.pid){P.splice(i3,1);break;}}
+  }else if(u.k==='pay'){
+    (u.p||[]).forEach(function(z){var o=state.orders.filter(function(x){return x.id===z.oid;})[0];if(!o)return;
+      for(var i4=0;i4<o.payments.length;i4++)if(o.payments[i4].id===z.pid){trashPut('सहायक ↩️ वापस',o.payments[i4].date,{pay:o.payments[i4],oid:o.id});o.payments.splice(i4,1);break;}});
+  }else return 'ये वापस नहीं हो सकता।';
+  save();c.st='open';c.res=null;c.err='';
+  return '';
 }
 function aiPartyFor(px){   // उधारी खाता — नहीं है तो बनाओ (ग्राहक का नाम/नंबर लेकर)
   if(px.party)return {p:px.party};
@@ -8930,7 +9071,7 @@ function aiSaveK(c,ty){
   if(items.length)ne.items=items;
   KH().entries.push(ne);
   var bal=partyTotals(pr.p.id).bal;
-  return {eid:ne.id,pid:pr.p.id,msg:(ty==='u'?'उधार लिखा गया':'जमा हो गया')+' — '+pr.p.name+' '+rupee(amt)+' · अब '+(bal>0?'बकाया '+rupee(bal):(bal<0?rupee(-bal)+' एडवांस':'हिसाब साफ़ ✓'))+(pr.made?' (नया खाता बना)':'')};
+  return {eid:ne.id,pid:pr.p.id,undo:{k:'kh',eid:ne.id,pid:pr.p.id,made:!!pr.made},msg:(ty==='u'?'उधार लिखा गया':'जमा हो गया')+' — '+pr.p.name+' '+rupee(amt)+' · अब '+(bal>0?'बकाया '+rupee(bal):(bal<0?rupee(-bal)+' एडवांस':'हिसाब साफ़ ✓'))+(pr.made?' (नया खाता बना)':'')};
 }
 function aiSaveJama(c){
   var px=aiPX(c);if(!px)return {err:'किसने जमा किया — नाम चुनिए।'};
@@ -8943,8 +9084,9 @@ function aiSaveJama(c){
   if(amt>tot+0.001)return {err:'बिल का कुल बाकी सिर्फ़ '+rupee(tot)+' है — इससे ज़्यादा नहीं ले सकते।'};
   var dk=c.date||todayStr();if(dk>todayStr())return {err:'आगे की तारीख़ नहीं लिख सकते।'};
   var rem=amt,n=0,note=c.mode?'जमा — '+c.mode:'एक साथ जमा';
-  el.forEach(function(o){if(rem<=0.001)return;var take=round2(Math.min(rem,orderDue(o)));if(take>0){o.payments.push({id:uid(),amount:take,date:dk,note:note});rem=round2(rem-take);n++;}});
-  return {cid:px.cust.id,msg:rupee(amt)+' जमा हो गया — '+px.cust.name+(n>1?' ('+n+' ऑर्डर में बँटा)':'')+' · अब बिल बाकी '+rupee(customerTotals(px.cust.id).due)};
+  var paidL=[];
+  el.forEach(function(o){if(rem<=0.001)return;var take=round2(Math.min(rem,orderDue(o)));if(take>0){var py={id:uid(),amount:take,date:dk,note:note};o.payments.push(py);paidL.push({oid:o.id,pid:py.id});rem=round2(rem-take);n++;}});
+  return {cid:px.cust.id,undo:{k:'pay',p:paidL},msg:rupee(amt)+' जमा हो गया — '+px.cust.name+(n>1?' ('+n+' ऑर्डर में बँटा)':'')+' · अब बिल बाकी '+rupee(customerTotals(px.cust.id).due)};
 }
 function aiSaveOrder(c){
   var px=aiPX(c);if(!px)return {err:'ग्राहक का नाम चुनिए।'};
@@ -8966,10 +9108,14 @@ function aiSaveOrder(c){
 function aiSaveHs(c){
   if(c.d>todayStr())return {err:'आगे की तारीख़ का हिसाब नहीं भर सकते।'};
   var mg=aiHsMerge(c);if(!mg.ch.length)return {err:'भरने लायक कुछ नहीं मिला।'};
+  var old=hsGet(c.d),snap=old?JSON.parse(JSON.stringify(old)):null,sup0=SUP().map(function(z){return z.id;});
   var r=hsSaveDraft(mg.x);if(r.err)return {err:r.err};
   if(ui.view==='hisaab'&&ui.hsDraft&&ui.hsDraft.d===c.d)ui.hsDraft=hsDraftFor(c.d);
   var e=hsGet(c.d);
-  return {msg:hsDm(c.d)+' का हिसाब '+(r.old?'अपडेट':'सेव')+' — बिक्री '+rupee(hsTot(e))+(hsExp(e)?' · खर्च '+rupee(hsExp(e)):'')};
+  /* जिस सप्लायर का लिखा, वो "हटाए हुए" में हो तो फिर से लिस्ट में */
+  glList(e.sm).concat(glList(e.sp)).forEach(function(z){var s0=z.s?supFind(z.s):null;if(s0&&s0.on===false)s0.on=true;});
+  var ns=SUP().filter(function(z){return sup0.indexOf(z.id)<0;}).map(function(z){return z.id;});
+  return {undo:{k:'hs',d:c.d,snap:snap,at:e.at,ns:ns},msg:hsDm(c.d)+' का हिसाब '+(r.old?'अपडेट':'सेव')+' — बिक्री '+rupee(hsTot(e))+(hsExp(e)?' · खर्च '+rupee(hsExp(e)):'')};
 }
 function aiSavePhone(c){
   var px=aiPX(c);if(!px||px.isNew)return {err:'किसका नंबर — नाम चुनिए।'};
@@ -9103,10 +9249,14 @@ function aiHandle(o,fx,note,text){
   var pend=aiPending();
   (Array.isArray(o.actions)?o.actions:[]).slice(0,8).forEach(function(a){
     if(!a||typeof a!=='object')return;
-    var c=aiNewCard(a);if(c.st==='bad')return;
+    var c=aiNewCard(a,text||'');if(c.st==='bad')return;
     var ri=a.replaces;if(ri!=null&&ri!==''&&pend[+ri])pend[+ri].st='replaced';
     m.cards.push(c);
   });
+  /* फ़ोन ने "दिया" को "देना बाकी" में बदला — AI की लाइन ("… को ₹1900 दिया") कार्ड से उलटी न दिखे/बोली जाए */
+  var ow=m.cards.filter(function(c){return c.a&&c.a.__owe;});
+  if(ow.length){var on=[];ow.forEach(function(c){(c.a.sup||[]).forEach(function(z){if(!z)return;var sp=aiSupMatch(z.name,z.nameEn),n=(sp?sp.n:String(z.name||''))+' के '+rupee(aiAmt(z.amount));if(on.indexOf(n)<0)on.push(n);});});
+    m.say='आपने "देना है / बाकी" कहा — इसलिए '+on.join(', ')+' सप्लायर के बाकी में लिख रहा हूँ (पैसा दिया नहीं)। जाँचकर ✅ दबाइए।';}
   /* कार्ड में दिखे नंबर (फोटो/बात से पढ़ी रकम, सामान का जोड़) — मालिक ✅ से पहले ख़ुद देखता है, इसलिए इन पर ⚠️ नहीं */
   m.cards.forEach(function(c){
     var cn=function(v){var n=round2(num(v));if(n>0)m.unums[String(n)]=1;};
@@ -9161,6 +9311,17 @@ function aiLocal(text,fx){
   var isU=/उधार|उधर लिख|udhar|udhaar|उधारी|खाते में|khate me|khata me|बाकी लिख|बाक़ी लिख|baki likh|credit/i.test(lo);
   var isQ=/कितना|कितनी|कितने|kitna|kitni|kitne|क्या|कौन|kaun|कब|kab|कहाँ|कहां|kahan|क्यों|kyon|kyu|बताओ|बताइए|batao|\?|how much|what|report|हाल/i.test(lo);
   var ids=function(re,max){var r=[];Object.keys(fx.fb.map).forEach(function(k){if(re.test(fx.fb.map[k].l))r.push(k);});return r.slice(0,max||10);};
+  /* सप्लायर (AI के बिना भी): "कृष्णा को 1900 दिया" = पैसा दिया · "कृष्णा को 1900 देना है" = बाकी · "कृष्णा से 1900 का माल आया" = माल */
+  var sx=aiSupInText(s),supSaid=supHasGen(s)||/माल|maal|सप्लायर|supplier/i.test(lo);
+  if(!isQ&&sx&&amt>0&&(!top||supSaid||fx.people[0].s<0.95)){
+    var owe=aiOweSaid(s),maal=/माल|maal|आया|आए|आयी|आई|aaya|aya|बिल|bill/i.test(lo),paid=aiPaidSaid(s),d0=todayStr();
+    var md=/upi|यूपीआई|online|ऑनलाइन|phone ?pe|फोन ?पे|paytm|पेटीएम/i.test(lo)?'online':(/घर से|ghar se/i.test(lo)?'home':'');
+    if(owe)o.actions.push({type:'hisaab',date:d0,sup:[{name:sx.n,amount:amt,paid:'later'}]});
+    else if(maal)o.actions.push({type:'hisaab',date:d0,sup:[{name:sx.n,amount:amt,paid:paid?(md||'upar'):''}]});
+    else if(paid)o.actions.push({type:'hisaab',date:d0,suppay:[{name:sx.n,amount:amt,mode:md}]});
+    if(o.actions.length){o.say='मैंने ये समझा ('+sx.n+') — जाँचकर ✅ दबाइए। उल्टा हो तो कार्ड में बटन से बदलिए।';return o;}
+    o.say=sx.n+' — '+rupee(amt)+' समझ आया। माल आया, पैसा दिया, या देना बाकी है? साफ़ बोलिए।';o.fallback=true;return o;
+  }
   if(!isQ&&top&&amt>0&&(isJ||isU)){
     var ty=(isJ&&!isU)?'jama':(isU&&!isJ?'udhar':(/जमा|jama/i.test(lo)?'jama':'udhar'));
     o.actions.push({type:ty,name:top.name,ref:aiPRef(top),amount:amt,mode:/upi|यूपीआई|online|ऑनलाइन/i.test(lo)?'UPI':(/नकद|cash|कैश/i.test(lo)?'नकद':'')});
@@ -9285,6 +9446,10 @@ function aiHFReply(text){
     else if(/बिल|ऑर्डर|आर्डर|bill|order/i.test(t))c.to='b';
     else return false;
     c.err='';ok=true;
+  }else if(c.t==='hisaab'&&aiSupDirRows(c).length===1&&(aiOweSaid(t)||aiPaidSaid(t)||/^(नहीं\s*)?(बाकी|बाक़ी|उधार|baki|udhar)(\s*(है|हैं|लिखो|रखो))?$/i.test(t))){
+    /* "नहीं, देना है" / "बाकी" / "दे दिया" — सप्लायर की तरफ़ बदलो, फिर "सेव करूँ?" */
+    var r0=aiSupDirRows(c)[0],owe0=aiOweSaid(t)||(/बाकी|बाक़ी|उधार|baki|udhar/i.test(t)&&!aiPaidSaid(t)),dv=owe0?'due':(/माल|maal/i.test(t)?'maalpaid':'pay');
+    aiSupDir(c,r0.k,r0.i,dv);ok=true;say=dv==='due'?'ठीक है — देना बाकी।':(dv==='pay'?'ठीक है — पैसा दिया।':'ठीक है — माल आया और पैसा दिया।');
   }else if(AI_HF_NO.test(t)){
     c.st='off';ok=true;say='ठीक है, रहने दिया।';
   }else if(AI_HF_YES.test(t)){
@@ -9460,6 +9625,8 @@ function aiVocab(){
   var w={};var addW=function(t){String(t||'').toLowerCase().split(/[\s,()/.-]+/).forEach(function(x){if(x.length>1)w[x]=1;});};
   try{state.items.forEach(function(x){addW(displayName(x));});}catch(e){}
   try{aiPeopleAll().forEach(function(x){addW(x.name);});}catch(e){}
+  try{SUP().forEach(function(x){addW(x.n);});}catch(e){}
+  'सप्लायर माल आया दिया देना है दे पैसा पेमेंट चुका बाकी पनीर दूध दही घर ऊपर गल्ले'.split(' ').forEach(addW);
   'उधार उधारी जमा बाकी बिल ऑर्डर एडवांस डिलीवरी हिसाब खर्च गल्ला नकद upi किलो पाव आधा पीस पैकेट लीटर डिब्बा रुपये रुपया कल परसों आज सुबह शाम'.split(' ').forEach(addW);
   AI.vocab={at:Date.now(),w:w};return w;
 }
@@ -9760,6 +9927,8 @@ function aiClick(t,act){
     case 'ai-edit':if(c&&c.st==='open')aiEditCard(c);return true;
     case 'ai-off':if(c){c.st='off';aiRender();}return true;
     case 'ai-reopen':if(c){c.st='open';c.err='';aiRender();}return true;
+    case 'ai-supdir':if(c&&c.st==='open'&&aiSupDir(c,t.getAttribute('data-k'),+t.getAttribute('data-i'),v))aiRender();return true;
+    case 'ai-undo':if(c&&c.st==='saved'){var ue=aiUndo(c);if(ue){c.err=ue;toast(ue);}else toast('↩️ हटा दिया — कार्ड फिर खुला है, ठीक करके ✅ दबाइए');try{renderRoute();}catch(e){}aiRender();}return true;
     case 'ai-go':if(c)aiGoCard(c);return true;
     case 'ai-pp':if(c&&c.pp){c.pp.pick=v||'';c.pp.open=false;c.to='';if(v==='new'&&!c.pp.nn)c.pp.nn=c.pp.srch||c.pp.q;c.err='';aiRender();}return true;
     case 'ai-pp-chg':if(c&&c.pp){c.pp.open=true;aiRender();}return true;
