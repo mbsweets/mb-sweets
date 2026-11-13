@@ -8374,6 +8374,9 @@ function aiSys(){
 '- TWO DRAWERS: 🧾 काउंटर (आज का गल्ला) gets the day\'s cash sale; loose change stays there and is never counted, and small counter spends are NOT recorded. 🔝 ऊपर वाला गल्ला holds all saved cash; every recorded payment comes from here. Every night the owner counts only the big notes in the counter and puts them in the upper drawer → "galla" (e.g. "आज 9000 ऊपर डाले", "बड़े नोट 9000"). If he counts the whole upper drawer → "upar". There is no morning count any more — never use "morning". mode for exp/home/suppay/sup: "upar" (default), "online", "home"; leave it empty if not said.',
 '- Udhari money received (cash or UPI) counts in that day\'s sale (owner\'s rule) — but it is still recorded as "jama" in the khata, never as hisaab.',
 '- One spoken entry during the day = one hisaab action with only that field. Each sup/suppay/exp/home line becomes its own row.',
+'- ENTRY or QUESTION: a sentence that gives amounts ("आज की बिक्री 10,000 UPI और 10,000 कैश", "aaj ki sale upi 5200 cash 9000", "today sale UPI 10000 cash 10000") is an ENTRY — return the action and do NOT give an answer/report. Answer only when the owner asks (कितना, कितनी, क्या, कौन, बताओ, दिखाओ, how much, show, ?). Never reply to an entry with a report of the whole account.',
+'- SALE of the day: UPI / Paytm / PhonePe / online total → "upi"; cash sale / कैश / नकद / बड़े नोट ऊपर डाले → "galla" (in this shop the cash sale IS the big notes moved to the upper drawer). If he says only a total sale without the split, ask "कितना UPI, कितना कैश?".',
+'- NUMBERS: copy the owner\'s number exactly — never multiply, never add zeros. Indian commas: 10,280 = 10280 · 1,00,000 = 100000 · 12,80,000 = 1280000. Spoken: दस हज़ार दो सौ अस्सी = 10 हज़ार 280 = 10280 · साढ़े तीन हज़ार = 3500 · पौने दो हज़ार = 1750 · ढाई सौ = 250. If a number is unclear, ask instead of guessing.',
 '',
 'TRUTH RULES (most important)',
 '- Use ONLY the FACTS, ITEMS and PEOPLE given by the app, plus what the owner said. Never invent a number, name, date, bill or record.',
@@ -8417,6 +8420,8 @@ function aiSys(){
 '- "'+exA+' को 2000 फोन पे से भेजा" → {"type":"hisaab","suppay":[{"name":"'+exAn+'","amount":2000,"mode":"online"}]}',
 '- "मोहन 2 किलो रसगुल्ला ले गया, खाते में लिखो" → udhar · "मोहन ने 500 जमा किया" → jama · "मोहन से 700 लेना है" → udhar amount 700',
 '- "बिजली का बिल 1200 दिया" → hisaab exp [{"box":"other","name":"बिजली","amount":1200}] · "घर के लिए 500 लिया" → hisaab home · "आज 9000 ऊपर डाले" → hisaab galla 9000',
+'- "आज की बिक्री 10,000 UPI और 10,000 कैश" = "aaj ki sale 10k upi 10k cash" = "today sale UPI 10000 cash 10000" → {"type":"hisaab","upi":10000,"galla":10000} (no answer) · "आज कितनी बिक्री हुई?" → answer only',
+'- "कृष्णा को 10,280 दिया" → suppay amount 10280 (not 1028000)',
 '- "10000 स्टाफ को दिया" → {"type":"hisaab","exp":[{"box":"other","name":"मज़दूरी","amount":10000,"note":"स्टाफ"}]} · "कारीगर राजू को 3000 पगार दी" → same with note "राजू" (no PEOPLE, no udhar/jama)',
 '- "मोहन को 500 दे दिया" → udhar 500 for मोहन · "मोहन ने 500 दिया" → jama 500 from मोहन',
 '- Hinglish / English say the same: "krishna ko 1900 dena hai" = "need to pay Krishna 1900" = "Krishna 1900 due" → sup paid "later" · "krishna ko 1900 de diya" = "paid 1900 to Krishna" → suppay · "ramesh ne 500 jama kiya upi se" = "Ramesh paid 500 by UPI" = "received 500 from Ramesh on UPI" → jama 500 UPI · "ramesh ko 2 kilo rasgulla udhaar" = "give Ramesh 2 kg rasgulla on credit" → udhar · "10k staff ko diya" = "paid staff salary 10000" → exp मज़दूरी 10000 · "aaj upi 5200" = "today UPI total 5200" → hisaab upi',
@@ -8633,7 +8638,9 @@ var AI_NORM=[
   [/\b(i|we|maine|mainne|humne|hamne)\b/gi,' मैंने '],
   [/\b(rupees|rupee|rupaye|rupaiya|rupay|rs|inr)\b\.?/gi,' रुपये '],
   [/\b(phone\s*pe|phonepe|paytm|g\s*pay|gpay|google\s*pay|upi|online)\b/gi,' ऑनलाइन '],
-  [/\b(cash|nakad|nagad)\b/gi,' नकद '],
+  [/\b(cash|nakad|nagad|naqad)\b/gi,' नकद '],
+  [/\b(galla|galle|gallaa|galley|gulla)\b/gi,' गल्ले '],[/\bupar\b/gi,' ऊपर '],[/\bbade?\s*notes?\b/gi,' बड़े नोट '],
+  [/\b(bikri|bikree|bikari|sale|sales|selling)\b/gi,' बिक्री '],
   [/\b(thousand|hazar|hazaar|hajar)\b/gi,' हज़ार '],[/\b(hundred|sau)\b/gi,' सौ '],[/\b(lakh|lac|lakhs)\b/gi,' लाख '],
   /* आवाज़ से इंग्लिश शब्द देवनागरी में आते हैं */
   [/पेड\s*(किया|कर\s*दिया|कर\s*दी|हो\s*गया)?|पैड\s*कर\s*दिया|पेमेंट\s*(किया|कर\s*दिया|कर\s*दी|हो\s*गया|भेज\s*दिया)|ट्रांसफर\s*(किया|कर\s*दिया)|क्लियर\s*(किया|कर\s*दिया)/g,' दिया '],
@@ -8828,8 +8835,10 @@ function aiSupScore(name,nameEn){
 function aiPmOf(p,def){p=String(p==null?'':p).toLowerCase();if(!p)return def;return /later|बाद|उधार|baad|udh|बाकी|kal/.test(p)?'':(/online|upi|ऑनलाइन|यूपीआई|phone ?pe|paytm/.test(p)?'u':(/upar|ऊपर|उपर|tijori|तिजोरी|बड़े गल्ल|bade gall|counter|काउंटर/.test(p)?'g':(/home|घर/.test(p)?'h':def)));}
 function aiHsMerge(c){
   var a=c.a||{},d=c.d,x=hsDraftFor(d),ch=[],w=[];
-  if(x.gm&&a.cash!=null&&a.cash!==''&&(a.galla==null||a.galla===''))w.push('गल्ला मिलान वाले दिन "गल्ले में बढ़ा" नहीं लिखते — रात को गल्ले में कुल कितना गिना, वो बताइए');
-  [['upi','UPI बिक्री'],['cash','गल्ले में बढ़ा'],['out',x.gm?'💼 निकाला (बैंक/बचत)':'गल्ले से निकाला'],['rg','रसगुल्ला बना (लीटर दूध)'],['bs','बालूशाही बनी (किलो)']].forEach(function(f){
+  /* दो-गल्ले वाले दिन "कैश बिक्री" = रात को ऊपर डाले बड़े नोट (galla) — AI "cash" भेजे तो वही (13 नवंबर 2026: "आज की बिक्री 10,000 UPI और 10,000 कैश") */
+  if(x.gm&&a.cash!=null&&a.cash!==''&&(a.galla==null||a.galla==='')){a=Object.assign({},a,{galla:a.cash,cash:''});}
+  if(false)w.push('गल्ला मिलान वाले दिन "गल्ले में बढ़ा" नहीं लिखते — रात को गल्ले में कुल कितना गिना, वो बताइए');
+  [['upi','📱 UPI बिक्री'],['cash','गल्ले में बढ़ा'],['out',x.gm?'💼 निकाला (बैंक/बचत)':'गल्ले से निकाला'],['rg','रसगुल्ला बना (लीटर दूध)'],['bs','बालूशाही बनी (किलो)']].forEach(function(f){
     var v=a[f[0]];if(v==null||v==='')return;if(x.gm&&f[0]==='cash')return;v=num(aiDigits(String(v)).replace(/[,₹\s]/g,''));if(!(v>=0))return;
     if(x.gm&&f[0]==='out'){if(!(v>0))return;var o1=num(x.out);x.out=String(round2(o1+v));ch.push('💼 निकाला (बैंक/बचत): + '+rupee(v)+(o1?' (आज कुल '+rupee(round2(o1+v))+')':''));return;}
     var old=String(x[f[0]]||'');x[f[0]]=String(round2(v));
@@ -8875,7 +8884,7 @@ function aiHsMerge(c){
   });
   if(x.gm){
     if(a.morning!=null&&a.morning!=='')w.push('सुबह का गल्ला अब नहीं लिखते — छुट्टा काउंटर में ही रहता है। रात को बड़े नोट गिनकर "ऊपर डाले" लिखिए।');
-    [['galla','gc','🔝 काउंटर से ऊपर डाले (बड़े नोट)'],['upar','uc','🔢 ऊपर वाला गल्ला गिना (कुल)']].forEach(function(f){
+    [['galla','gc','💵 कैश बिक्री (बड़े नोट ऊपर डाले)'],['upar','uc','🔢 ऊपर वाला गल्ला गिना (कुल)']].forEach(function(f){
       var v=a[f[0]];if(v==null||v==='')return;v=num(aiDigits(String(v)).replace(/[,₹\s]/g,''));if(!(v>=0))return;
       var old=String(x[f[1]]||'');x[f[1]]=String(round2(v));ch.push(f[2]+': '+(old!==''&&num(old)!==round2(v)?rupee(old)+' → ':'')+rupee(v)+(old!==''&&num(old)===round2(v)?' (पहले से यही)':''));});
     if(a.gin!=null&&a.gin!==''){var gv=num(aiDigits(String(a.gin)).replace(/[,₹\s]/g,''));if(gv>0){var g1=num(x.gin);x.gin=String(round2(g1+gv));ch.push('➕ ऊपर वाले गल्ले में डाला: + '+rupee(gv)+(g1?' (आज कुल '+rupee(round2(g1+gv))+')':''));}}
@@ -8950,6 +8959,8 @@ function aiWarn(c){
     if(!c.wtSaid)w.push('समय नहीं बोला — '+c.wt+' रखा है, नीचे बदल सकते हैं');
     if(px&&px.cust&&c.wd){var same=customerOrders(px.cust.id).filter(function(o){return !o.cancelled&&dayKey(o.date)===c.wd;});if(same.length)w.push('इसी दिन '+px.name+' का ऑर्डर #'+same.map(function(o){return o.no;}).join(', #')+' पहले से है');}
   }
+  if(c.amtFix)w.push('रकम आपकी बात से ठीक की: '+c.amtFix.join(', ')+' — जाँच लें');
+  if(c.amtWarn)w.push(c.amtWarn.join(', ')+' — ये रकम आपकी बात में नहीं मिली, ध्यान से जाँचें');
   if(c.noName)w.push('"'+c.noName+'" — ये नाम आपकी बात में नहीं था, इसलिए अपने-आप नहीं चुना। किसका है? ऊपर से चुनिए या नया नाम लिखिए।');
   if(c.pp&&c.pp.pick==='new'&&c.pp.list.length){var b=aiPByRef(c.pp.list[0].ref);if(b&&c.pp.list[0].s>=0.6)w.push('मिलता-जुलता नाम पहले से है: '+b.name+' — वही हों तो ऊपर से चुनिए');}
   return w;
@@ -9324,7 +9335,40 @@ function aiNeed(fx,n){
     }
   }
 }
+/* कार्ड की रकम = आपकी बोली रकम? (13 नवंबर 2026: "10,280" बोला तो 12,80,000 लिख दिया) — न मिले तो आपकी बात वाली रकम, या ⚠️ */
+function aiAmtGuard(c,text){
+  var L=aiAmtList(text).concat(aiAmtList(aiNorm(text)));
+  var raw=aiDigits(String(text||'')).match(/\d+/g)||[];      // "10 280" जैसे टूटे अंक भी जोड़कर
+  for(var i=0;i+1<raw.length;i++)L.push(+(raw[i]+raw[i+1]));
+  if(!L.length)return;
+  var B=aiAmtList(text),D=[];   // "15000 की बिक्री, 6000 UPI बाकी कैश" → कैश 9000 = अंतर/जोड़ भी सही
+  for(var x=0;x<B.length;x++)for(var y=x+1;y<B.length;y++){D.push(B[x]+B[y]);D.push(Math.abs(B[x]-B[y]));}
+  var has=function(v){return L.concat(D).some(function(n){return Math.abs(n-v)<0.51;});};
+  var slots=[];   // [get, set, label]
+  var A=c.a||{};
+  if((c.t==='jama'||(c.t==='udhar'&&!(c.lines&&c.lines.length)))&&num(c.amount)>0)slots.push([function(){return num(c.amount);},function(v){c.amount=v;c.said=v;},'रकम']);
+  if(c.t==='hisaab'){
+    ['upi','galla','upar','gin','out','cash'].forEach(function(k){var v=A[k];if(v!=null&&v!==''&&!/\+/.test(String(v))&&aiAmt(v)>0)slots.push([function(){return aiAmt(A[k]);},function(n){A[k]=n;},k]);});
+    ['exp','sup','suppay','home'].forEach(function(k){(Array.isArray(A[k])?A[k]:[]).forEach(function(e){if(e&&e.amount!=null&&!/\+/.test(String(e.amount))&&aiAmt(e.amount)>0)slots.push([function(){return aiAmt(e.amount);},function(n){e.amount=n;},k]);});});
+  }
+  var bad=slots.filter(function(sl){return !has(sl[0]());});
+  if(!bad.length)return;
+  var used=slots.filter(function(sl){return has(sl[0]());}).map(function(sl){return sl[0]();});
+  var free=aiAmtList(text).filter(function(n){var k=used.indexOf(n);if(k>-1){used.splice(k,1);return false;}return true;});
+  bad.forEach(function(sl){
+    var v=sl[0](),sv=String(Math.round(v)),pick=null;
+    var near=free.filter(function(n){var sn=String(Math.round(n));return sn.length>=3&&(sv.indexOf(sn)>-1||sn.indexOf(sv)>-1||[10,100,1000,10000].some(function(f){return Math.abs(n*f-v)<0.51||Math.abs(v*f-n)<0.51;}));});
+    if(near.length===1)pick=near[0];else if(free.length===1&&bad.length===1)pick=free[0];
+    if(pick!=null){sl[1](pick);free.splice(free.indexOf(pick),1);(c.amtFix=c.amtFix||[]).push(rupee(v)+' → '+rupee(pick));}
+    else (c.amtWarn=c.amtWarn||[]).push(rupee(v));
+  });
+}
 function aiHandle(o,fx,note,text){
+  /* बात में रकम है और सवाल नहीं — AI ने कुछ लिखा ही नहीं (सिर्फ़ जवाब/हिसाब) तो फ़ोन ख़ुद लिखे */
+  if(o&&!o.local&&!(Array.isArray(o.actions)&&o.actions.length)&&text&&!(AI.s.curImgs>0)&&!aiIsQ(text)&&(aiLocalAmt(text)||aiLocalAmt(aiNorm(text)))>0){
+    try{var lo2=aiLocal(text,fx);if(lo2.actions&&lo2.actions.length)o={say:lo2.say,actions:lo2.actions,__m:o.__m,__entry:1};
+      else if(lo2.ask&&/बिक्री/.test(lo2.ask))o={say:'',ask:lo2.ask,actions:[],__m:o.__m,__entry:1};}catch(e){}
+  }
   var m={r:'a',say:String(o.say||'').trim().slice(0,600),cards:[],note:note||'',ask:o.ask?String(o.ask).slice(0,300):'',model:o.__m||'',fallback:!!o.fallback,nums:fx.fb.nums,unums:{}};
   aiNumsOf(text||'').forEach(function(n){m.unums[n]=1;});
   var pend=aiPending();
@@ -9334,6 +9378,7 @@ function aiHandle(o,fx,note,text){
     var ri=a.replaces;if(ri!=null&&ri!==''&&pend[+ri])pend[+ri].st='replaced';
     m.cards.push(c);
   });
+  if(text&&!(AI.s.curImgs>0))m.cards.forEach(function(c){aiAmtGuard(c,text);});
   /* फ़ोन ने "दिया" को "देना बाकी" में बदला — AI की लाइन ("… को ₹1900 दिया") कार्ड से उलटी न दिखे/बोली जाए */
   var ow=m.cards.filter(function(c){return c.a&&c.a.__owe;});
   if(ow.length){var on=[];ow.forEach(function(c){(c.a.sup||[]).forEach(function(z){if(!z)return;var sp=aiSupMatch(z.name,z.nameEn),n=(sp?sp.n:String(z.name||''))+' के '+rupee(aiAmt(z.amount));if(on.indexOf(n)<0)on.push(n);});});
@@ -9355,6 +9400,8 @@ function aiHandle(o,fx,note,text){
     if(c.t==='hisaab'&&c.a)['sup','suppay','home'].forEach(function(k){if(Array.isArray(c.a[k]))c.a[k].forEach(function(e){var v=hsSum(aiDigits(String(e&&e.amount!=null?e.amount:'')));if(v>0)cn(v);});});
     if(c.t==='hisaab'&&c.a)['galla','upar','gin'].forEach(function(k){if(c.a[k]!=null)cn(aiDigits(String(c.a[k])).replace(/[,₹\s]/g,''));});
   });
+  /* लिखने वाली बात (सवाल नहीं) पर कार्ड बना — तो पूरा हिसाब/रिपोर्ट मत सुनाओ */
+  if(m.cards.length&&text&&!aiIsQ(text))o.answer=null;
   if(o.answer&&typeof o.answer==='object'){
     var ids=(Array.isArray(o.answer.facts)?o.answer.facts:[]).map(function(x){return String(x).trim();}).filter(function(id,i,arr){return fx.fb.map[id]&&arr.indexOf(id)===i;});
     m.ans={head:String(o.answer.head||'').trim().slice(0,500),rows:ids.slice(0,12).map(function(id){return fx.fb.map[id];}),
@@ -9371,27 +9418,61 @@ function aiHandle(o,fx,note,text){
 var AI_NUMW={'एक':1,'दो':2,'तीन':3,'चार':4,'पाँच':5,'पांच':5,'छह':6,'छः':6,'सात':7,'आठ':8,'नौ':9,'दस':10,'ग्यारह':11,'बारह':12,'पंद्रह':15,'बीस':20,'पच्चीस':25,'तीस':30,'चालीस':40,'पचास':50,'साठ':60,'सत्तर':70,'अस्सी':80,'नब्बे':90,'डेढ़':1.5,'ढाई':2.5,'सवा':1.25,
   'ek':1,'do':2,'teen':3,'char':4,'chaar':4,'paanch':5,'panch':5,'chhe':6,'chhah':6,'saat':7,'aath':8,'nau':9,'das':10,'gyarah':11,'barah':12,'pandrah':15,'bees':20,'pachchis':25,'pachis':25,'tees':30,'chalis':40,'pachas':50,'saath':60,'sattar':70,'assi':80,'nabbe':90,'dedh':1.5,'dhai':2.5,'dhaai':2.5,'sava':1.25,
   'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12,'fifteen':15,'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,'seventy':70,'eighty':80,'ninety':90};
-function aiLocalAmt(s){
+/* बात में आई सारी रकमें (क्रम से): "10,000 UPI और 10,000 कैश" → [10000,10000] · "10 हज़ार 280" → [10280] · "साढ़े तीन हज़ार" → [3500] */
+function aiAmtList(s){
   s=aiDigits(s).replace(/₹/g,' ').replace(/(\d),(?=\d)/g,'$1');
-  var toks=s.split(/[\s,]+/),best=0,cur=null,tot=0,run=false,afterM=false;
-  var flush=function(){var v=round2(tot+(cur||0));if(v>0&&!best)best=v;tot=0;cur=null;run=false;afterM=false;};
+  var toks=s.split(/[\s,+]+/),out=[],cur=null,tot=0,run=false,afterM=false,half=0;
+  var flush=function(){var v=round2(tot+(cur||0));if(v>0)out.push(v);tot=0;cur=null;run=false;afterM=false;};
   for(var i=0;i<toks.length;i++){
     var w=toks[i].replace(/[^\u0900-\u097Fa-zA-Z0-9.]/g,''),lw=w.toLowerCase();
+    if(/^(साढ़े|साढे|sadhe|saadhe|sarhe)$/.test(lw)){if(run)flush();half=0.5;continue;}
+    if(/^(पौने|paune)$/.test(lw)){if(run)flush();half=-0.25;continue;}
     var mk=lw.match(/^(\d+(?:\.\d+)?)(k|हज़ार|हजार)?$/);
-    if(mk){var n=parseFloat(mk[1])*(mk[2]?1000:1);
+    if(mk){var n=parseFloat(mk[1])*(mk[2]?1000:1);if(half){n+=half;half=0;}
       if(run&&afterM){cur=(cur||0)+n;afterM=false;}          // "2 हज़ार 500" = 2500, "5 सौ 50" = 550
       else{if(run)flush();cur=n;run=true;}
       continue;}
     var wv=AI_NUMW[w]!=null?AI_NUMW[w]:AI_NUMW[lw];
-    if(wv!=null){cur=(cur||0)+wv;run=true;afterM=false;continue;}
+    if(wv!=null){if(half){wv+=half;half=0;}cur=(cur||0)+wv;run=true;afterM=false;continue;}
     if(/^(सौ|sau|hundred|हंड्रेड)$/.test(lw)&&run){cur=(cur||1)*100;afterM=true;continue;}
     if(/^(लाख|lakh|lac|lakhs)$/.test(lw)&&run){tot+=(cur||1)*100000;cur=0;afterM=true;continue;}
     if(/^(हज़ार|हजार|hazar|hajar|hazaar|thousand|थाउजेंड|थाउज़ेंड)$/.test(lw)&&run){tot+=(cur||1)*1000;cur=0;afterM=true;continue;}
-    if(/^(रुपये|रुपया|रुपए|rupay|rupaye|rupees|rupee|rs|inr|का|की|के|and|aur|और)$/.test(lw))continue;
+    if(/^(रुपये|रुपया|रुपए|rupay|rupaye|rupees|rupee|rs|inr|का|की|के)$/.test(lw))continue;
     if(run)flush();
   }
   if(run)flush();
-  return round2(best);
+  return out;
+}
+function aiLocalAmt(s){var L=aiAmtList(s);return L.length?L[0]:0;}
+var AI_Q=/कितना|कितनी|कितने|kitna|kitni|kitne|क्या|कौन|kaun|कब|kab|कहाँ|कहां|kahan|क्यों|kyon|kyu|बताओ|बताइए|बता दो|batao|bata do|\?|how much|how many|what|which|when|show|report|हाल|दिखाओ|dikhao/i;
+function aiIsQ(text){var s=aiDigits(String(text||''));return AI_Q.test(s+' '+aiNorm(s));}
+/* "आज की बिक्री 10,000 UPI और 10,000 कैश" — ये सवाल नहीं, बिक्री लिखनी है */
+var AI_SALEW=/बिक्री|बिकी|बिका|सेल|sale|sales|बेचा|गल्ले\s*में|गल्ला|ऊपर\s*डाले|बड़े\s*नोट|counter/i;
+function aiSaleEntry(text){
+  /* "10,000 UPI और 10,000 कैश" · "upi 5200 cash 9000" · "8000 कैश, 6500 पेटीएम" · "15000 की बिक्री, 6000 ऑनलाइन बाकी कैश"
+     हर रकम को उसके पास वाले शब्द से जोड़ो; "बाकी कैश/UPI" = कुल − दूसरा */
+  var n=aiNorm(text).replace(/(\d),(?=\d)/g,'$1'),r={},rest=null,all=aiAmtList(n);
+  var KU='ऑनलाइन|यूपीआई|upi|पेटीएम|paytm|फोन\\s*पे|phone\\s*pe|phonepe|गूगल\\s*पे|google\\s*pay|gpay|स्कैन|scan';
+  var KG='नकद|कैश|cash|गल्ले?|ऊपर\\s*(?:डाले|डाला|रखे|रखा)?|बड़े\\s*नोट';
+  var RB='(?:बाकी|बाक़ी|baki|baaki|बचा\\s*हुआ|rest|remaining|बाकी\\s*सब)\\s*(?:सब\\s*|का\\s*|में\\s*|in\\s*)?';
+  n=n.replace(new RegExp(RB+'(?:'+KU+')','gi'),' ¦RU¦ ').replace(new RegExp(RB+'(?:'+KG+')','gi'),' ¦RG¦ ');
+  var add=function(k,v){if(k==='U')r.upi=round2((r.upi||0)+v);else r.galla=round2((r.galla||0)+v);};
+  var used=[];
+  n.split(/\s+(?:और|aur|and|तथा|फिर)\s+|[,।;]/).forEach(function(sg){
+    var m=sg.replace(new RegExp(KU,'gi'),' ¦U¦ ').replace(new RegExp(KG,'gi'),' ¦G¦ ').split('¦'),seq=[];
+    m.forEach(function(x){x=x.trim();if(!x)return;
+      if(x==='U'||x==='G')seq.push({k:x});else if(x==='RU'||x==='RG')rest=x.slice(1);
+      else{var l=/तारीख|tarikh|date/i.test(x)?[]:aiAmtList(x).filter(function(v){return v>0;});seq.push(l.length?{l:l}:{});}});
+    var ks=seq.filter(function(q){return q.k;}),vs=seq.filter(function(q){return q.l;});
+    if(!ks.length||!vs.length)return;
+    var vf=seq.filter(function(q){return q.k||q.l;})[0],kFirst=!!vf.k;
+    var nxt=function(i){var q=seq[i+1];return q&&q.l?q.l[0]:0;},prv=function(i){var q=seq[i-1];return q&&q.l?q.l[q.l.length-1]:0;};
+    ks.forEach(function(k){var i=seq.indexOf(k),v=kFirst?(nxt(i)||prv(i)):(prv(i)||nxt(i));if(ks.length===1&&!v)v=vs[0].l[0];
+      if(v>0){add(k.k,v);used.push(v);}});
+  });
+  if(rest){var tot=Math.max.apply(null,all.concat([0])),got=used.reduce(function(a,v){return a+v;},0);
+    if(tot>got&&used.indexOf(tot)<0)add(rest,round2(tot-got));}
+  return (r.upi||r.galla)?r:null;
 }
 function aiEscRe(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 function aiLocal(text,fx){
@@ -9399,8 +9480,18 @@ function aiLocal(text,fx){
   var amt=aiLocalAmt(s)||aiLocalAmt(nrm),top=(fx.people[0]&&fx.people[0].s>=0.8)?fx.people[0].x:null;
   var isJ=/जमा|jama|jma|दिया|दिए|diya|diye|दे ?गय|de ?gay|दे ?दिय|de ?diy|payment|पेमेंट|चुका|chuka|लौटा|lauta|received|paid|मिला|मिले/i.test(lo);
   var isU=/उधार|उधर लिख|udhar|udhaar|उधारी|खाते में|khate me|khata me|बाकी लिख|बाक़ी लिख|baki likh|credit|लेना है/i.test(lo);
-  var isQ=/कितना|कितनी|कितने|kitna|kitni|kitne|क्या|कौन|kaun|कब|kab|कहाँ|कहां|kahan|क्यों|kyon|kyu|बताओ|बताइए|बता दो|batao|bata do|\?|how much|how many|what|which|when|show|total|report|हाल/i.test(lo);
+  var isQ=AI_Q.test(lo);
   var ids=function(re,max){var r=[];Object.keys(fx.fb.map).forEach(function(k){if(re.test(fx.fb.map[k].l))r.push(k);});return r.slice(0,max||10);};
+ /* आज की बिक्री: "10,000 UPI और 10,000 कैश" / "aaj ki sale upi 5200 cash 9000" — सवाल नहीं, लिखना है */
+  var se=(!isQ&&amt>0&&!AI_STAFF.test(lo)&&!/जमा|उधार|दिया|मिला|माल/.test(nrm.replace(/ऑनलाइन|नकद/g,'')))?aiSaleEntry(text):null;
+  if(se&&(AI_SALEW.test(lo)||(se.upi&&se.galla))){
+    var act={type:'hisaab',date:todayStr()};if(se.upi)act.upi=se.upi;if(se.galla)act.galla=se.galla;
+    o.actions.push(act);o.say='आज की बिक्री लिख रहा हूँ'+(se.upi?' — UPI '+rupee(se.upi):'')+(se.galla?(se.upi?',':' —')+' कैश '+rupee(se.galla):'')+'। जाँचकर ✅ दबाइए।';return o;
+  }
+  /* सिर्फ़ कुल बिक्री बोली ("आज की बिक्री 20,000") — दो दराज़ हैं, इसलिए पूछो */
+  if(!isQ&&amt>0&&!se&&/बिक्री|बिकी|सेल|sale|bikri|becha|बेचा/i.test(lo)&&!AI_STAFF.test(lo)&&!/जमा|उधार|दिया|मिला|माल|खर्च/.test(nrm)){
+    var u0=Math.round(amt*0.4/100)*100;o.ask='आज की बिक्री '+rupee(amt)+' — इसमें कितना UPI और कितना कैश? जैसे बोलिए: "'+u0+' UPI और '+(amt-u0)+' कैश"';return o;
+  }
  /* स्टाफ/कारीगर (AI के बिना भी): "10000 स्टाफ को दिया" = खर्च (मज़दूरी) */
   if(!isQ&&amt>0&&AI_STAFF.test(lo)){
     o.actions.push({type:'hisaab',date:todayStr(),exp:[{box:'other',name:'मज़दूरी',amount:amt,note:'स्टाफ',mode:/upi|यूपीआई|online|ऑनलाइन|phone ?pe|फोन ?पे/i.test(lo)?'online':''}]});
