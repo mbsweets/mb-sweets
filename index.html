@@ -300,6 +300,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .onmeta{color:var(--muted);font-size:.84rem}
 .onhome{display:flex;align-items:center;gap:6px;width:100%;margin:10px 0 2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-size:.92rem;text-align:left}
 .onhome.hot{border:2px solid var(--gold)}
+.gchome{border-style:dashed}
+.gcres{margin:10px 0;padding:12px;border-radius:12px;border:2px solid var(--line);line-height:1.45}
+.gcres.ok{border-color:#2e7b47;background:#eef8f0}.gcres.bad{border-color:#c62828;background:#fdeeee}
+.gcres small{display:block;color:var(--muted);margin:4px 0 8px}.gccode{font-size:1.6rem;font-weight:800;letter-spacing:3px}
+.gcerr{color:#c62828;font-weight:600}.gcmore{margin-top:12px}.gcmore summary{cursor:pointer;color:var(--muted)}
 .onhome span{margin-left:auto;color:var(--muted);font-size:.84rem}
 /* चिपकी पट्टी को स्क्रॉल-एंकर मत बनने दो — वरना छोटा बदलाव होते ही पेज ऊपर कूदता है */
 .hxtop,.hxbody{overflow-anchor:none}
@@ -1523,6 +1528,7 @@ function renderHome(){
       '<p class="hint" style="margin-top:-4px">इनकी तारीख निकल गई पर टिक नहीं लगा। दे दिया हो तो ग्राहक खोलकर टिक लगा दो।</p>'+
       overdueGroups.map(function(g){return miniCard(g.order,g.items,'overdue');}).join('');
   }
+  sections+='<button class="onhome gchome" data-act="gc-open">🎮 गेम कूपन जाँचो <span>रसगुल्ला रन वाले ग्राहक का कोड</span></button>';
   sections+=remindCardHtml(live);
   sections+=milkCard(live);
   sections+=daySummaryBlock(live,dayAfter,'परसों');
@@ -2185,6 +2191,89 @@ window.addEventListener('popstate',function(e){
     if(NAV.hd===0&&ui.view==='home'&&!NAV.stack.length){try{history.pushState({mbTrap:1,d:1,na:1},'');NAV.hd=1;}catch(err){}saveView();}
   },2500);
 });
+
+/* ---------- 🎮 रसगुल्ला रन — गेम कूपन (14 नवंबर 2026) ----------
+   ग्राहक गेम में स्टैम्प भरकर कूपन पाता है (ABC-123) → यहाँ कोड डालो → सर्वर बताता है क्या देना है → "दे दिया" दबाओ (दोबारा नहीं चलेगा)।
+   सर्वर: मालिक का Cloudflare Worker (repo mbsweets/rasgulla-lb)। चाबी (ADMIN_KEY) सिर्फ़ इसी फ़ोन में — localStorage 'mbmb-gc', बैकअप में नहीं। */
+var GC_URL='https://rasgulla-lb.pankajgupta800201.workers.dev';
+function gcCfg(){try{return JSON.parse(localStorage.getItem('mbmb-gc')||'{}')||{};}catch(e){return {};}}
+function gcSet(o){var c=gcCfg();for(var k in o)c[k]=o[k];try{localStorage.setItem('mbmb-gc',JSON.stringify(c));}catch(e){}}
+function gcCode(s){s=String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/O/g,'0').replace(/[IL]/g,'1');return s.length===6?s.slice(0,3)+'-'+s.slice(3):'';}
+function gcPost(path,body){
+  body.key=gcCfg().key||'';
+  return fetch(GC_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j.__s=r.status;return j;});});
+}
+function gcOpen(){ui.gc=ui.gc||{};openSheet('<div id="gcBody"></div>');gcPaint();if(gcCfg().key)gcStatus();setTimeout(function(){var f=$('#gc-code')||$('#gc-keyin');if(f)f.focus();},80);}
+function gcStatus(){gcPost('/admin/config',{}).then(function(j){if(j&&j.ok){ui.gc=ui.gc||{};ui.gc.cfg=j;gcPaint();}else if(j&&j.__s===403){ui.gc.err='चाबी गलत है — फिर से डालिए';gcSet({key:''});gcPaint();}}).catch(function(){});}
+function gcPaint(){
+  var b=$('#gcBody');if(!b)return;var g=ui.gc||{},key=gcCfg().key,h='';
+  h+='<div class="sh-head"><h2>🎮 गेम कूपन</h2><button class="lnk muted" data-act="close">बंद करो</button></div>';
+  if(!key){
+    h+='<p class="hint">पहली बार: Cloudflare में डाला हुआ अपना <b>ADMIN_KEY</b> पासवर्ड लिखिए। यह सिर्फ़ इसी फ़ोन में रहेगा (बैकअप में नहीं जाता)।</p>'+
+      '<label class="fl">ADMIN_KEY<input id="gc-keyin" type="password" autocomplete="off"></label>'+
+      (g.err?'<p class="gcerr">'+esc(g.err)+'</p>':'')+
+      '<button class="btn primary block" data-act="gc-key">✅ सेव करो</button>';
+    paint(b,h);return;
+  }
+  var cfg=g.cfg;
+  if(cfg)h+='<p class="hint">आज दिए मुफ़्त रसगुल्ले: <b>'+cfg.rasToday+' / '+cfg.cap+'</b> (रोज़ की सीमा)</p>';
+  h+='<label class="fl">ग्राहक के फ़ोन पर लिखा कोड<input id="gc-code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="9" placeholder="जैसे 92J-A7K" value="'+esc(g.code||'')+'" style="font-size:1.4rem;letter-spacing:3px;text-transform:uppercase"></label>'+
+    '<button class="btn primary block" data-act="gc-check">🔍 जाँचो</button>';
+  if(g.busy)h+='<p class="hint">जाँच रहा हूँ…</p>';
+  if(g.err)h+='<p class="gcerr">'+esc(g.err)+'</p>';
+  var r=g.res;
+  if(r){
+    var exp=r.expires?new Date(r.expires).toLocaleDateString('hi-IN',{day:'numeric',month:'long'}):'';
+    if(r.status==='nf')h+='<div class="gcres bad">❌ यह कोड नहीं मिला — ग्राहक से फिर से देखकर लिखिए।</div>';
+    else{
+      var what=r.kind==='ras'?'🍬 <b>1 रसगुल्ला मुफ़्त</b> दीजिए (कुछ ख़रीदना ज़रूरी नहीं)':
+        r.kind==='off'?'💰 <b>₹'+r.off.amt+' छूट</b> — सिर्फ़ जब मिठाई/नमकीन का बिल <b>₹'+r.off.min+' या ज़्यादा</b> हो (दूध, दही, पनीर, पैकेट सामान पर नहीं)':
+        r.kind==='top3'?'🏆 <b>'+r.gram+' ग्राम मिठाई</b> मुफ़्त (दरभंगा हफ़्ते के टॉप 3)':esc(r.label||r.kind);
+      if(r.status==='ok')h+='<div class="gcres ok"><div class="gccode">'+esc(r.code)+'</div>'+what+'<small>'+exp+' तक चलेगा</small>'+
+        (r.kind==='ras'&&r.rasToday>=r.cap?'<p class="gcerr">आज की सीमा ('+r.cap+') पूरी — ग्राहक से कहिए कल आएँ, कूपन कल भी चलेगा।</p>':'<button class="btn primary block" data-act="gc-use">✅ दे दिया — कूपन इस्तेमाल हो गया</button>')+'</div>';
+      else if(r.status==='used')h+='<div class="gcres bad"><div class="gccode">'+esc(r.code)+'</div>⛔ यह कूपन <b>पहले ही इस्तेमाल</b> हो चुका है ('+new Date(r.used).toLocaleString('hi-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})+')।<br>'+what+
+        (g.justUsed?'<button class="lnk" data-act="gc-undo">↩️ गलती से दबा — वापस करो</button>':'')+'</div>';
+      else if(r.status==='expired')h+='<div class="gcres bad"><div class="gccode">'+esc(r.code)+'</div>⌛ समय निकल गया ('+exp+' तक था)।</div>';
+    }
+    h+='<button class="lnk" data-act="gc-new">+ दूसरा कोड</button>';
+  }
+  h+='<details class="gcmore"><summary>⚙️ नियम और सीमा</summary>'+
+    '<ul class="hint"><li>10 स्टैम्प = 1 रसगुल्ला मुफ़्त; दिन में 3 स्टैम्प तक; शुरू में 2 मुफ़्त</li><li>एक मोबाइल को हफ़्ते में ज़्यादा से ज़्यादा 2 मुफ़्त रसगुल्ले</li><li>20,000+ स्कोर → ₹200+ मिठाई/नमकीन पर ₹20 छूट (हफ़्ते में 1)</li><li>दरभंगा हफ़्ते के टॉप 3 → 250 ग्राम</li><li>हर कूपन 7 दिन</li></ul>'+
+    '<label class="fl">रोज़ ज़्यादा से ज़्यादा मुफ़्त रसगुल्ले<input id="gc-capin" type="number" inputmode="numeric" min="0" max="500" value="'+(cfg?cfg.cap:'')+'"></label>'+
+    '<button class="btn small" data-act="gc-cap">सीमा सेव करो</button> '+
+    '<button class="lnk muted" data-act="gc-forget">चाबी हटाओ</button></details>';
+  paint(b,h);
+}
+function gcSaveKey(){
+  var k=(($('#gc-keyin')||{}).value||'').trim();
+  if(k.length<8){ui.gc.err='पासवर्ड कम से कम 8 अक्षर का था';gcPaint();return;}
+  gcSet({key:k});ui.gc.err='';gcPaint();gcStatus();
+}
+function gcCheck(){
+  var g=ui.gc;var raw=(($('#gc-code')||{}).value||'');g.code=raw;var c=gcCode(raw);
+  if(!c){g.err='कोड 6 अक्षर का होता है (जैसे 92J-A7K)';g.res=null;gcPaint();return;}
+  g.err='';g.busy=true;g.res=null;g.justUsed=false;gcPaint();
+  gcPost('/coupon/check',{code:c}).then(function(j){g.busy=false;
+    if(j.__s===403){gcSet({key:''});g.err='चाबी गलत है — फिर से डालिए';}else if(!j.ok)g.err='सर्वर से जवाब नहीं आया — फिर दबाइए';else{g.res=j;g.cfg=g.cfg||{};g.cfg.rasToday=j.rasToday;g.cfg.cap=j.cap;}
+    gcPaint();}).catch(function(){g.busy=false;g.err='इंटरनेट नहीं मिला — फिर दबाइए';gcPaint();});
+}
+function gcUse(){
+  var g=ui.gc;if(!g.res)return;g.busy=true;gcPaint();
+  gcPost('/coupon/use',{code:g.res.code}).then(function(j){g.busy=false;
+    if(j.ok){g.res=j;g.justUsed=true;g.cfg=g.cfg||{};g.cfg.rasToday=j.rasToday;g.cfg.cap=j.cap;toast('✅ कूपन इस्तेमाल हो गया');}
+    else if(j.err==='cap'){g.res=j;g.err='आज की सीमा पूरी — कूपन कल चलेगा';}
+    else if(j.err==='used'){g.res=j;g.err='';}
+    else g.err='नहीं हुआ — फिर दबाइए';
+    gcPaint();}).catch(function(){g.busy=false;g.err='इंटरनेट नहीं मिला — फिर दबाइए';gcPaint();});
+}
+function gcUndo(){
+  var g=ui.gc;if(!g.res)return;
+  gcPost('/coupon/undo',{code:g.res.code}).then(function(j){if(j.ok){g.res=j;g.justUsed=false;g.cfg.rasToday=j.rasToday;toast('↩️ वापस कर दिया');}else g.err='वापस नहीं हुआ (सिर्फ़ उसी दिन होता है)';gcPaint();}).catch(function(){g.err='इंटरनेट नहीं मिला';gcPaint();});
+}
+function gcCap(){
+  var v=parseInt((($('#gc-capin')||{}).value||''),10);if(!(v>=0)){toast('संख्या लिखिए');return;}
+  gcPost('/admin/config',{cap:v}).then(function(j){if(j.ok){ui.gc.cfg=j;toast('सीमा: रोज़ '+j.cap+' मुफ़्त रसगुल्ले');gcPaint();}else toast('सेव नहीं हुआ');}).catch(function(){toast('इंटरनेट नहीं मिला');});
+}
 
 /* ---------- SHEETS: generic ---------- */
 function openSheet(html){
@@ -7203,6 +7292,14 @@ document.addEventListener('click',function(e){
       save();closeSheet();ui.view='home';ui.customerId=null;renderRoute();toast('ग्राहक डिलीट हो गया');
       break;
     case 'close':closeSheet();break;
+    case 'gc-open':gcOpen();break;
+    case 'gc-check':gcCheck();break;
+    case 'gc-use':gcUse();break;
+    case 'gc-undo':gcUndo();break;
+    case 'gc-key':gcSaveKey();break;
+    case 'gc-forget':gcSet({key:''});ui.gc=null;gcOpen();break;
+    case 'gc-cap':gcCap();break;
+    case 'gc-new':ui.gc={};gcPaint();setTimeout(function(){var f=$('#gc-code');if(f)f.focus();},50);break;
     case 'on-sync':onlineSync(true);break;
     case 'on-accept':acceptOnline(t.getAttribute('data-code'));break;
     case 'on-reject':openRejectSheet(t.getAttribute('data-code'));break;
