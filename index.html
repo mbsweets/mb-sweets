@@ -2265,7 +2265,8 @@ function gcPaint(){
     else{
       var what=r.kind==='ras'?'🍬 <b>1 रसगुल्ला मुफ़्त</b> दीजिए (कुछ ख़रीदना ज़रूरी नहीं)':
         r.kind==='off'?'💰 <b>₹'+r.off.amt+' छूट</b> — सिर्फ़ जब मिठाई/नमकीन का बिल <b>₹'+r.off.min+' या ज़्यादा</b> हो (दूध, दही, पनीर, पैकेट सामान पर नहीं)':
-        r.kind==='top3'?'🏆 <b>'+r.gram+' ग्राम मिठाई</b> मुफ़्त (दरभंगा हफ़्ते के टॉप 3)':esc(r.label||r.kind);
+        r.kind==='top3'?'🏆 <b>'+r.gram+' ग्राम मिठाई</b> मुफ़्त (दरभंगा हफ़्ते के टॉप 3)':
+        r.kind==='vil'?'🏘️ <b>1 रसगुल्ला मुफ़्त</b> (गेम की गाँव लीग जीतने वाले गाँव के टॉप 10; कुछ ख़रीदना ज़रूरी नहीं)':esc(r.label||r.kind);
       if(r.status==='ok')h+='<div class="gcres ok"><div class="gccode">'+esc(r.code)+'</div>'+what+'<small>'+exp+' तक चलेगा</small>'+
         (r.kind==='ras'&&r.rasToday>=r.cap?'<p class="gcerr">आज की सीमा ('+r.cap+') पूरी — ग्राहक से कहिए कल आएँ, कूपन कल भी चलेगा।</p>':'<button class="btn primary block" data-act="gc-use">✅ दे दिया — कूपन इस्तेमाल हो गया</button>')+'</div>';
       else if(r.status==='used')h+='<div class="gcres bad"><div class="gccode">'+esc(r.code)+'</div>⛔ यह कूपन <b>पहले ही इस्तेमाल</b> हो चुका है ('+new Date(r.used).toLocaleString('hi-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})+')।<br>'+what+
