@@ -2209,6 +2209,35 @@ function gcStatus(){gcPost('/admin/config',{}).then(function(j){if(j&&j.ok){ui.g
 /* 📊 गेम का छोटा हिसाब (खिलाड़ी + ⭐ राय) — पूरा पन्ना बटन से (चाबी इसी फ़ोन से, टाइप नहीं करनी) */
 function gcSum(){var k=gcCfg().key;if(!k)return;fetch(GC_URL+'/stats?json=1&key='+encodeURIComponent(k)).then(function(r){return r.json();}).then(function(j){if(!j||!j.ok)return;ui.gc=ui.gc||{};ui.gc.sum={players:j.all.newp,games:j.all.games,today:j.today.users,avg:j.fb&&j.fb.avg,n:j.fb?j.fb.n:0};gcPaint();}).catch(function(){});}
 function gcStatsOpen(){var k=gcCfg().key;if(!k)return;window.open(GC_URL+'/stats?key='+encodeURIComponent(k),'_blank','noopener');}
+/* 🧾 बिल पर गेम कोड (17 नवंबर 2026): ऑर्डर बनते ही (नेट हो तो) सर्वर से 6 अक्षर का कोड — बिल के WhatsApp संदेश, फोटो और प्रिंट में छपता है.
+   ग्राहक गेम में डाले → +2 स्टैम्प + "MB Sweets पाग". 7 दिन, एक बार. चालू/बंद और कम से कम बिल: 🎮 गेम कूपन → ⚙️ */
+var GAME_URL='https://mbsweets.github.io/game/';
+function gcBillOn(){var c=gcCfg();return !!c.key&&c.bill!==false;}
+function gcBillMin(){var c=gcCfg();return c.billMin>=0?c.billMin:100;}
+function gcValid(o){return !!(o&&o.gcode&&o.gcodeExp>Date.now());}
+function gcEligible(o){return !!(o&&!o.cancelled&&gcBillOn()&&orderTotal(o)>=gcBillMin());}
+var gcMinting={};
+function gcMintFor(o){
+  if(!gcEligible(o)||gcValid(o)||gcMinting[o.id])return Promise.resolve(false);
+  gcMinting[o.id]=1;
+  return gcPost('/admin/billcode',{amt:Math.round(orderTotal(o)),bill:'#'+o.no}).then(function(j){delete gcMinting[o.id];if(j&&j.ok){o.gcode=j.code;o.gcodeExp=j.expires;save();return true;}return false;}).catch(function(){delete gcMinting[o.id];return false;});
+}
+function gcUntil(ms){return new Date(ms).toLocaleDateString('hi-IN',{day:'numeric',month:'short'});}
+function gcLink(code){return GAME_URL+'?bc='+String(code).replace('-','');}
+function gcLines(L,o){
+  if(!gcValid(o))return;
+  L.push('');
+  L.push('🎮 रसगुल्ला रन गेम कोड: *'+o.gcode+'*');
+  L.push('गेम में डालें → +2 स्टैम्प (10 स्टैम्प = 1 रसगुल्ला मुफ़्त) + MB Sweets पाग · '+gcUntil(o.gcodeExp)+' तक');
+  L.push(gcLink(o.gcode));
+}
+function gcCounterMsg(code,exp){return ['*'+state.shop.name+'*','🎮 रसगुल्ला रन गेम कोड: *'+code+'*','गेम में डालें → +2 स्टैम्प (10 स्टैम्प = 1 रसगुल्ला मुफ़्त) + MB Sweets पाग · '+gcUntil(exp)+' तक',gcLink(code)].join(String.fromCharCode(10));}
+function gcNewCounter(){
+  var g=ui.gc;g.busy=true;g.nc=null;gcPaint();
+  gcPost('/admin/billcode',{amt:0,bill:'counter'}).then(function(j){g.busy=false;if(j&&j.ok)g.nc=j;else g.err=j&&j.__s===403?'चाबी गलत है':'कोड नहीं बना — फिर दबाइए';gcPaint();}).catch(function(){g.busy=false;g.err='इंटरनेट नहीं मिला';gcPaint();});
+}
+function gcCopy(){var g=ui.gc;if(!g.nc)return;var t=gcCounterMsg(g.nc.code,g.nc.expires);if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast('📋 कॉपी हो गया');},function(){toast('कॉपी नहीं हुआ');});}
+function gcBillSet(){var on=!!($('#gc-billon')||{}).checked,mn=parseInt((($('#gc-billmin')||{}).value||''),10);gcSet({bill:on,billMin:mn>=0?mn:100});toast(on?'🧾 बिल पर गेम कोड: चालू (₹'+(mn>=0?mn:100)+'+)':'🧾 बिल पर गेम कोड: बंद');gcPaint();}
 function gcPaint(){
   var b=$('#gcBody');if(!b)return;var g=ui.gc||{},key=gcCfg().key,h='';
   h+='<div class="sh-head"><h2>🎮 गेम कूपन</h2><button class="lnk muted" data-act="close">बंद करो</button></div>';
@@ -2222,6 +2251,9 @@ function gcPaint(){
   var cfg=g.cfg,sm=g.sum;
   h+='<button class="btn block gcstat" data-act="gc-stats">📊 गेम का हिसाब और राय'+(sm?'<small>कुल खिलाड़ी <b>'+sm.players+'</b> · आज '+sm.today+' · ⭐ '+(sm.n?(+sm.avg).toFixed(1)+' ('+sm.n+' राय)':'अभी राय नहीं')+'</small>':'')+'</button>';
   if(cfg)h+='<p class="hint">आज दिए मुफ़्त रसगुल्ले: <b>'+cfg.rasToday+' / '+cfg.cap+'</b> (रोज़ की सीमा)</p>';
+  h+='<button class="btn block" data-act="gc-newcode">🧾 काउंटर ग्राहक के लिए गेम कोड बनाओ</button>';
+  if(g.nc)h+='<div class="gcres ok"><div class="gccode">'+esc(g.nc.code)+'</div>ग्राहक गेम में 🎫 दुकान के इनाम → "बिल वाला कोड" में डाले: <b>+2 स्टैम्प + MB Sweets पाग</b><small>'+gcUntil(g.nc.expires)+' तक · एक बार</small>'+
+    '<a class="btn primary block" href="'+esc('https://api.whatsapp.com/send?text='+encodeURIComponent(gcCounterMsg(g.nc.code,g.nc.expires)))+'" target="_blank" rel="noopener">💬 WhatsApp पर भेजो</a><button class="lnk" data-act="gc-copy">📋 कॉपी करो</button></div>';
   h+='<label class="fl">ग्राहक के फ़ोन पर लिखा कोड<input id="gc-code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="9" placeholder="जैसे 92J-A7K" value="'+esc(g.code||'')+'" style="font-size:1.4rem;letter-spacing:3px;text-transform:uppercase"></label>'+
     '<button class="btn primary block" data-act="gc-check">🔍 जाँचो</button>';
   if(g.busy)h+='<p class="hint">जाँच रहा हूँ…</p>';
@@ -2246,6 +2278,9 @@ function gcPaint(){
     '<ul class="hint"><li>10 स्टैम्प = 1 रसगुल्ला मुफ़्त; दिन में 3 स्टैम्प तक; शुरू में 2 मुफ़्त</li><li>एक मोबाइल को हफ़्ते में ज़्यादा से ज़्यादा 2 मुफ़्त रसगुल्ले</li><li>20,000+ स्कोर → ₹200+ मिठाई/नमकीन पर ₹20 छूट (हफ़्ते में 1)</li><li>दरभंगा हफ़्ते के टॉप 3 → 250 ग्राम</li><li>हर कूपन 7 दिन</li></ul>'+
     '<label class="fl">रोज़ ज़्यादा से ज़्यादा मुफ़्त रसगुल्ले<input id="gc-capin" type="number" inputmode="numeric" min="0" max="500" value="'+(cfg?cfg.cap:'')+'"></label>'+
     '<button class="btn small" data-act="gc-cap">सीमा सेव करो</button> '+
+    '<label class="fl" style="flex-direction:row;align-items:center;gap:8px;margin-top:12px"><input id="gc-billon" type="checkbox" '+(gcCfg().bill!==false?'checked':'')+'> 🧾 ऑर्डर के बिल पर गेम कोड छापो</label>'+
+    '<label class="fl">कम से कम बिल (₹)<input id="gc-billmin" type="number" inputmode="numeric" min="0" max="100000" value="'+gcBillMin()+'"></label>'+
+    '<button class="btn small" data-act="gc-billset">सेव करो</button> '+
     '<button class="lnk muted" data-act="gc-forget">चाबी हटाओ</button></details>';
   paint(b,h);
 }
@@ -2522,7 +2557,7 @@ function saveOrderFromDraft(){
       queueStatus(d.webCode,'accepted',{total:round2(orderTotal(o2))});
     }
     state.orders.push(o2);
-    save();closeSheet();toast('ऑर्डर #'+o2.no+' save हो गया'+(advIn>totNew?' (advance टोटल से ज़्यादा था, '+rupee(totNew)+' ही जमा किया)':''));
+    save();closeSheet();gcMintFor(o2);toast('ऑर्डर #'+o2.no+' save हो गया'+(advIn>totNew?' (advance टोटल से ज़्यादा था, '+rupee(totNew)+' ही जमा किया)':''));
   }
   ui.view='customer';ui.customerId=d.customerId;
   renderRoute();window.scrollTo(0,0);
@@ -6491,6 +6526,7 @@ function billMessage(o){
   L.push('===================');
   L.push('Dhanyawad');
   L.push(state.shop.owner);
+  gcLines(L,o);
   orderPromo(L);
   return L.join('\n');
 }
@@ -6560,6 +6596,7 @@ function shortBillMessage(o){
   L.push('');
   L.push('पूरा बिल फोटो में भेज रहे हैं।');
   L.push('धन्यवाद - '+state.shop.owner);
+  gcLines(L,o);
   orderPromo(L);
   return L.join(String.fromCharCode(10));
 }
@@ -6779,6 +6816,16 @@ function biTerms(ctx,y){
   });
   return y+8;
 }
+function biGameCode(ctx,y,o){
+  if(!gcValid(o))return y;
+  var W=BI.W,P=BI.P;y+=30;
+  biRound(ctx,P,y,W-2*P,170,22,'#FFF3C4',BI.maroon);
+  biFont(ctx,700,30,true);biText(ctx,'🎮 रसगुल्ला रन गेम कोड',P+28,y+50,'left',BI.maroon);
+  biFont(ctx,700,58,true);biText(ctx,o.gcode,W-P-28,y+66,'right',BI.ink);
+  biFont(ctx,400,25);biText(ctx,'गेम में डालें → +2 स्टैम्प (10 = 1 रसगुल्ला मुफ़्त) + MB Sweets पाग · '+gcUntil(o.gcodeExp)+' तक',P+28,y+112,'left',BI.ink);
+  biFont(ctx,600,25);biText(ctx,GAME_URL.replace(/^https?:\/\//,'').replace(/\/$/,''),P+28,y+148,'left',BI.gold);
+  return y+170;
+}
 function biFooter(ctx,y,qr){
   var W=BI.W,P=BI.P;
   y+=46;biFont(ctx,700,40,true);biText(ctx,'धन्यवाद!',W/2,y+38,'center',BI.maroon);y+=58;
@@ -6811,7 +6858,7 @@ function renderBillImage(kind,ref){
       while(shown.length>1&&est(shown,true)>14000)shown=shown.slice(1);
       older=orders.filter(function(x){return shown.indexOf(x)<0;});
     }
-    var H=Math.min(15000,est(shown,older.length>0));
+    var H=Math.min(15000,est(shown,older.length>0)+(kind==='order'&&gcValid(o)?240:0));
     var cv=document.createElement('canvas');cv.width=BI.W;cv.height=H;
     var ctx=cv.getContext('2d');ctx.textBaseline='alphabetic';
     ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,BI.W,H);
@@ -6839,6 +6886,7 @@ function renderBillImage(kind,ref){
       y=biTotals(ctx,y,gt,gp,null);
     }
     y=biTerms(ctx,y);
+    if(kind==='order')y=biGameCode(ctx,y,o);
     y=biFooter(ctx,y,qr);
     var out=document.createElement('canvas');out.width=BI.W;out.height=Math.min(Math.ceil(y),H);
     out.getContext('2d').drawImage(cv,0,0);
@@ -6991,6 +7039,7 @@ function openBillSheet(kind,refId){
   var o=kind==='order'?findOrder(refId):null;
   var c=kind==='order'?(o&&findCustomer(o.customerId)):findCustomer(refId);
   if(!c||(kind==='order'&&!o))return;
+  if(kind==='order'&&gcEligible(o)&&!gcValid(o))gcMintFor(o).then(function(ok){if(ok&&ui.billShare&&ui.billShare.ref===refId&&$('#bill-prev'))openBillSheet(kind,refId);}); // कोड आते ही बिल फिर से
   ui.billShare={kind:kind,ref:refId,file:null,url:null};
   var chatHref=waLink(c.phone,kind==='order'?shortBillMessage(o):shortSummaryMessage(c));
   var textHref=waLink(c.phone,kind==='order'?billMessage(o):summaryMessage(c));
@@ -7122,6 +7171,7 @@ function printOrderBill(o){
     '</div>'+
     termsHtml+
     '<div style="margin-top:20px;text-align:center">Dhanyawad<br>'+esc(state.shop.owner)+'</div>'+
+    (gcValid(o)?'<div style="margin-top:12px;border:2px solid #7A111A;border-radius:8px;padding:8px;text-align:center"><b>🎮 रसगुल्ला रन गेम कोड: <span style="font-size:1.4em;letter-spacing:2px">'+esc(o.gcode)+'</span></b><br><small>गेम में डालें → +2 स्टैम्प + MB Sweets पाग · '+gcUntil(o.gcodeExp)+' तक · mbsweets.github.io/game</small></div>':'')+
     '<div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px dashed #999;border-radius:8px;padding:8px">'+
       '<img src="order-qr.png" alt="" style="width:70px;height:70px;image-rendering:pixelated">'+
       '<div style="text-align:left"><b>अगली बार घर बैठे ऑर्डर करें</b><br>'+esc(orderPageShort())+'</div></div>';
@@ -7305,6 +7355,9 @@ document.addEventListener('click',function(e){
     case 'gc-forget':gcSet({key:''});ui.gc=null;gcOpen();break;
     case 'gc-cap':gcCap();break;
     case 'gc-stats':gcStatsOpen();break;
+    case 'gc-newcode':gcNewCounter();break;
+    case 'gc-copy':gcCopy();break;
+    case 'gc-billset':gcBillSet();break;
     case 'gc-new':ui.gc={};gcPaint();setTimeout(function(){var f=$('#gc-code');if(f)f.focus();},50);break;
     case 'on-sync':onlineSync(true);break;
     case 'on-accept':acceptOnline(t.getAttribute('data-code'));break;
