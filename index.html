@@ -301,6 +301,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .onhome{display:flex;align-items:center;gap:6px;width:100%;margin:10px 0 2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit;font-size:.92rem;text-align:left}
 .onhome.hot{border:2px solid var(--gold)}
 .gchome{border-style:dashed}
+.gcstat{display:flex;flex-direction:column;align-items:center;gap:2px}.gcstat small{font-weight:600;opacity:.85}
 .gcres{margin:10px 0;padding:12px;border-radius:12px;border:2px solid var(--line);line-height:1.45}
 .gcres.ok{border-color:#2e7b47;background:#eef8f0}.gcres.bad{border-color:#c62828;background:#fdeeee}
 .gcres small{display:block;color:var(--muted);margin:4px 0 8px}.gccode{font-size:1.6rem;font-weight:800;letter-spacing:3px}
@@ -2204,7 +2205,10 @@ function gcPost(path,body){
   return fetch(GC_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){j.__s=r.status;return j;});});
 }
 function gcOpen(){ui.gc=ui.gc||{};openSheet('<div id="gcBody"></div>');gcPaint();if(gcCfg().key)gcStatus();setTimeout(function(){var f=$('#gc-code')||$('#gc-keyin');if(f)f.focus();},80);}
-function gcStatus(){gcPost('/admin/config',{}).then(function(j){if(j&&j.ok){ui.gc=ui.gc||{};ui.gc.cfg=j;gcPaint();}else if(j&&j.__s===403){ui.gc.err='चाबी गलत है — फिर से डालिए';gcSet({key:''});gcPaint();}}).catch(function(){});}
+function gcStatus(){gcPost('/admin/config',{}).then(function(j){if(j&&j.ok){ui.gc=ui.gc||{};ui.gc.cfg=j;gcPaint();gcSum();}else if(j&&j.__s===403){ui.gc.err='चाबी गलत है — फिर से डालिए';gcSet({key:''});gcPaint();}}).catch(function(){});}
+/* 📊 गेम का छोटा हिसाब (खिलाड़ी + ⭐ राय) — पूरा पन्ना बटन से (चाबी इसी फ़ोन से, टाइप नहीं करनी) */
+function gcSum(){var k=gcCfg().key;if(!k)return;fetch(GC_URL+'/stats?json=1&key='+encodeURIComponent(k)).then(function(r){return r.json();}).then(function(j){if(!j||!j.ok)return;ui.gc=ui.gc||{};ui.gc.sum={players:j.all.newp,games:j.all.games,today:j.today.users,avg:j.fb&&j.fb.avg,n:j.fb?j.fb.n:0};gcPaint();}).catch(function(){});}
+function gcStatsOpen(){var k=gcCfg().key;if(!k)return;window.open(GC_URL+'/stats?key='+encodeURIComponent(k),'_blank','noopener');}
 function gcPaint(){
   var b=$('#gcBody');if(!b)return;var g=ui.gc||{},key=gcCfg().key,h='';
   h+='<div class="sh-head"><h2>🎮 गेम कूपन</h2><button class="lnk muted" data-act="close">बंद करो</button></div>';
@@ -2215,7 +2219,8 @@ function gcPaint(){
       '<button class="btn primary block" data-act="gc-key">✅ सेव करो</button>';
     paint(b,h);return;
   }
-  var cfg=g.cfg;
+  var cfg=g.cfg,sm=g.sum;
+  h+='<button class="btn block gcstat" data-act="gc-stats">📊 गेम का हिसाब और राय'+(sm?'<small>कुल खिलाड़ी <b>'+sm.players+'</b> · आज '+sm.today+' · ⭐ '+(sm.n?(+sm.avg).toFixed(1)+' ('+sm.n+' राय)':'अभी राय नहीं')+'</small>':'')+'</button>';
   if(cfg)h+='<p class="hint">आज दिए मुफ़्त रसगुल्ले: <b>'+cfg.rasToday+' / '+cfg.cap+'</b> (रोज़ की सीमा)</p>';
   h+='<label class="fl">ग्राहक के फ़ोन पर लिखा कोड<input id="gc-code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="9" placeholder="जैसे 92J-A7K" value="'+esc(g.code||'')+'" style="font-size:1.4rem;letter-spacing:3px;text-transform:uppercase"></label>'+
     '<button class="btn primary block" data-act="gc-check">🔍 जाँचो</button>';
@@ -7299,6 +7304,7 @@ document.addEventListener('click',function(e){
     case 'gc-key':gcSaveKey();break;
     case 'gc-forget':gcSet({key:''});ui.gc=null;gcOpen();break;
     case 'gc-cap':gcCap();break;
+    case 'gc-stats':gcStatsOpen();break;
     case 'gc-new':ui.gc={};gcPaint();setTimeout(function(){var f=$('#gc-code');if(f)f.focus();},50);break;
     case 'on-sync':onlineSync(true);break;
     case 'on-accept':acceptOnline(t.getAttribute('data-code'));break;
