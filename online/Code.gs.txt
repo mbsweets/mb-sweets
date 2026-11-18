@@ -1,5 +1,5 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 8 (10 नवंबर 2026)
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 9 (18 नवंबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
@@ -24,7 +24,7 @@
  * "Points" शीट में भेजता है ताकि ग्राहक अपने पॉइंट ख़ुद देख सके — WhatsApp वाले लिंक से पूरा हिसाब,
  * सिर्फ़ मोबाइल नंबर से सिर्फ़ पॉइंट (नाम और ख़रीद नहीं)।
  */
-var VERSION = 8;
+var VERSION = 9;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -677,9 +677,12 @@ function backup_(b) {
     if (typeof b.full === 'string' && b.full.length > 20) {
       if (b.full.length > 40 * 1024 * 1024) return { ok: false, error: 'big' };
       try { JSON.parse(b.full); } catch (e) { return { ok: false, error: 'json' }; }
-      var folder = backupFolder_(), name = 'MB-Sweets-backup-' + day + '.json', old = folder.getFilesByName(name);
-      folder.createFile(Utilities.newBlob(b.full, 'application/json', name));
-      while (old.hasNext()) old.next().setTrashed(true);          // उसी दिन की पुरानी कॉपी की जगह नई
+      // संस्करण 9: उसी दिन की पुरानी कॉपी पहले गिन लो, फिर नई बनाओ, फिर सिर्फ़ पुरानी हटाओ.
+      // (संस्करण 8 में सूची नई फ़ाइल बनने के बाद पढ़ी जाती थी — उसमें नई फ़ाइल भी आ जाती और वो भी कचरे में चली जाती।)
+      var folder = backupFolder_(), name = 'MB-Sweets-backup-' + day + '.json', olds = [], it = folder.getFilesByName(name);
+      while (it.hasNext()) { var f0 = it.next(); if (!f0.isTrashed()) olds.push(f0); }
+      var nf = folder.createFile(Utilities.newBlob(b.full, 'application/json', name)), nid = nf.getId();
+      olds.forEach(function (f) { if (f.getId() !== nid) f.setTrashed(true); });
       res.file = name;
       bkCleanup_(folder);
     }
@@ -692,14 +695,14 @@ function backup_(b) {
 }
 /* 40 दिन से पुरानी रोज़ वाली फ़ाइलें हटाओ — हर महीने की 1 तारीख़ वाली हमेशा रखो */
 function bkCleanup_(folder) {
-  var cut = istKey_(-40), it = folder.getFiles();
+  var cut = istKey_(-40), it = folder.searchFiles('trashed = false');
   while (it.hasNext()) {
     var f = it.next(), m = /^MB-Sweets-backup-(\d{4}-\d\d-(\d\d))\.json$/.exec(f.getName());
     if (m && m[1] < cut && m[2] !== '01') f.setTrashed(true);
   }
 }
 function backupList_() {
-  var it = backupFolder_().getFiles(), L = [];
+  var it = backupFolder_().searchFiles('trashed = false'), L = [];
   while (it.hasNext()) {
     var f = it.next(), m = /^MB-Sweets-backup-(\d{4}-\d\d-\d\d)\.json$/.exec(f.getName());
     if (m) L.push({ id: f.getId(), day: m[1], size: f.getSize(), at: f.getLastUpdated().getTime() });
