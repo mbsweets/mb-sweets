@@ -4538,7 +4538,9 @@ function cloudBackup(manual,force){
     return fetch(c.u,{method:'POST',body:JSON.stringify({action:'backup',key:c.k,day:todayStr(),rows:cloudRows(31),full:full}),redirect:'follow'})
       .then(function(r){return r.json();})
       .then(function(r){cbBusy=false;
-        if(r&&r.ok){lsSet(CB_LS,{day:todayStr(),t:Date.now(),t0:t0,size:size,file:r.file||'',ch:num(cloudInfo().ch)});ui.cbShrink=null;ui.cbFail=0;if(cbDirty())cbPlan(60000);}
+        if(r&&r.ok){lsSet(CB_LS,{day:todayStr(),t:Date.now(),t0:t0,size:size,file:r.file||'',ch:num(cloudInfo().ch)});ui.cbShrink=null;ui.cbFail=0;
+          if(num(r.v)>=8){var pv=lsGet(PLAN_SENT,{})||{};if(num(pv.v)<num(r.v)){pv.v=num(r.v);delete pv.old;lsSet(PLAN_SENT,pv);}}   // हाथ से बैकअप चला = रजिस्टर 8 चालू → अब अपने-आप भी
+          if(cbDirty())cbPlan(60000);}
         else{if(r&&r.error==='action'){var ps=lsGet(PLAN_SENT,{})||{};if(num(ps.v)>=8){ps.v=7;lsSet(PLAN_SENT,ps);}}
           ui.cbFail=(ui.cbFail||0)+1;cbPlan(Math.min(30,5*ui.cbFail)*60000);}
         cbRefresh();
@@ -10574,6 +10576,7 @@ startOnline();
 if(ui.lpTokNew){ui.lpTokNew=false;save();}
 lpSyncSoon(3000);
 window.addEventListener('online',function(){lpSyncSoon(2000);});
+if(onlineCfg()&&!num((lsGet(PLAN_SENT,{})||{}).v)&&!(lsGet(PLAN_SENT,{})||{}).old)planSyncSoon();   // सेटअप/जाँच के बाद रजिस्टर का संस्करण तुरंत पता करो (Google बैकअप उसी से चालू होता है)
 setTimeout(function(){if(cloudOn()){var ci=cloudInfo();if(ci.day!==todayStr()||cbDirty(ci))cloudBackup(false);}},15000);
 /* ऐप छोड़ते समय (WhatsApp पर बिल भेजने गए, फ़ोन बंद किया): बदलाव बाकी हों तो अभी Drive में */
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')cbNow(10*60000);});
