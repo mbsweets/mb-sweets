@@ -307,6 +307,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .gcres small{display:block;color:var(--muted);margin:4px 0 8px}.gccode{font-size:1.6rem;font-weight:800;letter-spacing:3px}
 .gcerr{color:#c62828;font-weight:600}.gcmore{margin-top:12px}.gcmore summary{cursor:pointer;color:var(--muted)}
 .onhome span{margin-left:auto;color:var(--muted);font-size:.84rem}
+/* 🛡️ हिसाब की सुरक्षा — होम की एक लाइन + ख़ाली ऐप वाला "वापस लाओ" डिब्बा */
+.safechip{display:flex;align-items:center;gap:6px;width:100%;margin:2px 0 8px;padding:7px 11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--green);font:inherit;font-size:.8rem;font-weight:600;text-align:left;line-height:1.35}
+.safechip span{margin-left:auto;white-space:nowrap;font-weight:700}
+.safechip.warn{color:var(--amber);border-color:var(--amber)}
+.safechip.bad{color:var(--red);border:2px solid var(--red);background:var(--red-bg)}
+.rescue{margin:4px 0 12px;padding:14px;border:2px solid var(--red);border-radius:14px;background:var(--red-bg);line-height:1.5}
+.rescue h3{margin:0 0 6px;font-size:1.08rem;color:var(--red)}
+.rescue p{margin:0 0 8px;font-size:.92rem}
 /* चिपकी पट्टी को स्क्रॉल-एंकर मत बनने दो — वरना छोटा बदलाव होते ही पेज ऊपर कूदता है */
 .hxtop,.hxbody{overflow-anchor:none}
 /* 🌙 रात का हिसाब */
@@ -1176,6 +1184,7 @@ function daysSinceBackup(){
 }
 function backupWarningHtml(){
   if(!state.customers.length&&!state.orders.length)return '';
+  if(cloudOn()&&Date.now()-num(cloudInfo().t)<48*3600000)return '';   // Google बैकअप चल रहा है — WhatsApp वाला रोज़ ज़रूरी नहीं
   var d=daysSinceBackup();
   if(d===null){
     return '<button class="banner btn-banner" data-act="nav" data-v="backup">\u26A0\uFE0F Aapne kabhi backup nahi liya! Data surakshit rakhne ke liye "बैकअप" tab mein jaake "Copy karo" dabao.</button>';
@@ -1571,7 +1580,7 @@ function renderHome(){
     }).join('')+(moreCust?'<button class="btn block small" style="margin-top:8px" data-act="all-custs">बाकी '+moreCust+' ग्राहक भी दिखाओ (या ऊपर नाम खोजो)</button>':'');
   }
 
-  paint($('#main'),hsHomeCard()+band+duesLink+sections+
+  paint($('#main'),rescueCardHtml()+safeChipHtml()+hsHomeCard()+band+duesLink+sections+
     '<div class="sechead" style="margin-top:20px"><h2>ग्राहक खोजो</h2></div>'+
     '<input id="search" type="search" placeholder="नाम या फोन नंबर" autocomplete="off" value="'+esc(ui.search)+'">'+
     '<div class="addrow"><button class="lnk" data-act="add-customer">+ नया ग्राहक</button></div>'+
@@ -2704,6 +2713,7 @@ function navHashStrip(ev){
 }
 function checkWebImport(ev){
   var h=location.hash||'';
+  if(h.indexOf('#rec&')===0){recOpen(h.slice(5),ev);return;}   // 🛟 वापसी लिंक
   if(h==='#online'){
     navHashStrip(ev);
     if($('#ov'))closeSheet();
@@ -4074,6 +4084,7 @@ function hxCloseSave(){
   if(e.gc!==''&&e.gc!=null||e.upi!==''&&e.upi!=null||e.uc!==''&&e.uc!=null)trashPut('बदला',C.d,{gc:e.gc,upi:e.upi,uc:e.uc});
   e.upi=sv('upi');e.gc=sv('gc');e.uc=sv('uc');e.cash='';
   save();ui.hxc=null;closeSheet();renderRoute();
+  cbNow(60000);                                   // दिन बंद = आज का पूरा हिसाब तुरंत Google Drive में
   var mt=k.cnt==null?'':(k.open==null?' · 🔝 ऊपर का हिसाब शुरू':(Math.abs(k.diff)<0.5?' · 🔝 ऊपर ✅ मिल गया':' · 🔝 ऊपर ⚠️ '+rupee(Math.abs(k.diff))+' '+(k.diff>0?'ज़्यादा':'कम')));
   toast(hsHas(e)?'✅ दिन बंद — बिक्री '+rupee(hsTot(e))+' (कैश '+rupee(hsCashSale(e))+' · UPI '+rupee(hsUpiSale(e))+')'+mt:'सेव हो गया — रात को बड़े नोट गिनकर लिखिए'+mt);
 }
@@ -4463,12 +4474,21 @@ function fixGo(){
   save();closeSheet();renderRoute();toast(moved?'✓ '+moved+' एंट्री सप्लायर खाते में गई':'कुछ नहीं चुना');
 }
 
-/* ---------- ☁️ Google बैकअप (रजिस्टर कोड 8) — रोज़ अपने-आप, मालिक की अपनी Google Drive में ----------
-   "कभी डिलीट नहीं होना चाहिए… 5 साल बाद भी पूछूँ" — ऐप ख़ुद कुछ नहीं मिटाता; ये फ़ोन खोने/बदलने के लिए।
-   रोज़ एक बार (और हर बदलाव के 1 मिनट बाद, 3 घंटे में ज़्यादा से ज़्यादा एक बार): पूरा state + पिछले 31 दिन की लाइन "Hisaab" शीट के लिए। */
-var CB_LS='mbmb-cloud',cbTimer=null,cbBusy=false;
+/* ---------- ☁️ Google बैकअप (रजिस्टर कोड 8) — अपने-आप, मालिक की अपनी Google Drive में ----------
+   "Chrome में कुछ भी करूँ, हिसाब पर असर न हो · 10 साल पीछे का भी देख सकूँ" — फ़ोन वाला डेटा Chrome की
+   "कुकी और साइट डेटा" साफ़ करने से मिट सकता है, इसलिए हिसाब की असली कॉपी Drive में रहती है:
+   • हर बदलाव के ~2 मिनट बाद (पिछले बैकअप से कम से कम 20 मिनट का फ़ासला; बड़ा डेटा हो तो 30–60),
+     "दिन बंद" करते ही तुरंत, ऐप छोड़ते समय (बदलाव बाकी हों और 10 मिनट हो चुके हों), और रोज़ कम से कम एक बार।
+   • पूरा state + पिछले 31 दिन की लाइन "Hisaab" शीट के लिए।
+   • ख़ाली/बहुत कम डेटा कभी अच्छे बैकअप के ऊपर अपने-आप नहीं चढ़ता (cbGuard) — Chrome साफ़ होने के बाद ख़ाली ऐप Drive नहीं बिगाड़ता।
+   • Drive (रजिस्टर कोड): रोज़ की फ़ाइल 40 दिन, हर महीने की 1 तारीख़ वाली हमेशा। */
+var CB_LS='mbmb-cloud',cbTimer=null,cbDue=0,cbBusy=false;
 function cloudInfo(){return lsGet(CB_LS,{})||{};}
 function cloudOn(){return !!onlineCfg()&&num((lsGet(PLAN_SENT,{})||{}).v)>=8;}
+function cbDirty(ci){ci=ci||cloudInfo();return num(ci.ch)>num(ci.t0||ci.t);}       // आख़िरी बैकअप के बाद कुछ बदला?
+function cbGap(ci){var s=num(ci.size);return (s>3000000?60:s>1000000?30:20)*60000;}
+function u8len(s){try{return new TextEncoder().encode(s).length;}catch(e){return String(s).length;}}
+function kbTxt(b){b=num(b);return b>=1048576?(Math.round(b/104857.6)/10)+' MB':Math.max(1,Math.round(b/1024))+' KB';}
 function cloudRows(n){
   var t=todayStr(),R=[];
   for(var i=n-1;i>=0;i--){var d=hsKeyAdd(t,-i),e=hsGet(d);if(!e)continue;var has=hsHas(e);
@@ -4476,39 +4496,173 @@ function cloudRows(n){
       round2(glList(e.sm).reduce(function(s,x){return s+num(x.v);},0))||'',round2(glList(e.sp).reduce(function(s,x){return s+num(x.v);},0))||'',hsMadeList(e).map(hsMadeTxt).join(', '),e.waste||'']);}
   return R;
 }
+/* save() से: "कुछ बदला" दर्ज करो, ~2 मिनट बाद बैकअप (फ़ासला पूरा होने पर) */
 function cloudSoon(){
-  if(!cloudOn())return;clearTimeout(cbTimer);
-  cbTimer=setTimeout(function(){var ci=cloudInfo();if(ci.day!==todayStr()||Date.now()-num(ci.t)>3*3600000)cloudBackup(false);},60000);
+  var ci=cloudInfo();ci.ch=Date.now();lsSet(CB_LS,ci);
+  cbPlan(2*60000);
 }
-function cloudBackup(manual){
+function cbPlan(wait){
+  if(!cloudOn())return;
+  var ci=cloudInfo(),now=Date.now(),due=now+Math.max(wait,num(ci.t)+cbGap(ci)-now);
+  if(cbTimer&&cbDue>now-1000&&cbDue<=due)return;   // पहले से जल्दी वाला टाइमर लगा है — लगातार बदलाव में भी बैकअप टले नहीं
+  clearTimeout(cbTimer);cbDue=due;
+  cbTimer=setTimeout(function(){cbTimer=null;cbDue=0;if(cbDirty()||cloudInfo().day!==todayStr())cloudBackup(false);},Math.max(1000,due-now));
+}
+/* अभी भेजो — "दिन बंद" (minGap 1 मिनट) / ऐप छोड़ते समय (10 मिनट) */
+function cbNow(minGap){
+  if(!cloudOn()||cbBusy)return;
+  var ci=cloudInfo();if(!cbDirty(ci))return;
+  if(Date.now()-num(ci.t)<minGap){cbPlan(0);return;}
+  clearTimeout(cbTimer);cbTimer=null;cbDue=0;cloudBackup(false);
+}
+/* ख़ाली ऐप Drive का अच्छा बैकअप न बिगाड़े: अभी का डेटा पिछले बैकअप के आधे से कम (और 30 KB से ज़्यादा कम) हो तो अपने-आप मत भेजो.
+   इस फ़ोन से पहले कोई बैकअप नहीं गया (Chrome साफ़ हुआ / नया फ़ोन) तो पहले Drive की सबसे नई फ़ाइल से मिलाओ. */
+function cbGuard(c,size,force){
+  if(force)return Promise.resolve({ok:true});
+  var was=num(cloudInfo().size),bad=function(w){return w>0&&size<w*0.5&&w-size>30000;};
+  if(was){if(!bad(was))return Promise.resolve({ok:true});ui.cbShrink={was:was,now:size};return Promise.resolve({ok:false,was:was});}
+  return fetch(c.u+'?action=backups&key='+encodeURIComponent(c.k),{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
+    var f=r&&r.ok&&r.files&&r.files[0],w=f?num(f.size):0;
+    if(!bad(w))return {ok:true};
+    ui.cbShrink={was:w,now:size,day:f.day};return {ok:false,was:w};
+  },function(){return {ok:false,net:true};});
+}
+function cloudBackup(manual,force){
   var c=onlineCfg();if(!c||cbBusy)return Promise.resolve(null);
   if(!cloudOn()&&!manual)return Promise.resolve(null);
-  cbBusy=true;var full;try{full=JSON.stringify(state);}catch(e){cbBusy=false;return Promise.resolve(null);}
-  return fetch(c.u,{method:'POST',body:JSON.stringify({action:'backup',key:c.k,day:todayStr(),rows:cloudRows(31),full:full}),redirect:'follow'})
-    .then(function(r){return r.json();})
-    .then(function(r){cbBusy=false;
-      if(r&&r.ok){lsSet(CB_LS,{day:todayStr(),t:Date.now(),size:full.length,file:r.file||''});}
-      else if(r&&r.error==='action'){var ps=lsGet(PLAN_SENT,{})||{};if(num(ps.v)>=8){ps.v=7;lsSet(PLAN_SENT,ps);}}
-      if(ui.view==='backup'&&!$('#ov'))renderBackup();
-      return r;},function(){cbBusy=false;return null;});
+  var full;try{full=JSON.stringify(state);}catch(e){return Promise.resolve(null);}
+  var size=u8len(full),t0=Date.now();
+  cbBusy=true;
+  return cbGuard(c,size,force).then(function(g){
+    if(!g.ok){cbBusy=false;cbRefresh();return {ok:false,error:g.net?'net':'shrink',was:g.was,now:size};}
+    return fetch(c.u,{method:'POST',body:JSON.stringify({action:'backup',key:c.k,day:todayStr(),rows:cloudRows(31),full:full}),redirect:'follow'})
+      .then(function(r){return r.json();})
+      .then(function(r){cbBusy=false;
+        if(r&&r.ok){lsSet(CB_LS,{day:todayStr(),t:Date.now(),t0:t0,size:size,file:r.file||'',ch:num(cloudInfo().ch)});ui.cbShrink=null;ui.cbFail=0;if(cbDirty())cbPlan(60000);}
+        else{if(r&&r.error==='action'){var ps=lsGet(PLAN_SENT,{})||{};if(num(ps.v)>=8){ps.v=7;lsSet(PLAN_SENT,ps);}}
+          ui.cbFail=(ui.cbFail||0)+1;cbPlan(Math.min(30,5*ui.cbFail)*60000);}
+        cbRefresh();
+        return r;},function(){cbBusy=false;ui.cbFail=(ui.cbFail||0)+1;cbPlan(Math.min(30,5*ui.cbFail)*60000);cbRefresh();return null;});
+  });
+}
+/* restore के बाद: वापस आया डेटा ही अब "पूरा" माना जाए */
+function cbRestored(){var ci=cloudInfo();ci.size=u8len(JSON.stringify(state));lsSet(CB_LS,ci);ui.cbShrink=null;lsSet('mbmb-fresh-ok',0);}
+function cbRefresh(){
+  var a=$('#safechip');if(a)a.outerHTML=safeChipHtml();
+  var b=$('#cbcard');if(b)b.outerHTML=cloudCardHtml();
+}
+function cbWhen(t){var d=new Date(num(t));if(dayKey(d)===todayStr())return 'आज '+d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});return fmtDT(t);}
+function cbNowDone(r){
+  if(r&&r.error==='shrink'){
+    openSheet('<div class="sh-head"><h2>⚠️ रुकिए</h2></div>'+
+      '<p class="hint">ऐप में अभी का हिसाब (<b>'+kbTxt(r.now)+'</b>) Google Drive के सबसे नए बैकअप (<b>'+kbTxt(r.was)+'</b>) से बहुत कम है — शायद Chrome साफ़ होने से फ़ोन का डेटा मिट गया।</p>'+
+      '<p class="hint">पहले Google से वापस लाइए। "फिर भी भेजो" दबाया तो आज की फ़ाइल इस कम डेटा से बदल जाएगी (पिछले दिनों की फ़ाइलें सुरक्षित रहेंगी)।</p>'+
+      '<div class="sh-actions"><button class="btn" data-act="cb-force">फिर भी भेजो</button><button class="btn primary" data-act="cb-list" data-rescue="1">⬇️ वापस लाओ</button></div>');
+    return;
+  }
+  toast(r&&r.ok?'☁️ बैकअप हो गया ✓':(r&&r.error==='action'?'रजिस्टर का कोड 8 अभी नहीं चिपका':'नहीं हो पाया — इंटरनेट देखिए और दोबारा दबाइए'));
+}
+
+/* ---------- 🛟 वापसी लिंक — Chrome साफ़ हो / ऐप ख़ाली दिखे / नया फ़ोन: एक लिंक दबाओ → रजिस्टर से जुड़ो → Drive का सबसे नया बैकअप ----------
+   लिंक में रजिस्टर की चाबी है (सेटअप लिंक जैसी) — सिर्फ़ मालिक के अपने WhatsApp में; ऐप खुलते ही पता-पट्टी से हटा देता है। */
+var GS_URL_RE=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{20,}\/exec$/;
+function appEmpty(){return !state.customers.length&&!state.orders.length&&!(state.daily||[]).length&&!KH().parties.length&&!LY().m.length;}
+function recLink(){
+  var c=onlineCfg();if(!c)return '';
+  var base;try{base=new URL('./',location.href).href;}catch(e){base='https://mbsweets.github.io/mb-sweets/';}
+  return base+'#rec&u='+encodeURIComponent(c.u)+'&k='+encodeURIComponent(c.k)+'&t='+encodeURIComponent(c.t||'');
+}
+function recShare(){
+  var l=recLink();if(!l){toast('पहले ऑनलाइन (रजिस्टर) जोड़िए');return;}
+  var txt='🛟 MB Sweets — वापसी लिंक\n(सिर्फ़ अपने पास रखें — किसी को न भेजें, इसमें दुकान की चाबी है)\n\n'+
+    'Chrome साफ़ हो जाए, ऐप ख़ाली दिखे या नया फ़ोन लें — बस ये लिंक दबाइए, Google Drive से पूरा हिसाब वापस आ जाएगा:\n'+l;
+  var done=function(msg){state.shop.recAt=Date.now();save();cbRefresh();toast(msg);};
+  var copy=function(){
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){done('📋 कॉपी हो गया — WhatsApp में अपने नंबर ("Message yourself") पर चिपकाकर भेजिए');},function(){toast('कॉपी नहीं हुआ');});
+    else toast('इस फ़ोन में Share/कॉपी नहीं चला');
+  };
+  if(navigator.share)navigator.share({title:'MB Sweets वापसी लिंक',text:txt}).then(function(){done('✓ वापसी लिंक भेज दिया — अपने WhatsApp में संभालकर रखिए');},function(e){if(e&&e.name==='AbortError')return;copy();});
+  else copy();
+}
+function recOpen(q,ev){
+  navHashStrip(ev);if($('#ov'))closeSheet();
+  var p={};q.split('&').forEach(function(kv){var i=kv.indexOf('=');if(i>0){try{p[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1));}catch(e){}}});
+  if(!p.u||!p.k||!GS_URL_RE.test(p.u)){toast('वापसी लिंक अधूरा है — WhatsApp से पूरा लिंक दोबारा दबाइए');return;}
+  var old=onlineCfg();
+  lsSet(ONLINE_CFG,{u:p.u,k:p.k,t:p.t||(old&&old.t)||''});
+  if(!ui.onlineStarted)startOnline();else online.cfg=onlineCfg();
+  fetch(p.u+'?action=ping',{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
+    if(!r||!r.ok)return;
+    var ps=lsGet(PLAN_SENT,{})||{};
+    if(num(r.v)>num(ps.v)){ps.v=num(r.v);delete ps.old;lsSet(PLAN_SENT,ps);}
+    if(r.vapid&&pushSupported()&&Notification.permission==='granted'&&!pushOn())   // घंटी की अनुमति पहले से है — घंटी भी अपने-आप वापस
+      pushSubscribe(r.vapid).then(function(sub){return pushPost(onlineCfg(),sub,r.vapid);}).catch(function(){});
+    cbRefresh();
+  }).catch(function(){});
+  if(appEmpty()){ui.view='home';renderRoute();cloudListOpen(true);}
+  else{ui.view='backup';renderRoute();window.scrollTo(0,0);toast('🛟 वापसी लिंक से जुड़ गया ✓');}
+}
+/* होम पर: ख़ाली ऐप हो तो सबसे ऊपर "वापस लाओ" डिब्बा */
+function rescueCardHtml(){
+  if(!appEmpty()||lsGet('mbmb-fresh-ok',0))return '';
+  var on=!!onlineCfg();
+  return '<div class="rescue"><h3>🛟 ऐप ख़ाली दिख रहा है?</h3>'+
+    '<p>Chrome में <b>"कुकी और साइट डेटा"</b> साफ़ करने से फ़ोन वाला डेटा मिट जाता है। घबराइए नहीं — आपका हिसाब <b>Google Drive</b> में सुरक्षित है।</p>'+
+    (on?'<button class="btn primary block" data-act="cb-list" data-rescue="1">⬇️ Google से पूरा हिसाब वापस लाओ</button>'
+      :'<p><b>1.</b> WhatsApp में अपना <b>"🛟 वापसी लिंक"</b> वाला मैसेज खोलकर लिंक दबाइए — बाकी सब अपने-आप।</p>'+
+       '<p><b>2.</b> या <b>Google Drive</b> ऐप → <b>"MB Sweets — ऐप का बैकअप"</b> फ़ोल्डर → सबसे नई फ़ाइल के ⋮ → <b>Download</b> → फिर नीचे वाला बटन।</p>')+
+    '<label class="btn block'+(on?'':' primary')+'" style="margin-top:8px;justify-content:center;text-align:center">📂 बैकअप फ़ाइल चुनकर वापस लाओ<input id="rs-file" type="file" accept=".txt,.json,text/plain,application/json" style="display:none"></label>'+
+    '<button class="lnk muted" data-act="cb-fresh" style="margin-top:6px">ये नई शुरुआत है — ये डिब्बा छिपाओ</button></div>';
+}
+/* होम पर एक लाइन: हिसाब सुरक्षित है या नहीं */
+function safeChipHtml(){
+  var ci=cloudInfo(),h;
+  if(appEmpty())return '<span id="safechip"></span>';
+  if(ui.cbShrink)h=['bad','cb-list','🛟 ऐप में हिसाब Google बैकअप से बहुत कम है — पहले वापस लाओ','देखो →'];
+  else if(!onlineCfg())h=['bad','nav','⚠️ Google बैकअप बंद — Chrome साफ़ हुआ तो हिसाब जा सकता है','जोड़ो →'];
+  else if(!cloudOn())h=['warn','nav','⏳ Google बैकअप अभी चालू नहीं हुआ','देखो →'];
+  else if(!ci.t&&cbDirty(ci))h=['warn','cb-now','⏳ Google बैकअप कुछ मिनट में अपने-आप जाएगा','अभी भेजो →'];
+  else if(!ci.t||Date.now()-num(ci.t)>36*3600000)h=['warn','cb-now',ci.t?'⚠️ Google बैकअप '+cbWhen(ci.t)+' के बाद नहीं गया':'⚠️ अभी तक Google बैकअप नहीं गया','अभी भेजो →'];
+  else if(!state.shop.recAt)h=['warn','cb-rec','🛡️ Google बैकअप ✓ · 🔗 वापसी लिंक अभी WhatsApp पर नहीं भेजा','भेजो →'];
+  else h=['ok','nav','🛡️ हिसाब सुरक्षित · Google बैकअप '+cbWhen(ci.t)+(cbDirty(ci)?' · नए बदलाव कुछ देर में':' ✓'),''];
+  return '<button id="safechip" class="safechip '+h[0]+'" data-act="'+h[1]+'"'+(h[1]==='nav'?' data-v="backup"':'')+(h[1]==='cb-list'?' data-rescue="1"':'')+'>'+h[2]+(h[3]?'<span>'+h[3]+'</span>':'')+'</button>';
+}
+function restoreAskHtml(rd){
+  return '<div class="sh-head"><h2>Restore करें?</h2></div>'+
+    '<p class="hint">इस बैकअप में <b>'+rd.customers.length+' ग्राहक</b>, <b>'+rd.orders.length+' ऑर्डर</b>, '+((rd.khata&&rd.khata.parties)?rd.khata.parties.length:0)+' उधारी खाते और '+(Array.isArray(rd.daily)?rd.daily.length:0)+' दिन का हिसाब है।</p>'+
+    (appEmpty()?'':'<p class="hint">अभी ऐप वाला डेटा इससे बदल जाएगा (पहले उसकी फ़ाइल सेव होगी)।</p>')+
+    '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-restore">हां, Restore करो</button></div>';
+}
+function chromeTipHtml(){
+  return '<div class="installbox"><p>🧹 <b>Chrome साफ़ करते समय:</b> "Delete browsing data / ब्राउज़िंग डेटा मिटाएँ" में <b>"Cookies and site data" (कुकी और साइट डेटा)</b> का ✓ हटा दीजिए — सिर्फ़ "Browsing history" और "Cached images and files" चुनिए। तब ऐप का हिसाब फ़ोन में भी बना रहेगा। गलती से मिट भी जाए तो नीचे वाला 🛟 वापसी लिंक है।</p></div>';
 }
 function cloudCardHtml(){
-  if(!onlineCfg())return '';
-  var ci=cloudInfo(),on=cloudOn();
-  var st=!on?'<p class="hint">रजिस्टर का नया कोड (संस्करण 8) चिपकाते ही रोज़ अपने-आप आपकी <b>Google Drive</b> में पूरा बैकअप जाएगा और "Hisaab" शीट में हर दिन की लाइन — फ़ोन खो जाए तो भी सब वापस आ जाएगा। <a class="lnk" style="padding:0" href="online/setup.html#st-milk" target="_blank" rel="noopener">सेटअप पेज, चरण 7</a></p>':
-    (ci.t?'<p class="hint" style="color:var(--green);font-weight:700">✓ आख़िरी बैकअप: '+fmtDT(ci.t)+(ci.size?' · '+(Math.round(ci.size/1024))+' KB':'')+'</p>':'<p class="hint">अभी तक कोई Google बैकअप नहीं गया — नीचे दबाकर पहला बैकअप लीजिए।</p>');
-  return '<div class="sechead" style="margin-top:14px"><h2>☁️ Google बैकअप (अपने-आप, रोज़)</h2></div>'+st+
-    (on?'<div class="actbar"><button class="btn primary small" data-act="cb-now">☁️ अभी बैकअप लो</button><button class="btn small" data-act="cb-list">⬇️ Google से वापस लाओ</button></div>':'');
+  var sz=0;try{sz=u8len(JSON.stringify(state));}catch(e){}
+  var space='<p class="hint">📦 हिसाब का साइज़: <b>'+kbTxt(sz)+'</b> · इस फ़ोन में ऐप की जगह <b>'+storageUsedPct()+'%</b> भरी</p>';
+  if(!onlineCfg())return '<div id="cbcard"><div class="sechead" style="margin-top:14px"><h2>🛡️ हिसाब की सुरक्षा</h2></div>'+
+    '<p class="hint" style="color:var(--red);font-weight:700">⚠️ Google बैकअप बंद है — नीचे "🌐 ऑनलाइन ऑर्डर" का सेटअप जोड़िए (या WhatsApp वाला 🛟 वापसी लिंक दबाइए), तभी हिसाब अपने-आप आपकी Google Drive में जाएगा।</p>'+chromeTipHtml()+space+'</div>';
+  var ci=cloudInfo(),on=cloudOn(),rs=state.shop.recAt;
+  var st=!on?'<p class="hint">रजिस्टर का नया कोड (संस्करण 8) चिपकाते ही अपने-आप आपकी <b>Google Drive</b> में पूरा बैकअप जाएगा और "Hisaab" शीट में हर दिन की लाइन — फ़ोन खो जाए तो भी सब वापस आ जाएगा। <a class="lnk" style="padding:0" href="online/setup.html#st-milk" target="_blank" rel="noopener">सेटअप पेज, चरण 7</a></p>':
+    (ci.t?'<p class="hint" style="color:var(--green);font-weight:700">✓ आख़िरी बैकअप: '+cbWhen(ci.t)+(ci.size?' · '+kbTxt(ci.size):'')+(cbDirty(ci)?' · नए बदलाव कुछ देर में जाएँगे':'')+'</p>':'<p class="hint">अभी तक इस फ़ोन से कोई Google बैकअप नहीं गया — नीचे दबाकर पहला बैकअप लीजिए।</p>');
+  if(ui.cbShrink)st+='<div class="banner" style="margin:6px 0">🛟 ऐप में अभी का हिसाब ('+kbTxt(ui.cbShrink.now)+') Google के सबसे नए बैकअप ('+kbTxt(ui.cbShrink.was)+') से बहुत कम है, इसलिए अपने-आप बैकअप रोका गया है — पहले "⬇️ Google से वापस लाओ" दबाइए।</div>';
+  return '<div id="cbcard"><div class="sechead" style="margin-top:14px"><h2>☁️ Google बैकअप (अपने-आप)</h2></div>'+st+
+    (on?'<p class="hint">हर बदलाव के कुछ मिनट बाद, "दिन बंद" करते ही तुरंत और ऐप छोड़ते समय — आपकी अपनी Google Drive के <b>"MB Sweets — ऐप का बैकअप"</b> फ़ोल्डर में। रोज़ की फ़ाइल 40 दिन, <b>हर महीने की 1 तारीख़ वाली हमेशा</b> (10 साल बाद भी)।</p>'+
+      '<div class="actbar"><button class="btn primary small" data-act="cb-now">☁️ अभी बैकअप लो</button><button class="btn small" data-act="cb-list">⬇️ Google से वापस लाओ</button></div>':'')+
+    '<div class="installbox"><p>🛟 <b>वापसी लिंक</b> — Chrome साफ़ हो जाए, ऐप ख़ाली दिखे या नया फ़ोन लें: WhatsApp में ये लिंक दबाते ही ऐप जुड़कर Drive से पूरा हिसाब वापस ले आएगा।</p>'+
+      '<p class="hint" style="font-weight:700;color:'+(rs?'var(--green)">✓ भेजा: '+fmtDT(rs):'var(--red)">⚠️ अभी नहीं भेजा')+'</p>'+
+      '<button class="btn '+(rs?'':'primary ')+'small" data-act="cb-rec">📤 वापसी लिंक WhatsApp पर भेजो</button>'+
+      '<p class="hint">अपने ही नंबर पर ("Message yourself") भेजिए — किसी और को नहीं, इसमें दुकान की चाबी है।</p></div>'+
+    chromeTipHtml()+space+'</div>';
 }
-function cloudListOpen(){
+function cloudListOpen(rescue){
   var c=onlineCfg();if(!c)return;
   openSheet('<div class="sh-head"><h2>⬇️ Google से वापस लाओ</h2><button class="lnk muted" data-act="close">बंद करो</button></div><p class="hint">ढूँढ रहे हैं…</p>');
   fetch(c.u+'?action=backups&key='+encodeURIComponent(c.k),{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
     if(!$('#ov'))return;
     if(!r||!r.ok){setSheet('<div class="sh-head"><h2>⬇️ Google से वापस लाओ</h2><button class="lnk muted" data-act="close">बंद करो</button></div><p class="hint">सूची नहीं मिली ('+esc((r&&r.error)||'?')+') — इंटरनेट देखिए, या रजिस्टर का कोड 8 चिपकाइए।</p>');return;}
     setSheet('<div class="sh-head"><h2>⬇️ Google से वापस लाओ</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
-      '<p class="hint">जिस दिन का बैकअप चाहिए वो चुनिए। अभी वाला डेटा पहले एक फ़ाइल में सेव होगा, फिर बदलेगा।</p>'+
-      (r.files&&r.files.length?'<div class="suplist">'+r.files.map(function(f){return '<button class="suprow" data-act="cb-get" data-id="'+esc(f.id)+'"><span class="l"><b>'+hsDm(f.day)+' '+f.day.slice(0,4)+'</b><small>'+hsWdOf(f.day)+' · '+Math.round(f.size/1024)+' KB</small></span><span class="r"><small>चुनो →</small></span></button>';}).join('')+'</div>':'<p class="hint">अभी कोई बैकअप नहीं है।</p>'));
+      (rescue||appEmpty()?'<p class="hint" style="font-weight:700">🛟 सबसे ऊपर वाला (सबसे नया ⭐) बैकअप चुनिए — फिर "हां, Restore करो"।</p>':'<p class="hint">जिस दिन का बैकअप चाहिए वो चुनिए। अभी वाला डेटा पहले एक फ़ाइल में सेव होगा, फिर बदलेगा।</p>')+
+      (r.files&&r.files.length?'<div class="suplist">'+r.files.map(function(f,fi){return '<button class="suprow" data-act="cb-get" data-id="'+esc(f.id)+'"><span class="l"><b>'+(fi?'':'⭐ ')+hsDm(f.day)+' '+f.day.slice(0,4)+'</b><small>'+hsWdOf(f.day)+(f.at?' · '+new Date(f.at).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})+' तक का':'')+' · '+kbTxt(f.size)+'</small></span><span class="r"><small>चुनो →</small></span></button>';}).join('')+'</div>':'<p class="hint">अभी कोई बैकअप नहीं है।</p>'));
   }).catch(function(){if($('#ov'))setSheet('<div class="sh-head"><h2>⬇️ Google से वापस लाओ</h2><button class="lnk muted" data-act="close">बंद करो</button></div><p class="hint">इंटरनेट नहीं मिला — दोबारा कोशिश करें।</p>');});
 }
 function cloudGet(id){
@@ -4517,10 +4671,7 @@ function cloudGet(id){
     var rd=null;try{rd=r&&r.ok?JSON.parse(r.data):null;}catch(e){rd=null;}
     if(!rd||!Array.isArray(rd.orders)||!Array.isArray(rd.customers)||!Array.isArray(rd.items)){toast('ये बैकअप पढ़ा नहीं गया');return;}
     ui.pendingRestore=rd;
-    setSheet('<div class="sh-head"><h2>Restore करें?</h2></div>'+
-      '<p class="hint">इस बैकअप में <b>'+rd.customers.length+' ग्राहक</b>, <b>'+rd.orders.length+' ऑर्डर</b>, '+((rd.khata&&rd.khata.parties)?rd.khata.parties.length:0)+' उधारी खाते और '+(Array.isArray(rd.daily)?rd.daily.length:0)+' दिन का हिसाब है।</p>'+
-      '<p class="hint">अभी ऐप वाला डेटा इससे बदल जाएगा (पहले उसकी फ़ाइल सेव होगी)।</p>'+
-      '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-restore">हां, Restore करो</button></div>');
+    if($('#ov'))setSheet(restoreAskHtml(rd));else openSheet(restoreAskHtml(rd));
   }).catch(function(){toast('इंटरनेट नहीं मिला — दोबारा कोशिश करें');});
 }
 
@@ -4642,8 +4793,11 @@ function hxClick2(t,act){
     case 'calc-ok':calcOk();return true;
     case 'calc-x':calcClose();return true;
     case 'sup-maal':closeSheet();hxSheet('maal',{s:t.getAttribute('data-s'),d:todayStr()});return true;
-    case 'cb-now':toast('Google में भेज रहे हैं…');cloudBackup(true).then(function(r){toast(r&&r.ok?'☁️ बैकअप हो गया ✓':(r&&r.error==='action'?'रजिस्टर का कोड 8 अभी नहीं चिपका':'नहीं हो पाया — इंटरनेट देखिए'));});return true;
-    case 'cb-list':cloudListOpen();return true;
+    case 'cb-now':toast('Google में भेज रहे हैं…');cloudBackup(true).then(cbNowDone);return true;
+    case 'cb-force':closeSheet();toast('Google में भेज रहे हैं…');cloudBackup(true,true).then(cbNowDone);return true;
+    case 'cb-list':cloudListOpen(!!t.getAttribute('data-rescue'));return true;
+    case 'cb-rec':recShare();return true;
+    case 'cb-fresh':lsSet('mbmb-fresh-ok',1);renderRoute();return true;
     case 'cb-get':cloudGet(t.getAttribute('data-id'));return true;
   }
   return false;
@@ -5088,7 +5242,8 @@ function renderOnline(){
 }
 function startOnline(){
   online.cfg=onlineCfg();
-  if(!online.cfg)return;
+  if(!online.cfg||ui.onlineStarted)return;
+  ui.onlineStarted=true;
   onlineSync();
   pushCheck();
   setInterval(function(){if(document.visibilityState==='visible')onlineSync();},30000);
@@ -7553,7 +7708,7 @@ document.addEventListener('click',function(e){
         normalizeState();applyCatalog();migrateUdharOrders();
         var mx2=0;state.orders.forEach(function(o){if(o.no>mx2)mx2=o.no;});
         state.nextOrderNo=Math.max(rd2.nextOrderNo||1,mx2+1);
-        ui.storageOk=true;ui.loadFailed=false;save();
+        ui.storageOk=true;ui.loadFailed=false;save();cbRestored();
         if(!ui.storageOk){try{localStorage.removeItem(KEY+'-before-restore');}catch(e6){}ui.storageOk=true;save();}
         closeSheet();renderShell();renderRoute();
         toast(ui.storageOk?'Restore हो गया ✓ (पुराना डेटा फ़ाइल में भी सेव किया)':'Restore हुआ पर फ़ोन में सेव नहीं हो पाया — जगह भर गई है');
@@ -7996,6 +8151,17 @@ document.addEventListener('change',function(e){
     }
   }
   if(t.id==='i-cat'){var mw=$('#i-milkwrap');if(mw)mw.classList.toggle('hide',t.value!=='mithai');return;}
+  if(t.id==='rs-file'&&t.files&&t.files[0]){
+    var fr3=new FileReader();
+    fr3.onload=function(){
+      var rd3=null;try{rd3=JSON.parse(String(fr3.result||'').trim());}catch(e7){rd3=null;}
+      if(!rd3||!Array.isArray(rd3.orders)||!Array.isArray(rd3.customers)||!Array.isArray(rd3.items)){toast('ये बैकअप फ़ाइल नहीं लगती — "MB-Sweets-backup-….json" या "mbmb-backup-….txt" चुनिए');return;}
+      ui.pendingRestore=rd3;openSheet(restoreAskHtml(rd3));
+    };
+    fr3.onerror=function(){toast('फ़ाइल नहीं पढ़ पाए');};
+    fr3.readAsText(t.files[0]);t.value='';
+    return;
+  }
   if(t.id==='b-file'&&t.files&&t.files[0]){
     var fr=new FileReader();
     fr.onload=function(){var ta2=$('#b-text');if(ta2){ta2.value=String(fr.result||'');toast('फ़ाइल लोड हो गई — अब "Restore karo" दबाओ');}};
@@ -10408,7 +10574,10 @@ startOnline();
 if(ui.lpTokNew){ui.lpTokNew=false;save();}
 lpSyncSoon(3000);
 window.addEventListener('online',function(){lpSyncSoon(2000);});
-setTimeout(function(){if(cloudOn()){var ci=cloudInfo();if(ci.day!==todayStr())cloudBackup(false);}},15000);
+setTimeout(function(){if(cloudOn()){var ci=cloudInfo();if(ci.day!==todayStr()||cbDirty(ci))cloudBackup(false);}},15000);
+/* ऐप छोड़ते समय (WhatsApp पर बिल भेजने गए, फ़ोन बंद किया): बदलाव बाकी हों तो अभी Drive में */
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')cbNow(10*60000);});
+window.addEventListener('online',function(){if(cbDirty())cbPlan(5000);});
 checkWebImport();
 window.addEventListener('hashchange',checkWebImport);
 })();
