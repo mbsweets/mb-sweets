@@ -2204,10 +2204,10 @@ window.addEventListener('popstate',function(e){
 
 /* ---------- 🎮 रसगुल्ला रन — गेम कूपन (14 नवंबर 2026) ----------
    ग्राहक गेम में स्टैम्प भरकर कूपन पाता है (ABC-123) → यहाँ कोड डालो → सर्वर बताता है क्या देना है → "दे दिया" दबाओ (दोबारा नहीं चलेगा)।
-   सर्वर: मालिक का Cloudflare Worker (repo mbsweets/rasgulla-lb)। चाबी (ADMIN_KEY) सिर्फ़ इसी फ़ोन में — localStorage 'mbmb-gc', बैकअप में नहीं। */
+   सर्वर: मालिक का Cloudflare Worker (repo mbsweets/rasgulla-lb)। चाबी (ADMIN_KEY) इसी फ़ोन में — localStorage 'mbmb-gc'; मालिक की "हाँ" (18 Nov) से सिर्फ़ उनकी Google Drive वाले बैकअप में भी (vault), WhatsApp वाली फ़ाइल में नहीं। */
 var GC_URL='https://rasgulla-lb.pankajgupta800201.workers.dev';
 function gcCfg(){try{return JSON.parse(localStorage.getItem('mbmb-gc')||'{}')||{};}catch(e){return {};}}
-function gcSet(o){var c=gcCfg();for(var k in o)c[k]=o[k];try{localStorage.setItem('mbmb-gc',JSON.stringify(c));}catch(e){}}
+function gcSet(o){var c=gcCfg();for(var k in o)c[k]=o[k];try{localStorage.setItem('mbmb-gc',JSON.stringify(c));}catch(e){}cloudSoon();}   // बदली चाबी/सेटिंग Drive बैकअप में भी जाए
 function gcCode(s){s=String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/O/g,'0').replace(/[IL]/g,'1');return s.length===6?s.slice(0,3)+'-'+s.slice(3):'';}
 function gcPost(path,body){
   body.key=gcCfg().key||'';
@@ -4527,10 +4527,26 @@ function cbGuard(c,size,force){
     ui.cbShrink={was:w,now:size,day:f.day};return {ok:false,was:w};
   },function(){return {ok:false,net:true};});
 }
+/* 🔐 चाबियाँ भी Drive बैकअप में (मालिक, 18 Nov 17:35: "गेम की चाबी, कूपन चाबी और GitHub की चाबी ड्राइव बैकअप में रख दो"):
+   सिर्फ़ Google Drive वाली फ़ाइल में ("vault") — state में कभी नहीं, इसलिए WhatsApp/कॉपी वाले बैकअप में नहीं जातीं.
+   AI (Gemini) चाबी 'mbmb-ai' नहीं — मालिक ने नहीं कहा. Restore पर सिर्फ़ तब लगती हैं जब फ़ोन में वो चाबी न हो. */
+var VAULT_KEYS=['mbmb-gc','mbmb-gh'];
+function vaultGet(){var v={},n=0;VAULT_KEYS.forEach(function(k){try{var x=localStorage.getItem(k);if(x){v[k]=x;n++;}}catch(e){}});return n?v:null;}
+function vaultPut(v){
+  if(!v||typeof v!=='object')return 0;var n=0;
+  VAULT_KEYS.forEach(function(k){
+    if(typeof v[k]!=='string'||!v[k])return;
+    try{
+      if(k==='mbmb-gc'){if(gcCfg().key)return;}else if(localStorage.getItem(k))return;
+      localStorage.setItem(k,v[k]);n++;
+    }catch(e){}
+  });
+  return n;
+}
 function cloudBackup(manual,force){
   var c=onlineCfg();if(!c||cbBusy)return Promise.resolve(null);
   if(!cloudOn()&&!manual)return Promise.resolve(null);
-  var full;try{full=JSON.stringify(state);}catch(e){return Promise.resolve(null);}
+  var full;try{full=JSON.stringify(state);var vt=vaultGet();if(vt)full=full.slice(0,-1)+',"vault":'+JSON.stringify(vt)+'}';}catch(e){return Promise.resolve(null);}
   var size=u8len(full),t0=Date.now();
   cbBusy=true;
   return cbGuard(c,size,force).then(function(g){
@@ -4632,6 +4648,7 @@ function safeChipHtml(){
 function restoreAskHtml(rd){
   return '<div class="sh-head"><h2>Restore करें?</h2></div>'+
     '<p class="hint">इस बैकअप में <b>'+rd.customers.length+' ग्राहक</b>, <b>'+rd.orders.length+' ऑर्डर</b>, '+((rd.khata&&rd.khata.parties)?rd.khata.parties.length:0)+' उधारी खाते और '+(Array.isArray(rd.daily)?rd.daily.length:0)+' दिन का हिसाब है।</p>'+
+    (rd.vault&&typeof rd.vault==='object'?'<p class="hint">🔐 साथ में '+[rd.vault['mbmb-gc']?'🎮 गेम कूपन की चाबी':'',rd.vault['mbmb-gh']?'⚙️ GitHub चाबी':''].filter(Boolean).join(' और ')+' भी (फ़ोन में पहले से न हो तो लगेगी)।</p>':'')+
     (appEmpty()?'':'<p class="hint">अभी ऐप वाला डेटा इससे बदल जाएगा (पहले उसकी फ़ाइल सेव होगी)।</p>')+
     '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-restore">हां, Restore करो</button></div>';
 }
@@ -4648,7 +4665,7 @@ function cloudCardHtml(){
     (ci.t?'<p class="hint" style="color:var(--green);font-weight:700">✓ आख़िरी बैकअप: '+cbWhen(ci.t)+(ci.size?' · '+kbTxt(ci.size):'')+(cbDirty(ci)?' · नए बदलाव कुछ देर में जाएँगे':'')+'</p>':'<p class="hint">अभी तक इस फ़ोन से कोई Google बैकअप नहीं गया — नीचे दबाकर पहला बैकअप लीजिए।</p>');
   if(ui.cbShrink)st+='<div class="banner" style="margin:6px 0">🛟 ऐप में अभी का हिसाब ('+kbTxt(ui.cbShrink.now)+') Google के सबसे नए बैकअप ('+kbTxt(ui.cbShrink.was)+') से बहुत कम है, इसलिए अपने-आप बैकअप रोका गया है — पहले "⬇️ Google से वापस लाओ" दबाइए।</div>';
   return '<div id="cbcard"><div class="sechead" style="margin-top:14px"><h2>☁️ Google बैकअप (अपने-आप)</h2></div>'+st+
-    (on?'<p class="hint">हर बदलाव के कुछ मिनट बाद, "दिन बंद" करते ही तुरंत और ऐप छोड़ते समय — आपकी अपनी Google Drive के <b>"MB Sweets — ऐप का बैकअप"</b> फ़ोल्डर में। रोज़ की फ़ाइल 40 दिन, <b>हर महीने की 1 तारीख़ वाली हमेशा</b> (10 साल बाद भी)।</p>'+
+    (on?'<p class="hint">हर बदलाव के कुछ मिनट बाद, "दिन बंद" करते ही तुरंत और ऐप छोड़ते समय — आपकी अपनी Google Drive के <b>"MB Sweets — ऐप का बैकअप"</b> फ़ोल्डर में। रोज़ की फ़ाइल 40 दिन, <b>हर महीने की 1 तारीख़ वाली हमेशा</b> (10 साल बाद भी)। 🔐 साथ में 🎮 गेम कूपन और ⚙️ GitHub की चाबी भी (सिर्फ़ Drive में — WhatsApp वाली फ़ाइल में नहीं)।</p>'+
       '<div class="actbar"><button class="btn primary small" data-act="cb-now">☁️ अभी बैकअप लो</button><button class="btn small" data-act="cb-list">⬇️ Google से वापस लाओ</button></div>':'')+
     '<div class="installbox"><p>🛟 <b>वापसी लिंक</b> — Chrome साफ़ हो जाए, ऐप ख़ाली दिखे या नया फ़ोन लें: WhatsApp में ये लिंक दबाते ही ऐप जुड़कर Drive से पूरा हिसाब वापस ले आएगा।</p>'+
       '<p class="hint" style="font-weight:700;color:'+(rs?'var(--green)">✓ भेजा: '+fmtDT(rs):'var(--red)">⚠️ अभी नहीं भेजा')+'</p>'+
@@ -7711,9 +7728,10 @@ document.addEventListener('click',function(e){
         var mx2=0;state.orders.forEach(function(o){if(o.no>mx2)mx2=o.no;});
         state.nextOrderNo=Math.max(rd2.nextOrderNo||1,mx2+1);
         ui.storageOk=true;ui.loadFailed=false;save();cbRestored();
+        var vaultN=vaultPut(rd2.vault);
         if(!ui.storageOk){try{localStorage.removeItem(KEY+'-before-restore');}catch(e6){}ui.storageOk=true;save();}
         closeSheet();renderShell();renderRoute();
-        toast(ui.storageOk?'Restore हो गया ✓ (पुराना डेटा फ़ाइल में भी सेव किया)':'Restore हुआ पर फ़ोन में सेव नहीं हो पाया — जगह भर गई है');
+        toast(ui.storageOk?'Restore हो गया ✓'+(vaultN?' · 🔐 चाबियाँ भी वापस':'')+' (पुराना डेटा फ़ाइल में भी सेव किया)':'Restore हुआ पर फ़ोन में सेव नहीं हो पाया — जगह भर गई है');
       }else{closeSheet();}
       break;
     case 'bill-sheet':openBillSheet(t.getAttribute('data-kind'),t.getAttribute('data-ref'));break;
@@ -8042,13 +8060,14 @@ document.addEventListener('click',function(e){
     case 'ss-key-save':
       var kv=($('#ss-key')||{}).value||'';kv=kv.replace(/\s+/g,'');
       if(!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(kv)){SS.keyErr='यह चाबी सही नहीं लग रही — github_pat_ से शुरू होने वाली पूरी चाबी चिपकाओ।';renderShopSet();break;}
-      SS.keyErr='';lsSet(GH.KEY,kv);ssLoad();break;
+      SS.keyErr='';lsSet(GH.KEY,kv);cloudSoon();ssLoad();break;
     case 'ss-key-del':
       openSheet('<div class="sh-head"><h2>GitHub चाबी हटाएँ?</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
         '<p>इस फ़ोन से चाबी हट जाएगी। दोबारा सेटिंग बदलने के लिए नई चाबी डालनी होगी।</p><p class="hint">फ़ोन बेचना/बदलना हो या चाबी किसी और ने देखी हो, तो GitHub में भी चाबी Delete कर देना (हैंडबुक देखो)।</p>'+
         '<div class="sh-actions"><button class="btn" data-act="close">रुको</button><button class="btn warn" data-act="ss-key-del-ok">हाँ, हटाओ</button></div>');break;
     case 'ss-key-del-ok':
       try{localStorage.removeItem(GH.KEY);}catch(err){}
+      cloudSoon();
       SS.state='idle';SS.cat=null;SS.d=null;SS.err='';closeSheet();renderShopSet();toast('चाबी हटा दी');break;
     case 'ss-reload':ssLoad();break;
     case 'ss-pause':if(!SS.d)break;ssSyncForm();SS.d.pause=t.getAttribute('data-v')==='1';renderShopSet();break;
