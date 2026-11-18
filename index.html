@@ -1800,11 +1800,11 @@ function renderBackup(){
     '<button class="ssentry" data-act="ai-set" style="margin-top:8px"><b>🎤 सहायक (AI)</b><span>बोलकर उधार · जमा · ऑर्डर · रात का हिसाब · बिल की फोटो · सवाल-जवाब — मुफ़्त चाबी और सेटिंग</span></button>'+
     '<p class="hint"><a class="lnk" style="padding:0" href="help.html" target="_blank" rel="noopener">📘 हैंडबुक — सब कुछ ख़ुद कैसे संभालें</a></p>'+
     cloudCardHtml()+
-    '<div class="sechead" style="margin-top:14px"><h2>बैकअप (रोज़ करो)</h2></div>'+
+    '<div class="sechead" style="margin-top:14px"><h2>📤 WhatsApp वाला बैकअप'+(cloudOn()?' (हफ़्ते में एक बार)':' (रोज़ करो)')+'</h2></div>'+
     '<p class="hint" id="last-backup-txt" style="font-weight:700">'+backupStatusText()+'</p>'+
     (corruptKeys().length?'<div class="banner" style="margin:6px 0">⚠️ इस फ़ोन में पुराने (खराब हुए) डेटा की कॉपी रखी है। <button class="btn small" data-act="dl-corrupt">⬇️ उसकी फ़ाइल डाउनलोड करो</button> — Claude/मदद करने वाले को भेजो, उससे डेटा वापस निकाला जा सकता है।</div>':'')+
     '<p class="hint">डेटा: '+state.customers.length+' ग्राहक, '+state.orders.length+' ऑर्डर, '+KH().parties.length+' उधारी खाते ('+KH().entries.length+' एंट्री), '+LY().m.length+' पॉइंट सदस्य ('+LY().b.length+' ख़रीद) · जगह भरी: '+storageUsedPct()+'%'+(ui.persisted?' · Chrome सुरक्षा: पक्की ✓':'')+'</p>'+
-    '<p class="hint">Data sirf isi phone me save hota hai. Roz dukaan band karte waqt backup apne hi WhatsApp number par bhej do — phone kho jaye ya kharab ho jaye to bhi data bacha rahega.</p>'+
+    (cloudOn()?'<p class="hint">हिसाब अपने-आप ऊपर वाले ☁️ Google बैकअप में जाता है। एक अलग कॉपी के लिए हफ़्ते में एक बार यह फ़ाइल अपने ही WhatsApp नंबर पर भी भेज दीजिए (इसमें कोई चाबी नहीं होती)।</p>':'<p class="hint">Data sirf isi phone me save hota hai. Roz dukaan band karte waqt backup apne hi WhatsApp number par bhej do — phone kho jaye ya kharab ho jaye to bhi data bacha rahega.</p>')+
     '<div class="actbar">'+(canShare?'<button class="btn primary small" data-act="share-backup">📤 WhatsApp पर भेजो</button>':'')+
     '<button class="btn '+(canShare?'':'primary ')+'small" data-act="copy-backup">Copy karo</button></div>'+
     '<textarea id="b-text" rows="4" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea>'+
