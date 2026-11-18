@@ -2251,7 +2251,7 @@ function gcPaint(){
   var b=$('#gcBody');if(!b)return;var g=ui.gc||{},key=gcCfg().key,h='';
   h+='<div class="sh-head"><h2>🎮 गेम कूपन</h2><button class="lnk muted" data-act="close">बंद करो</button></div>';
   if(!key){
-    h+='<p class="hint">पहली बार: Cloudflare में डाला हुआ अपना <b>ADMIN_KEY</b> पासवर्ड लिखिए। यह सिर्फ़ इसी फ़ोन में रहेगा (बैकअप में नहीं जाता)।</p>'+
+    h+='<p class="hint">पहली बार: Cloudflare में डाला हुआ अपना <b>ADMIN_KEY</b> पासवर्ड लिखिए। यह इसी फ़ोन में रहेगा, और आपकी Google Drive वाले बैकअप में भी (WhatsApp वाली फ़ाइल में नहीं)।</p>'+
       '<label class="fl">ADMIN_KEY<input id="gc-keyin" type="password" autocomplete="off"></label>'+
       (g.err?'<p class="gcerr">'+esc(g.err)+'</p>':'')+
       '<button class="btn primary block" data-act="gc-key">✅ सेव करो</button>';
@@ -4527,18 +4527,23 @@ function cbGuard(c,size,force){
     ui.cbShrink={was:w,now:size,day:f.day};return {ok:false,was:w};
   },function(){return {ok:false,net:true};});
 }
-/* 🔐 चाबियाँ भी Drive बैकअप में (मालिक, 18 Nov 17:35: "गेम की चाबी, कूपन चाबी और GitHub की चाबी ड्राइव बैकअप में रख दो"):
+/* 🔐 सारी चाबियाँ भी Drive बैकअप में (मालिक, 18 Nov: "गेम की चाबी, कूपन चाबी और GitHub की चाबी ड्राइव बैकअप में रख दो" ·
+   "सहायक वाला भी रखना है, सभी रखना है"): गेम कूपन (mbmb-gc), GitHub (mbmb-gh), सहायक AI (mbmb-ai), ऑनलाइन रजिस्टर (mbmb-online).
    सिर्फ़ Google Drive वाली फ़ाइल में ("vault") — state में कभी नहीं, इसलिए WhatsApp/कॉपी वाले बैकअप में नहीं जातीं.
-   AI (Gemini) चाबी 'mbmb-ai' नहीं — मालिक ने नहीं कहा. Restore पर सिर्फ़ तब लगती हैं जब फ़ोन में वो चाबी न हो. */
-var VAULT_KEYS=['mbmb-gc','mbmb-gh'];
+   Restore पर सिर्फ़ तब लगती हैं जब फ़ोन में वो चाबी न हो (Drive से डाउनलोड की फ़ाइल से भी — तब रजिस्टर भी अपने-आप जुड़ जाता है). */
+var VAULT_KEYS=['mbmb-gc','mbmb-gh','mbmb-ai','mbmb-online'];
 function vaultGet(){var v={},n=0;VAULT_KEYS.forEach(function(k){try{var x=localStorage.getItem(k);if(x){v[k]=x;n++;}}catch(e){}});return n?v:null;}
 function vaultPut(v){
   if(!v||typeof v!=='object')return 0;var n=0;
   VAULT_KEYS.forEach(function(k){
     if(typeof v[k]!=='string'||!v[k])return;
     try{
-      if(k==='mbmb-gc'){if(gcCfg().key)return;}else if(localStorage.getItem(k))return;
+      if(k==='mbmb-gc'){if(gcCfg().key)return;}
+      else if(k==='mbmb-ai'){if(aiCfg().key)return;}
+      else if(k==='mbmb-online'){if(onlineCfg())return;var oc=JSON.parse(v[k]);if(!oc||!oc.k||!GS_URL_RE.test(String(oc.u||'')))return;}
+      else if(localStorage.getItem(k))return;
       localStorage.setItem(k,v[k]);n++;
+      if(k==='mbmb-online'){if(!ui.onlineStarted)startOnline();else online.cfg=onlineCfg();planSyncSoon();}
     }catch(e){}
   });
   return n;
@@ -4648,7 +4653,7 @@ function safeChipHtml(){
 function restoreAskHtml(rd){
   return '<div class="sh-head"><h2>Restore करें?</h2></div>'+
     '<p class="hint">इस बैकअप में <b>'+rd.customers.length+' ग्राहक</b>, <b>'+rd.orders.length+' ऑर्डर</b>, '+((rd.khata&&rd.khata.parties)?rd.khata.parties.length:0)+' उधारी खाते और '+(Array.isArray(rd.daily)?rd.daily.length:0)+' दिन का हिसाब है।</p>'+
-    (rd.vault&&typeof rd.vault==='object'?'<p class="hint">🔐 साथ में '+[rd.vault['mbmb-gc']?'🎮 गेम कूपन की चाबी':'',rd.vault['mbmb-gh']?'⚙️ GitHub चाबी':''].filter(Boolean).join(' और ')+' भी (फ़ोन में पहले से न हो तो लगेगी)।</p>':'')+
+    (rd.vault&&typeof rd.vault==='object'?'<p class="hint">🔐 साथ में '+[rd.vault['mbmb-ai']?'🎤 सहायक (AI)':'',rd.vault['mbmb-gc']?'🎮 गेम कूपन':'',rd.vault['mbmb-gh']?'⚙️ GitHub':'',rd.vault['mbmb-online']?'🌐 ऑनलाइन रजिस्टर':''].filter(Boolean).join(', ')+' की चाबी भी (फ़ोन में पहले से न हो तो लगेगी)।</p>':'')+
     (appEmpty()?'':'<p class="hint">अभी ऐप वाला डेटा इससे बदल जाएगा (पहले उसकी फ़ाइल सेव होगी)।</p>')+
     '<div class="sh-actions"><button class="btn" data-act="close">नहीं</button><button class="btn warn" data-act="confirm-restore">हां, Restore करो</button></div>';
 }
@@ -4665,7 +4670,7 @@ function cloudCardHtml(){
     (ci.t?'<p class="hint" style="color:var(--green);font-weight:700">✓ आख़िरी बैकअप: '+cbWhen(ci.t)+(ci.size?' · '+kbTxt(ci.size):'')+(cbDirty(ci)?' · नए बदलाव कुछ देर में जाएँगे':'')+'</p>':'<p class="hint">अभी तक इस फ़ोन से कोई Google बैकअप नहीं गया — नीचे दबाकर पहला बैकअप लीजिए।</p>');
   if(ui.cbShrink)st+='<div class="banner" style="margin:6px 0">🛟 ऐप में अभी का हिसाब ('+kbTxt(ui.cbShrink.now)+') Google के सबसे नए बैकअप ('+kbTxt(ui.cbShrink.was)+') से बहुत कम है, इसलिए अपने-आप बैकअप रोका गया है — पहले "⬇️ Google से वापस लाओ" दबाइए।</div>';
   return '<div id="cbcard"><div class="sechead" style="margin-top:14px"><h2>☁️ Google बैकअप (अपने-आप)</h2></div>'+st+
-    (on?'<p class="hint">हर बदलाव के कुछ मिनट बाद, "दिन बंद" करते ही तुरंत और ऐप छोड़ते समय — आपकी अपनी Google Drive के <b>"MB Sweets — ऐप का बैकअप"</b> फ़ोल्डर में। रोज़ की फ़ाइल 40 दिन, <b>हर महीने की 1 तारीख़ वाली हमेशा</b> (10 साल बाद भी)। 🔐 साथ में 🎮 गेम कूपन और ⚙️ GitHub की चाबी भी (सिर्फ़ Drive में — WhatsApp वाली फ़ाइल में नहीं)।</p>'+
+    (on?'<p class="hint">हर बदलाव के कुछ मिनट बाद, "दिन बंद" करते ही तुरंत और ऐप छोड़ते समय — आपकी अपनी Google Drive के <b>"MB Sweets — ऐप का बैकअप"</b> फ़ोल्डर में। रोज़ की फ़ाइल 40 दिन, <b>हर महीने की 1 तारीख़ वाली हमेशा</b> (10 साल बाद भी)। 🔐 साथ में सारी चाबियाँ भी — 🎤 सहायक (AI), 🎮 गेम कूपन, ⚙️ GitHub, 🌐 ऑनलाइन रजिस्टर (सिर्फ़ Drive में — WhatsApp वाली फ़ाइल में नहीं)।</p>'+
       '<div class="actbar"><button class="btn primary small" data-act="cb-now">☁️ अभी बैकअप लो</button><button class="btn small" data-act="cb-list">⬇️ Google से वापस लाओ</button></div>':'')+
     '<div class="installbox"><p>🛟 <b>वापसी लिंक</b> — Chrome साफ़ हो जाए, ऐप ख़ाली दिखे या नया फ़ोन लें: WhatsApp में ये लिंक दबाते ही ऐप जुड़कर Drive से पूरा हिसाब वापस ले आएगा।</p>'+
       '<p class="hint" style="font-weight:700;color:'+(rs?'var(--green)">✓ भेजा: '+fmtDT(rs):'var(--red)">⚠️ अभी नहीं भेजा')+'</p>'+
@@ -8230,7 +8235,7 @@ window.addEventListener('storage',function(e){
 /* ================= 🎤 सहायक (AI) — 4 नवंबर 2026 =================
    मालिक: "जो भी बोलूँ… ऑर्डर/उधार डायरेक्ट ऐड… बिल की फोटो से… कोई फेक नहीं… हिंदी-इंग्लिश मिलाकर… खर्च/बचत/बजट एनालिसिस…
            पहले सही से खोज करके ऐड करे, मौजूद चीज़ पर 'नहीं मिला' न बोले… अभी कोई खर्च नहीं, फ्री सेटअप"
-   - दिमाग़: Google Gemini (मुफ़्त चाबी) — चाबी सिर्फ़ इसी फ़ोन में ('mbmb-ai'), बैकअप/repo में नहीं जाती
+   - दिमाग़: Google Gemini (मुफ़्त चाबी) — चाबी इसी फ़ोन में ('mbmb-ai') + मालिक की हाँ (18 Nov) से सिर्फ़ Google Drive वाले बैकअप में (vault); repo/WhatsApp बैकअप में नहीं
    - हर रकम/गिनती फ़ोन का हिसाब (aiFacts) निकालता है; AI सिर्फ़ समझता/समझाता है, 📊 आँकड़े fact-ID से ऐप ख़ुद छापता है
    - ✅ दबाए बिना कुछ सेव नहीं; नाम/आइटम की खोज फ़ोन में (हिंदी↔English), दोहरी एंट्री की चेतावनी
    - ग्राहक का फोन नंबर/पता AI को कभी नहीं भेजते
@@ -8239,7 +8244,9 @@ var AI={KEY:'mbmb-ai',BASE:'https://generativelanguage.googleapis.com/v1beta/',s
   s:{msgs:[],text:'',imgs:[],busy:false,status:'',listen:false,rec:null,mic:null,tx:false,recFail:false,page:'chat',test:'',testing:false,micErr:''}};
 var AI_DEFAULT_MODELS=['gemini-flash-latest','gemini-flash-lite-latest','gemini-2.5-flash','gemini-2.5-flash-lite','gemma-3-27b-it'];
 function aiCfg(){var c=lsGet(AI.KEY,null);return (c&&typeof c==='object'&&!Array.isArray(c))?c:{};}
-function aiSet(p){var c=aiCfg();for(var k in p){if(!Object.prototype.hasOwnProperty.call(p,k))continue;if(p[k]===undefined)delete c[k];else c[k]=p[k];}lsSet(AI.KEY,c);return c;}
+function aiSet(p){var c=aiCfg();for(var k in p){if(!Object.prototype.hasOwnProperty.call(p,k))continue;if(p[k]===undefined)delete c[k];else c[k]=p[k];}lsSet(AI.KEY,c);
+  if('key' in p||'lang' in p||'voice' in p||'wait' in p)cloudSoon();   // चाबी/सेटिंग बदली → Drive बैकअप में भी (मालिक की हाँ)
+  return c;}
 function aiKey(){return String(aiCfg().key||'').trim();}
 function aiWait(ms){return new Promise(function(res){setTimeout(res,ms);});}
 function aiNowHM(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
@@ -10387,7 +10394,7 @@ function aiSetHtml(){
     '<li>अपने Google (Gmail) अकाउंट से लॉग-इन कीजिए, शर्तें मानिए।</li>'+
     '<li><b>Create API key</b> दबाइए → बनी हुई चाबी <b>Copy</b> कीजिए।</li>'+
     '<li>यहाँ ऊपर वाले डिब्बे में चिपकाइए → <b>जाँचो और सेव करो</b>।</li></ol>'+
-    '<p class="hint">कोई कार्ड या पैसा नहीं लगता। चाबी किसी को मत भेजिए — चैट में भी नहीं। ये सिर्फ़ इसी फ़ोन में रहती है, बैकअप में भी नहीं जाती।</p></div>';
+    '<p class="hint">कोई कार्ड या पैसा नहीं लगता। चाबी किसी को मत भेजिए — चैट में भी नहीं। ये इसी फ़ोन में रहती है, और आपकी Google Drive वाले बैकअप में भी (WhatsApp वाली फ़ाइल में नहीं)।</p></div>';
   h+='<div class="aitogs"><label class="aitog"><input type="checkbox" id="ai-o-automic"'+(c.autoMic!==false?' checked':'')+'><span>🎤 सहायक खोलते ही सुनना शुरू करो</span></label>'+
     '<label class="aitog"><input type="checkbox" id="ai-o-auto"'+(c.auto!==false?' checked':'')+'><span>➤ बोलना रुकते ही अपने-आप भेजो</span></label>'+
     '<label class="aitog"><input type="checkbox" id="ai-o-hf"'+(c.hf?' checked':'')+'><span>🗣️ बिना हाथ लगाए — सहायक बोलकर पूछेगा, आप "हाँ" बोलें तो सेव, "नहीं" तो रहने दो, नाम बोलकर चुनें<small>ये रकम और नाम ज़ोर से बोलता है — ग्राहक के सामने ध्यान रखें। शुरू में बंद।</small></span></label>'+
