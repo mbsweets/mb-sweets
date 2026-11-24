@@ -1,4 +1,4 @@
-var CACHE_NAME = 'mbmb-billing-v18';
+var CACHE_NAME = 'mbmb-billing-v19';
 var CORE_ASSETS = [
   './',
   './manifest.json',

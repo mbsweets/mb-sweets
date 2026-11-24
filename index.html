@@ -10595,7 +10595,12 @@ function aiQuick(text,fx){
   if(cat&&!H.exp&&!sx&&!H.sup&&/कितना|kitna|कितने/.test(lo))H.exp=1;
   if(H.exp&&cat)delete H.pro;
   var top=(fx.people&&fx.people[0]&&fx.people[0].s>=0.9)?fx.people[0].x:null;
-  if(top&&sx){   // "कृष्णा" ग्राहक भी, "कृष्णा पनीर" सप्लायर भी
+  if(top&&sx){   // "कृष्णा" ग्राहक भी, "कृष्णा पनीर" सप्लायर भी — पहले देखो किसके ज़्यादा शब्द बोले ("अमूल वाले भैया" = उधारी वाला, "कृष्णा पनीर" = सप्लायर)
+    var tw=aiToks(s),cnt=function(L){return L.filter(function(x){return tw.some(function(w){return aiNameScore(w,x)>=0.9;});}).length;};
+    var pc=cnt(aiToks(top.name).filter(function(w){return !AI_NOTNAME.test(w);})),scn=cnt(supCore(String(sx.n).split(/[(·]/)[0]).split(/\s+/).filter(function(w){return w.length>=2;}));
+    if(pc>scn)sx=null;else if(scn>pc)top=null;
+  }
+  if(top&&sx){
     if(/पनीर|सप्लायर|supplier|माल|maal|(?:देना|देने)\s*(?:है|बाकी)|dena/.test(lo)&&!/उधार|udhar|जमा|jama|लेना/.test(lo))top=null;
     else if(/उधार|udhar|जमा|jama|लेना/.test(lo))sx=null;
     else return null;
@@ -10680,9 +10685,12 @@ function aiQuick(text,fx){
   if(k==='exp'){
     var P=per&&per.a?per:(per&&per.d?null:{a:t.slice(0,8)+'01',b:t,lb:HS_MON[+t.slice(5,7)-1]+' (1–'+(+t.slice(8,10))+' '+HS_MON[+t.slice(5,7)-1]+', अब तक)',k:'mon'});
     if(per&&per.d){var e2=hsGet(per.d);return out(hsHasExp(e2)?aiQDl(per.d,t)+' का खर्च '+rupee(hsExp(e2))+' (माल + दुकान का खर्च; घर का अलग)।':aiQDl(per.d,t)+' का कोई खर्च नहीं लिखा।',[dayRow(per.d)]);}
-    if(cat){var cn=/^o:/.test(cat)?cat.slice(2):(hsBox(cat)||[0,0,cat])[2],lbc=/^o:/.test(cat)?'अन्य खर्च में: '+cn:'खर्च: '+cn,ci=R(P,lbc);
-      if(!ci)ci=put(P.lb+' — '+lbc,'₹0 — इस समय में कोई एंट्री नहीं');
-      return out(P.lb+' — '+cn+': '+val(ci).split(' (')[0]+'।',[ci,R(P,'खर्च')]);}
+    if(cat){var cn=/^o:/.test(cat)?cat.slice(2):(hsBox(cat)||[0,0,cat])[2],cre=AI_QCAT.filter(function(c){return c[0]===cat;})[0][1],cl=[];
+      if(!/^o:/.test(cat)){var c0=R(P,'खर्च: '+cn);if(c0)cl.push(c0);}
+      /* "अन्य खर्च" में उसी नाम से लिखा भी ("गैस सिलेंडर", "मजदूरी", "स्टाफ पगार") — वरना ₹0 दिखता */
+      rng(P);Object.keys(hsExpRange(P.a,P.b).oth).forEach(function(n){if(cre.test(String(n).toLowerCase())){var c1=R(P,'अन्य खर्च में: '+n);if(c1&&cl.indexOf(c1)<0)cl.push(c1);}});
+      if(!cl.length)cl.push(put(P.lb+' — '+(/^o:/.test(cat)?'अन्य खर्च में: ':'खर्च: ')+cn,'₹0 — इस समय में कोई एंट्री नहीं'));
+      return out(P.lb+' — '+cn+': '+cl.map(function(id){var L0=fx.fb.map[id].l,nm=L0.split(' — ').pop().replace(/^(?:अन्य खर्च में|खर्च): /,'');return (cl.length>1?nm+' ':'')+val(id).split(' (')[0];}).join(' + ')+'।',cl.concat([R(P,'खर्च')]));}
     var x=hsExpRange(P.a,P.b),ex=[R(P,'खर्च')];
     BG_BOXES.forEach(function(c){var id3=R(P,'खर्च: '+c[2]);if(id3)ex.push(id3);});
     Object.keys(x.oth).forEach(function(n){var id4=R(P,'अन्य खर्च में: '+n);if(id4)ex.push(id4);});
@@ -10766,7 +10774,7 @@ function aiQuick(text,fx){
   }
   /* हिसाब नहीं भरा */
   if(k==='miss'){
-    if(per&&per.a){var ms2=R(per,'हिसाब नहीं भरा');return out(ms2?per.lb+' — '+val(ms2)+' का रात का हिसाब नहीं भरा।':per.lb+' — सब दिन का हिसाब भरा है ✓',[ms2||R(per,'बिक्री')]);}
+    if(per&&per.a){var ms2=R(per,'हिसाब नहीं भरा');return out(ms2?per.lb+' — '+val(ms2)+' का रात का हिसाब नहीं भरा।':per.lb+' — सब दिन का हिसाब भरा है ✓',[ms2||put(per.lb+' — हिसाब नहीं भरा','कोई दिन नहीं — सब भरा ✓'),R(per,'बिक्री')]);}
     var mr=F(/— रात का हिसाब किन दिनों का नहीं भरा$/,1);return out('इस महीने: '+val(mr[0])+'।',mr.concat(F(/^रात का हिसाब कब से/,1)));
   }
   /* बजट */
@@ -11386,7 +11394,7 @@ function aiSelfQ(){
   add('आज का ऑर्डर क्या है',/ऑर्डर/);
   add('कल किसका ऑर्डर है',/ऑर्डर/);
   add('इस महीने कितने दिन का हिसाब नहीं भरा',/भरा/);
-  var pr=KH().parties.map(function(p){return {p:p,b:partyTotals(p.id).bal};}).filter(function(r){return r.b>0.001;}).sort(function(a,b){return b.b-a.b;})[0];
+  var pr=KH().parties.map(function(p){return {p:p,b:partyTotals(p.id).bal};}).filter(function(r){return r.b>0.001&&!aiSupInText(r.p.name);}).sort(function(a,b){return b.b-a.b;})[0];   // नाम सप्लायर से टकराए ("अमूल वाले भैया") तो सहायक पूछता है — जाँच में अगला
   if(pr)add(pr.p.name+' का कितना बाकी है',new RegExp('^'+aiEscRe(pr.p.name)+' — उधारी खाता'),rupee(pr.b));
   var sd=supDues(t)[0];if(sd)add(String(sd.n).split(/[(·]/)[0].trim()+' का कितना बाकी है',/^सप्लायर .* — अभी$/,rupee(sd.bal));
   return C;
@@ -11494,9 +11502,9 @@ function aiSelfHtml(){
   if(last&&last.at)h+='<p class="aiselfst">पिछली जाँच: '+hsDm(dayKey(new Date(last.at)))+' '+onHm(last.at)+' — ⚡ '+last.qo+'/'+last.qn+(last.an?' · 🤖 '+last.ao+'/'+last.an+' (औसत '+sec(last.aavg)+')':'')+'</p>';
   h+='<button class="btn primary" data-act="ai-selftest"'+(S&&S.run?' disabled':'')+'>'+(S&&S.run?'⏳ '+esc(S.step||'जाँच चल रही है…'):'🧪 जाँच शुरू करो')+'</button>';
   if(S&&S.q){var qo=S.q.filter(function(r){return r.ok;}).length,qm=S.q.reduce(function(s,r){return Math.max(s,r.ms);},0);
-    h+='<div class="aiselfres"><b>⚡ तुरंत वाले: '+qo+' / '+S.q.length+' सही</b> · हर जवाब '+sec(qm)+' से कम<ul>'+S.q.map(function(r){return '<li class="'+(r.ok?'ok':'bad')+'">'+(r.ok?'✅':'❌')+' '+esc(r.q)+' <small>'+sec(r.ms)+(r.ok?'':' — '+esc(r.why))+'</small>'+(r.head?'<i>'+esc(r.head)+'</i>':'')+'</li>';}).join('')+'</ul></div>';}
+    h+='<div class="aiselfres"><b>⚡ तुरंत वाले: '+qo+' / '+S.q.length+' सही</b> · हर जवाब '+sec(qm)+' से कम<ul>'+S.q.slice().sort(function(x,y){return (x.ok?1:0)-(y.ok?1:0);}).map(function(r){return '<li class="'+(r.ok?'ok':'bad')+'">'+(r.ok?'✅':'❌')+' '+esc(r.q)+' <small>'+sec(r.ms)+(r.ok?'':' — '+esc(r.why))+'</small>'+(r.head?'<i>'+esc(r.head)+'</i>':'')+'</li>';}).join('')+'</ul></div>';}
   if(S&&S.a&&S.a.length){var ao=S.a.filter(function(r){return r.ok;}).length,am=S.a.filter(function(r){return !r.err;}),av=am.length?am.reduce(function(s,r){return s+r.ms;},0)/am.length:0;
-    h+='<div class="aiselfres"><b>🤖 AI वाले: '+ao+' / '+S.a.length+' सही</b>'+(am.length?' · औसत '+sec(av)+' · सबसे धीमा '+sec(am.reduce(function(s,r){return Math.max(s,r.ms);},0)):'')+'<ul>'+S.a.map(function(r){return '<li class="'+(r.ok?'ok':'bad')+'">'+(r.ok?'✅':'❌')+' '+esc(r.q)+' <small>'+sec(r.ms)+(r.rounds>1?' (2 चक्कर)':'')+(r.model?' · '+esc(r.model):'')+(r.ok?'':' — '+esc(r.why))+'</small>'+(r.say?'<i>'+esc(String(r.say).slice(0,160))+'</i>':'')+'</li>';}).join('')+'</ul></div>';}
+    h+='<div class="aiselfres"><b>🤖 AI वाले: '+ao+' / '+S.a.length+' सही</b>'+(am.length?' · औसत '+sec(av)+' · सबसे धीमा '+sec(am.reduce(function(s,r){return Math.max(s,r.ms);},0)):'')+'<ul>'+S.a.slice().sort(function(x,y){return (x.ok?1:0)-(y.ok?1:0);}).map(function(r){return '<li class="'+(r.ok?'ok':'bad')+'">'+(r.ok?'✅':'❌')+' '+esc(r.q)+' <small>'+sec(r.ms)+(r.rounds>1?' (2 चक्कर)':'')+(r.model?' · '+esc(r.model):'')+(r.ok?'':' — '+esc(r.why))+'</small>'+(r.say?'<i>'+esc(String(r.say).slice(0,160))+'</i>':'')+'</li>';}).join('')+'</ul></div>';}
   if(S&&S.note)h+='<p class="hint">'+esc(S.note)+'</p>';
   return h+'</div>';
 }
