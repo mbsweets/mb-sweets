@@ -614,6 +614,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .onpaid{color:var(--green);font-weight:700;font-size:.88rem}
 .onwait{color:var(--amber);font-weight:700;font-size:.88rem}
 .onbell{color:var(--muted);font-size:.8rem;margin-top:2px}
+.pmpick{display:grid;gap:6px;margin:0 0 10px}.pmopt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--card);cursor:pointer}
+.pmopt input{width:20px;height:20px;accent-color:var(--brandband);flex:none}.pmopt span{display:flex;flex-direction:column}.pmopt small{color:var(--muted);font-size:.8rem}
+.pmopt:has(input:checked){border-color:var(--brandband);box-shadow:0 0 0 2px var(--brandband) inset}
+.paym{color:var(--green);font-weight:700}.paym.unk{color:var(--muted);font-weight:400}
+.pmbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 12px;margin:10px 0}.pmbox .pmh{font-weight:800;margin:2px 0 6px}.pmbox .pmh small{font-weight:400;color:var(--muted)}
+.pmbox .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px dashed var(--line)}.pmbox .row b{white-space:nowrap}.pmbox .row.tot{border-top:1.5px solid var(--ink);font-size:1.02rem}
+.pmbox .pmsub{color:var(--muted);font-size:.8rem;margin:-2px 0 4px 6px;line-height:1.4}.pmbox.where{border-color:var(--gold)}
 .aimemo{background:var(--milk-bg);border:1px solid var(--milk-line);border-radius:12px;padding:8px 10px;margin:6px 0;font-size:.9rem}.aimemob{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
 .aimemlist{border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;background:var(--card)}.aimemrow{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 0}.aimemrow span{flex:1;font-size:.92rem}
 .aihqin{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--card);color:var(--ink);margin:4px 0 8px}
@@ -1791,8 +1798,9 @@ function orderCardFull(o){
   var pays='';
   if(o.payments.length){
     pays='<div class="paylog"><div style="font-weight:600">जमा का हिसाब:</div>'+o.payments.map(function(p){
-      return '<div class="payrow"><span>'+fmtDonly(p.date)+': '+rupee(p.amount)+(p.note?' ('+esc(p.note)+')':'')+'</span>'+
-        (cancelled?'':'<button class="lnk danger" data-act="del-payment" data-order="'+o.id+'" data-pay="'+p.id+'">हटाओ</button>')+'</div>';
+      var pmx=payMode(p);
+      return '<div class="payrow"><span>'+fmtDonly(p.date)+': '+rupee(p.amount)+(p.note?' ('+esc(p.note)+')':'')+(pmx!=='x'?'<br><small class="paym'+(pmx?'':' unk')+'">'+payTxt(p)+'</small>':'')+'</span>'+
+        (cancelled?'':(pmx!=='x'&&num(p.amount)>0?'<button class="lnk" data-act="pay-mode" data-order="'+o.id+'" data-pay="'+p.id+'">बदलो</button>':'')+'<button class="lnk danger" data-act="del-payment" data-order="'+o.id+'" data-pay="'+p.id+'">हटाओ</button>')+'</div>';
     }).join('')+'</div>';
   }
   var acts='';
@@ -2555,7 +2563,8 @@ function renderOrderSheet(){
     '<div class="lines">'+lines+'</div>'+
     customItemBlock+
     '<div class="ftotal"><span>टोटल</span><b id="of-total">'+rupee(orderDraftTotal())+'</b></div>'+
-    (ui.editId?'':'<label class="fl">अभी कितना advance मिला \u20b9<input id="of-advance" type="number" inputmode="decimal" step="any" min="0" value="'+esc(d.advance)+'"></label>')+
+    (ui.editId?'':'<label class="fl">अभी कितना advance मिला \u20b9<input id="of-advance" type="number" inputmode="decimal" step="any" min="0" value="'+esc(d.advance)+'"></label>'+
+      payPickHtml('of-pm',d.advPm||'').replace('पैसा कैसे मिला?','एडवांस कैसे मिला?').replace('(चुनना ज़रूरी)','(एडवांस हो तो चुनना ज़रूरी)'))+
     '<label class="fl">नोट (जैसे केक पर क्या लिखना है)<textarea id="of-notes" rows="2">'+esc(d.notes)+'</textarea></label>'+
     '<div class="err" id="of-err"></div>'+
     '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-order">Save करो</button></div>'+
@@ -2573,6 +2582,7 @@ function syncDraftField(t){
     });
     return true;
   }
+  if(t.name==='of-pm'){d.advPm=t.value;return true;}
   var map={'of-notes':'notes','of-advance':'advance','nc-name':'newCustName','nc-phone':'newCustPhone','ci-name':'ciName','ci-rate':'ciRate','ci-unit':'ciUnit'};
   if(map[t.id]){d[map[t.id]]=t.value;return true;}
   return false;
@@ -2611,8 +2621,9 @@ function saveOrderFromDraft(){
   }else{
     var totNew=round2(items.reduce(function(s,i){return s+lineAmt(i);},0));
     var advIn=Math.max(0,num($('#of-advance').value));
-    var adv=Math.min(totNew,advIn);
-    var o2={id:uid(),no:state.nextOrderNo++,customerId:d.customerId,date:dateVal,items:items,payments:adv>0?[{id:uid(),amount:adv,date:todayStr(),note:'Advance'}]:[],cancelled:false,notes:notes,createdAt:Date.now()};
+    var adv=Math.min(totNew,advIn),apk=payPick(d.advPm||'');
+    if(adv>0&&!apk){err.textContent='एडवांस कैसे मिला — 💵 नकद (ऊपर वाला गल्ला / काउंटर) या 📱 UPI चुनिए।';return;}
+    var o2={id:uid(),no:state.nextOrderNo++,customerId:d.customerId,date:dateVal,items:items,payments:adv>0?[Object.assign({id:uid(),amount:adv,date:todayStr(),note:'Advance'},apk)]:[],cancelled:false,notes:notes,createdAt:Date.now()};
     if(d.webCode){o2.webCode=d.webCode;o2.webMode=d.webMode||'d';}
     if(d.webCode&&ui.onlineAccept===d.webCode){
       var acc=findCustomer(d.customerId),ono=findOnline(d.webCode),cc2=ono?cpnForOnline(ono):null;
@@ -3295,7 +3306,7 @@ function hsExList(e){
 }
 function hsExp(e){return round2(hsExList(e).reduce(function(t,x){return t+x.v;},0));}
 function hsExpG(e){return round2(hsExList(e).reduce(function(t,x){return t+(x.g?x.v:0);},0));}
-function hsCashSale(e){if(!e)return 0;if(e.gm)return glCash(e);return round2(num(e.cash)+hsExpG(e)+num(e.out));}
+function hsCashSale(e){if(!e)return 0;if(e.gm)return round2(glCash(e)+ordUp(e.d));return round2(num(e.cash)+hsExpG(e)+num(e.out));}
 function hsUpiSale(e){if(!e)return 0;return num(e.upi);}   /* 10 नवंबर: उधारी का UPI जमा भी उस दिन की बिक्री (मालिक) */
 function hsTot(e){return e?round2(hsUpiSale(e)+hsCashSale(e)):0;}
 /* ---------- 💵 गल्ला मिलान + 🤝 सप्लायर खाता (7 नवंबर 2026, मालिक: "महीने में हिसाब परफेक्ट मिलना चाहिए… काउंटर में कितना कैश बचना चाहिए")
@@ -3352,7 +3363,7 @@ function glPaidList(e,src){
 function kjList(d,type,m){var L=[];KH().entries.forEach(function(k){if(k.date===d&&k.type===type&&(!m||kjMode(k)===m)){var p=findParty(k.partyId);L.push({n:p?p.name:'उधारी',v:num(k.amount)});}});return L;}
 function kjTxt(L){return L.map(function(x){return esc(x.n)+' '+rupee(x.v);}).join(', ');}
 /* 🔝 ऊपर वाला गल्ला */
-function upFlow(e){return e&&e.gm?round2(num(e.gc)+num(e.gin)-glPaid(e,'g')):0;}
+function upFlow(e,d){var o=ordUp(d||(e&&e.d));if(!(e&&e.gm))return o;return round2(num(e.gc)+num(e.gin)+o-glPaid(e,'g'));}   /* + ऑर्डर/बिल का नकद जो सीधे ऊपर रखा */
 function upCnt(e){return e&&e.gm&&e.uc!==''&&e.uc!=null&&isFinite(parseFloat(e.uc))?num(e.uc):null;}
 function upStart(){
   var u0=GL().u0,s=null;
@@ -3366,7 +3377,7 @@ function upLedger(upto){
   if(!s||s.d>upto)return {start:s,days:L,bal:null,map:{}};
   var map={};
   for(var d=s.d;d<=upto;d=hsKeyAdd(d,1)){
-    var e=hsGet(d),fl=upFlow(e),c=upCnt(e),open=d===s.d?(s.u0?s.v:null):bal,exp=open==null?null:round2(open+fl);
+    var e=hsGet(d),fl=upFlow(e,d),c=upCnt(e),open=d===s.d?(s.u0?s.v:null):bal,exp=open==null?null:round2(open+fl);
     var r={d:d,e:e,open:open,flow:fl,exp:exp,cnt:c,diff:c!=null&&exp!=null?round2(c-exp):null};
     L.push(r);map[d]=r;bal=c!=null?c:exp;
   }
@@ -3379,15 +3390,16 @@ function upEnd(r){return r?(r.cnt!=null?r.cnt:r.exp):null;}
 function upRange(from,to){
   var U=upLedger(to);if(!U.start)return null;
   var rows=U.days.filter(function(r){return r.d>=from&&r.d<=to;});if(!rows.length)return null;
-  var t=todayStr(),o=rows[0],g={od:o.d,open:o.open,openCnt:false,T:0,gin:0,sup:0,ex:0,hm:0,out:0,cnts:[],gap:[],dsum:0};
+  var t=todayStr(),o=rows[0],g={od:o.d,open:o.open,openCnt:false,T:0,gin:0,ord:0,sup:0,ex:0,hm:0,out:0,cnts:[],gap:[],dsum:0};
   if(o.open==null){g.open=o.cnt;g.openCnt=true;}
   rows.forEach(function(r,i){
     var e=r.e;
     if(!(i===0&&g.openCnt)&&e&&e.gm){g.T+=num(e.gc);g.gin+=num(e.gin);glPaidList(e,'g').forEach(function(x){g[x.k]+=x.v;});}
+    if(!(i===0&&g.openCnt))g.ord+=ordUp(r.d);
     if(r.diff!=null){g.cnts.push({d:r.d,exp:r.exp,cnt:r.cnt,diff:r.diff});g.dsum+=r.diff;}
     if(r.d!==t&&!hsHas(e))g.gap.push(r.d);
   });
-  ['T','gin','sup','ex','hm','out','dsum'].forEach(function(k){g[k]=round2(g[k]);});
+  ['T','gin','ord','sup','ex','hm','out','dsum'].forEach(function(k){g[k]=round2(g[k]);});
   var last=rows[rows.length-1];g.ed=last.d;g.end=upEnd(last);
   var lc=rows.filter(function(r){return r.cnt!=null;}).pop();g.lastCnt=lc?{d:lc.d,v:lc.cnt}:null;
   return g;
@@ -4098,7 +4110,7 @@ function hxGroupsHtml(e,d){
 }
 
 /* ---------- ऊपर का हिस्सा: टैब + तारीख़ ---------- */
-var HX_TABS=[['aaj','आज'],['sale','बिक्री'],['galla','गल्ला'],['sup','सप्लायर'],['rep','रिपोर्ट']];
+var HX_TABS=[['aaj','आज'],['sale','बिक्री'],['galla','पैसा'],['sup','सप्लायर'],['rep','रिपोर्ट']];   /* "पैसा" = पहले का "गल्ला" टैब + पैसा आया/गया/कहाँ है (24 नवंबर 2026) */
 function hxDateBar(){
   var d=HX().d,t=todayStr();
   return '<div class="hxdate"><button data-act="hx-day" data-n="-1" aria-label="पिछला दिन">‹</button>'+
@@ -4326,17 +4338,46 @@ function hxCloseCalc(){
   if(s&&s.d===C.d&&s.u0)open=s.v;
   else if(s&&s.d<C.d)open=upEnd(upLedger(hsKeyAdd(C.d,-1)).map[hsKeyAdd(C.d,-1)]);
   else first=true;   // अभी शुरुआत नहीं (या यही पहली गिनती)
-  var exp=open==null?null:round2(open+gc+gin-gOut),ucs=String(C.uc).trim(),cnt=ucs===''?null:num(hsSum(ucs));
-  return {e:e,has:has,gc:gc,upi:upi,kP:kP,kL:glPaidList(e,'k'),cash:has?round2(gc):0,kjC:kjList(C.d,'j','c'),kjU:kjList(C.d,'j','u'),
+  var ou=ordUp(C.d),exp=open==null?null:round2(open+gc+gin+ou-gOut),ucs=String(C.uc).trim(),cnt=ucs===''?null:num(hsSum(ucs));
+  return {e:e,has:has,gc:gc,upi:upi,kP:kP,kL:glPaidList(e,'k'),cash:has?round2(gc+ou):0,ou:ou,ouL:ordUpList(C.d),kjC:kjList(C.d,'j','c'),kjU:kjList(C.d,'j','u'),
     open:open,first:first,gin:gin,gOut:gOut,gL:glPaidList(e,'g'),exp:exp,cnt:cnt,diff:cnt!=null&&exp!=null?round2(cnt-exp):null,isT:C.d===t};
 }
+/* ---------- 💵📱 पेमेंट कैसे मिला + कहाँ रखा (24 नवंबर 2026)
+   मालिक: "पेमेंट लेना… नगद दिया है या UPI… ऊपर वाले गल्ले में… ऑनलाइन ऑर्डर छोड़ के, ऑर्डर का जो भी पैसा आता है (दूध-दही/मिठाई का बड़ा ऑर्डर) सब ऊपर वाले गल्ले में जाता है;
+   उधारी वाला बिक्री में जाता है"
+   बिल/ऑर्डर का पेमेंट: m 'c' नकद / 'u' UPI · नकद में g 'up' = 🔝 ऊपर वाले गल्ले में सीधे (ऑर्डर का) / 'k' = 🧾 काउंटर (आज का गल्ला → रात के बड़े नोटों में)
+   · 'up' वाला नकद उस दिन की कैश बिक्री और ऊपर वाले गल्ले में अपने-आप जुड़ता है (रात के बड़े नोटों में नहीं गिनना)
+   · पुराने पेमेंट (m नहीं) वैसे ही — "तरीका नहीं लिखा"; ऑनलाइन ऑर्डर का (नोट से) नकद = काउंटर */
+var PAY_OPTS=[['c-up','💵 नकद','🔝 ऊपर वाले गल्ले में रखा'],['c-k','💵 नकद','🧾 काउंटर (आज के गल्ले) में'],['u','📱 UPI','Paytm / फ़ोन पे / ऑनलाइन']];
+function payMode(p){
+  if(!p)return '';
+  if(p.m==='u'||p.m==='c')return p.m;
+  var nt=String(p.note||''),mo=/^ऑनलाइन ऑर्डर — (.+)$/.exec(nt);
+  if(mo)return /upi/i.test(mo[1])?'u':(/cash|नकद/i.test(mo[1])?'c':'');
+  if(/ adjust$/.test(nt))return 'x';
+  return '';
+}
+function payPlace(p){return payMode(p)!=='c'?'':(p.g==='up'?'up':'k');}
+function payTxt(p){var m=payMode(p);if(m==='u')return '📱 UPI';if(m==='c')return '💵 नकद · '+(payPlace(p)==='up'?'🔝 ऊपर वाला गल्ला':'🧾 काउंटर');if(m==='x')return '↔️ दूसरे बिल से';return 'तरीका नहीं लिखा';}
+function payKey(p){var m=payMode(p);return m==='u'?'u':(m==='c'?(payPlace(p)==='up'?'c-up':'c-k'):'');}
+function payPick(v){return v==='u'?{m:'u'}:(v==='c-up'?{m:'c',g:'up'}:(v==='c-k'?{m:'c',g:'k'}:null));}
+function payPickHtml(name,cur){
+  return '<p class="fl" style="margin-bottom:4px">पैसा कैसे मिला? <small class="muted">(चुनना ज़रूरी)</small></p><div class="pmpick" role="radiogroup">'+PAY_OPTS.map(function(o){
+    return '<label class="pmopt"><input type="radio" name="'+name+'" value="'+o[0]+'"'+(cur===o[0]?' checked':'')+'><span><b>'+o[1]+'</b><small>'+o[2]+'</small></span></label>';}).join('')+'</div>';
+}
+function payPickVal(name){var el=document.querySelector('input[name="'+name+'"]:checked');return el?payPick(el.value):null;}
+/* उस दिन बिल/ऑर्डर का नकद जो सीधे 🔝 ऊपर वाले गल्ले में गया */
+function ordUpList(d){var L=[];state.orders.forEach(function(o){if(o.cancelled)return;(o.payments||[]).forEach(function(p){if(p.date===d&&num(p.amount)>0&&payMode(p)==='c'&&p.g==='up')L.push({n:'#'+o.no,v:num(p.amount)});});});return L;}
+function ordUp(d){return round2(ordUpList(d).reduce(function(a,x){return a+x.v;},0));}
+/* उस दिन बिल/ऑर्डर का नकद जो काउंटर में आया (रात के बड़े नोटों में शामिल) */
+function ordKList(d){var L=[];state.orders.forEach(function(o){if(o.cancelled)return;(o.payments||[]).forEach(function(p){if(p.date===d&&num(p.amount)>0&&payMode(p)==='c'&&payPlace(p)==='k')L.push({n:'#'+o.no,v:num(p.amount)});});});return L;}
 /* उस दिन ऐप में दर्ज पक्का UPI: बिल/ऑनलाइन ऑर्डर का जमा (नोट में UPI) + उधारी का UPI जमा */
 function hxAppUpi(d){
   var L=[];
   state.orders.forEach(function(o){if(o.cancelled)return;(o.payments||[]).forEach(function(p){
     if(p.date!==d||!(num(p.amount)>0))return;
     var nt=String(p.note||''),mo=/^ऑनलाइन ऑर्डर — (.+)$/.exec(nt);
-    var up=mo?/upi/i.test(mo[1]):(/upi|यूपीआई|paytm|पेटीएम|phone\s*pe|फोन\s*पे|gpay|google\s*pay|स्कैन/i.test(nt)&&!/नकद|cash|कैश/i.test(nt));
+    var up=p.m==='u'||(!p.m&&(mo?/upi/i.test(mo[1]):(/upi|यूपीआई|paytm|पेटीएम|phone\s*pe|फोन\s*पे|gpay|google\s*pay|स्कैन/i.test(nt)&&!/नकद|cash|कैश/i.test(nt))));
     if(up)L.push({n:(mo?'🌐 ':'🧾 ')+'#'+o.no,v:num(p.amount)});
   });});
   kjList(d,'j','u').forEach(function(x){L.push({n:'📒 '+x.n,v:x.v});});
@@ -4352,6 +4393,7 @@ function hxCloseRes(){
     if(avg>0&&k.cash<avg*0.3)w.push('रोज़ (औसत '+rupee(avg)+') से बहुत कम — नोट एक बार और गिन लीजिए।');
     if(avg>0&&k.cash>avg*3)w.push('रोज़ (औसत '+rupee(avg)+') से बहुत ज़्यादा — रकम एक बार देख लीजिए।');
   }
+  if(k.ou>0)h+='<p class="hint hxhint">📦 कैश बिक्री में ऑर्डर/बिल का नकद '+rupee(k.ou)+' ('+k.ouL.slice(0,4).map(function(x){return esc(x.n)+' '+rupee(x.v);}).join(', ')+') अपने-आप जुड़ा — ये सीधे 🔝 ऊपर वाले गल्ले में रखा था, रात के बड़े नोटों में मत गिनिए</p>';
   var au=hxAppUpi(C.d),aus=sum(au);   /* 📱 ऐप में उस दिन दर्ज पक्का UPI (24 नवंबर 2026) — Paytm का जोड़ इससे कम हो तो कुछ छूटा */
   if(aus>0){
     h+='<p class="hint hxhint">📱 ऐप में दर्ज UPI '+rupee(aus)+' ('+au.slice(0,4).map(function(x){return esc(x.n)+' '+rupee(x.v);}).join(', ')+(au.length>4?' …':'')+') — Paytm के जोड़ में ये भी होना चाहिए</p>';
@@ -4368,7 +4410,7 @@ function hxCloseUp(){
   var s=upStart(),o=!!C.upo;
   var h='<button type="button" class="hxbrk" data-act="hxc-upo" aria-expanded="'+o+'">'+(o?'▾':'▸')+' 🔝 ऊपर वाले गल्ले में होना चाहिए <b>'+rupee(k.exp)+'</b></button>';
   if(o)h+='<div class="hxgalla glres" style="margin-top:6px">'+ln('',(s&&s.d===C.d&&s.u0?'सुबह ऊपर में (शुरुआत)':'कल रात ऊपर में'),rupee(k.open))+
-    ln('+','आज डाले',k.has?rupee(k.gc):'—')+(k.gin?ln('+','घर/बैंक से डाला',rupee(k.gin)):'')+
+    ln('+','आज डाले',k.has?rupee(k.gc):'—')+(k.ou?ln('+','📦 ऑर्डर/बिल का नकद (सीधे ऊपर)',rupee(k.ou)):'')+(k.gin?ln('+','घर/बैंक से डाला',rupee(k.gin)):'')+
     k.gL.map(function(x){return ln('−',esc(x.t),rupee(x.v));}).join('')+
     ln('=','होना चाहिए',rupee(k.exp),'tot')+'</div>';
   return h;
@@ -4431,7 +4473,49 @@ function upStartSave(){
 
 /* ---------- 💵 गल्ला टैब — एक नज़र में (10 नवंबर शाम, मालिक: "सिंपल… भीड़-भाड़ नहीं… आदमी तुरंत समझ जाए") ----------
    ऊपर एक बड़ा नंबर (ऊपर वाले गल्ले में होना चाहिए) + गिनकर मिलाओ · नीचे 4–5 लाइन · महीना और पिछले दिन तीर में */
-function hxGallaHtml(){
+/* ---------- 💰 पैसा — एक जगह (24 नवंबर 2026, मालिक: "पैसा कहाँ जाता है, UPI से आया या कैश… सभी पैसे एक जगह मैनेज")
+   चुने दिन का ➕ आया (नकद: काउंटर से ऊपर डाले + ऑर्डर/बिल का सीधे ऊपर · UPI: Paytm का जोड़ — "इसमें" ऐप में दर्ज)
+   ➖ गया (ऊपर वाले गल्ले / काउंटर / ऑनलाइन / घर से) · 📍 अभी कहाँ है (ऊपर वाला गल्ला, इस महीने UPI, लेना, देना)
+   किसी पैसे को दो बार नहीं गिनते: काउंटर में आया बिल/उधारी का नकद और ऐप में दर्ज UPI सिर्फ़ "इसमें" दिखते हैं */
+function hxMoneyHtml(){
+  var d=HX().d,t=todayStr(),e=hsGet(d)||{d:d},closed=hsHas(e),isT=d===t;
+  var row=function(a,b,cl){return '<div class="row'+(cl?' '+cl:'')+'"><span>'+a+'</span><b>'+b+'</b></div>';};
+  var sum=function(L){return round2(L.reduce(function(a,x){return a+num(x.v);},0));};
+  var lst=function(L){return L.map(function(x){return esc(x.n)+' '+rupee(x.v);}).join(' · ');};
+  var later='<span class="muted">दिन बंद होने पर</span>';
+  var ou=ordUpList(d),kc=ordKList(d),kj=kjList(d,'j','c').map(function(x){return {n:'📒 '+x.n,v:x.v};}),au=hxAppUpi(d);
+  var h='<div class="pmbox"><div class="pmh">➕ '+(isT?'आज':hsDm(d)+' को')+' पैसा आया</div>';
+  if(e.gm||glDay(d)){
+    h+=row('💵 नकद — काउंटर से ऊपर डाले (बड़े नोट)',closed?rupee(num(e.gc)):later);
+    if(kc.length||kj.length)h+='<div class="pmsub">इसमें: '+lst(kc.concat(kj))+'</div>';
+    if(ou.length)h+=row('💵 नकद — 📦 ऑर्डर/बिल का, सीधे 🔝 ऊपर',rupee(sum(ou)))+'<div class="pmsub">'+lst(ou)+'</div>';
+  }else h+=row('💵 नकद बिक्री',closed?rupee(hsCashSale(e)):later);
+  h+=row('📱 UPI — Paytm का जोड़',(e.upi!==''&&e.upi!=null)?rupee(num(e.upi)):later);
+  if(au.length)h+='<div class="pmsub">इसमें ऐप में दर्ज: '+lst(au)+'</div>';
+  h+=row('= '+(isT?'आज':'उस दिन')+' की कुल बिक्री',closed?rupee(hsTot(e)):later,'tot');
+  if(num(e.gin))h+=row('🏠 घर/बैंक से गल्ले में डाला (बिक्री नहीं)',rupee(num(e.gin)));
+  h+='</div>';
+  var gh='';
+  [['g','🔝 ऊपर वाले गल्ले से'],['k','🧾 काउंटर से'],['u','📱 ऑनलाइन (UPI/बैंक) से'],['h','🏠 घर से']].forEach(function(sx){
+    var L=glPaidList(e,sx[0]);if(!L.length)return;
+    gh+=row(sx[1],rupee(sum(L)))+'<div class="pmsub">'+L.map(function(x){return esc(x.t)+' '+rupee(x.v);}).join(' · ')+'</div>';
+  });
+  var due=glList(e.sm).filter(function(m){return (m.pm||'')==='';});
+  h+='<div class="pmbox"><div class="pmh">➖ '+(isT?'आज':hsDm(d)+' को')+' पैसा गया</div>'+(gh||'<p class="hint" style="margin:4px 0">अभी कुछ नहीं लिखा।</p>')+
+    (due.length?'<div class="pmsub">⏳ माल आया, पैसा बाद में: '+due.map(function(m){return esc(m.n)+' '+rupee(num(m.v));}).join(' · ')+'</div>':'')+'</div>';
+  var U=upLedger(t),ur=U.map[t],upNow=ur?upEnd(ur):null,m0=t.slice(0,8)+'01',mu=0,mo=0;
+  DLY().forEach(function(x){if(x.d>=m0&&x.d<=t){if(hsHas(x))mu+=hsUpiSale(x);mo+=sum(glPaidList(x,'u'));}});
+  var lena=round2(allDue()+khataTotalDue()),dena=0;try{dena=round2(supDues(t).reduce(function(a,z){return a+z.bal;},0));}catch(err){}
+  h+='<div class="pmbox where"><div class="pmh">📍 पैसा अभी कहाँ है <small>(आज तक)</small></div>'+
+    row('🔝 ऊपर वाले गल्ले में होना चाहिए',upNow!=null?rupee(upNow):'<span class="muted">एक बार गिनकर शुरू करें</span>')+
+    row('📱 '+HS_MON[+t.slice(5,7)-1]+' में UPI से आया',rupee(round2(mu)))+
+    row('📱 '+HS_MON[+t.slice(5,7)-1]+' में ऑनलाइन से दिया',rupee(round2(mo)))+
+    row('🔒 लेना बाकी (बिल + उधारी)','<button class="lnk" data-act="view-dues" style="padding:0;min-height:0">'+rupee(lena)+' →</button>')+
+    row('🤝 सप्लायर को देना बाकी',rupee(dena))+'</div>';
+  return h+'<h3 class="grouphead" style="margin-top:14px">🔝 ऊपर वाला गल्ला</h3>';
+}
+function hxGallaHtml(){return hxMoneyHtml()+hxGallaCore();}
+function hxGallaCore(){
   var d=HX().d,t=todayStr(),isT=d===t,open=HX().open;
   if(!glDay(d))return '<div class="hxnote">गल्ले का हिसाब '+hsDm(GL().d0)+' से शुरू हुआ।</div>';
   var e=hsGet(d)||{d:d},closed=hsHas(e),U=upLedger(t),r=U.map[d]||null,st=U.start;
@@ -4455,7 +4539,7 @@ function hxGallaHtml(){
   if(r.open!=null){
     var gL=glPaidList(e,'g'),gin=num(e.gin);
     html+='<div class="hxgalla glres">'+ln('',(st.d===d&&st.u0?'सुबह ऊपर में (शुरुआत)':'कल रात ऊपर में'),rupee(r.open))+
-      ln('+','आज डाले (बड़े नोट)',closed?rupee(num(e.gc)):'<span class="muted">रात को</span>')+(gin?ln('+','घर/बैंक से डाला',rupee(gin)):'')+
+      ln('+','आज डाले (बड़े नोट)',closed?rupee(num(e.gc)):'<span class="muted">रात को</span>')+(ordUp(d)?ln('+','📦 ऑर्डर/बिल का नकद (सीधे ऊपर)',rupee(ordUp(d))):'')+(gin?ln('+','घर/बैंक से डाला',rupee(gin)):'')+
       gL.map(function(x){return ln('−',esc(x.t),rupee(x.v));}).join('')+
       ln('=','होना चाहिए',rupee(r.exp),'tot')+'</div>';
   }
@@ -4463,7 +4547,7 @@ function hxGallaHtml(){
   var ym=d.slice(0,7),mf=ym+'-01',me=moEnd(ym)<t?moEnd(ym):t,G=st.d<=me?upRange(mf>st.d?mf:st.d,me):null;
   if(G){var gl=function(a,b){return '<div class="row"><span>'+a+'</span><b>'+b+'</b></div>';};
     html+=grp('g_mon','📅 '+HS_MON[+ym.slice(5,7)-1]+' का पूरा जोड़',rupee(G.end),'<div class="hxgalla" style="margin:0 10px 10px">'+
-      gl(G.openCnt?'शुरुआत ('+hsDm(G.od)+' रात, गिना)':'शुरुआत ('+hsDm(G.od)+' सुबह)',rupee(G.open))+gl('+ काउंटर से डाले',rupee(G.T))+(G.gin?gl('+ घर/बैंक से डाला',rupee(G.gin)):'')+
+      gl(G.openCnt?'शुरुआत ('+hsDm(G.od)+' रात, गिना)':'शुरुआत ('+hsDm(G.od)+' सुबह)',rupee(G.open))+gl('+ काउंटर से डाले',rupee(G.T))+(G.ord?gl('+ 📦 ऑर्डर/बिल का नकद (सीधे ऊपर)',rupee(G.ord)):'')+(G.gin?gl('+ घर/बैंक से डाला',rupee(G.gin)):'')+
       (G.sup?gl('− सप्लायर को',rupee(G.sup)):'')+(G.ex?gl('− खर्च',rupee(G.ex)):'')+(G.hm?gl('− घर के लिए',rupee(G.hm)):'')+(G.out?gl('− बैंक / बचत',rupee(G.out)):'')+
       (G.dsum?gl('± गिनती में फ़र्क़',(G.dsum>0?'+':'−')+rupee(Math.abs(G.dsum))):'')+gl('= '+(G.ed===t?'अभी':hsDm(G.ed)+' रात'),rupee(G.end))+
       (G.cnts.length?'<p class="hint" style="margin:6px 0 2px">मिलान: '+G.cnts.map(function(c){return hsDm(c.d)+' '+(Math.abs(c.diff)<0.5?'✅':'⚠️ '+(c.diff>0?'+':'−')+rupee(Math.abs(c.diff)));}).join(' · ')+'</p>':'')+
@@ -4654,7 +4738,7 @@ function rpHtml(){
   /* 🔝 ऊपर वाला गल्ला */
   if(D.g){var g=D.g,ln=function(a,b){return '<div class="glline"><span>'+a+'</span><b>'+b+'</b></div>';},okc=g.cnts.every(function(c){return Math.abs(c.diff)<0.5;});
     html+=sec('galla','🔝','ऊपर वाला गल्ला',g.cnts.length?(okc?'✅':'⚠️'):rupee(g.end),
-      ln(g.openCnt?'🔢 शुरुआत ('+hsDm(g.od)+' रात, गिना)':'🌅 शुरुआत ('+hsDm(g.od)+' सुबह)',rupee(g.open))+ln('➕ काउंटर से डाले (बड़े नोट)',rupee(g.T))+(g.gin?ln('➕ घर/बैंक से डाला',rupee(g.gin)):'')+
+      ln(g.openCnt?'🔢 शुरुआत ('+hsDm(g.od)+' रात, गिना)':'🌅 शुरुआत ('+hsDm(g.od)+' सुबह)',rupee(g.open))+ln('➕ काउंटर से डाले (बड़े नोट)',rupee(g.T))+(g.ord?ln('➕ 📦 ऑर्डर/बिल का नकद (सीधे ऊपर)',rupee(g.ord)):'')+(g.gin?ln('➕ घर/बैंक से डाला',rupee(g.gin)):'')+
       (g.sup?ln('➖ सप्लायर को',rupee(g.sup)):'')+(g.ex?ln('➖ खर्च (ऊपर से)',rupee(g.ex)):'')+(g.hm?ln('➖ 🏠 घर के लिए (ऊपर से)',rupee(g.hm)):'')+(g.out?ln('➖ 💼 बैंक / बचत',rupee(g.out)):'')+
       (g.dsum?ln('± गिनती में फ़र्क़',(g.dsum>0?'+':'−')+rupee(Math.abs(g.dsum))):'')+ln('= '+hsDm(g.ed)+' रात ऊपर में',rupee(g.end))+
       (g.cnts.length?'<p class="hint">मिलान: '+g.cnts.map(function(c){return hsDm(c.d)+' '+(Math.abs(c.diff)<0.5?'✅':'⚠️ '+(c.diff>0?'+':'−')+rupee(Math.abs(c.diff)));}).join(' · ')+'</p>':'<p class="hint">'+(g.lastCnt?'गिनती हो गई — अगली गिनती पर मिलान दिखेगा।':'इस समय में ऊपर वाला गल्ला गिनकर नहीं मिलाया।')+'</p>')+
@@ -5543,7 +5627,7 @@ function savePaid(code){
   if(bo){
     var due=orderDue(bo);
     if(amt>due+0.001){err.textContent='इस ऑर्डर पर सिर्फ़ '+rupee(due)+' बाकी है — इससे ज़्यादा नहीं ले सकते।';return;}
-    bo.payments.push({id:uid(),amount:amt,date:todayStr(),note:'ऑनलाइन ऑर्डर — '+mode});
+    bo.payments.push({id:uid(),amount:amt,date:todayStr(),note:'ऑनलाइन ऑर्डर — '+mode,m:mode==='UPI'?'u':'c',g:'k'});   // ऑनलाइन ऑर्डर का नकद → काउंटर
     save();
     total=round2(orderPaid(bo));rest=orderDue(bo);
   }else{
@@ -5879,6 +5963,7 @@ function openPaymentForm(customerId,preOrderId){
     html+='<p class="hint">ऑर्डर #'+chosen.no+' ('+fmtDT(chosen.date)+') \u2013 अभी '+rupee(orderDue(chosen))+' बाकी है।</p>'+
       (eligible.length>1?'<button class="lnk" data-act="pay-change-order" data-cust="'+customerId+'">दूसरा ऑर्डर चुनो</button>':'')+
       '<label class="fl">कितना पैसा मिला \u20b9<input id="p-amt" type="number" inputmode="decimal" step="any" min="0" value="'+orderDue(chosen)+'"></label>'+
+      payPickHtml('p-pm','')+
       '<label class="fl">तारीख<input id="p-date" type="date" value="'+todayStr()+'"></label>'+
       '<label class="fl">नोट (वैकल्पिक)<input id="p-note" type="text"></label>'+
       '<div class="err" id="p-err"></div>'+
@@ -5915,6 +6000,7 @@ function openLumpPayment(cid){
   openSheet('<div class="sh-head"><h2>एक साथ जमा</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<p class="hint">'+esc(c.name)+' के '+el.length+' ऑर्डर पर कुल '+rupee(tot)+' बाकी है। जितना पैसा मिला वो सबसे पुराने ऑर्डर से शुरू करके अपने आप बँट जाएगा।</p>'+
     '<label class="fl">कितना पैसा मिला ₹<input id="lp-amt" type="number" inputmode="decimal" step="any" min="0" value="'+tot+'"></label>'+
+    payPickHtml('lp-pm','')+
     '<label class="fl">तारीख<input id="lp-date" type="date" value="'+todayStr()+'"></label>'+
     '<label class="fl">नोट (वैकल्पिक)<input id="lp-note" type="text"></label>'+
     '<div class="err" id="lp-err"></div>'+
@@ -8129,8 +8215,20 @@ document.addEventListener('click',function(e){
       if(!(amt>0)){$('#p-err').textContent='सही amount लिखो।';break;}
       var poDue=orderDue(po);
       if(amt>poDue+0.001){$('#p-err').textContent='इस ऑर्डर पर सिर्फ '+rupee(poDue)+' बाकी है — इससे ज़्यादा नहीं ले सकते।';break;}
-      po.payments.push({id:uid(),amount:amt,date:$('#p-date').value||todayStr(),note:$('#p-note').value.trim()});
+      var ppk=payPickVal('p-pm');if(!ppk){$('#p-err').textContent='पैसा कैसे मिला — 💵 नकद (ऊपर वाला गल्ला / काउंटर) या 📱 UPI चुनिए।';break;}
+      po.payments.push(Object.assign({id:uid(),amount:amt,date:$('#p-date').value||todayStr(),note:$('#p-note').value.trim()},ppk));
       save();closeSheet();renderRoute();toast('पेमेंट जुड़ गया');
+      break;
+    case 'pay-mode':
+      var pmo2=findOrder(t.getAttribute('data-order')),pmp=pmo2?pmo2.payments.find(function(x){return x.id===t.getAttribute('data-pay');}):null;
+      if(pmp)openSheet('<div class="sh-head"><h2>पैसा कैसे मिला?</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+        '<p class="hint">बिल #'+pmo2.no+' · '+fmtDonly(pmp.date)+' · '+rupee(pmp.amount)+'</p>'+payPickHtml('pm-edit',payKey(pmp))+'<div class="err" id="pm-err"></div>'+
+        '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="pay-mode-save" data-order="'+pmo2.id+'" data-pay="'+pmp.id+'">Save करो</button></div>');
+      break;
+    case 'pay-mode-save':
+      var pso=findOrder(t.getAttribute('data-order')),psp=pso?pso.payments.find(function(x){return x.id===t.getAttribute('data-pay');}):null,psk=payPickVal('pm-edit');
+      if(!psk){$('#pm-err').textContent='एक चुनिए।';break;}
+      if(psp){psp.m=psk.m;if(psk.g)psp.g=psk.g;else delete psp.g;save();closeSheet();renderRoute();toast('ठीक कर दिया — '+payTxt(psp));}
       break;
     case 'del-payment':
       var dpo=findOrder(t.getAttribute('data-order'));var dpid=t.getAttribute('data-pay');
@@ -8157,11 +8255,12 @@ document.addEventListener('click',function(e){
       var ltot=round2(lel.reduce(function(s,o){return s+orderDue(o);},0));
       if(!(lamt>0)){$('#lp-err').textContent='सही amount लिखो।';break;}
       if(lamt>ltot+0.001){$('#lp-err').textContent='कुल बाकी सिर्फ '+rupee(ltot)+' है — इससे ज़्यादा नहीं ले सकते।';break;}
+      var lpk=payPickVal('lp-pm');if(!lpk){$('#lp-err').textContent='पैसा कैसे मिला — 💵 नकद (ऊपर वाला गल्ला / काउंटर) या 📱 UPI चुनिए।';break;}
       var lrem=round2(lamt),lcount=0,ldate=$('#lp-date').value||todayStr(),lnote=$('#lp-note').value.trim()||'एक साथ जमा';
       lel.forEach(function(o){
         if(lrem<=0.001)return;
         var take=round2(Math.min(lrem,orderDue(o)));
-        if(take>0){o.payments.push({id:uid(),amount:take,date:ldate,note:lnote});lrem=round2(lrem-take);lcount++;}
+        if(take>0){o.payments.push(Object.assign({id:uid(),amount:take,date:ldate,note:lnote},lpk));lrem=round2(lrem-take);lcount++;}
       });
       save();closeSheet();renderRoute();toast(rupee(lamt)+' जमा हो गया ('+lcount+' ऑर्डर में बँटा)');
       break;
@@ -8948,7 +9047,7 @@ function aiFB(){
 function aiNumsOf(s){var a=[];aiDigits(s).replace(/\d[\d,]*(\.\d+)?/g,function(m){var n=String(+m.replace(/,/g,''));if(n!=='NaN')a.push(n);return m;});return a;}
 function aiDayTxt(e){
   var p=['बिक्री '+rupee(hsTot(e))+' (UPI '+rupee(hsUpiSale(e))+', कैश '+rupee(hsCashSale(e))+')'];
-  if(e.gm&&hsHas(e)){var ur=upDay(e.d);p.push('ऊपर डाले '+rupee(num(e.gc))+(glPaid(e,'k')?' · काउंटर से दिया '+rupee(glPaid(e,'k')):'')+(glPaid(e,'g')?' · ऊपर से गया '+rupee(glPaid(e,'g')):'')+(glHome(e)?' · घर के लिए '+rupee(glHome(e)):'')+(num(e.out)?' · बैंक/बचत '+rupee(num(e.out)):'')+(ur&&upEnd(ur)!=null?' · रात ऊपर वाले गल्ले में '+rupee(upEnd(ur))+(ur.diff!=null?(Math.abs(ur.diff)<0.5?' (गिनती मिली)':' (गिनती में '+rupee(Math.abs(ur.diff))+' '+(ur.diff>0?'ज़्यादा':'कम')+')'):''):''));}
+  if(e.gm&&hsHas(e)){var ur=upDay(e.d);p.push('ऊपर डाले '+rupee(num(e.gc))+(ordUp(e.d)?' · ऑर्डर/बिल का नकद सीधे ऊपर '+rupee(ordUp(e.d)):'')+(glPaid(e,'k')?' · काउंटर से दिया '+rupee(glPaid(e,'k')):'')+(glPaid(e,'g')?' · ऊपर से गया '+rupee(glPaid(e,'g')):'')+(glHome(e)?' · घर के लिए '+rupee(glHome(e)):'')+(num(e.out)?' · बैंक/बचत '+rupee(num(e.out)):'')+(ur&&upEnd(ur)!=null?' · रात ऊपर वाले गल्ले में '+rupee(upEnd(ur))+(ur.diff!=null?(Math.abs(ur.diff)<0.5?' (गिनती मिली)':' (गिनती में '+rupee(Math.abs(ur.diff))+' '+(ur.diff>0?'ज़्यादा':'कम')+')'):''):''));}
   var xl=hsExList(e);if(xl.length)p.push('खर्च '+rupee(hsExp(e))+' ['+xl.map(function(x){return x.name+' '+rupee(x.v)+(x.n?' ('+x.n+')':'');}).join(', ')+']');
   var mk=hsMadeList(e).map(hsMadeTxt);if(mk.length)p.push('बना: '+mk.join(', '));
   if(e.waste)p.push('फेंका/ख़राब: '+e.waste);
@@ -9164,6 +9263,12 @@ function aiFacts(text){
     var opd=(online.orders||[]).filter(function(o){return (o.status==='accepted'||o.status==='out'||o.status==='delivered')&&!onlineIsPaid(o);});
     if(opd.length)fb.add('ऑनलाइन ऑर्डर — पेमेंट बाकी',opd.length+' ऑर्डर ('+opd.slice(0,6).map(function(o){return '#'+o.code+' '+rupee(Math.max(0,round2(onlineTotal(o)-onlinePaidAmt(o))));}).join(', ')+')');
     fb.add('कुल लेना बाकी (बिल + उधारी)',rupee(round2(allDue()+khataTotalDue())));
+    var tou=ordUpList(t),tkc=ordKList(t);
+    if(tou.length)fb.add('आज — ऑर्डर/बिल का नकद सीधे ऊपर वाले गल्ले में',rupee(ordUp(t))+' ('+tou.slice(0,5).map(function(x){return x.n+' '+rupee(x.v);}).join(', ')+') — कैश बिक्री में जुड़ा');
+    if(tkc.length)fb.add('आज — ऑर्डर/बिल का नकद काउंटर में',rupee(round2(tkc.reduce(function(a,x){return a+x.v;},0))));
+    var mm0=t.slice(0,8)+'01',mmu=0,mmo=0;DLY().forEach(function(x){if(x.d>=mm0&&x.d<=t){if(hsHas(x))mmu+=hsUpiSale(x);mmo+=glPaidList(x,'u').reduce(function(a,y){return a+y.v;},0);}});
+    fb.add(mon+' — 📱 UPI से आया / ऑनलाइन से दिया',rupee(round2(mmu))+' / '+rupee(round2(mmo)));
+    var tdu=upDay(t);if(tdu&&upEnd(tdu)!=null)fb.add('अभी — 🔝 ऊपर वाले गल्ले में होना चाहिए',rupee(upEnd(tdu)));
   }catch(e){}
   /* कौन-से दिन का हिसाब नहीं भरा */
   var miss=[];for(var i=1;i<=dd;i++){var k=t.slice(0,8)+pad(i);if(!hsHas(hsGet(k)))miss.push(i);}
@@ -10053,9 +10158,10 @@ function aiSaveJama(c){
   var tot=round2(el.reduce(function(s,o){return s+orderDue(o);},0));
   if(amt>tot+0.001)return {err:'बिल का कुल बाकी सिर्फ़ '+rupee(tot)+' है — इससे ज़्यादा नहीं ले सकते।'};
   var dk=c.date||todayStr();if(dk>todayStr())return {err:'आगे की तारीख़ नहीं लिख सकते।'};
-  var rem=amt,n=0,note=c.mode?'जमा — '+c.mode:'एक साथ जमा';
+  if(c.mode!=='UPI'&&c.mode!=='नकद')return {err:'पैसा कैसे मिला — कार्ड में 📱 UPI या 💵 नकद चुनिए।'};
+  var rem=amt,n=0,note='जमा — '+c.mode,mk=c.mode==='UPI'?{m:'u'}:{m:'c',g:'up'};   // बिल/ऑर्डर का नकद → 🔝 ऊपर वाला गल्ला (मालिक का नियम)
   var paidL=[];
-  el.forEach(function(o){if(rem<=0.001)return;var take=round2(Math.min(rem,orderDue(o)));if(take>0){var py={id:uid(),amount:take,date:dk,note:note};o.payments.push(py);paidL.push({oid:o.id,pid:py.id});rem=round2(rem-take);n++;}});
+  el.forEach(function(o){if(rem<=0.001)return;var take=round2(Math.min(rem,orderDue(o)));if(take>0){var py=Object.assign({id:uid(),amount:take,date:dk,note:note},mk);o.payments.push(py);paidL.push({oid:o.id,pid:py.id});rem=round2(rem-take);n++;}});
   return {cid:px.cust.id,undo:{k:'pay',p:paidL},msg:rupee(amt)+' जमा हो गया — '+px.cust.name+(n>1?' ('+n+' ऑर्डर में बँटा)':'')+' · अब बिल बाकी '+rupee(customerTotals(px.cust.id).due)};
 }
 function aiSaveOrder(c){
@@ -10070,8 +10176,9 @@ function aiSaveOrder(c){
   var items=c.lines.map(function(l){return {lid:uid(),iid:l.iid||'',name:l.name,unit:l.unit,rate:Math.max(0,num(l.rate)),qty:num(l.qty),delivered:!!c.now,deliveredAt:c.now?td:'',date:''};});
   var tot=round2(items.reduce(function(s,i){return s+lineAmt(i);},0));
   var pay=c.now?(c.paid==='full'?tot:round2(num(c.paid))):round2(num(c.adv));pay=Math.min(tot,Math.max(0,pay));
-  var note=(c.now?'काउंटर पर':'Advance')+(c.mode?' — '+c.mode:'');
-  var o={id:uid(),no:state.nextOrderNo++,customerId:cr.c.id,date:when,items:items,payments:pay>0?[{id:uid(),amount:pay,date:td,note:note}]:[],cancelled:false,notes:String(c.notes||''),createdAt:Date.now()};
+  if(pay>0&&c.mode!=='UPI'&&c.mode!=='नकद')return {err:'पैसा कैसे मिला — कार्ड में 📱 UPI या 💵 नकद चुनिए।'};
+  var note=(c.now?'काउंटर पर':'Advance')+(c.mode?' — '+c.mode:''),mk=c.mode==='UPI'?{m:'u'}:{m:'c',g:c.now?'k':'up'};   // अभी का बिल = काउंटर; ऑर्डर का एडवांस = 🔝 ऊपर
+  var o={id:uid(),no:state.nextOrderNo++,customerId:cr.c.id,date:when,items:items,payments:pay>0?[Object.assign({id:uid(),amount:pay,date:td,note:note},mk)]:[],cancelled:false,notes:String(c.notes||''),createdAt:Date.now()};
   state.orders.push(o);
   return {oid:o.id,cid:cr.c.id,msg:(c.now?'बिल':'ऑर्डर')+' #'+o.no+' सेव — '+cr.c.name+' · कुल '+rupee(tot)+(pay>0?' · जमा '+rupee(pay):'')+' · बाकी '+rupee(orderDue(o))+(cr.made?' (नया ग्राहक बना)':'')};
 }
@@ -10368,7 +10475,8 @@ function aiQuick(text,fx){
   var s=aiDigits(String(text||'')),lo=(s+' ¦ '+aiNorm(s)).toLowerCase();
   if(!s||s.length>80||!aiIsQ(text)||AI_QDEEP.test(lo)||AI_QWRITE.test(lo)||/\d/.test(s)||/\d/.test(aiNorm(s)))return null;
   var T={sale:/बिक्री|बिकी|bikri|bikree|\bsale|सेल|बिका|कमाई|kamai/,exp:/खर्च|ख़र्च|kharch|expense/,pro:/बचत|bachat|मुनाफ़ा|मुनाफा|munafa|profit|फ़ायदा|फायदा|fayda/,
-    udh:/उधारी|udhari|उधार|udhar|बकाया|bakaya/,sup:/सप्लायर|supplier/,gal:/गल्ल|galla|गल्ले|galle/,ord:/ऑर्डर|आर्डर|order|डिलीवरी|delivery/};
+    udh:/उधारी|udhari|उधार|udhar|बकाया|bakaya/,sup:/सप्लायर|supplier/,gal:/गल्ल|galla|गल्ले|galle/,ord:/ऑर्डर|आर्डर|order|डिलीवरी|delivery/,
+    upi:/यूपीआई|\bupi\b|पैसा\s*(?:कहाँ|कहां|किधर)|paisa\s*(?:kaha|kidhar)/};
   var hit=Object.keys(T).filter(function(k){return T[k].test(lo);});
   var sx=null;try{sx=aiSupInText(s);}catch(e){sx=null;}
   var top=(fx.people&&fx.people[0]&&fx.people[0].s>=0.9)?fx.people[0].x:null;
@@ -10412,6 +10520,7 @@ function aiQuick(text,fx){
   }
   if(k==='sup')return ans('सप्लायर — ऐप का पक्का हिसाब:',F(/^सप्लायर को देना बाकी \(कुल\)$/,1).concat(F(/^सप्लायर बाकी: /,8)));
   if(k==='gal')return ans('गल्ला — ऐप का पक्का हिसाब:',F(/^आज — काउंटर \/ ऊपर वाला गल्ला$/,1).concat(F(/— 🔝 ऊपर वाला गल्ला$/,1),F(/^आज — ऐप में दर्ज UPI/,1)));
+  if(k==='upi')return ans('पैसा — ऐप का पक्का हिसाब:',F(/^आज — ऐप में दर्ज UPI/,1).concat(F(/— 📱 UPI से आया \/ ऑनलाइन से दिया$/,1),F(/^अभी — 🔝 ऊपर वाले गल्ले में होना चाहिए$/,1),F(/^आज — ऑर्डर\/बिल का नकद/,2),F(/^कुल लेना बाकी/,1)));
   if(k==='ord')return ans('ऑर्डर — ऐप का पक्का हिसाब:',F(/^नए ऑनलाइन ऑर्डर/,1).concat(F(/^अगले 7 दिन के ऑर्डर/,1),F(/^ऑर्डर #/,8),F(/^ऑनलाइन ऑर्डर — पेमेंट बाकी/,1)));
   return null;
 }
