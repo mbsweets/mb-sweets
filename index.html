@@ -10584,13 +10584,17 @@ function aiQuick(text,fx){
   if(H.sale&&H.upi)delete H.sale;
   if(H.avg)delete H.sale;
   if(H.jama&&H.udh)delete H.jama;
-  var cat=null;AI_QCAT.forEach(function(c){if(!cat&&c[1].test(lo))cat=c[0];});
+  /* नाम में आया शब्द खर्च का शब्द नहीं ("Santoah cake" उधारी वाले का नाम है — केक का खर्च नहीं; "दूध वाले भैया" भी) */
+  var loC=lo,pTop=(fx.people&&fx.people[0]&&fx.people[0].s>=0.9)?fx.people[0].x:null;
+  if(pTop){var nTk=aiToks(pTop.name);aiToks(s).forEach(function(w){if(nTk.some(function(x){return aiNameScore(w,x)>=0.9;}))loC=loC.replace(new RegExp(aiEscRe(w.toLowerCase()),'g'),' ');});}
+  var cat=null;AI_QCAT.forEach(function(c){if(!cat&&c[1].test(loC))cat=c[0];});
   if(cat&&H.exp)H.exp=1;else cat=H.exp?null:cat;
   var sx=null;try{sx=aiSupInText(s);}catch(e){sx=null;}
   if(sx){   // सप्लायर का पहला नाम बोला? ("पनीर" अकेला = दूध-दही-पनीर का खर्च, "कृष्णा पनीर" = सप्लायर)
     var core=supCore(String(sx.n).split(/[(·]/)[0]).split(/\s+/)[0]||'';
     var said=aiToks(s).some(function(w){return aiNameScore(w,core)>=0.95;});
-    if(!said&&(H.exp||(cat&&!/बाकी|baki|baaki|बकाया|bakaya|देना|dena|उधार|udhar/.test(lo))))sx=null;   // "संतोष केक का बाकी" = सप्लायर का बाकी, केक का खर्च नहीं
+    if(!said&&(H.exp||(cat&&!/बाकी|baki|baaki|बकाया|bakaya|देना|dena|उधार|udhar/.test(lo))))sx=null;
+    if(!said&&pTop)sx=null;   // "पनीर वाली दीदी" (उधारी) — सप्लायर का नाम (कृष्णा) बोला ही नहीं, सिर्फ़ "पनीर" मिला   // "संतोष केक का बाकी" = सप्लायर का बाकी, केक का खर्च नहीं
   }
   if(cat&&!H.exp&&!sx&&!H.sup&&/कितना|kitna|कितने/.test(lo)&&!/बाकी|baki|baaki|बकाया|bakaya|देना|dena|उधार|udhar/.test(lo))H.exp=1;
   if(H.exp&&cat)delete H.pro;
