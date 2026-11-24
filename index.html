@@ -622,7 +622,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .pmbox .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px dashed var(--line)}.pmbox .row b{white-space:nowrap}.pmbox .row.tot{border-top:1.5px solid var(--ink);font-size:1.02rem}
 .pmbox .pmsub{color:var(--muted);font-size:.8rem;margin:-2px 0 4px 6px;line-height:1.4}.pmbox.where{border-color:var(--gold)}
 .aimemo{background:var(--milk-bg);border:1px solid var(--milk-line);border-radius:12px;padding:8px 10px;margin:6px 0;font-size:.9rem}.aimemob{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
-.aiself{border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;background:var(--card)}.aiself .btn{width:100%;margin-top:6px}.aiselfst{font-size:.88rem;margin:6px 0}.aiselfres{margin-top:10px}.aiselfres ul{list-style:none;padding:0;margin:6px 0}.aiselfres li{padding:6px 0;border-top:1px solid var(--line);font-size:.9rem;line-height:1.35}.aiselfres li small{color:var(--muted)}.aiselfres li.bad{color:var(--red)}.aiselfres li i{display:block;font-style:normal;color:var(--muted);font-size:.82rem;margin-top:2px}
+.aiself{border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;background:var(--card)}.aiself .btn{width:100%;margin-top:6px}.aiselfb{display:flex;gap:8px}.aiselfb .btn{flex:1}.aiselfst{font-size:.88rem;margin:6px 0}.aiselfres{margin-top:10px}.aiselfres ul{list-style:none;padding:0;margin:6px 0}.aiselfres li{padding:6px 0;border-top:1px solid var(--line);font-size:.9rem;line-height:1.35}.aiselfres li small{color:var(--muted)}.aiselfres li.bad{color:var(--red)}.aiselfres li i{display:block;font-style:normal;color:var(--muted);font-size:.82rem;margin-top:2px}
 .aimemlist{border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;background:var(--card)}.aimemrow{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 0}.aimemrow span{flex:1;font-size:.92rem}
 .aihqin{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;background:var(--card);color:var(--ink);margin:4px 0 8px}
 .aihday{margin:12px 0 4px;color:var(--brand-ink);font-size:.95rem}.aihitem{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 8px;background:var(--card)}
@@ -9279,9 +9279,9 @@ function aiFacts(text){
   /* पिछले 21 दिन रोज़ का (पहले 35 — AI को हर बार ~3,000 अक्षर कम; किसी और समय का सवाल हो तो ⚡ वाला हिस्सा उस समय का हिसाब पहले ही जोड़ देता है) */
   DLY().filter(function(e){return e.d>=hsKeyAdd(t,-20)&&e.d<=t&&(hsHas(e)||hsHasExp(e));}).sort(function(a,b){return a.d<b.d?1:-1;}).forEach(function(e){fb.add('दिन: '+hsDm(e.d)+' ('+hsWdOf(e.d)+')',aiDayTxt(e));});
   /* मैसेज में जिनका नाम आया */
-  var all=aiPeopleAll(),pin=aiPeopleInText(text||'',all);
+  var all=aiPeopleAll(),pin=aiPeopleInText(text||'',all),pStart=fb.size();
   pin.slice(0,2).forEach(function(r){if(r.s>=0.85)aiPersonFacts(fb,r.x);});
-  return {fb:fb,people:pin,all:all,base:fb.size()};
+  return {fb:fb,people:pin,all:all,base:fb.size(),pStart:pStart};
 }
 
 /* ---------- AI को क्या बताना है (नियम) ---------- */
@@ -9399,7 +9399,11 @@ function aiCtxText(fx,text,imgN,extra){
   state.items.forEach(function(it){L.push(it.id+' | '+it.name+' | '+it.unit+' | '+num(it.price));});
   L.push('');
   L.push('NOW: '+t+' ('+hsWdOf(t)+'), '+aiNowHM()+' India time.');
-  L.push('FACTS (computed by the app — the only true numbers):');L.push(fx.fb.text(0,fx.base));
+  if(fx.slim){   /* लिखने वाली बात (उधार/जमा/खर्च/माल + रकम) — पूरा हिसाब नहीं चाहिए: आज/कल, सप्लायर का बाकी, बोले गए नाम का खाता */
+    var sl=[];for(var si=1;si<=fx.base;si++){var fr=fx.fb.map['F'+si];if(!fr)continue;
+      if(si>=num(fx.pStart)+1||/^आज$|^आज का हिसाब|^कल का हिसाब|^सप्लायर को देना बाकी|^सप्लायर बाकी: |^आज — उधारी$/.test(fr.l))sl.push('F'+si+' | '+fr.l+' | '+fr.v);}
+    L.push('FACTS (short list — this message is an entry, so only today\'s and the named people\'s facts are given; if you truly need more, use "need"):');L.push(sl.join('\n'));
+  }else{L.push('FACTS (computed by the app — the only true numbers):');L.push(fx.fb.text(0,fx.base));}
   if(extra){L.push('');L.push('EXTRA FACTS (computed by the app for your "need"):');L.push(extra);}
   L.push('');
   L.push('PEOPLE (possible matches in the app for names in the message):');
@@ -9452,6 +9456,20 @@ function aiNextReset(){   // मुफ़्त कोटा अमेरिक�
   catch(e){return Date.now()+6*3600000;}
 }
 function aiResetText(){var d=new Date(aiNextReset());return (d.getHours()>12?d.getHours()-12:d.getHours())+':'+pad(d.getMinutes())+(d.getHours()>=12?' बजे दोपहर':' बजे');}
+/* ⏱ मॉडल की रफ़्तार याद रखो (24 नवंबर 2026 रात — मालिक के फ़ोन पर 🧪 जाँच: 9 में से 6 सवाल ठीक 40.0 सेकंड पर रुके)
+   वजह: हर सवाल पर पहला मॉडल (जो जवाब ही नहीं देता था) 25 सेकंड तक आज़माया जाता, फिर दूसरे को बचे 15 सेकंड — और अगली बार फिर वही।
+   अब: जो मॉडल समय पर जवाब न दे, उसे 6 घंटे के लिए पीछे; जिसने जवाब दिया उसकी रफ़्तार (आख़िरी 5 बार) याद — धीमा (>20 सेकंड) भी पीछे।
+   पहली कोशिश का इंतज़ार 18 सेकंड (रफ़्तार पता हो तो उसका ढाई गुना, 10–25 सेकंड के बीच)। */
+function aiSpdMed(m){var a=((aiCfg().spd||{})[m]||[]).slice().sort(function(x,y){return x-y;});return a.length?a[Math.floor(a.length/2)]:null;}
+function aiSlowKey(m){var c=aiCfg();if(num((c.slow||{})[m])>Date.now())return 2;var md=aiSpdMed(m);return md!=null&&md>20000?1:0;}
+function aiSpdNote(m,ms,ok){
+  var c=aiCfg(),sp=c.spd||{},sl=c.slow||{};
+  if(ok){var a=(sp[m]||[]).concat([Math.round(ms)]);sp[m]=a.slice(-5);delete sl[m];}
+  else sl[m]=Date.now()+6*3600000;
+  aiSet({spd:sp,slow:sl});
+}
+function aiWaitFor(m,left,hasImg){if(hasImg)return Math.min(60000,left);var md=aiSpdMed(m),t=md!=null?Math.min(25000,Math.max(10000,md*2.5)):(AI.T1||18000);return Math.min(t,left);}
+function aiShortM(m){return String(m||'').replace(/^models\//,'').replace(/^gemini-/,'');}
 function aiMark(m,ei){
   var c=aiCfg(),ex=c.ex||{},bad=c.bad||{},now=Date.now();
   if(ei.code==='quota'){if(ei.zero)bad[m]=now+3*86400000;else ex[m]=aiNextReset();}
@@ -9490,7 +9508,7 @@ function aiModelOrder(key){
     var ok=list.filter(function(m){return !(num(ex[m])>now)&&!(num(bad[m])>now);});
     if(!ok.length)ok=list.filter(function(m){return !(num(bad[m])>now);});
     if(!ok.length)ok=list.slice();
-    return ok;
+    return ok.map(function(m,i){return {m:m,i:i,k:aiSlowKey(m)};}).sort(function(a,b){return a.k-b.k||a.i-b.i;}).map(function(x){return x.m;});
   });
 }
 function aiText(j){
@@ -9540,7 +9558,8 @@ function aiGen(sys,parts,key){
   return aiModelOrder(key).then(function(models){
     /* समझ पहले, रफ़्तार बाद में (13 नवंबर 2026, मालिक: "ठीक से बात नहीं समझ पा रहा") — पूरा flash पहले, flash-lite सिर्फ़ उसके न चलने पर
        (पहले सिर्फ़ बात पर flash-lite पहले चलता था — तेज़ था, पर "देना है" और "दिया" जैसी बातें गड़बड़ाता था) */
-    models=models.slice().sort(function(a,b){return (/flash-lite|flash-8b/.test(a)?1:0)-(/flash-lite|flash-8b/.test(b)?1:0);});
+    var lk=function(x){return aiSlowKey(x)*2+(/flash-lite|flash-8b/.test(x)?1:0);};
+    models=models.map(function(x,i){return {m:x,i:i};}).sort(function(a,b){return lk(a.m)-lk(b.m)||a.i-b.i;}).map(function(x){return x.m;});
     var tries=[];
     function attempt(mi,plain,again){
       var left=LIM-(Date.now()-T0);
@@ -9551,17 +9570,18 @@ function aiGen(sys,parts,key){
         {contents:[{role:'user',parts:[{text:sys+'\n\nReply with ONLY the JSON object.\n\n'}].concat(parts)}],generationConfig:gc.g}:
         {systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:parts}],generationConfig:gc.g};
       aiStatus('सोच रहा हूँ…'+(mi?' (दूसरा मॉडल '+(mi+1)+')':''));
-      return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,Math.min(hasImg?60000:25000,left)).then(function(r){
+      var ta=Date.now();
+      return aiHttp('POST','models/'+encodeURIComponent(m)+':generateContent',body,key,aiWaitFor(m,left,hasImg)).then(function(r){
         if(r.ok){
           aiLearnModel(m,r.j);
           var txt=aiText(r.j);
           if(!txt){var fr=r.j&&r.j.candidates&&r.j.candidates[0]&&r.j.candidates[0].finishReason;tries.push({m:m,code:(r.j&&r.j.promptFeedback&&r.j.promptFeedback.blockReason)?'blocked':'empty',fr:fr});return attempt(mi+1,false);}
-          aiUse(m);
+          aiUse(m);aiSpdNote(m,Date.now()-ta,true);tries.push({m:m,code:'ok',ms:Date.now()-ta});
           if(usePlain&&plain&&!/gemma/i.test(m)){pl[m]=1;aiSet({plain:pl});}
-          return {text:txt,model:m};
+          return {text:txt,model:m,tries:tries};
         }
         if(aiConfErr(m,r,gc.th))return attempt(mi,plain,again);
-        var ei=aiErrInfo(r);tries.push({m:m,code:ei.code,msg:ei.msg});
+        var ei=aiErrInfo(r);tries.push({m:m,code:ei.code,msg:ei.msg,ms:Date.now()-ta});
         if(ei.code==='key'){var ek=new Error('key');ek.code='key';ek.msg=ei.msg;throw ek;}
         if(ei.code==='region'){var eg=new Error('region');eg.code='region';eg.msg=ei.msg;throw eg;}
         if(ei.code==='format'&&!usePlain)return attempt(mi,true);
@@ -9570,7 +9590,7 @@ function aiGen(sys,parts,key){
         aiMark(m,ei);
         return attempt(mi+1,false);
       },function(e){
-        if(e.code==='timeout'){tries.push({m:m,code:'timeout'});return attempt(mi+1,false);}
+        if(e.code==='timeout'){tries.push({m:m,code:'timeout',ms:Date.now()-ta});aiSpdNote(m,0,false);return attempt(mi+1,false);}
         throw e;
       });
     }
@@ -9594,7 +9614,7 @@ function aiErrText(e){
   var c=e&&e.code;
   if(c==='key')return 'AI की चाबी काम नहीं कर रही (गलत या बंद) — ⚙️ सेटिंग में नई चाबी डालिए।';
   if(c==='net')return 'इंटरनेट नहीं मिला।';
-  if(c==='timeout')return 'AI से जवाब आने में बहुत देर लगी (इंटरनेट धीमा)।';
+  if(c==='timeout')return 'AI ने समय पर जवाब नहीं दिया (Google का मॉडल धीमा/व्यस्त, या इंटरनेट धीमा) — अगली बार ऐप तेज़ वाला मॉडल पहले आज़माएगा।';
   if(c==='quota')return 'आज का मुफ़्त AI कोटा पूरा हो गया — '+aiResetText()+' के बाद फिर से पूरा चलेगा।';
   if(c==='region')return 'Google ने इस जगह से AI चलाने से मना किया।';
   return 'AI से सही जवाब नहीं मिला।';
@@ -10296,6 +10316,8 @@ function aiSend(){
   if(navigator.onLine===false){done(aiLocal(text,fx),'इंटरनेट नहीं है — फ़ोन ने आसान तरीके से समझा।'+(imgs.length?' फोटो रखी हुई है — इंटरनेट आते ही नीचे "🔄 AI से फिर भेजो" दबाइए।':''),true);return;}
   /* साफ़ बिक्री वाली बात ("आज की बिक्री 10,000 UPI और 10,000 कैश") — AI का इंतज़ार नहीं, फ़ोन तुरंत कार्ड बनाता है */
   if(!imgs.length&&aiSaleOnly(text)){var lq=aiLocal(text,fx);if(lq.actions&&lq.actions.length===1&&lq.actions[0].type==='hisaab'){done(lq,'');return;}}
+  /* लिखने वाली बात → छोटा हिसाब (AI को कम पढ़ना, कम कोटा) — सवाल हो या फोटो हो तो पूरा */
+  if(!imgs.length&&!aiIsQ(text)&&(aiLocalAmt(text)||aiLocalAmt(aiNorm(text)))>0)fx.slim=1;
   var sys=aiSys();
   var parts=function(extra){var p=[{text:aiCtxText(fx,text,imgs.length,extra)}];imgs.forEach(function(im){p.push({inlineData:{mimeType:im.mime,data:im.data}});});return p;};
   aiGen(sys,parts(''),key).then(function(r){
@@ -11416,14 +11438,11 @@ function aiSelfA(){
   var nm=pr?pr.p.name:'मोहन',sL=sa.filter(function(z){return z.pay==='later';})[0]||sa[0],sN=sa.filter(function(z){return z!==sL;})[0]||sL;
   var sh=function(z){return z?String(z.n).split(/[(·]/)[0].trim():'दूध वाला';};
   C.push({q:'इस महीने की बिक्री पिछले महीने से कम है या ज़्यादा?',k:'ans',lab:/बिक्री|बनाम/});
-  C.push({q:'खर्च सबसे ज़्यादा कहाँ हो रहा है?',k:'ans',lab:/खर्च/});
   C.push({q:'पैसा कहाँ-कहाँ फँसा है और मुझे क्या करना चाहिए?',k:'ans',lab:/फँसा|बाकी|उधारी/});
   C.push({q:nm+' को 500 का उधार दिया',k:'act',type:'udhar',amt:500,name:nm});
   C.push({q:nm+' ने 300 जमा किया UPI से',k:'act',type:'jama',amt:300,name:nm});
   if(sL)C.push({q:sh(sL)+' को 1900 रुपये देना है',k:'act',type:'hisaab',f:'sup',amt:1900,paid:'later'});
-  if(sN)C.push({q:sh(sN)+' को 2000 दे दिया',k:'act',type:'hisaab',f:'suppay',amt:2000});
   C.push({q:'बिजली का बिल 1200 दिया',k:'act',type:'hisaab',f:'exp',amt:1200});
-  C.push({q:'स्टाफ को 3000 पगार दी',k:'act',type:'hisaab',f:'exp',amt:3000});
   return C;
 }
 function aiSelfRunQ(){
@@ -11477,22 +11496,22 @@ function aiSelfRunA(key,onStep){
   var one=function(){
     if(i>=C.length)return Promise.resolve(res);
     var c=C[i++],keep=AI.s.msgs,fx,ctx;
-    AI.s.msgs=[];try{fx=aiFacts(c.q);try{aiQHint(fx,aiQPer((aiDigits(c.q)+' ¦ '+aiNorm(c.q)).toLowerCase(),todayStr(),false));}catch(e){}ctx=aiCtxText(fx,c.q,0,'');}finally{AI.s.msgs=keep;}
-    var t0=Date.now(),model='',rounds=1;
+    AI.s.msgs=[];try{fx=aiFacts(c.q);if(c.k==='act')fx.slim=1;try{aiQHint(fx,aiQPer((aiDigits(c.q)+' ¦ '+aiNorm(c.q)).toLowerCase(),todayStr(),false));}catch(e){}ctx=aiCtxText(fx,c.q,0,'');}finally{AI.s.msgs=keep;}
+    var t0=Date.now(),model='',rounds=1,path=[];
     onStep(i,C.length,c.q,res);
     return aiGen(sys,[{text:ctx}],key).then(function(r){
-      model=r.model;var o=aiJSON(r.text);
+      model=r.model;path=path.concat(r.tries||[]);var o=aiJSON(r.text);
       if(o&&o.need&&typeof o.need==='object'&&c.k==='ans'){
         var before=fx.fb.size();try{aiNeed(fx,o.need);}catch(e){}
         if(fx.fb.size()>before){rounds=2;var keep2=AI.s.msgs;AI.s.msgs=[];var ctx2=aiCtxText(fx,c.q,0,fx.fb.text(before));AI.s.msgs=keep2;
-          return aiGen(sys,[{text:ctx2}],key).then(function(r2){model=r2.model;return aiJSON(r2.text);});}
+          return aiGen(sys,[{text:ctx2}],key).then(function(r2){model=r2.model;path=path.concat(r2.tries||[]);return aiJSON(r2.text);});}
       }
       return o;
     }).then(function(o){
       var why=aiSelfCheckA(c,o,fx);
-      res.push({q:c.q,ok:!why,why:why,ms:Date.now()-t0,model:model,rounds:rounds,say:o&&o.answer&&o.answer.head?String(o.answer.head):String(o&&o.say||'')});
+      res.push({q:c.q,ok:!why,why:why,ms:Date.now()-t0,model:model,rounds:rounds,path:path,say:o&&o.answer&&o.answer.head?String(o.answer.head):String(o&&o.say||'')});
     },function(e){
-      res.push({q:c.q,ok:false,why:aiErrText(e),ms:Date.now()-t0,model:model,err:1});
+      res.push({q:c.q,ok:false,why:aiErrText(e),ms:Date.now()-t0,model:model,err:1,path:path.concat((e&&e.tries)||[])});
       if(e&&(e.code==='key'||e.code==='region'))i=C.length;   // चाबी/देश की दिक्कत — आगे पूछना बेकार
     }).then(function(){onStep(i,C.length,'',res);return i<C.length?aiWait(2500).then(one):res;});   // मुफ़्त वाले में एक मिनट की हद — थोड़ा रुककर अगला
   };
@@ -11508,27 +11527,30 @@ function aiSelfHtml(){
   var c=aiCfg(),k=aiKey(),S=AI.s.self||null,st=aiSelfStats(),last=c.st;
   var sec=function(ms){return (ms/1000).toFixed(ms<1000?2:1)+' सेकंड';};
   var h='<div class="aiself"><b>🧪 सहायक की जाँच</b>'+
-    '<p class="hint">आपके अपने हिसाब पर आम सवाल पूछकर देखता है — जवाब सही है या नहीं, और कितना समय लगा। कुछ भी सेव नहीं होता।'+(k?' AI वाले 9 सवाल आपकी चाबी से जाते हैं (मुफ़्त कोटा से 9–12 बार गिनेगा, ~1 मिनट)।':' AI वाली जाँच के लिए ऊपर चाबी लगाइए — तुरंत वाली जाँच अभी भी चलेगी।')+'</p>';
+    '<p class="hint">आपके अपने हिसाब पर आम सवाल पूछकर देखता है — जवाब सही है या नहीं, और कितना समय लगा। कुछ भी सेव नहीं होता।'+(k?' 🤖 AI वाली जाँच में 6 सवाल आपकी चाबी से जाते हैं — मुफ़्त कोटा लगता है, इसलिए दिन में एक बार काफ़ी है।':' AI वाली जाँच के लिए ऊपर चाबी लगाइए।')+'</p>';
   if(st.n)h+='<p class="aiselfst">पिछले 30 दिन: <b>'+st.n+'</b> बातें · ⚡ तुरंत <b>'+st.q+'</b>'+(st.ai?' · 🤖 AI से '+st.ai+' (औसत <b>'+sec(st.avg)+'</b>, सबसे धीमा '+sec(st.max)+')':'')+'</p>';
   if(last&&last.at)h+='<p class="aiselfst">पिछली जाँच: '+hsDm(dayKey(new Date(last.at)))+' '+onHm(last.at)+' — ⚡ '+last.qo+'/'+last.qn+(last.an?' · 🤖 '+last.ao+'/'+last.an+' (औसत '+sec(last.aavg)+')':'')+'</p>';
-  h+='<button class="btn primary" data-act="ai-selftest"'+(S&&S.run?' disabled':'')+'>'+(S&&S.run?'⏳ '+esc(S.step||'जाँच चल रही है…'):'🧪 जाँच शुरू करो')+'</button>';
+  if(S&&S.run)h+='<button class="btn primary" data-act="ai-selftest" disabled>⏳ '+esc(S.step||'जाँच चल रही है…')+'</button>';
+  else h+='<div class="aiselfb"><button class="btn primary" data-act="ai-selftest" data-v="q">⚡ तुरंत वाली जाँच</button>'+(k?'<button class="btn" data-act="ai-selftest" data-v="a">🤖 AI वाली जाँच</button>':'')+'</div>';
   if(S&&S.q){var qo=S.q.filter(function(r){return r.ok;}).length,qm=S.q.reduce(function(s,r){return Math.max(s,r.ms);},0);
     h+='<div class="aiselfres"><b>⚡ तुरंत वाले: '+qo+' / '+S.q.length+' सही</b> · हर जवाब '+sec(qm)+' से कम<ul>'+S.q.slice().sort(function(x,y){return (x.ok?1:0)-(y.ok?1:0);}).map(function(r){return '<li class="'+(r.ok?'ok':'bad')+'">'+(r.ok?'✅':'❌')+' '+esc(r.q)+' <small>'+sec(r.ms)+(r.ok?'':' — '+esc(r.why))+'</small>'+(r.head?'<i>'+esc(r.head)+'</i>':'')+'</li>';}).join('')+'</ul></div>';}
   if(S&&S.a&&S.a.length){var ao=S.a.filter(function(r){return r.ok;}).length,am=S.a.filter(function(r){return !r.err;}),av=am.length?am.reduce(function(s,r){return s+r.ms;},0)/am.length:0;
-    h+='<div class="aiselfres"><b>🤖 AI वाले: '+ao+' / '+S.a.length+' सही'+(S.run?' (अब तक — बाकी चल रहे हैं)':'')+'</b>'+(am.length?' · औसत '+sec(av)+' · सबसे धीमा '+sec(am.reduce(function(s,r){return Math.max(s,r.ms);},0)):'')+'<ul>'+S.a.slice().sort(function(x,y){return (x.ok?1:0)-(y.ok?1:0);}).map(function(r){return '<li class="'+(r.ok?'ok':'bad')+'">'+(r.ok?'✅':'❌')+' '+esc(r.q)+' <small>'+sec(r.ms)+(r.rounds>1?' (2 चक्कर)':'')+(r.model?' · '+esc(r.model):'')+(r.ok?'':' — '+esc(r.why))+'</small>'+(r.say?'<i>'+esc(String(r.say).slice(0,160))+'</i>':'')+'</li>';}).join('')+'</ul></div>';}
+    h+='<div class="aiselfres"><b>🤖 AI वाले: '+ao+' / '+S.a.length+' सही'+(S.run?' (अब तक — बाकी चल रहे हैं)':'')+'</b>'+(am.length?' · औसत '+sec(av)+' · सबसे धीमा '+sec(am.reduce(function(s,r){return Math.max(s,r.ms);},0)):'')+'<ul>'+S.a.slice().sort(function(x,y){return (x.ok?1:0)-(y.ok?1:0);}).map(function(r){return '<li class="'+(r.ok?'ok':'bad')+'">'+(r.ok?'✅':'❌')+' '+esc(r.q)+' <small>'+sec(r.ms)+(r.rounds>1?' (2 चक्कर)':'')+(r.ok?'':' — '+esc(r.why))+'</small>'+(r.path&&r.path.length?'<i>मॉडल: '+esc(r.path.map(function(x){return aiShortM(x.m)+' '+(x.code==='ok'?'✓':(x.code==='timeout'?'⏱':(x.code==='quota'?'कोटा ख़त्म':'✗')))+(x.ms?' '+(x.ms/1000).toFixed(1)+'s':'');}).join(' → '))+'</i>':'')+(r.say?'<i>'+esc(String(r.say).slice(0,160))+'</i>':'')+'</li>';}).join('')+'</ul></div>';}
   if(S&&S.note)h+='<p class="hint">'+esc(S.note)+'</p>';
   return h+'</div>';
 }
-function aiSelfTest(){
+function aiSelfTest(mode){
   if(AI.s.self&&AI.s.self.run)return;
-  var S=AI.s.self={run:true,step:'⚡ तुरंत वाले सवाल…'};aiRender();
+  var prev=AI.s.self||{},S=AI.s.self={run:true,step:mode==='a'?'🤖 AI से पूछ रहा हूँ…':'⚡ तुरंत वाले सवाल…'};if(mode==='a'&&prev.q)S.q=prev.q;if(mode!=='a'&&prev.a)S.a=prev.a;aiRender();
   setTimeout(function(){
-    try{S.q=aiSelfRunQ();}catch(e){S.q=[];S.note='तुरंत वाली जाँच में गड़बड़: '+String(e&&e.message||e);}
+    if(mode!=='a'){try{S.q=aiSelfRunQ();}catch(e){S.q=[];S.note='तुरंत वाली जाँच में गड़बड़: '+String(e&&e.message||e);}}
     var k=aiKey(),fin=function(){S.run=false;S.step='';
       var a=S.a||[],am=a.filter(function(r){return !r.err;});
-      aiSet({st:{at:Date.now(),qn:S.q.length,qo:S.q.filter(function(r){return r.ok;}).length,an:a.length,ao:a.filter(function(r){return r.ok;}).length,aavg:am.length?Math.round(am.reduce(function(s,r){return s+r.ms;},0)/am.length):0}});
+      var Q=S.q||[],old=aiCfg().st||{};
+      aiSet({st:{at:Date.now(),qn:Q.length||old.qn||0,qo:Q.length?Q.filter(function(r){return r.ok;}).length:(old.qo||0),an:a.length||(mode==='a'?0:old.an||0),ao:a.length?a.filter(function(r){return r.ok;}).length:(mode==='a'?0:old.ao||0),aavg:am.length?Math.round(am.reduce(function(s,r){return s+r.ms;},0)/am.length):(mode==='a'?0:old.aavg||0)}});
       if(AI.s.page==='set')aiRender();};
-    if(!k||navigator.onLine===false){S.note=!k?'AI की चाबी नहीं लगी — सिर्फ़ तुरंत वाली जाँच हुई।':'इंटरनेट नहीं — सिर्फ़ तुरंत वाली जाँच हुई।';fin();return;}
+    if(mode!=='a'){fin();return;}
+    if(!k||navigator.onLine===false){S.note=!k?'AI की चाबी नहीं लगी।':'इंटरनेट नहीं है।';fin();return;}
     S.a=[];S.step='🤖 AI से पूछ रहा हूँ…';if(AI.s.page==='set')aiRender();
     /* हर सवाल पर चलती घड़ी + जो नतीजे आ गए वो तुरंत दिखें — "1/9" पर अटका न लगे (मालिक का फ़ोन, 24 नवंबर रात) */
     var tq=Date.now(),tick=setInterval(function(){if(!S.run){clearInterval(tick);return;}var b=$('[data-act="ai-selftest"]');if(b)b.textContent='⏳ '+S.step+' ('+Math.round((Date.now()-tq)/1000)+' सेकंड)';},1000);
@@ -11666,7 +11688,7 @@ function aiClick(t,act){
     case 'ai-set':if(AI.s.listen)aiMicStop();AI.s.page='set';AI.s.test='';if($('#aiw'))aiRender();else openSheet(aiSheetHtml());return true;
     case 'ai-back':AI.s.page='chat';AI.s.test='';aiRender(true);return true;
     case 'ai-test':aiTest(false);return true;
-    case 'ai-selftest':aiSelfTest();return true;
+    case 'ai-selftest':aiSelfTest(t.getAttribute('data-v')||'q');return true;
     case 'ai-test-old':aiTest(true);return true;
     case 'ai-delkey':aiSet({key:undefined,ok:undefined,last:undefined,models:undefined,ex:undefined,bad:undefined,plain:undefined});AI.s.test='चाबी हटा दी।';aiRender();return true;
     case 'ai-lang':aiSet({lang:v==='en-IN'?'en-IN':'hi-IN'});aiRender();return true;
