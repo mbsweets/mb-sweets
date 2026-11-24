@@ -609,6 +609,22 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .webtag{display:inline-block;font-size:.72rem;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
 .onpaid{color:var(--green);font-weight:700;font-size:.88rem}
 .onwait{color:var(--amber);font-weight:700;font-size:.88rem}
+.onbell{color:var(--muted);font-size:.8rem;margin-top:2px}
+.bellst{list-style:none;padding:0;margin:0 0 10px;line-height:1.6}.bellst li{margin-bottom:4px}
+.bellguide{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--card)}
+.bellguide summary{font-weight:700;cursor:pointer}.bellguide ol{margin:8px 0 2px 18px;padding:0;line-height:1.6}.bellguide li{margin-bottom:6px}
+#onalarm{position:fixed;inset:0;z-index:1200;background:rgba(120,10,15,.92);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));animation:alfl 1s ease-in-out infinite alternate}
+@keyframes alfl{from{background:rgba(120,10,15,.92)}to{background:rgba(185,30,30,.96)}}
+#onalarm .alcard{background:var(--card);color:var(--ink);border-radius:20px;padding:18px 16px 10px;width:min(420px,100%);max-height:100%;overflow:auto;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+#onalarm .albell{font-size:3.2rem;line-height:1;display:inline-block;animation:alsh .5s ease-in-out infinite}
+@keyframes alsh{0%,100%{transform:rotate(0)}25%{transform:rotate(-18deg)}75%{transform:rotate(18deg)}}
+#onalarm h2{margin:6px 0 10px;font-size:1.45rem;color:var(--red)}
+#onalarm .alo{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:0 0 8px;text-align:left;font-size:.95rem;line-height:1.45}
+#onalarm .alamt{font-weight:800;font-size:1.1rem}
+#onalarm .almuted{color:var(--muted);font-size:.86rem}
+#onalarm .albtn{min-height:56px;font-size:1.15rem;margin-top:6px}
+#onalarm .lnk{display:block;margin:6px auto 0}
+@media (prefers-reduced-motion:reduce){#onalarm,#onalarm .albell{animation:none}}
 .oncpn{color:var(--green);font-weight:700;font-size:.88rem;margin-top:2px}
 .oncpn .lnk{font-size:.85rem;padding:0 4px}
 .st-new{color:var(--red)} .st-accepted{color:var(--gold)} .st-out{color:var(--amber)} .st-rejected{color:var(--muted);text-decoration:line-through}
@@ -2797,8 +2813,8 @@ var ON_LABEL={'new':'नया','accepted':'स्वीकार','out':'रा
 function lsGet(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function onlineCfg(){var c=lsGet(ONLINE_CFG,null);return (c&&c.u&&c.k)?c:null;}
-function loadOnlineCache(){var c=lsGet(ONLINE_CACHE,null);if(c&&Array.isArray(c.orders)){online.orders=c.orders;online.lastSync=c.t||0;}}
-function saveOnlineCache(){lsSet(ONLINE_CACHE,{orders:online.orders,t:online.lastSync});}
+function loadOnlineCache(){var c=lsGet(ONLINE_CACHE,null);if(c&&Array.isArray(c.orders)){online.orders=c.orders;online.lastSync=c.t||0;online.v=c.v||0;online.alog=Array.isArray(c.alog)?c.alog:[];}}
+function saveOnlineCache(){lsSet(ONLINE_CACHE,{orders:online.orders,t:online.lastSync,v:online.v||0,alog:online.alog||[]});}
 function onlineNewCount(){return online.orders.filter(function(o){return o.status==='new';}).length;}
 function findOnline(code){for(var i=0;i<online.orders.length;i++)if(online.orders[i].code===code)return online.orders[i];return null;}
 /* नेट अटक जाए तो 25 सेकंड बाद छोड़ दो — "ताज़ा करो" हमेशा चलता रहे */
@@ -2843,6 +2859,8 @@ function queueStatus(code,status,extra){
   lsSet(ONLINE_QUEUE,q);
   saveOnlineCache();
   refreshOnlineViews();
+  if($('#onalarm'))showOrderAlarm([]);
+  liveCardLocal();
   if(online.cfg)flushQueue();
 }
 function onlineSync(manual){
@@ -2863,10 +2881,13 @@ function onlineSync(manual){
       return o;
     });
     online.lastSync=Date.now();online.error='';
+    online.v=Number(r.v)||0;online.alog=Array.isArray(r.alog)?r.alog:[];   // रजिस्टर संस्करण + घंटी का हिसाब (कोड 10 से)
     saveOnlineCache();
     planSync();
     alertNewOrders();
+    if($('#onalarm'))showOrderAlarm([]);   // अलार्म खुला है और ऑर्डर कहीं और से स्वीकार/मना हो गया
     refreshOnlineViews();
+    liveCardLocal();
     if(manual)toast('ऑनलाइन ऑर्डर अपडेट ✓');
   }).catch(function(){
     online.syncing=false;
@@ -2901,16 +2922,184 @@ function alertNewOrders(){
   if(!fresh.length)return;
   fresh.forEach(function(o){seen[o.code]=1;});
   lsSet(ONLINE_SEEN,seen);
-  beep();
+  if(document.visibilityState==='visible')showOrderAlarm(fresh);   // 🚨 ऐप सामने खुला है — पूरी स्क्रीन का अलार्म + आवाज़
+  else beep();
   toast('🌐 '+fresh.length+' नया ऑनलाइन ऑर्डर आया!');
   try{
-    if('Notification' in window&&Notification.permission==='granted'&&document.visibilityState!=='visible'&&navigator.serviceWorker){
+    if(!pushOn()&&'Notification' in window&&Notification.permission==='granted'&&document.visibilityState!=='visible'&&navigator.serviceWorker){   // घंटी (push) चालू हो तो रजिस्टर वाली घंटी ही काफ़ी — दो बार नहीं
       var o=fresh[0];
       navigator.serviceWorker.ready.then(function(reg){
         reg.showNotification('🌐 नया ऑनलाइन ऑर्डर '+rupee(o.total),{body:onlineWhen(o)+(fresh.length>1?' (+'+(fresh.length-1)+' और)':''),tag:'online-new',data:{url:'./#online'}});
       });
     }
   }catch(e){}
+}
+/* ---------- 🚨 नए ऑर्डर की पक्की घंटी (24 नवंबर, रजिस्टर कोड 10) ----------
+   ऐप सामने खुला हो: पूरी स्क्रीन लाल अलार्म + "ट्रिन-ट्रिन" आवाज़ + कंपन (1 मिनट तक, हर 2 सेकंड) जब तक "👀 ऑर्डर देखो" न दबाएँ।
+   "देखो" / ऑर्डर कार्ड छूना = रजिस्टर को "देख लिया" (action=oseen) → हर 5 मिनट वाली दोबारा घंटी और ईमेल बंद।
+   "अभी चुप करो" = सिर्फ़ आवाज़ बंद; देखा नहीं माना जाता (दोबारा घंटी चलती रहेगी)। */
+var ONLINE_OSEEN='mbmb-online-oseen';
+var AL={codes:[],extra:{},t:null,until:0,ac:null};
+function alAudio(){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
+    if(!AL.ac)AL.ac=new AC();
+    if(AL.ac.state==='suspended')AL.ac.resume().catch(function(){});
+    return AL.ac;
+  }catch(e){return null;}
+}
+/* फ़ोन पहली बार छूते ही आवाज़ "खोल" लो — वरना Chrome बिना छुए आवाज़ नहीं बजाने देता */
+['pointerdown','keydown'].forEach(function(ev){document.addEventListener(ev,function(){alAudio();},{once:true,capture:true,passive:true});});
+function alRing(){
+  var ac=alAudio();
+  if(ac&&ac.state==='running'){
+    var t0=ac.currentTime+0.02;
+    [0,0.42].forEach(function(d){            // ट्रिन-ट्रिन: दो बार, हर बार दो सुर (साइकिल की घंटी जैसा)
+      [[1318.5,0],[1760,0.1]].forEach(function(f){
+        var o=ac.createOscillator(),g=ac.createGain(),st=t0+d+f[1];
+        o.type='triangle';o.frequency.value=f[0];
+        g.gain.setValueAtTime(0.0001,st);g.gain.exponentialRampToValueAtTime(0.55,st+0.01);g.gain.exponentialRampToValueAtTime(0.0001,st+0.32);
+        o.connect(g);g.connect(ac.destination);o.start(st);o.stop(st+0.34);
+      });
+    });
+  }
+  try{if(navigator.vibrate)navigator.vibrate([500,200,500]);}catch(e){}
+}
+function alItemsText(o){
+  var items=onlineLines(o).filter(function(l){return l.name!==WEB_FEE_NAME;}).map(function(l){return displayName(l)+' '+((l.unit==='किलो'&&l.qty<1)?Math.round(l.qty*1000)+' ग्राम':fmtQty(l.qty)+' '+l.unit);});
+  (o.custom||[]).forEach(function(c){items.push(c[0]==='cake'?'🎂 कस्टम केक':'📦 पैकेट सामान');});
+  var it=items.length?items.join(', '):String(o.summary||'');
+  return it.length>120?it.slice(0,115)+'…':it;
+}
+function alOrderLine(o){
+  var it=o.alText||alItemsText(o);
+  return '<div class="alo"><div class="alamt">'+rupee(num(o.confirmedTotal)||num(o.total))+' · '+(o.mode==='p'?'🏪 दुकान से लेंगे':'🚚 डिलीवरी')+'</div>'+
+    '<div>⏰ '+esc(o.alWhen||onlineWhen(o))+'</div>'+(it?'<div class="almuted">🧾 '+esc(it)+'</div>':'')+'</div>';
+}
+function showOrderAlarm(list){
+  var added=false;
+  (list||[]).forEach(function(o){if(o&&AL.codes.indexOf(o.code)<0){AL.codes.push(o.code);added=true;}});
+  var orders=AL.codes.map(function(c){return AL.extra[c]||findOnline(c);}).filter(function(o){return o&&o.status==='new';});
+  AL.codes=orders.map(function(o){return o.code;});
+  if(!orders.length){alarmClose();return;}
+  var el=$('#onalarm');
+  if(!el){el=document.createElement('div');el.id='onalarm';el.setAttribute('role','alertdialog');el.setAttribute('aria-live','assertive');document.body.appendChild(el);added=true;}
+  var test=orders.length===1&&orders[0].code==='TEST';
+  el.innerHTML='<div class="alcard"><div class="albell">🛎️</div><h2>'+(test?'🧪 टेस्ट: ':'')+(orders.length>1?orders.length+' नए ऑनलाइन ऑर्डर!':'नया ऑनलाइन ऑर्डर!')+'</h2>'+
+    orders.slice(0,3).map(alOrderLine).join('')+(orders.length>3?'<div class="almuted">+'+(orders.length-3)+' और</div>':'')+
+    '<button class="btn primary block albtn" data-act="al-open">👀 ऑर्डर देखो</button>'+
+    '<button class="lnk muted" data-act="al-mute">🔕 अभी चुप करो (बाद में देखूँगा)</button></div>';
+  if(added){
+    AL.until=Date.now()+60000;
+    if(!AL.t){alRing();AL.t=setInterval(function(){if(Date.now()>AL.until||!$('#onalarm')){alarmStopSound();return;}alRing();},2200);}
+  }
+}
+function alarmStopSound(){if(AL.t){clearInterval(AL.t);AL.t=null;}try{if(navigator.vibrate)navigator.vibrate(0);}catch(e){}}
+function alarmClose(){alarmStopSound();var el=$('#onalarm');if(el)el.remove();AL.codes=[];AL.extra={};}
+function alarmOpen(){
+  var codes=AL.codes.filter(function(c){return c!=='TEST';});alarmClose();
+  orderSeenSend(codes);
+  if($('#ov'))closeSheet();
+  ui.view='online';ui.onFilter='live';renderRoute();window.scrollTo(0,0);
+  var first=codes[0]&&document.querySelector('.oncard[data-code="'+codes[0]+'"]');
+  if(first&&first.scrollIntoView)first.scrollIntoView({block:'center'});
+}
+/* 👀 "देख लिया" रजिस्टर को — उस ऑर्डर की दोबारा वाली घंटी/ईमेल बंद; फ़ोन की सूची से उसकी घंटी भी हटाओ */
+function orderSeenSend(codes){
+  var c=onlineCfg();if(!c)return;
+  var sent=lsGet(ONLINE_OSEEN,{}),now=Date.now();
+  Object.keys(sent).forEach(function(k){if(now-sent[k]>4*86400000)delete sent[k];});
+  var todo=(codes||[]).filter(function(x){return x&&/^W\d{4}-\d{5}$/.test(x)&&!sent[x];});
+  if(!todo.length)return;
+  todo.forEach(function(x){sent[x]=now;});lsSet(ONLINE_OSEEN,sent);
+  var undo=function(){var s2=lsGet(ONLINE_OSEEN,{});todo.forEach(function(x){delete s2[x];});lsSet(ONLINE_OSEEN,s2);};
+  fetch(c.u+'?action=oseen&key='+encodeURIComponent(c.k)+'&codes='+encodeURIComponent(todo.join(',')),{redirect:'follow'})
+    .then(function(r){return r.json();}).then(function(r){if(!r||!r.ok)undo();},undo);
+  try{
+    if(pushSupported())navigator.serviceWorker.ready.then(function(reg){
+      todo.forEach(function(x){reg.getNotifications({tag:'order-'+x}).then(function(l){l.forEach(function(n){n.close();});}).catch(function(){});});
+    }).catch(function(){});
+  }catch(e){}
+}
+/* 📌 लॉक-स्क्रीन वाला "ऑर्डर" कार्ड — ऐप में स्वीकार/निकल गया/डिलीवर दबाते ही गिनती बदलो (कार्ड पहले से हो तभी; नया नहीं बनाते) */
+function liveCardLocal(){
+  try{
+    if(!pushSupported()||Notification.permission!=='granted')return;
+    var nw=0,ac=0,out=0,next=null,nk='',from=hsKeyAdd(todayStr(),-1);
+    online.orders.forEach(function(o){
+      var asap=!o.when||String(o.when)==='asap',day=asap?(o.created?dayKey(o.created):todayStr()):String(o.when);
+      if(day<from)return;
+      if(o.status==='new')nw++;else if(o.status==='accepted')ac++;else if(o.status==='out')out++;else return;
+      if(o.status==='out')return;
+      var sl=Number(o.slot),k=day+'-'+(asap?'0':String(o.slot!==''&&o.slot!=null&&isFinite(sl)?sl+1:9));
+      if(!next||k<nk){next=o;nk=k;}
+    });
+    var parts=[];if(nw)parts.push(nw+' नए');if(ac)parts.push(ac+' तैयारी में');if(out)parts.push(out+' रास्ते में');
+    navigator.serviceWorker.ready.then(function(reg){
+      return reg.getNotifications({tag:'orders-live'}).then(function(list){
+        if(!list.length)return;
+        if(!parts.length){list.forEach(function(n){n.close();});return;}
+        return reg.showNotification('📌 MB Sweets ऑर्डर: '+parts.join(' · '),{
+          body:next?('अगला: '+onlineWhen(next)+' · '+rupee(num(next.confirmedTotal)||num(next.total))+' · '+(next.mode==='p'?'🏪':'🚚')+(next.status==='new'?' (स्वीकार बाकी)':'')):'बाकी सब रास्ते में 🚚',
+          tag:'orders-live',renotify:false,silent:true,requireInteraction:true,icon:'icon-192.png',badge:'badge-96.png',data:{url:'./#online'}});
+      });
+    }).catch(function(){});
+  }catch(e){}
+}
+/* 🔔 ऑर्डर कार्ड पर घंटी का हिसाब: कब बजी, फ़ोन तक पहुँची, ईमेल गई, कब देखा */
+function onHm(ms){var d=new Date(Number(ms));return isNaN(d)?'':d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});}
+function bellLogHtml(code){
+  var L=(online.alog||[]).filter(function(x){return x&&x.c===code;});
+  if(!L.length)return '';
+  return '<div class="onbell">'+L.slice(-6).map(function(x){
+    if(x.k==='s')return '👀 '+onHm(x.i)+' देखा';
+    var ph=x.p==='ok'?(x.r?'📲✓':'📲 भेजी'):(x.p==='x'?'📲✗':'');
+    return (x.n?'🔁':'🔔')+' '+onHm(x.i)+' '+ph+(x.f==='ok'?' ntfy✓':'')+(x.m==='ok'?' ✉️✓':(x.m==='x'?' ✉️✗':''));
+  }).join(' · ')+'</div>';
+}
+/* ⚙️ घंटी वाली शीट: हाल + 🧪 टेस्ट + iQOO फ़ोन/Gmail की सेटिंग */
+function openBellSheet(){
+  var v=online.v||0,push=pushOn();
+  var h='<div class="sh-head"><h2>🔔 नए ऑर्डर की पक्की घंटी</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
+    '<ul class="bellst">'+
+    '<li>'+(v>=10?'✅ रजिस्टर का कोड '+v+' — देखे बिना हर 5 मिनट दोबारा घंटी (1 घंटे तक) + Gmail ईमेल':'⚠️ रजिस्टर का कोड पुराना'+(v?' ('+v+')':'')+' — <a href="online/setup.html#st-alert">कंप्यूटर पर चरण 9 करें</a>')+'</li>'+
+    '<li>'+(push?'✅ इस फ़ोन पर घंटी चालू':(pushSupported()?'⚠️ इस फ़ोन पर घंटी बंद — <button class="lnk" data-act="push-on" style="padding:0;min-height:0">चालू करो</button>':'⚠️ इस ब्राउज़र में घंटी नहीं चलती — Chrome में खोलें'))+'</li>'+
+    '<li>✅ ऐप सामने खुला हो तो: पूरी स्क्रीन पर लाल अलार्म + आवाज़</li>'+
+    '<li>👀 "ऑर्डर देखो" दबाते ही (या स्वीकार/मना करते ही) दोबारा वाली घंटी बंद</li></ul>'+
+    '<button class="btn primary block" data-act="bell-test"'+(v>=10?'':' disabled')+'>🧪 टेस्ट: नए ऑर्डर जैसी घंटी भेजो</button>'+
+    '<div id="bellTestMsg" class="hint" style="margin-top:6px"></div>'+
+    '<details class="bellguide"><summary>📱 iQOO फ़ोन पर घंटी पक्की करें (एक बार)</summary>'+
+    '<p class="hint">फ़ोन के संस्करण के हिसाब से नाम थोड़े अलग हो सकते हैं — सबसे पास वाला चुनें।</p><ol>'+
+    '<li><b>Settings → Notifications & status bar → App notifications</b> → <b>MB Sweets</b> (ऐप इंस्टॉल नहीं है तो <b>Chrome</b>) → <b>Allow notifications</b> चालू। अंदर <b>Lock screen</b>, <b>Banner / Floating</b>, <b>Sound</b>, <b>Vibrate</b> सब चालू।</li>'+
+    '<li><b>Settings → Battery → Background power consumption management</b> (या "High background power consumption") → <b>MB Sweets</b> और <b>Chrome</b> → <b>Allow</b>। इससे फ़ोन लॉक होने पर भी घंटी आती है।</li>'+
+    '<li>Chrome में: <b>⋮ → Settings → Notifications</b> → <b>mbsweets.github.io</b> → <b>Allowed</b>।</li>'+
+    '<li><b>Do Not Disturb</b> (चाँद 🌙) बंद रखें, और <b>Notification volume</b> ऊपर रखें।</li>'+
+    '<li>फिर ऊपर <b>🧪 टेस्ट</b> दबाएँ, फ़ोन लॉक करके 10 सेकंड रुकें — घंटी बजनी चाहिए।</li></ol></details>'+
+    '<details class="bellguide"><summary>✉️ Gmail ईमेल (दूसरा रास्ता)</summary><ol>'+
+    '<li>ईमेल आपके अपने Google खाते से आपको ही आती है (पता कहीं लिखा नहीं जाता)। विषय: "🛍️ नया ऑनलाइन ऑर्डर …"।</li>'+
+    '<li><b>Gmail ऐप → ☰ → Settings → अपना खाता → Notifications: All</b>, और <b>Inbox notifications → Notify for every message</b> चालू।</li>'+
+    '<li>फ़ोन <b>Settings → App notifications → Gmail</b> → चालू।</li>'+
+    '<li>⚠️ कुछ फ़ोन पर Gmail अपने ही खाते से आई ईमेल पर घंटी नहीं बजाता — टेस्ट से देख लें। तब भी ईमेल Gmail में रिकॉर्ड रहती है; असली घंटी ऐप वाली है।</li></ol></details>'+
+    '<div class="sh-actions"><button class="btn" data-act="close">ठीक है</button></div>';
+  openSheet(h);
+}
+function bellTest(){
+  var c=onlineCfg();if(!c)return;
+  var m=$('#bellTestMsg');if(m)m.textContent='भेज रहे हैं…';
+  fetch(c.u+'?action=testorder&key='+encodeURIComponent(c.k),{redirect:'follow'}).then(function(r){return r.json();}).then(function(r){
+    var el=$('#bellTestMsg');
+    if(r&&r.error==='action'){if(el)el.textContent='रजिस्टर का कोड पुराना है — कंप्यूटर पर ⚙️ सेटअप का चरण 9 करें।';return;}
+    if(!r||!r.ok&&!r.push){if(el)el.textContent='नहीं भेज पाए ('+((r&&(r.error||(r.detail||[]).join(', ')))||'?')+')';return;}
+    var ph=r.push==='ok'?'✓ भेजी':(r.push==='-'?'चालू नहीं':'✗ नहीं गई'),ml=r.mail==='ok'?'✓ भेजी':(r.mail==='-'?'बंद':'✗ नहीं गई');
+    if(el)el.innerHTML='📲 फ़ोन: <b>'+ph+'</b>'+(r.ntfy==='ok'?' (ntfy से)':'')+' · ✉️ ईमेल: <b>'+ml+'</b><br>10 सेकंड में फ़ोन पर घंटी बजनी चाहिए। न बजे तो नीचे की सेटिंग देखें।';
+    // ऐप वाला अलार्म भी एक बार दिखा दो (कैसा दिखेगा)
+    setTimeout(function(){
+      if(document.visibilityState!=='visible')return;
+      AL.extra.TEST={code:'TEST',status:'new',mode:'d',total:450,alWhen:'आज (टेस्ट)',alText:'टेस्ट: रसगुल्ला 1 किलो, गुलाब जामुन 500 ग्राम'};
+      if($('#ov'))closeSheet();
+      showOrderAlarm([AL.extra.TEST]);
+    },2500);
+  }).catch(function(){var el=$('#bellTestMsg');if(el)el.textContent='इंटरनेट नहीं मिला — दोबारा दबाओ';});
 }
 function onlineItemInfo(id){return webItemInfo(id);}
 function onlineLines(o){
@@ -5296,9 +5485,9 @@ function onlineCard(o){
     acts=(o.statusNote?'<span class="onmeta">वजह: '+esc(o.statusNote)+'</span>':'')+
       '<a class="lnk" href="tel:+91'+esc(String(o.phone).slice(-10))+'">📞 कॉल</a>';
   }
-  return '<article class="order oncard st-'+esc(o.status)+'">'+
+  return '<article class="order oncard st-'+esc(o.status)+'" data-code="'+esc(o.code)+'"'+(o.status==='new'?' data-act="on-seen"':'')+'>'+
     '<div class="otop"><div class="when">⏰ '+esc(onlineWhen(o))+'</div><span class="obadge">'+esc(o.code)+'</span><span class="stamp st-'+esc(o.status)+'">'+(ON_LABEL[o.status]||esc(o.status))+'</span></div>'+
-    '<div class="onmeta">'+(isD?'🚚 घर पर डिलीवरी':'🏪 दुकान से लेंगे')+(o.distKm!==''&&o.distKm!=null?' · ~'+esc(o.distKm)+' km':'')+(created?' · आया: '+esc(created):'')+'</div>'+
+    '<div class="onmeta">'+(isD?'🚚 घर पर डिलीवरी':'🏪 दुकान से लेंगे')+(o.distKm!==''&&o.distKm!=null?' · ~'+esc(o.distKm)+' km':'')+(created?' · आया: '+esc(created):'')+'</div>'+bellLogHtml(o.code)+
     (o.status==='out'&&isD&&onlineOtp(o)?'<div class="onmeta">🔐 डिलीवरी कोड ग्राहक को भेजा गया — देते समय पूछिए</div>':'')+
     (o.status==='delivered'&&/\|\s*NOCODE/.test(String(o.statusNote||''))?'<div class="onwait">⚠️ बिना कोड डिलीवर</div>':'')+
     ((o.status==='accepted'||o.status==='out'||o.status==='delivered')?(onlineIsPaid(o)?'<div class="onpaid">💰 पेमेंट मिला'+(onlinePaidAmt(o)>0?' '+rupee(onlinePaidAmt(o)):'')+' ✓</div>':
@@ -5318,13 +5507,14 @@ function onlineCard(o){
 }
 function renderOnline(){
   online.cfg=onlineCfg();
-  var html='<div class="sechead" style="margin-top:4px"><h2>🌐 ऑनलाइन ऑर्डर</h2>'+(online.cfg?'<button class="lnk" data-act="on-sync">'+(online.syncing?'देख रहे हैं…':'🔄 ताज़ा करो')+'</button>':'')+'</div>';
+  var html='<div class="sechead" style="margin-top:4px"><h2>🌐 ऑनलाइन ऑर्डर</h2>'+(online.cfg?'<span><button class="lnk" data-act="on-bell">🔔 घंटी</button><button class="lnk" data-act="on-sync">'+(online.syncing?'देख रहे हैं…':'🔄 ताज़ा करो')+'</button></span>':'')+'</div>';
   if(!online.cfg){
     html+='<div class="installbox"><p><b>ऑनलाइन ऑर्डर अभी जुड़ा नहीं है।</b> एक बार का सेटअप करने के बाद ग्राहकों के ऑर्डर सीधे यहाँ आएंगे और फोन पर नोटिफिकेशन भी बजेगा।</p>'+
       '<a class="btn primary small" href="online/setup.html">⚙️ सेटअप शुरू करो</a></div>';
     $('#main').innerHTML=html;return;
   }
   if(online.error)html+='<div class="banner">'+esc(online.error)+'</div>';
+  if(online.lastSync&&!online.error&&(online.v||0)<10)html+='<a class="banner btn-banner" href="online/setup.html#st-alert" style="display:block;text-decoration:none">🔔 पक्की घंटी (देखे बिना हर 5 मिनट दोबारा + Gmail ईमेल) के लिए कंप्यूटर पर रजिस्टर का कोड नया करना है — ⚙️ सेटअप, चरण 9 (5 मिनट) →</a>';
   if(!pushOn()&&pushSupported()&&Notification.permission!=='denied')html+='<button class="banner btn-banner" data-act="push-on" style="background:var(--milk-bg);color:var(--milk)">🔔 नए ऑर्डर की घंटी इस फ़ोन पर चालू करो — यहाँ दबाओ</button>';
   var tk=todayStr();
   var todays=online.orders.filter(function(o){return o.created&&dayKey(o.created)===tk&&o.status!=='rejected';});
@@ -5360,6 +5550,11 @@ function startOnline(){
   pushCheck();
   setInterval(function(){if(document.visibilityState==='visible')onlineSync();},30000);
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')onlineSync();});
+  try{   // 📲 घंटी आई (service worker बताता है) — ऐप खुला हो तो 30 सेकंड का इंतज़ार नहीं, तुरंत लिस्ट + अलार्म
+    if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){
+      var d=e.data||{};if(d.type==='mb-push'&&/^order-/.test(String(d.g||'')))onlineSync();
+    });
+  }catch(e){}
 }
 
 /* ---------- 🔔 इस फ़ोन पर घंटी (रजिस्टर → Chrome push → यही ऐप) ---------- */
@@ -7633,6 +7828,11 @@ document.addEventListener('click',function(e){
     case 'gc-billset':gcBillSet();break;
     case 'gc-new':ui.gc={};gcPaint();setTimeout(function(){var f=$('#gc-code');if(f)f.focus();},50);break;
     case 'on-sync':onlineSync(true);break;
+    case 'on-bell':openBellSheet();break;
+    case 'bell-test':bellTest();break;
+    case 'al-open':alarmOpen();break;
+    case 'al-mute':alarmClose();toast('🔕 आवाज़ बंद — ऑर्डर अभी "नया" ही है');break;
+    case 'on-seen':orderSeenSend([t.getAttribute('data-code')]);break;
     case 'on-accept':acceptOnline(t.getAttribute('data-code'));break;
     case 'on-reject':openRejectSheet(t.getAttribute('data-code'));break;
     case 'on-rj-pick':

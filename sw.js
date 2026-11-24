@@ -1,4 +1,4 @@
-var CACHE_NAME = 'mbmb-billing-v14';
+var CACHE_NAME = 'mbmb-billing-v15';
 var CORE_ASSETS = [
   './',
   './manifest.json',
@@ -91,9 +91,19 @@ function sendAck(target) {
     return fetch(c.u + '?action=ack&key=' + encodeURIComponent(c.k), { redirect: 'follow' }).catch(function () {});
   }).catch(function () {});
 }
+/* 👀 नए ऑर्डर की घंटी दबाई = ऑर्डर देख लिया → रजिस्टर की "हर 5 मिनट दोबारा" वाली घंटी बंद (संस्करण 10) */
+function sendSeen(tag) {
+  var m = /^order-(W\d{4}-\d{5}|TEST)$/.exec(String(tag || ''));
+  if (!m) return Promise.resolve();
+  return readCfg().then(function (c) {
+    if (!c || !c.u || !c.k) return;
+    return fetch(c.u + '?action=oseen&key=' + encodeURIComponent(c.k) + '&codes=' + encodeURIComponent(m[1]), { redirect: 'follow' }).catch(function () {});
+  }).catch(function () {});
+}
 self.addEventListener('notificationclick', function (e) {
   e.notification.close();
   var target = (e.notification.data && e.notification.data.url) || './';
+  var tag = e.notification.tag || '';
   var open = self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
     for (var i = 0; i < list.length; i++) {
       var c = list[i];
@@ -101,7 +111,7 @@ self.addEventListener('notificationclick', function (e) {
     }
     return self.clients.openWindow(target);
   });
-  e.waitUntil(Promise.all([open, sendAck(target)]));   // पहले ऐप खोलो (क्लिक की अनुमति रहते), साथ में "देख लिया"
+  e.waitUntil(Promise.all([open, sendAck(target), sendSeen(tag)]));   // पहले ऐप खोलो (क्लिक की अनुमति रहते), साथ में "देख लिया"
 });
 
 /* ---------- 🔔 घंटी: नया ऑनलाइन ऑर्डर / दूध-दही रिमाइंडर (रजिस्टर से web push) ----------
@@ -128,19 +138,44 @@ function markSeen(id) {
 }
 function showItem(d, quiet) {
   var tag = d.g || ('n' + (d.i || Date.now()));
-  return self.registration.showNotification(d.t || 'MB Sweets', {
+  var order = /^order-/.test(tag);
+  var opt = {
     body: d.b || '', tag: tag, renotify: !quiet && !d.s, silent: !!(quiet || d.s),
     requireInteraction: !quiet && !d.s,   // ज़रूरी घंटी स्क्रीन पर टिकी रहे (जहाँ फ़ोन/ब्राउज़र मानता है)
     icon: 'icon-192.png', badge: 'badge-96.png', timestamp: Number(d.i) || Date.now(),
     data: { url: d.u || './' }
-  });
+  };
+  if (order && !quiet) opt.vibrate = [400, 150, 400, 150, 800];   // नया ऑर्डर: लंबा कंपन
+  return self.registration.showNotification(d.t || 'MB Sweets', opt).then(function () { return order && !quiet ? showLive(d.L) : null; });
+}
+/* 📌 लॉक-स्क्रीन वाला ऑर्डर कार्ड — हमेशा एक ही (tag 'orders-live'), चुपचाप बदलता है; कोई ऑर्डर बाकी नहीं तो हट जाता है */
+function showLive(L) {
+  if (!L || !L.t) return Promise.resolve();
+  if (L.z) return self.registration.getNotifications({ tag: 'orders-live' }).then(function (list) { list.forEach(function (n) { n.close(); }); }).catch(function () {});
+  return self.registration.showNotification(L.t, {
+    body: L.b || '', tag: 'orders-live', renotify: false, silent: true, requireInteraction: true,
+    icon: 'icon-192.png', badge: 'badge-96.png', data: { url: './#online' }
+  }).catch(function () {});
+}
+/* 📲 घंटी फ़ोन तक पहुँची — रजिस्टर को बताओ (ऐप में "घंटी का हिसाब" में दिखता है) + खुले ऐप को तुरंत ताज़ा करो */
+function sendGot(d) {
+  if (!d || !d.i || !/^order-/.test(d.g || '')) return Promise.resolve();
+  return readCfg().then(function (c) {
+    if (!c || !c.u || !c.k) return;
+    return fetch(c.u + '?action=got&key=' + encodeURIComponent(c.k) + '&i=' + encodeURIComponent(d.i), { redirect: 'follow' }).catch(function () {});
+  }).catch(function () {});
+}
+function tellPages(d) {
+  return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+    list.forEach(function (c) { try { c.postMessage({ type: 'mb-push', g: (d && d.g) || '' }); } catch (err) {} });
+  }).catch(function () {});
 }
 var GENERIC = { t: 'MB Sweets', b: 'नया अपडेट आया है — ऐप खोलकर देखें', u: './#online' };
 self.addEventListener('push', function (e) {
   var d = null;
   try { d = e.data ? e.data.json() : null; } catch (err) { d = null; }
   if (d && d.t) {
-    e.waitUntil(markSeen(d.i).then(function () { return showItem(d); }));
+    e.waitUntil(markSeen(d.i).then(function () { return showItem(d); }).then(function () { return Promise.all([sendGot(d), tellPages(d)]); }));
     return;
   }
   e.waitUntil(readCfg().then(function (c) {
@@ -151,7 +186,9 @@ self.addEventListener('push', function (e) {
     var max = items.reduce(function (m, it) { return Math.max(m, Number(it.i) || 0); }, 0);
     return markSeen(max).then(function (seen) {
       var fresh = items.filter(function (it) { return (Number(it.i) || 0) > seen; });
-      if (fresh.length) return Promise.all(fresh.slice(-4).map(function (it) { return showItem(it); }));
+      if (fresh.length) return Promise.all(fresh.slice(-4).map(function (it) { return showItem(it); })).then(function () {
+        return Promise.all(fresh.slice(-4).map(sendGot).concat([tellPages(fresh[fresh.length - 1])]));
+      });
       if (items.length) return showItem(items[items.length - 1], true);
       return showItem(GENERIC);
     });

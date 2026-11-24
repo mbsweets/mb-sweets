@@ -1,5 +1,5 @@
 /**
- * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 9 (18 नवंबर 2026)
+ * MB Sweets — ऑनलाइन ऑर्डर रजिस्टर · कोड संस्करण 10 (24 नवंबर 2026)
  * Google Sheet + Apps Script. इस कोड में कुछ बदलने की ज़रूरत नहीं है।
  *
  * ग्राहक का मेन्यू यहाँ ऑर्डर भेजता है, ऑर्डर "Orders" शीट में लिखा जाता है,
@@ -23,8 +23,15 @@
  * ⭐ माँ भगवती मिठास पॉइंट्स: असली हिसाब मालिक के फ़ोन (बिलिंग ऐप) में है। ऐप हर सदस्य का छोटा सार
  * "Points" शीट में भेजता है ताकि ग्राहक अपने पॉइंट ख़ुद देख सके — WhatsApp वाले लिंक से पूरा हिसाब,
  * सिर्फ़ मोबाइल नंबर से सिर्फ़ पॉइंट (नाम और ख़रीद नहीं)।
+ *
+ * 🔔 पक्की घंटी (संस्करण 10 से): नया ऑनलाइन ऑर्डर आते ही — फ़ोन पर घंटी + आपके Gmail में ईमेल
+ * (आपके अपने Google खाते पर; पता कहीं लिखा नहीं जाता)। जब तक ऑर्डर देखा न जाए (ऐप में खुला, घंटी दबाई,
+ * या स्वीकार/मना किया) — हर 5 मिनट फिर से घंटी, 1 घंटे तक; ईमेल 10, 30 और 55 मिनट पर दोबारा।
+ * हर घंटी का हिसाब (कब गई, फ़ोन तक पहुँची या नहीं) बिलिंग ऐप में ऑर्डर पर दिखता है।
+ * लॉक-स्क्रीन पर एक "📌 ऑर्डर" कार्ड: कितने नए, कितने तैयारी में, कितने रास्ते में, अगला कौन-सा।
+ * घंटी/ईमेल में ग्राहक का फ़ोन नंबर और पता नहीं जाता — सिर्फ़ रकम, कब, डिलीवरी/दुकान और सामान।
  */
-var VERSION = 9;
+var VERSION = 10;
 
 var SHEET_NAME = 'Orders';
 var BILLING_URL = 'https://mbsweets.github.io/mb-sweets/';
@@ -62,6 +69,7 @@ function setupReminder() {
   props_().setProperty('REMINDER', 'on');
   planSheet_();
   setupHisaabReminder();
+  setupOrderRepeat();
   Logger.log('✅ दूध-दही + आने वाले ऑर्डर की घंटी चालू — रोज़ दोपहर करीब 2 बजे, देखने तक 7 बजे तक दोबारा');
 }
 
@@ -90,6 +98,21 @@ function setupReportReminder() {
   try { backupFolder_(); } catch (e) { Logger.log('⚠️ Drive फ़ोल्डर नहीं बना: ' + e); }   // Drive की अनुमति इसी Run में
   Logger.log('✅ हफ़्ते/महीने की रिपोर्ट वाली घंटी + Drive बैकअप फ़ोल्डर तैयार');
 }
+
+/* 🔔 नए ऑर्डर की दोबारा घंटी: हर 5 मिनट जाँच — जो ऑर्डर अभी देखा नहीं गया उसकी घंटी फिर (1 घंटे तक).
+   setupSheet / setupReminder अपने-आप लगाते हैं। इसी Run में Gmail से ईमेल भेजने की अनुमति भी माँगता है। */
+function setupOrderRepeat() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'orderRepeat') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('orderRepeat').timeBased().everyMinutes(5).create();
+  props_().setProperty('OR_REP', 'on');
+  try { MailApp.getRemainingDailyQuota(); } catch (e) { Logger.log('⚠️ Gmail की अनुमति नहीं मिली: ' + e); }
+  Logger.log('✅ नए ऑर्डर की दोबारा घंटी (हर 5 मिनट, देखने तक) + Gmail ईमेल चालू');
+}
+/* ईमेल बंद/चालू करना हो तो इनमें से एक ▶ Run करें (घंटी चलती रहेगी) */
+function stopOrderMail() { props_().setProperty('MAIL', 'off'); Logger.log('ऑर्डर वाली ईमेल बंद'); }
+function startOrderMail() { props_().deleteProperty('MAIL'); Logger.log('ऑर्डर वाली ईमेल चालू'); }
 
 /* रात वाली घंटी बंद करनी हो तो इसे ▶ Run करें */
 function stopHisaabReminder() {
@@ -182,10 +205,12 @@ function notify_(title, message, priority, click, tags, tag) {
   return deliver_(title, message, priority, click, tags, tag).ok;
 }
 var LAST_DELIVERY_ = null;
-function deliver_(title, message, priority, click, tags, tag) {
+/* extra = { L: {t, b, z} } — लॉक-स्क्रीन वाला "📌 ऑर्डर" कार्ड उसी घंटी के साथ (संस्करण 10) */
+function deliver_(title, message, priority, click, tags, tag, extra) {
   var data = { t: str_(title, 200), b: str_(message, 1200), u: click || (BILLING_URL + '#online'), g: tag || '',
     s: (priority || 4) < 3, i: Date.now() };
-  var res = { ok: false, via: '', detail: [] };
+  if (extra && extra.L) data.L = { t: str_(extra.L.t, 160), b: str_(extra.L.b, 300), z: extra.L.z ? 1 : 0 };
+  var res = { ok: false, via: '', detail: [], id: data.i, push: subs_().length ? 'x' : '-', ntfy: '-' };
   try { inboxAdd_(data); } catch (e) { }
   var subs = subs_();
   if (subs.length) {
@@ -197,10 +222,11 @@ function deliver_(title, message, priority, click, tags, tag) {
       if (r.code !== 404 && r.code !== 410) keep.push(sub);
     });
     if (keep.length !== subs.length) saveSubs_(keep);
-    if (res.ok) { res.via = 'push'; LAST_DELIVERY_ = res; return res; }
+    if (res.ok) { res.via = 'push'; res.push = 'ok'; LAST_DELIVERY_ = res; return res; }
   }
   var n = ntfy_(title, message, priority, click, tags);
   res.detail.push('ntfy:' + n);
+  res.ntfy = n === 'ok' ? 'ok' : (n === 'off' ? '-' : 'x');
   if (n === 'ok') { res.ok = true; res.via = 'ntfy'; }
   LAST_DELIVERY_ = res;
   return res;
@@ -224,7 +250,19 @@ function doGet(e) {
   var p = (e && e.parameter) || {};
   try {
     if (p.action === 'ping') return out_({ ok: true, ready: !!props_().getProperty('KEY'), v: VERSION, reminder: props_().getProperty('REMINDER') === 'on', hsReminder: props_().getProperty('HS_REM') === 'on', rpReminder: props_().getProperty('RP_REM') === 'on', backupAt: num_(props_().getProperty('BK_LAST')), vapid: wpVapid_().pub,
-      seen: props_().getProperty('ACK') === istKey_(0) });
+      seen: props_().getProperty('ACK') === istKey_(0), orderRepeat: props_().getProperty('OR_REP') === 'on', mail: props_().getProperty('MAIL') !== 'off' });
+    if (p.action === 'oseen') {                   // 👀 ऑर्डर देख लिया (ऐप में खुला / घंटी दबाई) — उसकी दोबारा वाली घंटी बंद
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      return out_(orderSeen_(String(p.codes || '').split(',')));
+    }
+    if (p.action === 'got') {                     // 📲 घंटी फ़ोन तक पहुँची (बिलिंग ऐप का service worker बताता है)
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      return out_(bellGot_(num_(p.i)));
+    }
+    if (p.action === 'testorder') {               // 🧪 नए ऑर्डर जैसी पूरी घंटी: फ़ोन + ईमेल + लॉक-स्क्रीन कार्ड
+      if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
+      return out_(testOrder_());
+    }
     if (p.action === 'ack') {                     // घंटी पर क्लिक / ऐप में "✓ देख लिया" — आज की दोबारा वाली घंटी बंद
       if (!keyOk_(p.key)) return out_({ ok: false, error: 'key' });
       props_().setProperty('ACK', istKey_(0));
@@ -348,9 +386,13 @@ function create_(o) {
   } finally {
     lock.releaseLock();
   }
-  var n = items.length + custom.length;
-  notify_('🛍️ नया ऑर्डर ' + rupee_(o.t) + (custom.length ? ' +' : ''),
-    whenText_(when, slot, mode) + ' · ' + (mode === 'p' ? '🏪 दुकान से लेंगे' : '🚚 डिलीवरी') + ' · ' + n + ' आइटम\nदबाकर बिलिंग ऐप में देखें', 5, null, null, 'order-' + code);
+  // 🔔 घंटी + ईमेल + लॉक-स्क्रीन कार्ड; देखे जाने तक हर 5 मिनट दोबारा (orderRepeat)
+  var rec = { code: code, status: 'new', created: now.toISOString(), mode: mode, when: when, slot: slot, summary: str_(o.sm, 500),
+    total: num_(o.t), confirmedTotal: '', items: items, custom: custom };
+  try { alertAdd_(code, now.getTime()); } catch (e) { }
+  try { sendOrderBell_(rec, 0, true, null, 0); } catch (e) {
+    notify_('🛍️ नया ऑर्डर ' + rupee_(o.t), whenText_(when, slot, mode) + '\nदबाकर बिलिंग ऐप में देखें', 5, null, null, 'order-' + code);
+  }
   return { ok: true, code: code };
 }
 
@@ -371,7 +413,7 @@ function list_(key, days) {
   if (!keyOk_(key)) return { ok: false, error: 'key' };
   var sh = sheet_();
   var last = sh.getLastRow();
-  if (last < 2) return { ok: true, orders: [], now: new Date().toISOString() };
+  if (last < 2) return { ok: true, orders: [], now: new Date().toISOString(), v: VERSION, alog: jsonProp_('ALOG', []) };
   var from = Math.max(2, last - 499);
   var rows = sh.getRange(from, 1, last - from + 1, HEAD.length).getValues();
   var since = Date.now() - Math.min(60, Math.max(1, num_(days) || 10)) * 86400000;
@@ -381,7 +423,7 @@ function list_(key, days) {
     var t = new Date(o.created).getTime();
     if (o.status === 'new' || o.status === 'accepted' || o.status === 'out' || t >= since) list.push(o);
   });
-  return { ok: true, orders: list, now: new Date().toISOString() };
+  return { ok: true, orders: list, now: new Date().toISOString(), v: VERSION, alog: jsonProp_('ALOG', []) };
 }
 
 /* ---------- billing app changes a status ---------- */
@@ -399,6 +441,7 @@ function update_(b) {
     sh.getRange(row, HEAD.indexOf('updated') + 1).setValue(new Date());
     if (b.note !== undefined) sh.getRange(row, HEAD.indexOf('statusNote') + 1).setValue(str_(b.note, 200));
     if (b.total !== undefined && b.total !== null && b.total !== '') sh.getRange(row, HEAD.indexOf('confirmedTotal') + 1).setValue(num_(b.total));
+    if (status !== 'new') alertDrop_([str_(b.code, 20)], false);   // स्वीकार/मना/रास्ते में — दोबारा वाली घंटी बंद
   } finally {
     lock.releaseLock();
   }
@@ -799,6 +842,172 @@ function sendReminder_(test, again) {
   return { ok: sent === tried, sent: sent, tried: tried, need: need, detail: LAST_DELIVERY_ ? LAST_DELIVERY_.detail : [] };
 }
 
+/* ================= 🔔 नए ऑर्डर की पक्की घंटी (संस्करण 10) =================
+   ALERTS = [{c: कोड, t: आया (ms), n: कितनी बार दोबारा बजी, m: कितनी ईमेल, last: आख़िरी घंटी}] — सिर्फ़ जो अभी देखे नहीं गए
+   ALOG   = [{c, i: घंटी का समय/id, n: 0 पहली / 1.. दोबारा, p: फ़ोन (push), f: ntfy, m: ईमेल, r: फ़ोन तक पहुँची}] + {c, i, k:'s'} = देख लिया
+   ('ok' गया · 'x' नहीं गया · '-' चालू नहीं). 3 दिन से पुराना अपने-आप हटता है। */
+var MAIL_AT_ = [0, 10, 30, 55];   // ईमेल: पहली घंटी पर, फिर 10, 30, 55 मिनट पर (अगर तब तक देखा नहीं)
+var REPEAT_FOR_MIN_ = 62;         // दोबारा घंटी 1 घंटे तक
+function jsonProp_(k, d) { try { var v = JSON.parse(props_().getProperty(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } }
+function setJsonProp_(k, v) { props_().setProperty(k, JSON.stringify(v)); }
+function withLock_(fn) {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return null;
+  try { return fn(); } finally { lock.releaseLock(); }
+}
+function recentOrders_(sh, n) {
+  var last = sh.getLastRow();
+  if (last < 2) return [];
+  var from = Math.max(2, last - (n || 300) + 1);
+  return sh.getRange(from, 1, last - from + 1, HEAD.length).getValues().map(rowToObj_);
+}
+function dayWord_(w) {
+  var k = String(w || '');
+  if (k === istKey_(0)) return 'आज';
+  if (k === istKey_(1)) return 'कल';
+  if (k === istKey_(2)) return 'परसों';
+  var d = k.split('-');
+  return d.length === 3 ? (parseInt(d[2], 10) + ' ' + MONTHS_[parseInt(d[1], 10) - 1]) : k;
+}
+function hasSlot_(s) { return s !== '' && s !== null && s !== undefined && isFinite(s) && Number(s) >= 0 && Number(s) < SLOTS.length; }
+function whenShort_(w, s, mode) {
+  if (!w || String(w) === 'asap') return mode === 'p' ? 'जल्दी (30 मिनट में तैयार)' : 'जल्दी (30–60 मिनट)';
+  return dayWord_(w) + (hasSlot_(s) ? ', ' + SLOTS[Number(s)] : '');
+}
+/* घंटी का संदेश — रकम, कब, डिलीवरी/दुकान, सामान (ग्राहक का फ़ोन/पता नहीं) */
+function orderAlert_(o, n, ageMin) {
+  var amt = rupee_(num_(o.confirmedTotal) || num_(o.total)) + ((o.custom || []).length ? ' +' : '');
+  var how = o.mode === 'p' ? '🏪 दुकान से लेंगे' : '🚚 डिलीवरी';
+  var items = str_(o.summary, 500).replace(/;\s*/g, ', ');
+  if (!items) items = ((o.items || []).length + (o.custom || []).length) + ' आइटम';
+  if (items.length > 170) items = items.slice(0, 165) + '…';
+  var t = (n ? '⏰ ऑर्डर अभी देखा नहीं! ' : '🛍️ नया ऑनलाइन ऑर्डर ') + amt + ' · ' + how;
+  var b = '⏰ कब: ' + whenShort_(o.when, o.slot, o.mode) + '\n🧾 ' + items + '\n' +
+    (n ? '⌛ ' + ageMin + ' मिनट पहले आया · ' : '') + '#' + o.code + ' · दबाकर ऐप में देखें';
+  return { t: t, b: b };
+}
+/* 📌 लॉक-स्क्रीन कार्ड: नए / तैयारी में / रास्ते में + अगला ऑर्डर (कल से पहले के अटके ऑर्डर नहीं गिनते) */
+function liveCard_(rows) {
+  var nw = 0, ac = 0, out = 0, next = null, nk = '', from = istKey_(-1);
+  rows.forEach(function (o) {
+    var asap = !o.when || String(o.when) === 'asap';
+    var day = asap ? istKey_(0, new Date(o.created).getTime() || Date.now()) : String(o.when);
+    if (day < from) return;
+    if (o.status === 'new') nw++; else if (o.status === 'accepted') ac++; else if (o.status === 'out') out++; else return;
+    if (o.status === 'out') return;
+    var k = day + '-' + (asap ? '0' : String(hasSlot_(o.slot) ? Number(o.slot) + 1 : 9));
+    if (!next || k < nk) { next = o; nk = k; }
+  });
+  if (!nw && !ac && !out) return { t: '📌 MB Sweets: अभी कोई ऑर्डर बाकी नहीं ✓', b: '', z: 1 };
+  var parts = [];
+  if (nw) parts.push(nw + ' नए');
+  if (ac) parts.push(ac + ' तैयारी में');
+  if (out) parts.push(out + ' रास्ते में');
+  return { t: '📌 MB Sweets ऑर्डर: ' + parts.join(' · '),
+    b: next ? ('अगला: ' + whenShort_(next.when, next.slot, next.mode) + ' · ' + rupee_(num_(next.confirmedTotal) || num_(next.total)) + ' · ' +
+      (next.mode === 'p' ? '🏪' : '🚚') + (next.status === 'new' ? ' (स्वीकार बाकी)' : '')) : 'बाकी सब रास्ते में 🚚' };
+}
+function mailOrder_(a) {
+  if (props_().getProperty('MAIL') === 'off') return '-';
+  try {
+    if (MailApp.getRemainingDailyQuota() < 2) return 'x';
+    var to = Session.getEffectiveUser().getEmail();
+    if (!to) return 'x';
+    var esc = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+    MailApp.sendEmail({ to: to, name: 'MB Sweets ऑर्डर', subject: a.t, body: a.b + '\n\nबिलिंग ऐप: ' + BILLING_URL + '#online',
+      htmlBody: '<div style="font:16px/1.5 sans-serif"><p style="font-size:20px;font-weight:700;margin:0 0 8px">' + esc(a.t) + '</p><p style="margin:0 0 14px">' +
+        esc(a.b).replace(/\n/g, '<br>') + '</p><a href="' + BILLING_URL + '#online" style="display:inline-block;background:#c4161c;color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none;font-weight:700">बिलिंग ऐप में ऑर्डर देखो</a></div>' });
+    return 'ok';
+  } catch (e) { return 'x'; }
+}
+function logAdd_(e) {
+  withLock_(function () {
+    var cut = Date.now() - 3 * 86400000;
+    var L = jsonProp_('ALOG', []).filter(function (x) { return num_(x.i) > cut; });
+    L.push(e);
+    setJsonProp_('ALOG', L.slice(-45));
+  });
+}
+/* एक घंटी: फ़ोन (push → न पहुँचे तो ntfy) + (ज़रूरत हो तो) ईमेल + लॉक-स्क्रीन कार्ड, और उसका हिसाब */
+function sendOrderBell_(o, n, mail, rows, ageMin) {
+  var a = orderAlert_(o, n, ageMin), live = null;
+  try { live = liveCard_(rows || recentOrders_(sheet_(), 300)); } catch (e) { live = null; }
+  var res = deliver_(a.t, a.b, 5, BILLING_URL + '#online', ['shopping_bags'], 'order-' + o.code, live ? { L: live } : null);
+  var m = mail ? mailOrder_(a) : '-';
+  logAdd_({ c: o.code, i: res.id, n: n, p: res.push, f: res.ntfy, m: m });
+  return { ok: res.ok || m === 'ok', push: res.push, ntfy: res.ntfy, mail: m, detail: res.detail };
+}
+function alertAdd_(code, t) {
+  withLock_(function () {
+    var A = jsonProp_('ALERTS', []).filter(function (x) { return x.c !== code && Date.now() - num_(x.t) < REPEAT_FOR_MIN_ * 60000; });
+    A.push({ c: code, t: t, n: 0, m: 1, last: t });
+    setJsonProp_('ALERTS', A.slice(-20));
+  });
+}
+/* update_ के अंदर से (ताला पहले से लगा है) → withLock_ नहीं */
+function alertDrop_(codes, lockIt) {
+  var run = function () {
+    var A = jsonProp_('ALERTS', []), B = A.filter(function (x) { return codes.indexOf(x.c) < 0; });
+    if (B.length !== A.length) setJsonProp_('ALERTS', B);
+    return A.length - B.length;
+  };
+  return lockIt === false ? run() : withLock_(run);
+}
+function orderSeen_(codes) {
+  codes = codes.map(function (c) { return str_(c, 20).trim(); }).filter(function (c) { return /^W\d{4}-\d{5}$/.test(c) || c === 'TEST'; }).slice(0, 20);
+  if (!codes.length) return { ok: true, n: 0 };
+  var n = alertDrop_(codes) || 0, now = Date.now();
+  withLock_(function () {
+    var L = jsonProp_('ALOG', []), had = {};
+    L.forEach(function (x) { if (x.k === 's') had[x.c] = 1; });
+    codes.forEach(function (c) { if (!had[c] && L.some(function (x) { return x.c === c; })) L.push({ c: c, i: now, k: 's' }); });
+    setJsonProp_('ALOG', L.slice(-45));
+  });
+  return { ok: true, n: n };
+}
+function bellGot_(id) {
+  if (!id) return { ok: false };
+  var hit = withLock_(function () {
+    var L = jsonProp_('ALOG', []), f = false;
+    L.forEach(function (x) { if (num_(x.i) === id && !x.k && !x.r) { x.r = Date.now(); f = true; } });
+    if (f) setJsonProp_('ALOG', L);
+    return f;
+  });
+  return { ok: true, hit: !!hit };
+}
+/* ⏱️ टाइमर (हर 5 मिनट): जो नया ऑर्डर अभी देखा नहीं गया — उसकी घंटी फिर से */
+function orderRepeat() {
+  var A = jsonProp_('ALERTS', []);
+  if (!A.length) return;
+  var sh = sheet_(), rows = recentOrders_(sh, 300), by = {}, now = Date.now(), due = [];
+  rows.forEach(function (o) { by[o.code] = o; });
+  withLock_(function () {
+    var keep = [];
+    jsonProp_('ALERTS', []).forEach(function (a) {
+      var o = by[a.c];
+      if (!o || o.status !== 'new') return;                         // स्वीकार/मना हो गया
+      if (now - num_(a.t) > REPEAT_FOR_MIN_ * 60000) return;        // 1 घंटा पूरा
+      if (now - num_(a.last || a.t) < 4 * 60000) { keep.push(a); return; }
+      a.n = num_(a.n) + 1; a.last = now;
+      var mi = num_(a.m), mail = mi < MAIL_AT_.length && now - num_(a.t) >= MAIL_AT_[mi] * 60000;
+      if (mail) a.m = mi + 1;
+      due.push({ o: o, n: a.n, mail: mail, age: Math.round((now - num_(a.t)) / 60000) });
+      keep.push(a);
+    });
+    setJsonProp_('ALERTS', keep);
+  });
+  due.forEach(function (d) { try { sendOrderBell_(d.o, d.n, d.mail, rows, d.age); } catch (e) { } });
+}
+/* 🧪 टेस्ट: नए ऑर्डर जैसी घंटी + ईमेल + लॉक-स्क्रीन कार्ड (दोबारा नहीं बजती) */
+function testOrder_() {
+  var rows = [];
+  try { rows = recentOrders_(sheet_(), 300); } catch (e) { rows = []; }
+  var o = { code: 'TEST', status: 'new', created: new Date().toISOString(), mode: 'd', when: istKey_(0), slot: 2,
+    summary: 'टेस्ट: रसगुल्ला 1 किलो; गुलाब जामुन 500 ग्राम', total: 450, items: [['t', 1]], custom: [] };
+  var r = sendOrderBell_(o, 0, true, rows.concat([o]), 0);
+  return { ok: r.ok, push: r.push, ntfy: r.ntfy, mail: r.mail, detail: r.detail, v: VERSION };
+}
+
 /* ---------- 🔔 बिलिंग ऐप की घंटी: फ़ोन जोड़ना, भेजना ---------- */
 var PUSH_HOSTS = /^https:\/\/(fcm\.googleapis\.com|[a-z0-9.-]*push\.services\.mozilla\.com|[a-z0-9.-]*\.notify\.windows\.com|web\.push\.apple\.com|[a-z0-9.-]*\.push\.apple\.com)\//i;
 function subs_() {
@@ -860,6 +1069,7 @@ function pushOne_(sub, data, priority) {
 /* push संदेश ~3000 bytes से छोटा रहे (Chrome की सीमा 4096) */
 function pushBytes_(data) {
   var d = { t: data.t, b: data.b, u: data.u, g: data.g, s: data.s, i: data.i };
+  if (data.L) d.L = data.L;
   var bytes = wpUtf8_(JSON.stringify(d));
   while (bytes.length > 3000 && d.b.length > 20) {
     d.b = d.b.slice(0, Math.floor(d.b.length * 0.8)) + '…';

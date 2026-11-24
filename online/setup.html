@@ -126,7 +126,7 @@ details summary{cursor:pointer;font-weight:700;margin-top:8px}
   <b>पहले से चल रहा सेटअप है</b> तो कंप्यूटर पर एक बार कोड अपडेट करना है (5 मिनट):</p>
   <ol>
     <li>वही Google Sheet खोलें (<b class="m">MB Sweets ऑनलाइन ऑर्डर</b>) → <b class="m">Extensions</b> → <b class="m">Apps Script</b></li>
-    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 9"</b> लिखा दिखना चाहिए।</li>
+    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 10"</b> (या उससे नया) लिखा दिखना चाहिए।</li>
     <li>ऊपर <b class="m">▶ Run</b> दबाएं (बगल में <b>setupSheet</b> लिखा हो)। नई अनुमति माँगेगा (इस बार <b>Google Drive</b> की भी — बैकअप के लिए) → <b class="m">Review permissions</b> → अकाउंट चुनें → <b class="m">Advanced</b> → <b class="m">Go to … (unsafe)</b> → <b class="m">Allow</b>। नीचे "Execution completed" दिखे तो ठीक।</li>
     <li>ऊपर <b class="m">Deploy</b> → <b class="m">Manage deployments</b> → ✏️ (पेंसिल) → <b>Version:</b> <b class="m">New version</b> → <b class="m">Deploy</b>। <b>URL वही रहेगा</b> — कहीं कुछ बदलना नहीं है।</li>
   </ol>
@@ -144,6 +144,24 @@ details summary{cursor:pointer;font-weight:700;margin-top:8px}
   <p class="note">पॉइंट सिर्फ़ आपके फ़ोन (बिलिंग ऐप) से चढ़ते हैं — Sheet के "Points" टैब में सिर्फ़ ग्राहक को दिखाने के लिए कॉपी जाती है। उसे हाथ से न बदलें।</p>
   <button class="btn primary block" id="checkPoints">✓ जांचें — नया कोड (5) चालू है?</button>
   <div id="pointsMsg"></div>
+</div>
+
+<div class="step" id="st-alert">
+  <h2><span class="num">9</span>🔔 नए ऑर्डर की पक्की घंटी (कोड संस्करण 10)</h2>
+  <p>नया ऑनलाइन ऑर्डर आते ही: <b>फ़ोन पर घंटी</b> + <b>आपके Gmail में ईमेल</b>। जब तक ऑर्डर देखा न जाए (बिलिंग ऐप में "👀 ऑर्डर देखो", घंटी दबाना, या स्वीकार/मना करना) — <b>हर 5 मिनट फिर घंटी</b> (1 घंटे तक) और ईमेल 10, 30, 55 मिनट पर दोबारा।</p>
+  <p>लॉक-स्क्रीन पर एक <b>"📌 ऑर्डर"</b> कार्ड: कितने नए, कितने तैयारी में, कितने रास्ते में, अगला कौन-सा। ऐप सामने खुला हो तो <b>पूरी स्क्रीन पर लाल अलार्म + आवाज़</b>।</p>
+  <p class="note">घंटी और ईमेल में ग्राहक का फ़ोन नंबर और पता नहीं जाता — सिर्फ़ रकम, कब, डिलीवरी/दुकान और सामान। ईमेल आपके अपने Google खाते से आपको ही जाती है; आपका ईमेल पता कहीं लिखा नहीं जाता।</p>
+  <p class="note"><b>पहले से चल रहा सेटअप है</b> तो कंप्यूटर पर एक बार कोड अपडेट करना है (5 मिनट):</p>
+  <ol>
+    <li>वही Google Sheet खोलें (<b class="m">MB Sweets ऑनलाइन ऑर्डर</b>) → <b class="m">Extensions</b> → <b class="m">Apps Script</b></li>
+    <li>पुराना कोड पूरा मिटाएं (Ctrl+A फिर Delete) → ऊपर चरण 2 का <b>"📋 कोड कॉपी करें"</b> दबाकर नया कोड चिपकाएं → 💾 Save। सबसे ऊपर <b>"कोड संस्करण 10"</b> लिखा दिखना चाहिए।</li>
+    <li>ऊपर <b class="m">▶ Run</b> दबाएं (बगल में <b>setupSheet</b> लिखा हो)। इस बार <b>Gmail से ईमेल भेजने</b> की नई अनुमति माँगेगा → <b class="m">Review permissions</b> → अकाउंट चुनें → <b class="m">Advanced</b> → <b class="m">Go to … (unsafe)</b> → <b class="m">Allow</b>। नीचे "Execution completed" दिखे तो ठीक।</li>
+    <li>ऊपर <b class="m">Deploy</b> → <b class="m">Manage deployments</b> → ✏️ (पेंसिल) → <b>Version:</b> <b class="m">New version</b> → <b class="m">Deploy</b>। <b>URL वही रहेगा</b>।</li>
+  </ol>
+  <p class="note">⚠️ क्रम यही रखें — पहले Run (अनुमति), फिर Deploy। "New deployment" मत दबाना, वरना URL बदल जाएगा।</p>
+  <button class="btn primary block" id="checkAlert">✓ जांचें — कोड 10 और दोबारा वाली घंटी चालू है?</button>
+  <button class="btn block" id="testAlert" style="margin-top:8px">🧪 नए ऑर्डर जैसी घंटी + ईमेल अभी टेस्ट करो</button>
+  <div id="alertMsg"></div>
 </div>
 
 </main>
@@ -169,7 +187,7 @@ function renderStatus(){
   var c=load();
   var el=$('#st-status');
   if(c&&c.u&&c.k){
-    el.innerHTML='<h2>✅ इस फोन का बिलिंग ऐप जुड़ा हुआ है</h2><p class="hint">नया ऑनलाइन ऑर्डर बिलिंग ऐप के "🌐 ऑनलाइन" हिस्से में दिखेगा। दोबारा सेटअप की ज़रूरत नहीं — बस चरण 5 (नोटिफिकेशन), 6 और 7 (दूध-दही रिमाइंडर) देख लें।</p>';
+    el.innerHTML='<h2>✅ इस फोन का बिलिंग ऐप जुड़ा हुआ है</h2><p class="hint">नया ऑनलाइन ऑर्डर बिलिंग ऐप के "🌐 ऑनलाइन" हिस्से में दिखेगा। दोबारा सेटअप की ज़रूरत नहीं — बस चरण 5 (नोटिफिकेशन), 6, 7 (दूध-दही रिमाइंडर) और <b>9 (🔔 नए ऑर्डर की पक्की घंटी)</b> देख लें।</p>';
     $('#urlIn').value=c.u;
     if(c.t)$('#topicTxt').textContent=c.t;
   }else{
@@ -286,6 +304,26 @@ $('#checkPoints').addEventListener('click',function(){
       msg('#pointsMsg','err','शीट से ठीक जवाब नहीं आया — थोड़ी देर बाद दोबारा दबाएं।');
     }
   }).catch(function(){msg('#pointsMsg','err','शीट से बात नहीं हो पाई — इंटरनेट देखें और दोबारा दबाएं।');});
+});
+$('#checkAlert').addEventListener('click',function(){
+  var c=load();if(!c||!c.u){msg('#alertMsg','err','पहले चरण 4 पूरा करें।');return;}
+  msg('#alertMsg','note','जांच रहे हैं…');
+  api(c.u,{action:'ping'}).then(function(r){
+    if(r&&r.ok&&r.v>=10&&r.orderRepeat)msg('#alertMsg','ok','✅ कोड '+r.v+' चालू — नए ऑर्डर की घंटी, हर 5 मिनट दोबारा'+(r.mail?' और Gmail ईमेल':' (ईमेल अभी बंद)')+' तैयार। अब नीचे "🧪 टेस्ट" दबाकर फ़ोन पर देखें।');
+    else if(r&&r.ok&&r.v>=10)msg('#alertMsg','err','कोड '+r.v+' चालू है, पर दोबारा वाली घंटी का टाइमर नहीं लगा — Apps Script में ▶ Run (setupSheet) दोबारा करें और Allow दें (Gmail की अनुमति भी)।');
+    else if(r&&r.ok)msg('#alertMsg','err','अभी पुराना कोड (संस्करण '+(r.v||'?')+') चल रहा है — ऊपर के 4 काम करें (खासकर आखिरी: Manage deployments → New version → Deploy)।');
+    else msg('#alertMsg','err','शीट से ठीक जवाब नहीं आया — थोड़ी देर बाद दोबारा दबाएं।');
+  }).catch(function(){msg('#alertMsg','err','शीट से बात नहीं हो पाई — इंटरनेट देखें और दोबारा दबाएं।');});
+});
+$('#testAlert').addEventListener('click',function(){
+  var c=load();if(!c||!c.u||!c.k){msg('#alertMsg','err','पहले चरण 4 पूरा करें।');return;}
+  msg('#alertMsg','note','भेज रहे हैं…');
+  api(c.u,{action:'testorder',key:c.k}).then(function(r){
+    if(r&&r.error==='action'){msg('#alertMsg','err','अभी पुराना कोड चल रहा है — ऊपर के 4 काम करें (खासकर आखिरी: Manage deployments → New version → Deploy)।');return;}
+    if(!r||(!r.ok&&!r.push)){msg('#alertMsg','err','नहीं भेज पाए ('+(((r&&r.detail)||[]).join(', ')||(r&&r.error)||'?')+')');return;}
+    var ph=r.push==='ok'?'✓ भेजी':(r.push==='-'?'चालू नहीं — बिलिंग ऐप → 🌐 ऑनलाइन → 🔔 घंटी':'✗ नहीं गई'),ml=r.mail==='ok'?'✓ भेजी':(r.mail==='-'?'बंद':'✗ नहीं गई (Run करके Gmail की अनुमति दें)');
+    msg('#alertMsg',r.push==='ok'||r.mail==='ok'?'ok':'err','📲 फ़ोन: '+ph+(r.ntfy==='ok'?' (ntfy से)':'')+' · ✉️ ईमेल: '+ml+' — फ़ोन पर "🛍️ नया ऑनलाइन ऑर्डर ₹450" वाली घंटी देखें (टेस्ट वाली दोबारा नहीं बजती)।');
+  }).catch(function(){msg('#alertMsg','err','शीट से बात नहीं हो पाई — इंटरनेट देखें और दोबारा दबाएं।');});
 });
 fromHash();
 renderStatus();
