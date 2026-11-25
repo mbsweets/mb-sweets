@@ -633,7 +633,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .rthd{display:grid;grid-template-columns:1fr 70px 82px 34px;gap:6px;font-size:.78rem;color:var(--muted);margin:6px 0 2px}.rtlist{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
 .rtrow{display:grid;grid-template-columns:1fr 70px 82px 34px;gap:6px;align-items:center}.rtrow input,.rtrow select{height:38px;min-width:0;font-size:.95rem;padding:0 6px}.rtrow .rth{grid-column:1/-1;color:var(--muted);font-size:.78rem;margin-top:-4px}.rtrow .rth:empty{display:none}
 .rtdel{border:0;background:none;font-size:1.05rem;padding:0;width:34px;height:34px}
-.rtrow .rtsub{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;margin-top:-3px}.rtrow .rtsub .rth{margin-top:0}.rtcr{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:.8rem;white-space:nowrap}.rtrow .rtcr input{width:50px;height:30px;text-align:center;font-size:.9rem;padding:0 2px}
+.rtrow .rtsub{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;margin-top:-3px}.rtrow .rtsub .rth{margin-top:0}.rtcr{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:.8rem;white-space:nowrap}.rtcr[hidden]{display:none}.rtrow .rtcr input{width:50px;height:30px;text-align:center;font-size:.9rem;padding:0 2px}
 .itcr{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:5px}.itcr b{color:var(--ink)}.itcr label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.itcr input{width:48px;height:30px;text-align:center;font-size:.95rem;padding:0 2px}
 .supit{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:10px 0;background:var(--card);font-size:.88rem}.supit>b{display:block;margin-bottom:4px}.supit>div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:5px 0}.supit>div>span:last-child{text-align:right}.supit small{color:var(--muted)}.supit .ok{color:var(--green);font-weight:700}
 .supcmp>div{flex-direction:column;gap:2px}.supcmp>div>span:last-child{text-align:left}.supbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.supl .nt.due{color:var(--red)}
@@ -3623,19 +3623,20 @@ function renderSupRates(first){
   var R=ui.supRt,s=R&&supFind(R.id);if(!s)return;var all=supItems(s,true);
   var html='<div class="sh-head"><h2>📋 '+esc(s.n)+' — रेट</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<p class="hint">'+(R.pre?'आम आइटम के नाम पहले से भरे हैं — <b>बस रेट डालिए</b>। जो नहीं आता उसे 🗑 से हटाइए।':'रेट बदलें तो नया रेट <b>आज से</b> लगेगा — पहले की एंट्री पुराने रेट पर ही रहती हैं।')+
-    ' साइज़ नाम में लिखिए (जैसे "TM 1 लीटर", "दही 15 किलो पैक", "पनीर 200 ग्राम पैकेट")। <b>📦 कैरेट</b> में आता है तो "1 कैरेट में" पैकेट की गिनती लिखिए (जैसे 12) — फिर माल आया में बस कैरेट डालना होगा। ये रेट सिर्फ़ आपके फ़ोन और आपके Drive बैकअप में रहते हैं।</p>'+
+    ' साइज़ नाम में लिखिए (जैसे "TM 1 लीटर", "दही 15 किलो पैक", "पनीर 200 ग्राम पैकेट")। दूध <b>📦 कैरेट</b> में आता है तो "1 कैरेट में" पैकेट की गिनती लिखिए (जैसे 12) — फिर माल आया में बस कैरेट डालना होगा। ये रेट सिर्फ़ आपके फ़ोन और आपके Drive बैकअप में रहते हैं।</p>'+
     '<div class="rthd"><span>आइटम</span><span>रेट ₹</span><span>प्रति</span></div><div class="rtlist">'+R.rows.map(function(r,i){var o=r.id?all.filter(function(x){return x.id===r.id;})[0]:null;
       return '<div class="rtrow"><input id="rt-n-'+i+'" class="rtn" type="text" maxlength="40" placeholder="जैसे TM 1 लीटर" value="'+esc(r.n)+'">'+
         '<input id="rt-r-'+i+'" class="rtr" type="tel" inputmode="decimal" placeholder="रेट" value="'+esc(r.r)+'">'+
         '<select id="rt-u-'+i+'" class="rtu" aria-label="रेट प्रति">'+SUP_IT_U.map(function(u){return '<option'+(u===r.u?' selected':'')+'>'+u+'</option>';}).join('')+'</select>'+
         '<button type="button" class="rtdel" data-act="rt-del" data-i="'+i+'" aria-label="हटाओ">🗑</button>'+
-        '<div class="rtsub"><label class="rtcr">📦 1 कैरेट में <input id="rt-c-'+i+'" type="tel" inputmode="numeric" maxlength="3" placeholder="—" value="'+esc(r.cr||'')+'"> पैकेट</label>'+
+        '<div class="rtsub"><label class="rtcr" id="rt-cl-'+i+'"'+(rtCrShow(r)?'':' hidden')+'>📦 1 कैरेट में <input id="rt-c-'+i+'" type="tel" inputmode="numeric" maxlength="3" placeholder="—" value="'+esc(r.cr||'')+'"> पैकेट</label>'+
         '<small class="rth" id="rt-h-'+i+'">'+esc(rtHint(r,o))+'</small></div></div>';}).join('')+'</div>'+
     '<button type="button" class="btn small" data-act="rt-add">＋ आइटम जोड़ो</button>'+
     '<div class="err" id="rt-err"></div>'+
     '<div class="sh-actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="rt-save">✓ सेव करो</button></div>';
   if(first)openSheet(html);else setSheet(html);
 }
+function rtCrShow(r){return itIsMilk(itKey(r.n))||num(aiDigits(String(r.cr||'')))>0;}   // 📦 कैरेट सिर्फ़ दूध में — दही वगैरह गिनती में (मालिक, 25 नवंबर)
 function rtCap(){var R=ui.supRt;if(!R)return;R.rows.forEach(function(r,i){var n=$('#rt-n-'+i),v=$('#rt-r-'+i),u=$('#rt-u-'+i),c=$('#rt-c-'+i);if(n)r.n=n.value;if(v)r.r=v.value;if(u)r.u=u.value;if(c)r.cr=c.value;});}
 function rtSave(){
   rtCap();var R=ui.supRt,s=R&&supFind(R.id),err=$('#rt-err');if(!s)return;
@@ -3733,7 +3734,7 @@ function hxItLive(){
 }
 document.addEventListener('input',function(e){var id=e.target&&e.target.id||'';
   if(/^it-(q|r|xa|xn|c|l)-|^hx-bt$/.test(id)&&ui.hxs&&ui.hxs.kind==='maal'){if(id==='hx-bt'&&ui.hxs)ui.hxs.adj=0;hxItLive();}
-  else if(/^rt-(n|r|u)-\d+$/.test(id)&&ui.supRt){rtCap();var i=+id.split('-').pop(),r=ui.supRt.rows[i],s=supFind(ui.supRt.id),h=$('#rt-h-'+i);if(r&&h){var o=r.id&&s?supItems(s,true).filter(function(x){return x.id===r.id;})[0]:null;h.textContent=rtHint(r,o);}}
+  else if(/^rt-(n|r|u)-\d+$/.test(id)&&ui.supRt){rtCap();var i=+id.split('-').pop(),r=ui.supRt.rows[i],s=supFind(ui.supRt.id),h=$('#rt-h-'+i);if(r&&h){var o=r.id&&s?supItems(s,true).filter(function(x){return x.id===r.id;})[0]:null;h.textContent=rtHint(r,o);}var cl=$('#rt-cl-'+i);if(r&&cl)cl.hidden=!rtCrShow(r);}
 });
 document.addEventListener('change',function(e){var id=e.target&&e.target.id||'';if(/^rt-u-\d+$/.test(id)&&ui.supRt){rtCap();var i=+id.split('-').pop(),r=ui.supRt.rows[i],h=$('#rt-h-'+i);if(r&&h)h.textContent=rtHint(r,null);}});
 function hsHasExp(e){return hsExList(e).length>0;}
