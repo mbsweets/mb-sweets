@@ -3834,7 +3834,7 @@ function hsDraftFor(d){
     ci:{open:false,n:'',u:'लीटर'},
     /* 💵 गल्ला मिलान (8 नवंबर 2026 से) */
     gm:glDay(d),go:sv(e.go),gc:sv(e.gc),gin:sv(e.gin),uc:sv(e.uc),
-    sm:(Array.isArray(e.sm)?e.sm:[]).filter(Boolean).map(function(m){return {id:m.id||'',at:m.at||0,src:m.src||'',s:m.s||'',n:m.n||'',b:m.b||'',a:m.a!=null&&m.a!==''?String(m.a):sv(m.v),pm:m.pm||'',nt:m.nt||''};}),
+    sm:(Array.isArray(e.sm)?e.sm:[]).filter(Boolean).map(function(m){var o={id:m.id||'',at:m.at||0,src:m.src||'',s:m.s||'',n:m.n||'',b:m.b||'',a:m.a!=null&&m.a!==''?String(m.a):sv(m.v),pm:m.pm||'',nt:m.nt||''};if(Array.isArray(m.it))o.it=m.it;if(num(m.bt)>0)o.bt=num(m.bt);return o;}),   // 📋 आइटम/बिल का जोड़ ड्राफ़्ट में भी साथ
     sp:(Array.isArray(e.sp)?e.sp:[]).filter(Boolean).map(function(p){return {id:p.id||'',at:p.at||0,src:p.src||'',s:p.s||'',n:p.n||'',a:p.a!=null&&p.a!==''?String(p.a):sv(p.v),pm:p.pm||'g',nt:p.nt||''};}),
     hm:(Array.isArray(e.hm)?e.hm:[]).filter(Boolean).map(function(h){return {id:h.id||'',at:h.at||0,src:h.src||'',n:h.n||'',a:h.a!=null&&h.a!==''?String(h.a):sv(h.v),pm:h.pm||'g',nt:h.nt||''};}),
     xe:(Array.isArray(e.xe)?e.xe:[]).filter(Boolean).map(function(x){return {id:x.id||'',at:x.at||0,src:x.src||'',b:x.b||'other',n:x.n||'',a:x.a!=null&&x.a!==''?String(x.a):sv(x.v),pm:x.pm||'g',nt:x.nt||''};}),
@@ -5704,7 +5704,9 @@ function hsSaveDraft(hx){
       if(!s&&nm){s=SUP().filter(function(z){return aiNameScore(nm,z.n)>=0.92;})[0]||null;
         if(!s){s={id:'s'+uid(),n:nm,b:hsBox(m.b)?m.b:'other',pay:m.pm===''?'later':'now',m:m.pm&&m.pm!==''?m.pm:'g',on:true};SUP().push(s);}}
       if(!s){if(!gErr)gErr='🚚 सप्लायर का नाम चुनो।';return;}
-      hsm.push(hxMeta(m,{s:s.id,n:s.n,b:hsBox(m.b)?m.b:(s.b||'other'),a:String(m.a).replace(/\s/g,''),v:v,pm:['g','k','u','h',''].indexOf(m.pm)>-1?m.pm:'',nt:String(m.nt||'').trim().slice(0,40)}));});
+      var smr=hxMeta(m,{s:s.id,n:s.n,b:hsBox(m.b)?m.b:(s.b||'other'),a:String(m.a).replace(/\s/g,''),v:v,pm:['g','k','u','h',''].indexOf(m.pm)>-1?m.pm:'',nt:String(m.nt||'').trim().slice(0,40)});
+      if(Array.isArray(m.it)&&m.it.length&&Math.abs(round2(m.it.reduce(function(t,l){return t+num(l&&l.v);},0))-v)<0.5){smr.it=m.it;if(num(m.bt)>0)smr.bt=num(m.bt);}   // आइटम तभी जब जोड़ रकम से मिले (हाथ से रकम बदली तो आइटम नहीं)
+      hsm.push(smr);});
     (hx.sp||[]).forEach(function(p){var v=hsSum(p.a),s=supFind(p.s);
       if(v===''||!(v>0)||v>=10000000){if(!gErr)gErr='💸 '+(p.n||'सप्लायर')+' — कितना दिया, लिखो (या × से हटाओ)।';return;}
       hsp.push(hxMeta(p,{s:p.s,n:s?s.n:(p.n||''),a:String(p.a).replace(/\s/g,''),v:v,pm:['g','k','u','h'].indexOf(p.pm)>-1?p.pm:'g',nt:String(p.nt||'').trim().slice(0,40)}));});
@@ -10213,7 +10215,9 @@ function aiSupDir(c,k,i,v){
   var md=k==='suppay'?String(e.mode||''):String(e.paid||'');if(/later|बाद|उधार|बाकी|baad/i.test(md))md='';
   L.splice(i,1);
   if(v==='pay'){if(!Array.isArray(a.suppay))a.suppay=[];a.suppay.push({name:e.name||'',nameEn:e.nameEn||'',amount:e.amount,mode:md});}
-  else{if(!Array.isArray(a.sup))a.sup=[];a.sup.push({name:e.name||'',nameEn:e.nameEn||'',amount:e.amount,paid:v==='due'?'later':(md||'upar'),note:e.note||''});}
+  else{if(!Array.isArray(a.sup))a.sup=[];var ne={name:e.name||'',nameEn:e.nameEn||'',amount:e.amount,paid:v==='due'?'later':(md||'upar'),note:e.note||''};
+    if(k==='sup')['items','__it','__calc','__miss','__unk','__diff'].forEach(function(f){if(e[f]!=null)ne[f]=e[f];});   // 📋 आइटम की लिस्ट साथ रहे
+    a.sup.push(ne);}
   a.__owe=0;c.err='';return true;
 }
 
