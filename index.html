@@ -4460,7 +4460,7 @@ function hxAdvHint(){var S=ui.hxs;if(!S||S.kind!=='pay'||!S.s)return '';var b=su
   var net=round2(b.bal-b.adv);   // बदलते समय (S.id) पुराना पैसा भी गिना है — उसे वापस जोड़कर देखो
   if(S.id){var e=hsGet(S.d),o=e&&glList(e.sp).filter(function(x){return x.id===S.id;})[0];if(o)net=round2(net+num(o.v));}
   if(!(net>0.001))return '';var ex=round2(a-net);
-  return ex>0.001?'💰 बाकी '+rupee(net)+' से <b>'+rupee(ex)+' ज़्यादा</b> — ये '+esc((supFind(S.s)||{}).n||'सप्लायर')+' के पास <b>एडवांस</b> जमा रहेगा, अगले उधार माल में अपने-आप कटेगा।':'';}
+  return ex>0.001?'💰 बाकी '+rupee(net)+' से <b>'+rupee(ex)+' ज़्यादा</b> — ये '+esc((supFind(S.s)||{}).n||'सप्लायर')+' के पास <b>एडवांस</b> जमा रहेगा, अगले उधार माल में अपने-आप कटेगा। गल्ले (जहाँ से दिया) से <b>पूरे '+rupee(a)+'</b> घटेंगे।':'';}
 function hxAmtBox(label){return '<p class="hxlbl">'+label+'</p><div class="hxamt"><span class="rs">₹</span><input id="hx-a" type="tel" inputmode="tel" placeholder="0" autocomplete="off" value="'+esc(ui.hxs.a)+'"><button type="button" class="hxcalcb" data-act="calc-open" data-t="hx-a" aria-label="कैलकुलेटर">🧮</button></div>';}
 function hxPmBox(withLater){var S=ui.hxs,L=SUP_PM.filter(function(p){return withLater||p[0];}),lbl=withLater?'पैसा दिया — कहाँ से? या बाद में देना है':'पैसा कहाँ से दिया';
   if(S.pm==='k')L=[['k','🧾 काउंटर (पुरानी एंट्री)']].concat(L);
