@@ -635,6 +635,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .rtdel{border:0;background:none;font-size:1.05rem;padding:0;width:34px;height:34px}
 .rtrow .rtsub{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;margin-top:-3px}.rtrow .rtsub .rth{margin-top:0}.rtcr{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:.8rem;white-space:nowrap}.rtcr[hidden]{display:none}.rtrow .rtcr input{width:50px;height:30px;text-align:center;font-size:.9rem;padding:0 2px}
 .itcr{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:5px}.itcr b{color:var(--ink)}.itcr label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.itcr input{width:48px;height:30px;text-align:center;font-size:.95rem;padding:0 2px}
+.fullchips{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:-2px 0 12px}.fullchips button{border:1.5px solid var(--green);background:#EAF6EE;color:#14532d;border-radius:999px;padding:8px 14px;font-size:1rem;font-weight:700;min-height:40px}.fullchips small{color:var(--muted);font-size:.8rem}
 .supit .noit{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-top:1px dashed var(--line);padding-top:6px;margin-top:6px}.supit .noit small{display:block;color:var(--muted);font-size:.78rem;line-height:1.3}.supit .noit.tot{border-top:1.5px solid var(--line)}.supdh{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#FFF6E0;color:#5a3a00}
 .supit{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:10px 0;background:var(--card);font-size:.88rem}.supit>b{display:block;margin-bottom:4px}.supit>div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:5px 0}.supit>div>span:last-child{text-align:right}.supit small{color:var(--muted)}.supit .ok{color:var(--green);font-weight:700}
 .supcmp>div{flex-direction:column;gap:2px}.supcmp>div>span:last-child{text-align:left}.supbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.supl .nt.due{color:var(--red)}
@@ -4120,14 +4121,14 @@ function supMsg(id){
 }
 function openSupPay(id){
   var s=supFind(id);if(!s)return;var b=supBal(id,todayStr());
-  ui.supPay={s:id,a:b.bal>0.001?String(b.bal):'',pm:s.m==='u'||s.m==='h'?s.m:'g',d:todayStr(),nt:''};
+  ui.supPay={s:id,a:b.bal>0.001?amtStr(b.bal):'',pm:s.m==='u'||s.m==='h'?s.m:'g',d:todayStr(),nt:''};
   renderSupPay(true);
 }
 function renderSupPay(first){
   var p=ui.supPay,s=supFind(p.s),b=supBal(p.s,todayStr());
   var html='<div class="sh-head"><h2>💸 '+esc(s?s.n:'')+' को पैसा दिया</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<p class="hint">अभी बाकी: <b>'+rupee(Math.max(0,b.bal))+'</b></p>'+
-    '<label class="fl bigamt">कितना दिया ₹<input id="sp-a" type="tel" inputmode="tel" placeholder="0" value="'+esc(p.a)+'"></label>'+
+    '<label class="fl bigamt">कितना दिया ₹<input id="sp-a" type="tel" inputmode="tel" placeholder="0" value="'+esc(p.a)+'"></label>'+fullChip('sp-a',b.bal,'पूरा बाकी')+
     '<div class="pmchips">'+SUP_PM.filter(function(z){return z[0];}).map(function(z){return '<button type="button" class="'+(p.pm===z[0]?'on':'')+'" data-act="sp-pm" data-v="'+z[0]+'">'+z[1]+'</button>';}).join('')+'</div>'+
     '<label class="fl">तारीख<input id="sp-d" type="date" min="'+GL().d0+'" max="'+todayStr()+'" value="'+esc(p.d)+'"></label>'+
     '<label class="fl">नोट (चाहें तो)<input id="sp-nt" type="text" maxlength="40" value="'+esc(p.nt)+'"></label>'+
@@ -4426,13 +4427,17 @@ function hxSheet(kind,opt){
     else return;
   }else{
     if(opt.s)S.s=opt.s;
-    if(kind==='pay'&&S.s){var b=supBal(S.s,d).bal;if(b>0.001)S.a=String(b);}
+    if(kind==='pay'&&S.s){var b=supBal(S.s,d).bal;if(b>0.001)S.a=amtStr(b);}
   }
   if(S.pm==null){var sp=supFind(S.s);S.pm=S.kind==='maal'?(sp?supDefPm(sp):'g'):(S.kind==='pay'?(sp&&(sp.m==='u'||sp.m==='h'||sp.m==='k')?sp.m:'g'):(S.kind==='kharch'||S.kind==='ghar'?glPmDef(S.kind,hsSum(S.a)):'g'));if(S.kind==='kharch'||S.kind==='ghar')S.pmAuto=true;}
   ui.hxs=S;hxSheetRender(true);
   if(!opt.edit)setTimeout(function(){var f=S.kind==='maal'||S.kind==='pay'?(S.s?$('#hx-a'):null):(S.kind==='cash'||S.kind==='ghar'?$('#hx-a'):null);if(f)f.focus();},80);
 }
 function hxCap(){var S=ui.hxs;if(!S)return;var a=$('#hx-a'),n=$('#hx-n'),nt=$('#hx-nt');if(a)S.a=a.value;if(n)S.n=n.value;if(nt)S.nt=nt.value;hxItCap();}
+/* 💯 पूरी रकम एक दबाव में (मालिक, 26 नवंबर: "टोटल ऑटोमेटिक भरे या 'पूरा' लिखा हो… पैसे वाली रकम लिखना दिक्कत") */
+function amtStr(v){v=round2(num(v));return Math.abs(v-Math.round(v))>0.004?v.toFixed(2):String(Math.round(v));}   // 14462.4 → "14462.40"
+function fullChip(id,v,lbl){v=round2(num(v));if(!(v>0.001))return '';
+  return '<div class="fullchips"><button type="button" data-act="amt-full" data-t="'+id+'" data-v="'+amtStr(v)+'">💯 '+(lbl||'पूरा')+' <b>'+rupee(v)+'</b></button><small>या अपने मन से रकम लिखिए</small></div>';}
 function hxAmtBox(label){return '<p class="hxlbl">'+label+'</p><div class="hxamt"><span class="rs">₹</span><input id="hx-a" type="tel" inputmode="tel" placeholder="0" autocomplete="off" value="'+esc(ui.hxs.a)+'"><button type="button" class="hxcalcb" data-act="calc-open" data-t="hx-a" aria-label="कैलकुलेटर">🧮</button></div>';}
 function hxPmBox(withLater){var S=ui.hxs,L=SUP_PM.filter(function(p){return withLater||p[0];}),lbl=withLater?'पैसा दिया — कहाँ से? या बाद में देना है':'पैसा कहाँ से दिया';
   if(S.pm==='k')L=[['k','🧾 काउंटर (पुरानी एंट्री)']].concat(L);
@@ -4465,7 +4470,7 @@ function hxSheetRender(first){
   }else if(S.kind==='pay'){
     var b=S.s?supBal(S.s,S.d):null;
     body=hxSupChips(true)+(b?'<p class="hint hxhint">'+(b.bal>0.001?'अभी बाकी: <b>'+rupee(b.bal)+'</b>'+(b.since?' ('+hsDm(b.since)+' से)':''):'इनका कुछ बाकी नहीं — ये रकम उसी दिन का <b>🚚 माल + पैसा दिया</b> गिनी जाएगी। माल आया हो तो ऊपर "🚚 माल आया" से ही लिखिए।')+'</p>':'')+
-      hxAmtBox('कितना दिया')+hxPmBox(false)+
+      hxAmtBox('कितना दिया')+(b&&b.bal>0.001?fullChip('hx-a',b.bal,'पूरा बाकी'):'')+hxPmBox(false)+
       '<label class="fl">नोट (चाहें तो)<input id="hx-nt" type="text" maxlength="40" value="'+esc(S.nt)+'"></label>';
   }else if(S.kind==='kharch'){
     var isO=S.b.indexOf('o:')===0,custom=S.b==='o:';
@@ -5580,7 +5585,7 @@ function hxClick(t,act){
       hxSheet(null,{edit:{k:k,id:id}});return true;
     case 'hx-pick':hxCap();ui.hxs.s=t.getAttribute('data-s');var sp=supFind(ui.hxs.s);
       if(ui.hxs.kind==='maal'&&sp){ui.hxs.pm=supDefPm(sp);if(!ui.hxs.id)ui.hxs.amtMode=null;}
-      if(ui.hxs.kind==='pay'&&sp){ui.hxs.pm=sp.m==='u'||sp.m==='h'?sp.m:'g';var b=supBal(sp.id,ui.hxs.d).bal;if(!ui.hxs.id)ui.hxs.a=b>0.001?String(b):'';}
+      if(ui.hxs.kind==='pay'&&sp){ui.hxs.pm=sp.m==='u'||sp.m==='h'?sp.m:'g';var b=supBal(sp.id,ui.hxs.d).bal;if(!ui.hxs.id)ui.hxs.a=b>0.001?amtStr(b):'';}
       hxSheetRender();var fa=$('#hx-a');if(fa&&!ui.hxs.id){fa.focus();try{fa.select();}catch(e){}}return true;
     case 'hx-pm':hxCap();ui.hxs.pm=v;ui.hxs.pmAuto=false;hxSheetRender();return true;
     case 'hx-more':hxCap();ui.hxs.more=!ui.hxs.more;hxSheetRender();return true;
@@ -6669,7 +6674,8 @@ function renderKEntrySheet(){
        :'<button class="lnk" data-act="ke-ci-open">+ नया आइटम (जो लिस्ट में नहीं है)</button>');
   }
   var amtBlock=hasL?'<div class="ftotal"><span>टोटल — यही उधार की रकम</span><b id="ke-total">'+rupee(kLinesTotal(d))+'</b></div>':
-    '<label class="fl bigamt">'+(isU?'या सीधे रकम लिखो — कितने रुपये का उधार ₹':'कितने रुपये जमा मिले ₹')+'<input id="ke-amt" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="'+esc(d.amount)+'"></label>';
+    '<label class="fl bigamt">'+(isU?'या सीधे रकम लिखो — कितने रुपये का उधार ₹':'कितने रुपये जमा मिले ₹')+'<input id="ke-amt" type="number" inputmode="decimal" step="any" min="0" placeholder="0" value="'+esc(d.amount)+'"></label>'+
+    (!isU&&p?fullChip('ke-amt',partyTotals(p.id).bal,'पूरा बकाया'):'');
   var chips=(isU&&!hasL)?'<div class="notechips">'+UD_CHIPS.map(function(n){return '<button type="button" class="'+(d.note===n?'on':'')+'" data-act="ke-chip" data-v="'+esc(n)+'">'+esc(n)+'</button>';}).join('')+'</div>':'';
   setSheet('<div class="sh-head"><h2>'+(d.editId?(isU?'उधार बदलो':'जमा बदलो'):(isU?'📒 उधार लिखो':'💰 जमा लिखो'))+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<label class="fl">किसका खाता</label>'+block+
@@ -8305,9 +8311,11 @@ document.addEventListener('click',function(e){
     case 'gl-sp-add':
       if(ui.hsDraft&&ui.hsDraft.gm){var gps=supFind(t.getAttribute('data-s'));if(!gps)break;
         var gpb=supBal(gps.id,hsKeyAdd(ui.hsDraft.d,-1)).bal;
-        ui.hsDraft.sp.push({s:gps.id,n:gps.n,a:gpb>0.001?String(gpb):'',pm:gps.m==='u'||gps.m==='h'?gps.m:'g',nt:''});ui.hsDraft.spAll=false;renderHisaab();
+        ui.hsDraft.sp.push({s:gps.id,n:gps.n,a:gpb>0.001?amtStr(gpb):'',pm:gps.m==='u'||gps.m==='h'?gps.m:'g',nt:''});ui.hsDraft.spAll=false;renderHisaab();
         var gpf=$('#gl-spa-'+(ui.hsDraft.sp.length-1));if(gpf){gpf.focus();try{gpf.select();}catch(e){}}}
       break;
+    case 'amt-full':var afi=$('#'+t.getAttribute('data-t'));if(afi){afi.value=t.getAttribute('data-v');try{afi.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}
+      if(ui.kDraft&&afi.id==='ke-amt')ui.kDraft.amount=afi.value;if(ui.supPay&&afi.id==='sp-a')ui.supPay.a=afi.value;if(ui.hxs&&afi.id==='hx-a')ui.hxs.a=afi.value;toast('💯 पूरी रकम भर दी — '+rupee(num(afi.value)));}break;
     case 'gl-sp-rm':if(ui.hsDraft){ui.hsDraft.sp.splice(+t.getAttribute('data-i'),1);renderHisaab();}break;
     case 'gl-sp-all':if(ui.hsDraft){ui.hsDraft.spAll=true;renderHisaab();}break;
     case 'gl-hm-add':
