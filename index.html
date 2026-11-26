@@ -1040,7 +1040,7 @@ function load(){
 }
 function save(){
   ORD_IDX=null;LP_BIDX=null;
-  try{if(typeof supFixAdv==='function'&&Array.isArray(state.daily))supFixAdv();}catch(eSF){}
+  try{if(typeof supFixAdv==='function'&&Array.isArray(state.daily)){supUnsplitAdv();supFixAdv();}}catch(eSF){}
   planSyncSoon();
   if(typeof cloudSoon==='function')cloudSoon();
   if(typeof lpSyncSoon==='function')lpSyncSoon();
@@ -3473,12 +3473,28 @@ function supBal(sid,upto){
     else{var r=x.v;while(r>0.001&&q.length){var u=Math.min(r,q[0].v);q[0].v=round2(q[0].v-u);r=round2(r-u);if(q[0].v<=0.001)q.shift();}if(r>0.001)adv=round2(adv+r);}
   });
   var due=round2(q.reduce(function(t,z){return t+z.v;},0));
-  return {bal:round2(Math.max(0,due-adv)),since:q.length?q[0].d:''};   // "एडवांस" कभी नहीं (मालिक, 18 Nov) — बचा पैसा supFixAdv से माल+पैसा बन जाता है
+  return {bal:round2(Math.max(0,due-adv)),since:q.length?q[0].d:'',adv:round2(Math.max(0,adv-due))};   // adv = बाकी से ज़्यादा दिया पैसा (मालिक, 26 नवंबर: "एडवांस जमा लिखना चाहिए") — अगले उधार माल में कटता है
 }
 /* 🚚 सप्लायर का हिसाब सीधा (मालिक, 18 Nov 2026: "बस एक ऑप्शन रखो माल आया, या अगर उधारी है तो बाद में देना है… ज़्यादा घिच-पिच नहीं"):
    माल आया = पैसा दिया (कहाँ से) या ⏳ बाद में देना है। "💸 बाकी चुकाओ" सिर्फ़ उसी का पैसा है जो बाकी लिखा था।
    कोई पैसा किसी बाकी माल में नहीं गया (न पहले के, न बाद के) → वो उसी दिन का "माल + पैसा दिया" है — कोई "एडवांस" नहीं।
    हर save पर चलता है; बदली लाइन trash में ('एडवांस→माल'). लौटाओ: कितनी लाइनें बदलीं. */
+/* 26 नवंबर से पहले supFixAdv ने "बाकी से ज़्यादा दिया" वाला हिस्सा अलग "माल + पैसा दिया" बना दिया था (₹6,500 → ₹6,356 + माल ₹144).
+   ऐसी लाइन वापस जोड़ो: पैसा फिर से पूरा, अलग बना माल हटे (ट्रैश में रहे) → बचा पैसा एडवांस दिखे. एक ही बार चलता है (मेल न मिले तो कुछ नहीं). */
+function supUnsplitAdv(){
+  var n=0;TRASH().forEach(function(t){
+    if(!t||t.why!=='एडवांस→माल'||t.undone||!t.row||t.row.k!=='sp'||!t.row.row)return;
+    var o=t.row.row,e=hsGet(t.d);if(!e||!Array.isArray(e.sp)||!Array.isArray(e.sm))return;
+    var p=e.sp.filter(function(x){return x&&x.id===o.id&&x.s===o.s;})[0];if(!p)return;
+    var diff=round2(num(o.v)-num(p.v));if(!(diff>0.001))return;
+    var pm=['g','k','u','h'].indexOf(o.pm)>-1?o.pm:'g';
+    var mi=-1;e.sm.forEach(function(m,i){if(mi<0&&m&&m.s===o.s&&Math.abs(num(m.v)-diff)<0.001&&(m.pm||'')===pm&&!Array.isArray(m.it)&&m.id!==o.id)mi=i;});
+    if(mi<0)return;
+    trashPut('माल→एडवांस वापस',e.d,{k:'sm',row:JSON.parse(JSON.stringify(e.sm[mi]))});
+    e.sm.splice(mi,1);p.v=num(o.v);p.a=o.a||String(num(o.v));t.undone=1;n++;
+  });
+  return n;
+}
 function supFixAdv(){
   var n=0;
   SUP().forEach(function(s){
@@ -3502,6 +3518,7 @@ function supFixAdv(){
     });
     adv.forEach(function(z){
       var p=z.x.r,e=z.x.e,left=round2(z.left),pm=['g','k','u','h'].indexOf(p.pm)>-1?p.pm:'g';
+      if(left<num(p.v)-0.001)return;   // कुछ हिस्सा बाकी में गया, बचा = 💰 एडवांस (मालिक, 26 नवंबर) — माल नहीं बनाना
       if(!Array.isArray(e.sm))e.sm=[];if(!Array.isArray(e.sp))e.sp=[];
       var i=e.sp.indexOf(p);if(i<0)return;
       trashPut('एडवांस→माल',e.d,{k:'sp',row:JSON.parse(JSON.stringify(p))});
@@ -3747,6 +3764,7 @@ function hxItLive(){
   var t=$('#it-tot');if(t)t.textContent=rupee(hxItLines().v);var b=$('#it-bt');if(b)b.innerHTML=hxBtMsg();
 }
 document.addEventListener('input',function(e){var id=e.target&&e.target.id||'';
+  if(id==='hx-a'&&ui.hxs&&ui.hxs.kind==='pay'){ui.hxs.a=e.target.value;var ah=$('#hx-advh');if(ah)ah.innerHTML=hxAdvHint();}
   if(/^it-(q|r|xa|xn|c|l)-|^hx-bt$/.test(id)&&ui.hxs&&ui.hxs.kind==='maal'){if(id==='hx-bt'&&ui.hxs)ui.hxs.adj=0;hxItLive();}
   else if(/^rt-(n|r|u)-\d+$/.test(id)&&ui.supRt){rtCap();var i=+id.split('-').pop(),r=ui.supRt.rows[i],s=supFind(ui.supRt.id),h=$('#rt-h-'+i);if(r&&h){var o=r.id&&s?supItems(s,true).filter(function(x){return x.id===r.id;})[0]:null;h.textContent=rtHint(r,o);}var cl=$('#rt-cl-'+i);if(r&&cl)cl.hidden=!rtCrShow(r);}
 });
@@ -4050,7 +4068,7 @@ function renderSup(){
   var off=rows.filter(function(r){return r.s.on===false&&!(r.b.bal>0.001);});
   var row=function(r){var bx=hsBox(r.s.b);
     return '<button class="suprow" data-act="sup-open" data-s="'+esc(r.s.id)+'"><span class="l"><b>'+esc(r.s.n)+'</b><small>'+(bx?bx[1]+' '+esc(bx[2]):'🧾 अन्य')+' · '+(r.s.pay==='later'?'पैसा बाद में':'पैसा तुरंत')+' ('+(r.s.m==='u'?'ऑनलाइन':r.s.m==='h'?'घर से':'गल्ले से')+')'+(r.s.on===false?' · हटाया हुआ':'')+'</small></span>'+
-      '<span class="r">'+(r.b.bal>0.001?'<b class="due">'+rupee(r.b.bal)+'</b><small>बाकी'+(r.b.since?' · '+supDaysTxt(r.b.since):'')+'</small>':'<b class="ok">✓</b><small>साफ़</small>')+
+      '<span class="r">'+(r.b.bal>0.001?'<b class="due">'+rupee(r.b.bal)+'</b><small>बाकी'+(r.b.since?' · '+supDaysTxt(r.b.since):'')+'</small>':(r.b.adv>0.001?'<b class="ok">'+rupee(r.b.adv)+'</b><small>💰 एडवांस जमा</small>':'<b class="ok">✓</b><small>साफ़</small>'))+
       (r.mo.m?'<small>इस महीने माल '+rupee(r.mo.m)+'</small>':'')+'</span></button>';};
   var html='<button class="backbtn" data-act="nav" data-v="hisaab">← रात का हिसाब</button>'+
     '<div class="sechead" style="margin-top:0"><h2>🤝 सप्लायर खाता</h2></div>'+
@@ -4072,7 +4090,7 @@ function supMonths(id,t){
     if(x.t==='m'){o.m=round2(o.m+x.v);o.mn++;if(x.pm==='')o.later=round2(o.later+x.v);else o.paid=round2(o.paid+x.v);}
     else o.paid=round2(o.paid+x.v);});
   return order.reverse().map(function(k){var o=M[k],last=moAdd(k,1)+'-01',d=new Date(last+'T12:00:00');d.setDate(d.getDate()-1);
-    var end=k===t.slice(0,7)?t:d.toISOString().slice(0,10);o.bal=supBal(id,end).bal;return o;});
+    var end=k===t.slice(0,7)?t:d.toISOString().slice(0,10),sb=supBal(id,end);o.bal=sb.bal;o.adv=sb.adv;return o;});
 }
 function supRowHtml(x){
   return '<button type="button" class="'+(x.t==='m'?'m':'p')+'" data-act="sup-row" data-d="'+esc(x.d)+'" data-k="'+(x.t==='m'?'sm':'sp')+'" data-id="'+esc(x.id)+'"><span>'+hsDm(x.d)+'</span><span>'+
@@ -4085,7 +4103,7 @@ function openSupSheet(id,keep){
   var tm=0,tn=0,tp=0;L.forEach(function(x){if(x.t==='m'){tm=round2(tm+x.v);tn++;if(x.pm!=='')tp=round2(tp+x.v);}else tp=round2(tp+x.v);});
   var flt=function(x){return V.f!=='due'||(b.bal>0.001&&b.since&&x.d>=b.since&&(x.t!=='m'||x.pm===''));};   // ⏳ अभी का बाकी: जब से बाकी शुरू हुआ (उससे पहले का सब चुका)
   var html='<div class="sh-head"><h2>🤝 '+esc(s.n)+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
-    '<p class="supbal">'+(b.bal>0.001?'देना बाकी: <b class="due">'+rupee(b.bal)+'</b>'+(b.since?' <small>('+hsDm(b.since)+' से)</small>':''):'<b class="ok">✓ हिसाब साफ़</b>')+'</p>'+
+    '<p class="supbal">'+(b.bal>0.001?'देना बाकी: <b class="due">'+rupee(b.bal)+'</b>'+(b.since?' <small>('+hsDm(b.since)+' से)</small>':''):(b.adv>0.001?'<b class="ok">💰 एडवांस जमा: '+rupee(b.adv)+'</b> <small>(सप्लायर के पास — अगले उधार माल में कटेगा)</small>':'<b class="ok">✓ हिसाब साफ़</b>'))+'</p>'+
     '<div class="actbar"><button class="btn primary small" data-act="sup-maal" data-s="'+esc(id)+'">🚚 माल आया</button>'+
       (b.bal>0.001?'<button class="btn small" data-act="sup-pay" data-s="'+esc(id)+'">💸 बाकी चुकाओ</button>':'')+
       '<button class="btn small" data-act="sup-rates" data-s="'+esc(id)+'">📋 रेट'+(supHasRates(s)?'':' लिखो')+'</button>'+
@@ -4093,15 +4111,15 @@ function openSupSheet(id,keep){
   if(!L.length)return openSheet(html+'<p class="hint">अभी कोई माल नहीं लिखा। ऊपर "🚚 माल आया" दबाइए।'+(supHasRates(s)?'':' पहले "📋 रेट लिखो" से आइटम और रेट लिख दें तो आगे बस गिनती डालनी होगी।')+'</p>');
   html+='<div class="supsum"><div><small>कुल माल लिया</small><b>'+rupee(tm)+'</b><small>'+tn+' बार · '+hsDm(L[0].d)+' से</small></div>'+
     '<div><small>कुल पैसा दिया</small><b>'+rupee(tp)+'</b><small>माल के साथ + बाद में</small></div>'+
-    '<div class="'+(b.bal>0.001?'due':'ok')+'"><small>अभी बाकी</small><b>'+(b.bal>0.001?rupee(b.bal):'✓ ₹0')+'</b><small>'+(b.bal>0.001?'देना है':'हिसाब साफ़')+'</small></div></div>'+
+    '<div class="'+(b.bal>0.001?'due':'ok')+'"><small>'+(b.bal<=0.001&&b.adv>0.001?'एडवांस जमा':'अभी बाकी')+'</small><b>'+(b.bal>0.001?rupee(b.bal):(b.adv>0.001?rupee(b.adv):'✓ ₹0'))+'</b><small>'+(b.bal>0.001?'देना है':(b.adv>0.001?'अगले माल में कटेगा':'हिसाब साफ़'))+'</small></div></div>'+
     '<div class="supf"><button type="button" class="'+(V.f!=='due'?'on':'')+'" data-act="sup-flt" data-v="all">सब लेन-देन</button><button type="button" class="'+(V.f==='due'?'on':'')+'" data-act="sup-flt" data-v="due">⏳ अभी का बाकी</button></div>'+
-    (V.f==='due'?'<p class="hint supdh">'+(b.bal>0.001?'⏳ बाकी '+rupee(b.bal)+' — <b>'+hsDm(b.since)+'</b> से। सिर्फ़ उसके बाद की एंट्री दिख रही हैं; उससे पहले का सब चुका दिया ✓':'✓ अभी कुछ बाकी नहीं — सारा हिसाब साफ़। पूरी लिस्ट "सब लेन-देन" में।')+'</p>':'')+
+    (V.f==='due'?'<p class="hint supdh">'+(b.bal>0.001?'⏳ बाकी '+rupee(b.bal)+' — <b>'+hsDm(b.since)+'</b> से। सिर्फ़ उसके बाद की एंट्री दिख रही हैं; उससे पहले का सब चुका दिया ✓':(b.adv>0.001?'✓ अभी कुछ बाकी नहीं — उल्टा 💰 '+rupee(b.adv)+' एडवांस जमा है (अगले उधार माल में कटेगा)।':'✓ अभी कुछ बाकी नहीं — सारा हिसाब साफ़।')+' पूरी लिस्ट "सब लेन-देन" में।')+'</p>':'')+
     '<p class="hint" style="margin:6px 0 0">महीने को दबाइए तो दिन वार दिखेगा। गलत लाइन को दबाकर बदलिए या हटाइए।</p>';
   MS.forEach(function(o){
     var op=V.open[o.k]!=null?V.open[o.k]:o.k===cm,rows=o.rows.filter(flt).slice().reverse();
     var y=o.k.slice(0,4),mn=HS_MON[+o.k.slice(5,7)-1]+(y!==cm.slice(0,4)?' '+y:'');
     html+='<div class="supm"><button type="button" class="mh" data-act="sup-mon" data-m="'+o.k+'"><span><b>'+(op?'▾ ':'▸ ')+mn+'</b><small>🚚 माल '+rupee(o.m)+' ('+o.mn+' बार)'+(o.later>0.001?' · उधार '+rupee(o.later):'')+'</small></span>'+
-      '<span class="r"><small>दिया</small><b>'+rupee(o.paid)+'</b><small>'+(o.bal>0.001?(o.k===cm?'अभी बाकी ':'महीने के आख़िर बाकी ')+rupee(o.bal):'✓ साफ़')+'</small></span></button>'+
+      '<span class="r"><small>दिया</small><b>'+rupee(o.paid)+'</b><small>'+(o.bal>0.001?(o.k===cm?'अभी बाकी ':'महीने के आख़िर बाकी ')+rupee(o.bal):(o.adv>0.001?'💰 एडवांस '+rupee(o.adv):'✓ साफ़'))+'</small></span></button>'+
       (op?supItBox(id,o.k+'-01',moEnd(o.k),'📊 '+mn+' का माल (आइटम वार)')+(rows.length?'<div class="supl">'+rows.map(supRowHtml).join('')+'</div>':'<p class="hint" style="margin:8px 10px">'+(V.f==='due'?'इस महीने का कुछ बाकी नहीं ✓':'इस महीने कोई लेन-देन नहीं।')+'</p>'):'')+'</div>';
   });
   var sh0=keep&&$('#ov .sheet'),sy=sh0?sh0.scrollTop:0;
@@ -4116,7 +4134,7 @@ function supMsg(id){
   L.slice(-40).forEach(function(x){R.push(hsDm(x.d)+': '+(x.t==='m'?'माल '+rupee(x.v)+(x.pm===''?' (बाकी)':' (पैसा दिया)'):'बाकी चुकाया '+rupee(x.v))+(x.nt?' · '+x.nt:''));
     if(x.it)x.it.forEach(function(l){if(l)R.push('   • '+itLineFull(l));});
     if(x.bt>0&&Math.abs(x.bt-x.v)>0.5)R.push('   (आपके बिल में '+rupee(x.bt)+' — फ़र्क '+rupee(Math.abs(round2(x.bt-x.v)))+')');});
-  R.push('');R.push(b.bal>0.001?'बाकी: '+rupee(b.bal):'हिसाब साफ़ ✓');
+  R.push('');R.push(b.bal>0.001?'बाकी: '+rupee(b.bal):(b.adv>0.001?'एडवांस जमा: '+rupee(b.adv)+' (अगले माल में कटेगा)':'हिसाब साफ़ ✓'));
   return R.join('\n');
 }
 function openSupPay(id){
@@ -4438,6 +4456,11 @@ function hxCap(){var S=ui.hxs;if(!S)return;var a=$('#hx-a'),n=$('#hx-n'),nt=$('#
 function amtStr(v){v=round2(num(v));return Math.abs(v-Math.round(v))>0.004?v.toFixed(2):String(Math.round(v));}   // 14462.4 → "14462.40"
 function fullChip(id,v,lbl){v=round2(num(v));if(!(v>0.001))return '';
   return '<div class="fullchips"><button type="button" data-act="amt-full" data-t="'+id+'" data-v="'+amtStr(v)+'">💯 '+(lbl||'पूरा')+' <b>'+rupee(v)+'</b></button><small>या अपने मन से रकम लिखिए</small></div>';}
+function hxAdvHint(){var S=ui.hxs;if(!S||S.kind!=='pay'||!S.s)return '';var b=supBal(S.s,S.d),a=hsSum(S.a);if(!(a>0))return '';
+  var net=round2(b.bal-b.adv);   // बदलते समय (S.id) पुराना पैसा भी गिना है — उसे वापस जोड़कर देखो
+  if(S.id){var e=hsGet(S.d),o=e&&glList(e.sp).filter(function(x){return x.id===S.id;})[0];if(o)net=round2(net+num(o.v));}
+  if(!(net>0.001))return '';var ex=round2(a-net);
+  return ex>0.001?'💰 बाकी '+rupee(net)+' से <b>'+rupee(ex)+' ज़्यादा</b> — ये '+esc((supFind(S.s)||{}).n||'सप्लायर')+' के पास <b>एडवांस</b> जमा रहेगा, अगले उधार माल में अपने-आप कटेगा।':'';}
 function hxAmtBox(label){return '<p class="hxlbl">'+label+'</p><div class="hxamt"><span class="rs">₹</span><input id="hx-a" type="tel" inputmode="tel" placeholder="0" autocomplete="off" value="'+esc(ui.hxs.a)+'"><button type="button" class="hxcalcb" data-act="calc-open" data-t="hx-a" aria-label="कैलकुलेटर">🧮</button></div>';}
 function hxPmBox(withLater){var S=ui.hxs,L=SUP_PM.filter(function(p){return withLater||p[0];}),lbl=withLater?'पैसा दिया — कहाँ से? या बाद में देना है':'पैसा कहाँ से दिया';
   if(S.pm==='k')L=[['k','🧾 काउंटर (पुरानी एंट्री)']].concat(L);
@@ -4470,7 +4493,7 @@ function hxSheetRender(first){
   }else if(S.kind==='pay'){
     var b=S.s?supBal(S.s,S.d):null;
     body=hxSupChips(true)+(b?'<p class="hint hxhint">'+(b.bal>0.001?'अभी बाकी: <b>'+rupee(b.bal)+'</b>'+(b.since?' ('+hsDm(b.since)+' से)':''):'इनका कुछ बाकी नहीं — ये रकम उसी दिन का <b>🚚 माल + पैसा दिया</b> गिनी जाएगी। माल आया हो तो ऊपर "🚚 माल आया" से ही लिखिए।')+'</p>':'')+
-      hxAmtBox('कितना दिया')+(b&&b.bal>0.001?fullChip('hx-a',b.bal,'पूरा बाकी'):'')+hxPmBox(false)+
+      hxAmtBox('कितना दिया')+(b&&b.bal>0.001?fullChip('hx-a',b.bal,'पूरा बाकी'):'')+'<p class="hint hxhint" id="hx-advh">'+hxAdvHint()+'</p>'+hxPmBox(false)+
       '<label class="fl">नोट (चाहें तो)<input id="hx-nt" type="text" maxlength="40" value="'+esc(S.nt)+'"></label>';
   }else if(S.kind==='kharch'){
     var isO=S.b.indexOf('o:')===0,custom=S.b==='o:';
@@ -4539,7 +4562,7 @@ function hxSave(){
   else e[arr].push(hxMeta({},row));
   save();
   var msg={maal:'🚚 '+row.n+' — '+rupee(v)+(row.it?' ['+supItShort(row.it,3)+']':'')+' ('+hxPm(row.pm)+')',pay:'💸 '+row.n+' को '+rupee(v)+' दिया ('+pmTxt(row.pm)+')',kharch:'🧾 खर्च '+rupee(v)+' ('+pmTxt(row.pm)+')',ghar:'🏠 घर के लिए '+rupee(v)+' ('+pmTxt(row.pm)+')'}[g];
-  if(g==='pay'||g==='maal'){var nb=supBal(row.s,todayStr()).bal;msg+=' · '+(nb>0.001?'अब बाकी '+rupee(nb):'हिसाब साफ़ ✓');}
+  if(g==='pay'||g==='maal'){var nbb=supBal(row.s,todayStr()),nb=nbb.bal;msg+=' · '+(nb>0.001?'अब बाकी '+rupee(nb):(nbb.adv>0.001?'💰 एडवांस जमा '+rupee(nbb.adv):'हिसाब साफ़ ✓'));}
   hxDone(g,msg);
 }
 function hxDone(g,msg){
@@ -4904,7 +4927,7 @@ function supHtml(){
   var off=rows.filter(function(r){return r.s.on===false&&!(r.b.bal>0.001);});
   var row=function(r){var bx=hsBox(r.s.b);
     return '<button class="suprow" data-act="sup-open" data-s="'+esc(r.s.id)+'"><span class="l"><b>'+esc(r.s.n)+'</b><small>'+(bx?bx[1]+' '+esc(bx[2]):'🧾 अन्य')+' · '+(r.s.pay==='later'?'पैसा बाद में':'पैसा तुरंत')+(r.s.on===false?' · हटाया हुआ':'')+'</small></span>'+
-      '<span class="r">'+(r.b.bal>0.001?'<b class="due">'+rupee(r.b.bal)+'</b><small>बाकी'+(r.b.since?' · '+supDaysTxt(r.b.since):'')+'</small>':'<b class="ok">✓</b><small>साफ़</small>')+
+      '<span class="r">'+(r.b.bal>0.001?'<b class="due">'+rupee(r.b.bal)+'</b><small>बाकी'+(r.b.since?' · '+supDaysTxt(r.b.since):'')+'</small>':(r.b.adv>0.001?'<b class="ok">'+rupee(r.b.adv)+'</b><small>💰 एडवांस जमा</small>':'<b class="ok">✓</b><small>साफ़</small>'))+
       (r.mo.m?'<small>इस महीने माल '+rupee(r.mo.m)+'</small>':'')+'</span></button>';};
   var mn=HS_MON[+t.slice(5,7)-1];
   return '<div class="hxkpi"><div class="dn"><small>कुल देना बाकी</small><b>'+rupee(round2(tot))+'</b></div><div><small>'+mn+' में माल</small><b>'+rupee(round2(mm))+'</b></div><div><small>'+mn+' में दिया</small><b>'+rupee(round2(pp))+'</b></div></div>'+
