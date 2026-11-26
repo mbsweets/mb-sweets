@@ -635,6 +635,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .rtdel{border:0;background:none;font-size:1.05rem;padding:0;width:34px;height:34px}
 .rtrow .rtsub{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;margin-top:-3px}.rtrow .rtsub .rth{margin-top:0}.rtcr{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:.8rem;white-space:nowrap}.rtcr[hidden]{display:none}.rtrow .rtcr input{width:50px;height:30px;text-align:center;font-size:.9rem;padding:0 2px}
 .itcr{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:5px}.itcr b{color:var(--ink)}.itcr label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.itcr input{width:48px;height:30px;text-align:center;font-size:.95rem;padding:0 2px}
+.supit .noit{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-top:1px dashed var(--line);padding-top:6px;margin-top:6px}.supit .noit small{display:block;color:var(--muted);font-size:.78rem;line-height:1.3}.supit .noit.tot{border-top:1.5px solid var(--line)}.supdh{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#FFF6E0;color:#5a3a00}
 .supit{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:10px 0;background:var(--card);font-size:.88rem}.supit>b{display:block;margin-bottom:4px}.supit>div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:5px 0}.supit>div>span:last-child{text-align:right}.supit small{color:var(--muted)}.supit .ok{color:var(--green);font-weight:700}
 .supcmp>div{flex-direction:column;gap:2px}.supcmp>div>span:last-child{text-align:left}.supbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.supl .nt.due{color:var(--red)}
 .aimemlist{border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;background:var(--card)}.aimemrow{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 0}.aimemrow span{flex:1;font-size:.92rem}
@@ -1082,7 +1083,7 @@ function $(s,r){return (r||document).querySelector(s);}
 function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function num(v){var n=parseFloat(v);return isFinite(n)?n:0;}
-function rupee(n){n=num(n);return (n<0?'-':'')+'\u20B9'+Math.abs(n).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function rupee(n){n=num(n);var a=Math.abs(n),f=Math.abs(a-Math.round(a))>0.004;return (n<0?'-':'')+'\u20B9'+a.toLocaleString('en-IN',f?{minimumFractionDigits:2,maximumFractionDigits:2}:{maximumFractionDigits:0});}   // पैसे हों तो दो अंक: ₹5,030.40
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function pad(n){return n<10?'0'+n:''+n;}
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -3597,6 +3598,18 @@ function supItSum(sid,from,to){
 function supItSumHtml(L,title){if(!L.length)return '';
   return '<div class="supit"><b>'+title+'</b>'+L.map(function(o){var lt=o.sz?round2(o.q*o.sz.w):0;
     return '<div><span>'+esc(o.n)+'</span><span>'+fmtQty(o.q)+' '+(o.sz||o.u==='पैकेट'?'पैकेट':esc(o.u||''))+(lt&&o.sz.w!==1?' <small>('+fmtQty(lt)+' '+o.sz.wu+')</small>':'')+(o.k>0?' <small>('+fmtQty(o.k)+' कैरेट'+(o.q-o.kq>0.001?' + '+fmtQty(round2(o.q-o.kq))+' खुला':'')+')</small>':'')+' · <b>'+rupee(o.v)+'</b></span></div>';}).join('')+'</div>';}
+/* 📊 एक सप्लायर के महीने का आइटम वार डिब्बा + जिन एंट्री में आइटम नहीं लिखे उनकी रकम (मालिक, 26 नवंबर: "16 कैरेट दिखा रहा, नीचे 23 कैरेट") */
+function supItBox(sid,from,to,title){
+  var L=supItSum(sid,from,to),n=0,v=0,s=supFind(sid);
+  DLY().forEach(function(e){if(e.d<from||e.d>to)return;glList(e.sm).forEach(function(m){if(m.s!==sid)return;
+    if(Array.isArray(m.it)&&m.it.some(function(l){return l&&l.i!=='adj'&&l.i!=='x';}))return;n++;v=round2(v+num(m.v));});});
+  if(!L.length&&!(n&&supHasRates(s)))return '';
+  var h=supItSumHtml(L,title);if(!n)return h;
+  var tv=round2(L.reduce(function(t,o){return t+o.v;},0));
+  var row='<div class="noit"><span>📝 सिर्फ़ रकम वाली एंट्री ('+n+' बार)<small>इनमें गिनती नहीं लिखी — इसलिए ऊपर की गिनती में नहीं। लाइन दबाकर "📋 आइटम की गिनती से लिखो"।</small></span><span><b>'+rupee(v)+'</b></span></div>'+
+    (L.length?'<div class="noit tot"><span>कुल माल</span><span><b>'+rupee(round2(tv+v))+'</b></span></div>':'');
+  return h?h.replace(/<\/div>$/,row+'</div>'):'<div class="supit"><b>'+title+'</b>'+row+'</div>';
+}
 /* 📊 किसका रेट कितना — एक जैसा आइटम (TM 1 लीटर, दही 15 किलो…) दो या ज़्यादा सप्लायर से */
 function supRateCompare(){
   var G={},order=[];supActive().forEach(function(s){supItems(s).forEach(function(it){if(!(num(it.r)>0))return;var k=itKey(it.n);if(!G[k]){G[k]=[];order.push(k);}G[k].push({s:s,it:it,p:itPer(it)});});});
@@ -4069,7 +4082,7 @@ function openSupSheet(id,keep){
   if(!keep||!ui.supV||ui.supV.id!==id)ui.supV={id:id,f:'all',open:{}};
   var V=ui.supV,t=todayStr(),b=supBal(id,t),L=supLedger(id,t),MS=supMonths(id,t),cm=t.slice(0,7);
   var tm=0,tn=0,tp=0;L.forEach(function(x){if(x.t==='m'){tm=round2(tm+x.v);tn++;if(x.pm!=='')tp=round2(tp+x.v);}else tp=round2(tp+x.v);});
-  var flt=function(x){return V.f!=='due'||(x.t==='m'?x.pm==='':true);};
+  var flt=function(x){return V.f!=='due'||(b.bal>0.001&&b.since&&x.d>=b.since&&(x.t!=='m'||x.pm===''));};   // ⏳ अभी का बाकी: जब से बाकी शुरू हुआ (उससे पहले का सब चुका)
   var html='<div class="sh-head"><h2>🤝 '+esc(s.n)+'</h2><button class="lnk muted" data-act="close">बंद करो</button></div>'+
     '<p class="supbal">'+(b.bal>0.001?'देना बाकी: <b class="due">'+rupee(b.bal)+'</b>'+(b.since?' <small>('+hsDm(b.since)+' से)</small>':''):'<b class="ok">✓ हिसाब साफ़</b>')+'</p>'+
     '<div class="actbar"><button class="btn primary small" data-act="sup-maal" data-s="'+esc(id)+'">🚚 माल आया</button>'+
@@ -4080,14 +4093,15 @@ function openSupSheet(id,keep){
   html+='<div class="supsum"><div><small>कुल माल लिया</small><b>'+rupee(tm)+'</b><small>'+tn+' बार · '+hsDm(L[0].d)+' से</small></div>'+
     '<div><small>कुल पैसा दिया</small><b>'+rupee(tp)+'</b><small>माल के साथ + बाद में</small></div>'+
     '<div class="'+(b.bal>0.001?'due':'ok')+'"><small>अभी बाकी</small><b>'+(b.bal>0.001?rupee(b.bal):'✓ ₹0')+'</b><small>'+(b.bal>0.001?'देना है':'हिसाब साफ़')+'</small></div></div>'+
-    '<div class="supf"><button type="button" class="'+(V.f!=='due'?'on':'')+'" data-act="sup-flt" data-v="all">सब लेन-देन</button><button type="button" class="'+(V.f==='due'?'on':'')+'" data-act="sup-flt" data-v="due">⏳ सिर्फ़ उधार वाला</button></div>'+
+    '<div class="supf"><button type="button" class="'+(V.f!=='due'?'on':'')+'" data-act="sup-flt" data-v="all">सब लेन-देन</button><button type="button" class="'+(V.f==='due'?'on':'')+'" data-act="sup-flt" data-v="due">⏳ अभी का बाकी</button></div>'+
+    (V.f==='due'?'<p class="hint supdh">'+(b.bal>0.001?'⏳ बाकी '+rupee(b.bal)+' — <b>'+hsDm(b.since)+'</b> से। सिर्फ़ उसके बाद की एंट्री दिख रही हैं; उससे पहले का सब चुका दिया ✓':'✓ अभी कुछ बाकी नहीं — सारा हिसाब साफ़। पूरी लिस्ट "सब लेन-देन" में।')+'</p>':'')+
     '<p class="hint" style="margin:6px 0 0">महीने को दबाइए तो दिन वार दिखेगा। गलत लाइन को दबाकर बदलिए या हटाइए।</p>';
   MS.forEach(function(o){
     var op=V.open[o.k]!=null?V.open[o.k]:o.k===cm,rows=o.rows.filter(flt).slice().reverse();
     var y=o.k.slice(0,4),mn=HS_MON[+o.k.slice(5,7)-1]+(y!==cm.slice(0,4)?' '+y:'');
     html+='<div class="supm"><button type="button" class="mh" data-act="sup-mon" data-m="'+o.k+'"><span><b>'+(op?'▾ ':'▸ ')+mn+'</b><small>🚚 माल '+rupee(o.m)+' ('+o.mn+' बार)'+(o.later>0.001?' · उधार '+rupee(o.later):'')+'</small></span>'+
       '<span class="r"><small>दिया</small><b>'+rupee(o.paid)+'</b><small>'+(o.bal>0.001?(o.k===cm?'अभी बाकी ':'महीने के आख़िर बाकी ')+rupee(o.bal):'✓ साफ़')+'</small></span></button>'+
-      (op?supItSumHtml(supItSum(id,o.k+'-01',moEnd(o.k)),'📊 '+mn+' का माल (आइटम वार)')+(rows.length?'<div class="supl">'+rows.map(supRowHtml).join('')+'</div>':'<p class="hint" style="margin:8px 10px">इस महीने कोई उधार नहीं।</p>'):'')+'</div>';
+      (op?supItBox(id,o.k+'-01',moEnd(o.k),'📊 '+mn+' का माल (आइटम वार)')+(rows.length?'<div class="supl">'+rows.map(supRowHtml).join('')+'</div>':'<p class="hint" style="margin:8px 10px">'+(V.f==='due'?'इस महीने का कुछ बाकी नहीं ✓':'इस महीने कोई लेन-देन नहीं।')+'</p>'):'')+'</div>';
   });
   var sh0=keep&&$('#ov .sheet'),sy=sh0?sh0.scrollTop:0;
   if(keep&&sh0)setSheet(html);else openSheet(html); // महीना खोलने/बंद करने पर पन्ना ऊपर न कूदे
